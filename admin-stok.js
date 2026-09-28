@@ -204,7 +204,32 @@ async function pindahTabAdminStok(tab) {
     else if (tab === 'tambahbarang') await inisialisasiFormTambahBarangAdmin();
     else if (tab === 'akses') await muatHakAksesAdmin();
     else if (tab === 'log') await muatLogAktivitasAdmin();
-  } catch (err) { showError(err.message || 'Gagal memuat data.'); }
+  } catch (err) {
+    delete sudahDimuatTabAdminStok[tab]; // izinkan dicoba lagi begitu tab diklik ulang (mis. setelah setup selesai)
+    tampilkanGalatSirigaAdmin(tab, err);
+  }
+}
+
+/** Tampilkan penyebab gagal di DALAM panel (bukan cuma toast yang hilang), khusus kasus SIRAGA belum di-setup. */
+function tampilkanGalatSirigaAdmin(tab, err) {
+  const pesan = (err && err.message) || 'Gagal memuat data.';
+  showError(pesan);
+  const panel = document.getElementById(A_STOK_SUB_PANEL[tab]);
+  if (!panel) return;
+  const lama = panel.querySelector('.siraga-notice');
+  if (lama) lama.remove();
+  const box = document.createElement('div');
+  box.className = 'empty-state siraga-notice';
+  box.style.cssText = 'text-align:left;margin-bottom:12px;';
+  const belumSetup = /SIRAGA_SPREADSHEET_ID|setupSiragaSpreadsheet|belum ada di spreadsheet SIRAGA/i.test(pesan);
+  box.innerHTML = belumSetup
+    ? '<strong>Database SIRAGA belum disiapkan.</strong><ol style="margin:8px 0 0 18px;padding:0;">' +
+      '<li>Buat 1 Google Spreadsheet <em>kosong baru</em>, salin ID-nya dari URL (antara <code>/d/</code> dan <code>/edit</code>).</li>' +
+      '<li>Apps Script Portal → Project Settings → Script Properties → tambah <code>SIRAGA_SPREADSHEET_ID</code> = ID tadi.</li>' +
+      '<li>Di editor Apps Script, jalankan fungsi <code>setupSiragaSpreadsheet</code> sekali.</li>' +
+      '<li>Muat ulang halaman ini, lalu klik tab lagi.</li></ol>'
+    : '<strong>Data tidak dapat dimuat.</strong> ' + escapeHtml(pesan) + ' Klik tab ini lagi untuk mencoba ulang.';
+  panel.insertBefore(box, panel.firstChild);
 }
 
 // ============================================================
@@ -662,7 +687,9 @@ function initStok() {
   document.getElementById('aBtnBukaTambahBarang').addEventListener('click', () => pindahTabAdminStokPaksa('tambahbarang'));
   document.getElementById('aBarangCari').addEventListener('input', (e) => {
     clearTimeout(window._aSiragaCariTimeout);
-    window._aSiragaCariTimeout = setTimeout(() => muatDaftarBarangAdmin(e.target.value.trim()), 350);
+    window._aSiragaCariTimeout = setTimeout(() => {
+      muatDaftarBarangAdmin(e.target.value.trim()).catch(err => tampilkanGalatSirigaAdmin('barang', err));
+    }, 350);
   });
 
   pindahTabAdminStok('dashboard').catch(err => showError(err.message || 'Gagal memuat SIRAGA. Pastikan SIRAGA_SPREADSHEET_ID sudah diisi di Script Properties.'));

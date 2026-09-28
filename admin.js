@@ -1957,6 +1957,10 @@
       }
     });
   }
+
+  // Dipakai pulihkanSesiAdmin_ (blok terpisah di akhir file) -- fungsi/variabel ini
+  // hidup DI DALAM closure ini, tidak terlihat dari luar tanpa diekspos.
+  window.__sppgAdminInternal = { masukKeDashboard_: masukKeDashboard_, initDashboard: initDashboard, el: el };
 })();
 
 // ============================================================
@@ -2065,6 +2069,12 @@
     const sesi = ambilSesiAdmin();
     if (!sesi || !sesi.token) return; // tidak ada sesi tersimpan -- biarkan Login form tampil apa adanya (default)
 
+    // BUG LAMA: blok ini berada di closure SIPANDU, sehingga masukKeDashboard_/initDashboard/el
+    // "is not defined" (ReferenceError) setiap refresh dgn sesi tersimpan. Sekarang diambil
+    // dari objek yang diekspos closure utama (lihat window.__sppgAdminInternal).
+    const { masukKeDashboard_, initDashboard, el } = window.__sppgAdminInternal || {};
+    if (!masukKeDashboard_ || !initDashboard || !el) return; // closure utama belum siap -- biarkan Login tampil
+
     showLoading('Memeriksa sesi...');
     let info;
     try {
@@ -2098,9 +2108,14 @@
     }
 
     // Sesi valid -- lanjutkan PERSIS seperti alur setelah login manual berhasil.
-    masukKeDashboard_(sesi.token, info.username, info.role);
-    hideLoading();
-    await initDashboard();
+    try {
+      masukKeDashboard_(sesi.token, info.username, info.role);
+      hideLoading();
+      await initDashboard();
+    } catch (errMasuk) {
+      hideLoading(); // jangan sampai overlay "Memeriksa sesi..." menggantung
+      el.loginError.textContent = 'Gagal memulihkan sesi. Silakan login kembali.';
+    }
   }
 
   pulihkanSesiAdmin_();
