@@ -591,7 +591,6 @@ async function inisialisasiFormTambahBarangAdmin() {
     finally { tombol.disabled = false; }
   });
 
-  document.getElementById('aBtnBukaTambahBarang').addEventListener('click', () => pindahTabAdminStokPaksa('tambahbarang'));
 }
 // Versi paksa -- dipakai tombol "+ Tambah Barang" di tab Data Barang, TIDAK menghitung sbg tab tabbar aktif
 async function pindahTabAdminStokPaksa(tab) {
@@ -649,12 +648,18 @@ async function muatLogAktivitasAdmin() {
 // INIT (lazy-loaded, mengikuti pola admin-stok.js lama)
 // ============================================================
 function initStok() {
-  sesiAdminStok = ambilSesiAdmin();
-  if (!sesiAdminStok || !sesiAdminStok.token) return;
+  // Token diambil dari window.sppgAdminToken (di-set admin.js saat login/pulihkan sesi),
+  // sama seperti admin-shift.js & admin-role.js -- bukan dari localStorage langsung.
+  const token = window.sppgAdminToken;
+  if (!token) return;
+  sesiAdminStok = { token: token };
 
   document.querySelectorAll('#adminStokTabbar .stok-subtab').forEach(btn => {
     btn.addEventListener('click', () => pindahTabAdminStok(btn.dataset.asub));
   });
+  // Tombol "+ Tambah Barang" (di tab Data Barang) HARUS dipasang di sini, bukan di dalam
+  // inisialisasi form -- form baru diinisialisasi SETELAH tombol ini diklik.
+  document.getElementById('aBtnBukaTambahBarang').addEventListener('click', () => pindahTabAdminStokPaksa('tambahbarang'));
   document.getElementById('aBarangCari').addEventListener('input', (e) => {
     clearTimeout(window._aSiragaCariTimeout);
     window._aSiragaCariTimeout = setTimeout(() => muatDaftarBarangAdmin(e.target.value.trim()), 350);
@@ -665,3 +670,7 @@ function initStok() {
 
 let sudahInit = false;
 window.addEventListener('sppg-admin-ready', () => { if (!sudahInit) { sudahInit = true; initStok(); } });
+// PENTING: file ini di-lazy-load SETELAH login, jadi event 'sppg-admin-ready' biasanya SUDAH
+// tertembak sebelum listener di atas terpasang. Kalau token sudah ada, langsung init
+// (pola sama dengan admin-shift.js). Tanpa baris ini tab SIRAGA tidak bisa diklik.
+if (window.sppgAdminToken && !sudahInit) { sudahInit = true; initStok(); }
