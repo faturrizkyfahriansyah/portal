@@ -177,7 +177,7 @@ const A_STOK_SUB_PANEL = {
   keluar: 'aStokSubKeluar', transfer: 'aStokSubTransfer', pemusnahan: 'aStokSubPemusnahan',
   opname: 'aStokSubOpname', kartustok: 'aStokSubKartuStok', batch: 'aStokSubBatch',
   laporan: 'aStokSubLaporan', kategori: 'aStokSubKategori', supplier: 'aStokSubSupplier',
-  tambahbarang: 'aStokSubTambahBarang', akses: 'aStokSubAkses', log: 'aStokSubLog'
+  tambahbarang: 'aStokSubTambahBarang', akses: 'aStokSubAkses', log: 'aStokSubLog', diagnosa: 'aStokSubDiagnosa'
 };
 const sudahDimuatTabAdminStok = {};
 
@@ -204,6 +204,7 @@ async function pindahTabAdminStok(tab) {
     else if (tab === 'tambahbarang') await inisialisasiFormTambahBarangAdmin();
     else if (tab === 'akses') await muatHakAksesAdmin();
     else if (tab === 'log') await muatLogAktivitasAdmin();
+    else if (tab === 'diagnosa') inisialisasiDiagnosaAdmin();
   } catch (err) {
     delete sudahDimuatTabAdminStok[tab]; // izinkan dicoba lagi begitu tab diklik ulang (mis. setelah setup selesai)
     tampilkanGalatSirigaAdmin(tab, err);
@@ -221,10 +222,10 @@ function tampilkanGalatSirigaAdmin(tab, err) {
   const box = document.createElement('div');
   box.className = 'empty-state siraga-notice';
   box.style.cssText = 'text-align:left;margin-bottom:12px;';
-  const belumSetup = /SIRAGA_SPREADSHEET_ID|setupSiragaSpreadsheet|belum ada di spreadsheet SIRAGA/i.test(pesan);
+  const belumSetup = /SIRAGA_SPREADSHEET_ID|setupSiragaSpreadsheet|belum ada di spreadsheet SIRAGA|Gagal membuka spreadsheet SIRAGA/i.test(pesan);
   box.innerHTML = belumSetup
     ? '<strong>Database SIRAGA belum disiapkan.</strong><ol style="margin:8px 0 0 18px;padding:0;">' +
-      '<li>Buat 1 Google Spreadsheet <em>kosong baru</em>, salin ID-nya dari URL (antara <code>/d/</code> dan <code>/edit</code>).</li>' +
+      '<li>Siapkan 1 Google Spreadsheet (kosong baru, atau database SIRAGA yang sudah Anda isi). <strong>Harus berformat Google Sheets asli</strong> -- kalau di judulnya ada label <code>.XLSX</code>, buka File → Save as Google Sheets dulu dan pakai file hasil konversinya. Salin ID dari URL (antara <code>/d/</code> dan <code>/edit</code>).</li>' +
       '<li>Apps Script Portal → Project Settings → Script Properties → tambah <code>SIRAGA_SPREADSHEET_ID</code> = ID tadi.</li>' +
       '<li>Di editor Apps Script, jalankan fungsi <code>setupSiragaSpreadsheet</code> sekali.</li>' +
       '<li>Muat ulang halaman ini, lalu klik tab lagi.</li></ol>'
@@ -701,3 +702,38 @@ window.addEventListener('sppg-admin-ready', () => { if (!sudahInit) { sudahInit 
 // tertembak sebelum listener di atas terpasang. Kalau token sudah ada, langsung init
 // (pola sama dengan admin-shift.js). Tanpa baris ini tab SIRAGA tidak bisa diklik.
 if (window.sppgAdminToken && !sudahInit) { sudahInit = true; initStok(); }
+
+
+// ============================================================
+// DIAGNOSA DATABASE
+// ============================================================
+let diagnosaAdminSiap = false;
+function inisialisasiDiagnosaAdmin() {
+  if (diagnosaAdminSiap) return; diagnosaAdminSiap = true;
+  document.getElementById('aBtnJalankanDiagnosa').addEventListener('click', async () => {
+    const tombol = document.getElementById('aBtnJalankanDiagnosa');
+    const wadah = document.getElementById('aDiagnosaHasil');
+    tombol.disabled = true; tombol.textContent = 'Memeriksa...';
+    wadah.innerHTML = '';
+    try {
+      const h = await apiPost('diagnosaSiragaAdmin', { token: sesiAdminStok.token });
+      let html = '<p class="detail-row"><span class="detail-row-label">Spreadsheet</span><span class="detail-row-value">' + escapeHtml(h.namaSpreadsheet) + '</span></p>';
+      html += '<p class="section-title">Sheet</p>' + h.sheet.map(x => x.ada
+        ? '<div class="riwayat-item is-' + ((x.kolomHilang || []).length ? 'terlambat' : 'hadir') + '"><div class="riwayat-item-detail"><div class="riwayat-item-top"><strong class="riwayat-item-shift">' + escapeHtml(x.nama) + '</strong><span class="riwayat-badge ' + ((x.kolomHilang || []).length ? 'terlambat' : 'hadir') + '">' + x.jumlahBaris + ' baris</span></div>' +
+          ((x.kolomHilang || []).length ? '<div class="riwayat-item-jam">Kolom belum ada: ' + escapeHtml(x.kolomHilang.join(', ')) + '</div>' : '<div class="riwayat-item-jam">Kolom lengkap</div>') + '</div></div>'
+        : '<div class="riwayat-item is-sakit"><div class="riwayat-item-detail"><strong class="riwayat-item-shift">' + escapeHtml(x.nama) + '</strong><div class="riwayat-item-jam">Sheet tidak ada</div></div></div>').join('');
+      if (h.barang) {
+        const st = Object.keys(h.barang.distribusiStatus).map(k => escapeHtml(k) + ': ' + h.barang.distribusiStatus[k]).join(' · ');
+        html += '<p class="section-title" style="margin-top:16px;">Data Barang</p><div class="riwayat-item is-hadir"><div class="riwayat-item-detail">' +
+          '<div class="riwayat-item-jam">Total <strong>' + h.barang.total + '</strong> barang, terbaca aktif <strong>' + h.barang.terbacaAktif + '</strong></div>' +
+          '<div class="riwayat-item-jam">Status: ' + (st || '-') + '</div></div></div>';
+      }
+      html += '<p class="section-title" style="margin-top:16px;">Catatan</p>' + (h.catatan.length
+        ? h.catatan.map(c => '<div class="empty-state" style="text-align:left;margin-bottom:8px;">' + escapeHtml(c) + '</div>').join('')
+        : '<div class="empty-state" style="text-align:left;">✅ Tidak ada masalah ditemukan.</div>');
+      wadah.innerHTML = html;
+    } catch (err) {
+      wadah.innerHTML = '<div class="empty-state" style="text-align:left;">' + escapeHtml(err.message || 'Diagnosa gagal.') + '</div>';
+    } finally { tombol.disabled = false; tombol.textContent = 'Jalankan Diagnosa'; }
+  });
+}

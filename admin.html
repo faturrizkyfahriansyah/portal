@@ -597,6 +597,7 @@
       <button type="button" class="stok-subtab" data-asub="supplier">Supplier</button>
       <button type="button" class="stok-subtab" data-asub="akses">Hak Akses</button>
       <button type="button" class="stok-subtab" data-asub="log">Log Aktivitas</button>
+      <button type="button" class="stok-subtab" data-asub="diagnosa">Diagnosa</button>
     </div>
 
     <!-- DASHBOARD -->
@@ -792,6 +793,14 @@
     <!-- LOG AKTIVITAS -->
     <div class="stok-sub" id="aStokSubLog" style="display:none;">
       <div id="aLogAktivitasList" class="riwayat-list"></div>
+    </div>
+
+    <!-- DIAGNOSA DATABASE -->
+    <div class="stok-sub" id="aStokSubDiagnosa" style="display:none;">
+      <p class="section-title" style="margin-top:0;">🩺 Diagnosa Database SIRAGA</p>
+      <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 12px;">Memeriksa apakah sheet, kolom, dan data barang di spreadsheet SIRAGA cocok dengan aplikasi. Hanya membaca, tidak mengubah data.</p>
+      <button type="button" class="btn-submit" id="aBtnJalankanDiagnosa">Jalankan Diagnosa</button>
+      <div id="aDiagnosaHasil" style="margin-top:14px;"></div>
     </div>
   </div>
 
