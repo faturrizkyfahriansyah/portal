@@ -3,6 +3,38 @@
 // sendiri sesuai keputusan desain. Memakai ulang config.js/common.js yang
 // sudah ada (apiPost + registrasi Service Worker otomatis lewat common.js).
 
+/**
+ * PERBAIKAN DIAGNOSTIK: apiPost (common.js, dipakai SELURUH project) SENGAJA
+ * menyederhanakan semua kegagalan fetch jadi satu pesan generik "periksa
+ * koneksi internet" -- itu pilihan yang TEPAT untuk halaman relawan biasa,
+ * tapi salah untuk halaman ini: petugas di lapangan butuh tahu PERSIS jenis
+ * kegagalannya (timeout? server menjawab gagal dgn pesan tertentu? respons
+ * rusak? benar-benar network?), bukan pesan yang sama untuk semua kasus.
+ * Fungsi ini TIDAK mengubah common.js sama sekali (jadi halaman lain tidak
+ * terdampak) -- ia memakai ulang fetchDenganTimeout_ + GOOGLE_APPS_SCRIPT_WEB_APP_URL
+ * yang sudah ada, tapi meneruskan detail error APA ADANYA ke pemanggil.
+ */
+async function apiPostDiagnostik_(action, payload, timeoutMs) {
+  let res;
+  try {
+    res = await fetchDenganTimeout_(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
+      method: 'POST',
+      body: JSON.stringify(Object.assign({}, payload, { action }))
+    }, timeoutMs);
+  } catch (err) {
+    throw new Error((err.name || 'Error') + ': ' + (err.message || 'tidak diketahui') + ' (kemungkinan jaringan/timeout/CORS -- lihat kode error ini)');
+  }
+  const teksMentah = await res.text();
+  let json;
+  try {
+    json = JSON.parse(teksMentah);
+  } catch (e) {
+    throw new Error('Respons server tidak terbaca (HTTP ' + res.status + '). Cuplikan: "' + teksMentah.slice(0, 120) + '"');
+  }
+  if (!json.success) throw new Error((json.message || 'Server menjawab gagal tanpa pesan') + (json.error ? ' [kode: ' + json.error + ']' : ''));
+  return json.data;
+}
+
 let videoEl, canvasEl, ctx;
 let sedangProses = false;   // true selagi menunggu jawaban server -- cegah kirim ganda
 let cooldownAktif = false;  // jeda singkat SETELAH hasil ditampilkan, sebelum siap baca lagi
@@ -142,8 +174,7 @@ async function prosesHasilScan_(tokenKartu) {
   sedangProses = true;
   tampilkanStatusSiap_(false);
   try {
-    const res = await apiPost('submitAbsensiQr', { tokenKartu: tokenKartu, mode: modeAbsensi }, 15000);
-    const hasil = (res && res.kode) ? res : ((res && res.data && res.data.kode) ? res.data : res);
+    const hasil = await apiPostDiagnostik_('submitAbsensiQr', { tokenKartu: tokenKartu, mode: modeAbsensi }, 15000);
     tampilkanHasil_(hasil);
   } catch (err) {
     tampilkanHasil_({ kode: 'ERROR_KONEKSI', pesan: err.message || 'Tidak dapat terhubung ke server.' });
@@ -230,7 +261,7 @@ async function muatOperasionalKios_() {
     // 3.5 detik SERING gagal walau backend sebenarnya sehat -- inilah
     // penyebab paling mungkin dari "Data operasional belum dapat dimuat"
     // yang terlihat konsisten di lapangan. Dinaikkan ke 15000ms.
-    const d = await apiPost('getOperasionalAktifQr', {}, 15000);
+    const d = await apiPostDiagnostik_('getOperasionalAktifQr', {}, 15000);
     if (d && d.kode === 'OPERASIONAL_AKTIF' && d.tanggal) {
       elTanggal.textContent = 'Operasional: ' + d.tanggal;
       if (elStatus) { elStatus.textContent = '● OPERASIONAL AKTIF'; elStatus.className = 'operasional-status aktif'; }
@@ -241,8 +272,13 @@ async function muatOperasionalKios_() {
       if (elStatus) { elStatus.textContent = '● OPERASIONAL TIDAK AKTIF'; elStatus.className = 'operasional-status tidak-aktif'; }
       return;
     }
-    elTanggal.textContent = 'Data operasional belum tersedia';
-    if (elStatus) { elStatus.className = 'operasional-status gagal'; }
+    // BUG SEBELUMNYA: baris elStatus.textContent tidak ada di cabang ini --
+    // teks jadi macet di "Memeriksa status..." (dari HTML awal) walau warnanya
+    // sudah berubah oranye lewat className, membuat tampilan tidak konsisten
+    // persis seperti yang terlihat di lapangan.
+    elTanggal.textContent = 'Data operasional belum tersedia (respons server tidak dikenali: kode="' + (d && d.kode) + '")';
+    if (elStatus) { elStatus.textContent = '● RESPONS TIDAK DIKENALI'; elStatus.className = 'operasional-status gagal'; }
+    return;
   } catch (e) {
     // Tampilkan alasan SEBENARNYA (timeout vs pesan error server) -- sebelumnya
     // pesan generik yang sama untuk semua jenis kegagalan, menyulitkan diagnosa
