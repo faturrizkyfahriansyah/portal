@@ -9,8 +9,8 @@ let cooldownAktif = false;  // jeda singkat SETELAH hasil ditampilkan, sebelum s
 let modeAbsensi = null;       // MASUK/PULANG dipilih petugas sebelum scan
 let loopHandle = null;
 let waktuFrameQrTerakhir = 0;
-const INTERVAL_SCAN_QR_MS = 90;
-const COOLDOWN_HASIL_MS = 4000;
+const INTERVAL_SCAN_QR_MS = 140;
+const COOLDOWN_HASIL_MS = 2500;
 
 // ============================================================
 // SUARA — dibuat langsung lewat Web Audio API (oscillator), BUKAN file
@@ -214,6 +214,32 @@ function tampilkanStatusSiap_(siap) {
   document.getElementById('statusInstruksi').style.visibility = siap ? 'visible' : 'hidden';
 }
 
+
+// ============================================================
+// OPERASIONAL KIOS — dimuat terpisah dari proses kamera/scan
+// ============================================================
+async function muatOperasionalKios_() {
+  const el = document.getElementById('operasionalTanggal');
+  if (!el || typeof window.apiPost !== 'function') return;
+  el.textContent = 'Memuat operasional...';
+  try {
+    const res = await apiPost('getOperasionalAktifQr', {}, 3500);
+    const d = (res && res.kode) ? res : ((res && res.data && res.data.kode) ? res.data : res);
+    if (d && d.kode === 'OPERASIONAL_AKTIF' && d.tanggal) {
+      el.textContent = 'Operasional: ' + d.tanggal;
+      return;
+    }
+    if (d && d.kode === 'OPERASIONAL_TIDAK_AKTIF') {
+      el.textContent = 'Tidak ada operasional aktif';
+      return;
+    }
+    el.textContent = 'Data operasional belum tersedia';
+  } catch (e) {
+    el.textContent = 'Data operasional belum dapat dimuat';
+    console.warn('SIPRES operasional kiosk:', e);
+  }
+}
+
 // ============================================================
 // PILIH MODE ABSENSI
 // ============================================================
@@ -233,6 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
   videoEl = document.getElementById('video');
   canvasEl = document.createElement('canvas');
   ctx = canvasEl.getContext('2d', { willReadFrequently: true });
+
+  muatOperasionalKios_();
 
   document.getElementById('btnMasuk').addEventListener('click', () => pilihModeAbsensi_('MASUK'));
   document.getElementById('btnPulang').addEventListener('click', () => pilihModeAbsensi_('PULANG'));
