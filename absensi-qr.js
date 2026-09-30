@@ -62,23 +62,77 @@ async function mulaiKamera_() {
   }
 }
 
+function decodeFrame_(sourceCanvas, sourceCtx) {
+  if (typeof window.jsQR !== 'function') return null;
+
+  const w = sourceCanvas.width;
+  const h = sourceCanvas.height;
+  if (!w || !h) return null;
+
+  // Pass 1: seluruh frame.
+  let frame = sourceCtx.getImageData(0, 0, w, h);
+  let kode = window.jsQR(frame.data, frame.width, frame.height, { inversionAttempts: 'attemptBoth' });
+  if (kode && kode.data) return kode;
+
+  // Pass 2: fokus ke area tengah. Ini membantu ketika QR relatif kecil
+  // terhadap frame kamera HP. Gunakan canvas terpisah agar tidak mengubah
+  // canvas utama yang mengikuti resolusi kamera.
+  const cropRatio = 0.72;
+  const cw = Math.max(240, Math.floor(w * cropRatio));
+  const ch = Math.max(240, Math.floor(h * cropRatio));
+  const sx = Math.max(0, Math.floor((w - cw) / 2));
+  const sy = Math.max(0, Math.floor((h - ch) / 2));
+  const scanCanvas = decodeFrame_._cropCanvas || (decodeFrame_._cropCanvas = document.createElement('canvas'));
+  const scale = Math.min(2, Math.max(1, 640 / Math.max(cw, ch)));
+  scanCanvas.width = Math.floor(cw * scale);
+  scanCanvas.height = Math.floor(ch * scale);
+  const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
+  scanCtx.imageSmoothingEnabled = false;
+  scanCtx.drawImage(sourceCanvas, sx, sy, cw, ch, 0, 0, scanCanvas.width, scanCanvas.height);
+  frame = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height);
+  kode = window.jsQR(frame.data, frame.width, frame.height, { inversionAttempts: 'attemptBoth' });
+  return kode && kode.data ? kode : null;
+}
+
 function loopBacaQr_() {
   if (loopHandle) cancelAnimationFrame(loopHandle);
   const tick = (timestamp) => {
     if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA && !sedangProses && !cooldownAktif && (timestamp - waktuFrameQrTerakhir >= INTERVAL_SCAN_QR_MS)) {
       waktuFrameQrTerakhir = timestamp;
-      canvasEl.width = videoEl.videoWidth;
-      canvasEl.height = videoEl.videoHeight;
-      ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
-      const frame = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
-      const kode = jsQR(frame.data, frame.width, frame.height, { inversionAttempts: 'dontInvert' });
-      if (kode && kode.data) {
-        prosesHasilScan_(kode.data.trim());
+
+      // Jika library decoder gagal dimuat, tampilkan error yang jelas
+      // daripada membiarkan loop berhenti diam-diam karena ReferenceError.
+      if (typeof window.jsQR !== 'function') {
+        tampilkanErrorScanner_('Mesin pembaca QR belum termuat. Muat ulang halaman dengan koneksi internet aktif.');
+      } else {
+        const w = videoEl.videoWidth;
+        const h = videoEl.videoHeight;
+        if (w && h) {
+          canvasEl.width = w;
+          canvasEl.height = h;
+          ctx.drawImage(videoEl, 0, 0, w, h);
+          try {
+            const kode = decodeFrame_(canvasEl, ctx);
+            if (kode && kode.data) prosesHasilScan_(kode.data.trim());
+          } catch (e) {
+            console.error('SIPRES QR decoder error:', e);
+          }
+        }
       }
     }
     loopHandle = requestAnimationFrame(tick);
   };
   loopHandle = requestAnimationFrame(tick);
+}
+
+let scannerErrorAktif = false;
+function tampilkanErrorScanner_(pesan) {
+  if (scannerErrorAktif) return;
+  scannerErrorAktif = true;
+  const el = document.getElementById('statusSiap');
+  const instruksi = document.getElementById('statusInstruksi');
+  if (el) { el.textContent = 'SCANNER QR TIDAK SIAP'; el.style.color = '#b23a3a'; }
+  if (instruksi) instruksi.textContent = pesan;
 }
 
 // ============================================================
@@ -171,5 +225,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // sebelum audio bisa dimainkan) -- sekaligus tombol yang sama memicu izin kamera.
     ambilAudioCtx_();
     mulaiKamera_();
+  });
+
+  // Audit runtime: halaman tidak boleh masuk mode siap jika decoder belum ada.
+  // Ini mencegah kegagalan diam-diam ketika CDN library gagal dimuat.
+  window.addEventListener('load', () => {
+    if (typeof window.jsQR !== 'function') {
+      tampilkanErrorScanner_('Library pembaca QR gagal dimuat. Pastikan koneksi internet aktif lalu muat ulang.');
+    }
   });
 });
