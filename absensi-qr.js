@@ -219,23 +219,37 @@ function tampilkanStatusSiap_(siap) {
 // OPERASIONAL KIOS — dimuat terpisah dari proses kamera/scan
 // ============================================================
 async function muatOperasionalKios_() {
-  const el = document.getElementById('operasionalTanggal');
-  if (!el || typeof window.apiPost !== 'function') return;
-  el.textContent = 'Memuat operasional...';
+  const elTanggal = document.getElementById('operasionalTanggal');
+  const elStatus = document.getElementById('operasionalStatus');
+  if (!elTanggal || typeof window.apiPost !== 'function') return;
+  elTanggal.textContent = 'Memuat operasional...';
   try {
-    const res = await apiPost('getOperasionalAktifQr', {}, 3500);
-    const d = (res && res.kode) ? res : ((res && res.data && res.data.kode) ? res.data : res);
+    // PERBAIKAN: timeout sebelumnya 3500ms -- jauh lebih pendek dari standar
+    // project (API_TIMEOUT_MS = 20000ms di common.js). Apps Script Web App
+    // biasa perlu beberapa detik saat "cold start" (jarang dipanggil), jadi
+    // 3.5 detik SERING gagal walau backend sebenarnya sehat -- inilah
+    // penyebab paling mungkin dari "Data operasional belum dapat dimuat"
+    // yang terlihat konsisten di lapangan. Dinaikkan ke 15000ms.
+    const d = await apiPost('getOperasionalAktifQr', {}, 15000);
     if (d && d.kode === 'OPERASIONAL_AKTIF' && d.tanggal) {
-      el.textContent = 'Operasional: ' + d.tanggal;
+      elTanggal.textContent = 'Operasional: ' + d.tanggal;
+      if (elStatus) { elStatus.textContent = '● OPERASIONAL AKTIF'; elStatus.className = 'operasional-status aktif'; }
       return;
     }
     if (d && d.kode === 'OPERASIONAL_TIDAK_AKTIF') {
-      el.textContent = 'Tidak ada operasional aktif';
+      elTanggal.textContent = d.label || 'Tidak ada operasional aktif';
+      if (elStatus) { elStatus.textContent = '● OPERASIONAL TIDAK AKTIF'; elStatus.className = 'operasional-status tidak-aktif'; }
       return;
     }
-    el.textContent = 'Data operasional belum tersedia';
+    elTanggal.textContent = 'Data operasional belum tersedia';
+    if (elStatus) { elStatus.className = 'operasional-status gagal'; }
   } catch (e) {
-    el.textContent = 'Data operasional belum dapat dimuat';
+    // Tampilkan alasan SEBENARNYA (timeout vs pesan error server) -- sebelumnya
+    // pesan generik yang sama untuk semua jenis kegagalan, menyulitkan diagnosa
+    // dari lapangan (persis kasus yang terjadi).
+    const alasan = (e && e.message) ? e.message : 'sebab tidak diketahui';
+    elTanggal.textContent = 'Data operasional belum dapat dimuat (' + alasan + ')';
+    if (elStatus) { elStatus.textContent = '● GAGAL MEMUAT'; elStatus.className = 'operasional-status gagal'; }
     console.warn('SIPRES operasional kiosk:', e);
   }
 }

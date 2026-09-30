@@ -38,7 +38,10 @@
 
   .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 16px 8px; gap: 10px; min-height: 0; overflow:auto; }
   .operasional { width:100%; max-width:420px; background:#fff; border:1px solid #dfe5ec; border-radius:14px; padding:10px 14px; text-align:center; box-shadow:0 4px 14px rgba(11,35,64,.08); }
-  .operasional-status { font-size:12px; font-weight:800; color:var(--sukses); letter-spacing:.3px; }
+  .operasional-status { font-size:12px; font-weight:800; color:#889; letter-spacing:.3px; }
+  .operasional-status.aktif { color:var(--sukses); }
+  .operasional-status.tidak-aktif { color:var(--bahaya); }
+  .operasional-status.gagal { color:#b25b16; }
   .operasional-tanggal { font-size:13px; font-weight:700; color:var(--navy); margin-top:2px; }
   .pilih-absensi { width:100%; max-width:420px; }
   .pilih-judul { margin:0 0 8px; text-align:center; font-size:12px; font-weight:800; color:var(--navy); letter-spacing:.4px; }
@@ -108,7 +111,7 @@
 
 <div class="stage">
   <div class="operasional" id="operasionalBox">
-    <div class="operasional-status">● OPERASIONAL AKTIF</div>
+    <div class="operasional-status" id="operasionalStatus">● Memeriksa status operasional...</div>
     <div class="operasional-tanggal" id="operasionalTanggal">Memuat operasional...</div>
   </div>
 
