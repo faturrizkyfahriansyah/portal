@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>SIPRES — Absensi QR — SPPG Jeungjing</title>
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest-sipres.json">
 <link rel="icon" href="assets/logo.png">
 <link rel="apple-touch-icon" href="assets/logo.png">
 <meta name="theme-color" content="#0b2340">
@@ -126,6 +126,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <script src="config.js?v=20260929a"></script>
 <script src="common.js?v=20260929a"></script>
-<script src="absensi-qr.js?v=20260929a"></script>
+<script src="absensi-qr.js?v=20261001a"></script>
+<script>
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {})); }
+</script>
 </body>
 </html>

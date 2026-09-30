@@ -7,6 +7,8 @@ let videoEl, canvasEl, ctx;
 let sedangProses = false;   // true selagi menunggu jawaban server -- cegah kirim ganda
 let cooldownAktif = false;  // jeda singkat SETELAH hasil ditampilkan, sebelum siap baca lagi
 let loopHandle = null;
+let waktuFrameQrTerakhir = 0;
+const INTERVAL_SCAN_QR_MS = 90;
 
 // ============================================================
 // SUARA — dibuat langsung lewat Web Audio API (oscillator), BUKAN file
@@ -62,8 +64,9 @@ async function mulaiKamera_() {
 
 function loopBacaQr_() {
   if (loopHandle) cancelAnimationFrame(loopHandle);
-  const tick = () => {
-    if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA && !sedangProses && !cooldownAktif) {
+  const tick = (timestamp) => {
+    if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA && !sedangProses && !cooldownAktif && (timestamp - waktuFrameQrTerakhir >= INTERVAL_SCAN_QR_MS)) {
+      waktuFrameQrTerakhir = timestamp;
       canvasEl.width = videoEl.videoWidth;
       canvasEl.height = videoEl.videoHeight;
       ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);

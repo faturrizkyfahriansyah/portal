@@ -146,12 +146,66 @@ async function cetakTerpilih_() {
   } catch (err) { showError(err.message || 'Gagal menyiapkan cetak.'); }
 }
 
-/** Download PNG dari preview yang sedang terbuka -- render ulang QR ke canvas tersembunyi ukuran penuh, gabungkan jadi satu gambar kartu via <canvas> browser. */
+/** Download PNG kartu yang sedang dipreview. Tidak memakai library tambahan: QR diambil dari canvas qrcodejs, lalu seluruh kartu digambar ulang ke canvas. */
 async function downloadPreviewSebagaiPng_() {
   const data = window._kqDataPreviewAktif;
   if (!data) return;
-  showError('Membuka dialog Print — pilih "Simpan sebagai PDF" untuk menyimpan kartu ini sebagai file.');
-  cetakSatuDariPreview_();
+  try {
+    const qrEl = document.getElementById('kqPreviewQr');
+    const qrCanvas = qrEl && qrEl.querySelector('canvas');
+    const qrImg = qrEl && qrEl.querySelector('img');
+    if (!qrCanvas && !qrImg) throw new Error('QR belum selesai dibuat. Tunggu sebentar lalu coba lagi.');
+
+    const W = 1011, H = 638; // rasio CR80 85.6 x 54 mm pada ~300 DPI
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
+
+    // Ornamen header navy + aksen emas.
+    x.fillStyle = '#0b2340'; x.fillRect(0, 0, W, 108);
+    x.fillStyle = '#c9962c'; x.fillRect(0, 103, W, 5);
+    x.fillStyle = '#eaf0f7'; x.beginPath(); x.arc(W - 28, 24, 88, 0, Math.PI * 2); x.fill();
+
+    const logo = new Image();
+    logo.src = 'assets/logo.png';
+    await new Promise((resolve, reject) => { logo.onload = resolve; logo.onerror = reject; });
+    const lh = 62, lw = logo.naturalWidth ? lh * logo.naturalWidth / logo.naturalHeight : 62;
+    x.drawImage(logo, 30, 22, lw, lh);
+
+    x.fillStyle = '#ffffff'; x.font = '800 30px Arial';
+    x.fillText('SPPG JEUNGJING', 30 + lw + 18, 58);
+    x.font = '700 22px Arial'; x.fillStyle = '#c9962c';
+    x.fillText('KARTU ABSENSI RELAWAN', 30, 155);
+
+    x.fillStyle = '#0b2340'; x.font = '800 38px Arial';
+    const nama = String(data.nama || '-');
+    let namaTampil = nama;
+    if (namaTampil.length > 25) namaTampil = namaTampil.slice(0, 24) + '…';
+    x.fillText(namaTampil, 30, 225);
+
+    x.fillStyle = '#556070'; x.font = '500 25px Arial';
+    x.fillText('ID: ' + String(data.id || '-'), 30, 270);
+    x.fillText('Divisi: ' + String(data.divisi || '-'), 30, 307);
+
+    const qSize = 270;
+    if (qrCanvas) x.drawImage(qrCanvas, W - qSize - 42, 155, qSize, qSize);
+    else {
+      const img = new Image(); img.src = qrImg.src;
+      await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+      x.drawImage(img, W - qSize - 42, 155, qSize, qSize);
+    }
+
+    x.fillStyle = '#8b95a3'; x.font = '500 18px Arial';
+    x.fillText('SIPRES • SPPG Jeungjing', 30, H - 28);
+
+    const a = document.createElement('a');
+    a.download = 'Kartu-QR-' + String(data.id || 'Relawan').replace(/[^a-zA-Z0-9_-]+/g, '-') + '.png';
+    a.href = c.toDataURL('image/png');
+    a.click();
+  } catch (err) {
+    showError(err.message || 'Gagal membuat file PNG kartu.');
+  }
 }
 
 // ============================================================
