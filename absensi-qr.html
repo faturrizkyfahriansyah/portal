@@ -123,7 +123,29 @@
   <p id="pesanErrorKamera" style="font-size:12px;color:#b23a3a;margin:0;"></p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+// SIPRES QR DECODER LOADER — coba sumber berurutan. Kamera tidak dimulai
+// sebelum decoder benar-benar siap. Sumber utama GitHub Raw, lalu CDN fallback.
+window.sipresQrReady = (async function () {
+  const sources = [
+    'jsQR.js',
+    'https://raw.githubusercontent.com/cozmo/jsQR/master/dist/jsQR.js',
+    'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js',
+    'https://unpkg.com/jsqr@1.4.0/dist/jsQR.js'
+  ];
+  for (const src of sources) {
+    try {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src; s.async = true; s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+      if (typeof window.jsQR === 'function') return true;
+    } catch (_) {}
+  }
+  return false;
+})();
+</script>
 <script src="config.js?v=20260929a"></script>
 <script src="common.js?v=20260929a"></script>
 <script src="absensi-qr.js?v=20261001b"></script>

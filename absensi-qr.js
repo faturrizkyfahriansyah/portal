@@ -144,7 +144,9 @@ async function prosesHasilScan_(tokenKartu) {
   tampilkanStatusSiap_(false);
   try {
     const res = await apiPost('submitAbsensiQr', { tokenKartu: tokenKartu }, 15000);
-    tampilkanHasil_(res);
+    // Kompatibilitas defensif: jika backend lama masih membungkus data satu tingkat, buka di sini.
+    const hasil = (res && res.kode) ? res : ((res && res.data && res.data.kode) ? res.data : res);
+    tampilkanHasil_(hasil);
   } catch (err) {
     tampilkanHasil_({ kode: 'ERROR_KONEKSI', pesan: err.message || 'Tidak dapat terhubung ke server.' });
   } finally {
@@ -224,14 +226,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Buka AudioContext dari gestur pengguna (wajib di banyak browser mobile
     // sebelum audio bisa dimainkan) -- sekaligus tombol yang sama memicu izin kamera.
     ambilAudioCtx_();
+    const siapDecoder = await (window.sipresQrReady || Promise.resolve(typeof window.jsQR === 'function'));
+    if (!siapDecoder || typeof window.jsQR !== 'function') {
+      tampilkanErrorScanner_('Library pembaca QR gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.');
+      return;
+    }
     mulaiKamera_();
   });
 
   // Audit runtime: halaman tidak boleh masuk mode siap jika decoder belum ada.
   // Ini mencegah kegagalan diam-diam ketika CDN library gagal dimuat.
-  window.addEventListener('load', () => {
-    if (typeof window.jsQR !== 'function') {
-      tampilkanErrorScanner_('Library pembaca QR gagal dimuat. Pastikan koneksi internet aktif lalu muat ulang.');
+  window.addEventListener('load', async () => {
+    const siapDecoder = await (window.sipresQrReady || Promise.resolve(typeof window.jsQR === 'function'));
+    if (!siapDecoder || typeof window.jsQR !== 'function') {
+      tampilkanErrorScanner_('Library pembaca QR gagal dimuat dari semua sumber. Periksa koneksi internet lalu muat ulang.');
     }
   });
 });
