@@ -6,9 +6,11 @@
 let videoEl, canvasEl, ctx;
 let sedangProses = false;   // true selagi menunggu jawaban server -- cegah kirim ganda
 let cooldownAktif = false;  // jeda singkat SETELAH hasil ditampilkan, sebelum siap baca lagi
+let modeAbsensi = null;       // MASUK/PULANG dipilih petugas sebelum scan
 let loopHandle = null;
 let waktuFrameQrTerakhir = 0;
 const INTERVAL_SCAN_QR_MS = 90;
+const COOLDOWN_HASIL_MS = 4000;
 
 // ============================================================
 // SUARA — dibuat langsung lewat Web Audio API (oscillator), BUKAN file
@@ -64,19 +66,17 @@ async function mulaiKamera_() {
 
 function decodeFrame_(sourceCanvas, sourceCtx) {
   if (typeof window.jsQR !== 'function') return null;
-
   const w = sourceCanvas.width;
   const h = sourceCanvas.height;
   if (!w || !h) return null;
 
-  // Pass 1: seluruh frame.
+  // Pass 1: seluruh frame kamera.
   let frame = sourceCtx.getImageData(0, 0, w, h);
   let kode = window.jsQR(frame.data, frame.width, frame.height, { inversionAttempts: 'attemptBoth' });
   if (kode && kode.data) return kode;
 
-  // Pass 2: fokus ke area tengah. Ini membantu ketika QR relatif kecil
-  // terhadap frame kamera HP. Gunakan canvas terpisah agar tidak mengubah
-  // canvas utama yang mengikuti resolusi kamera.
+  // Pass 2: crop area tengah + pembesaran ringan agar QR kartu yang relatif
+  // kecil di frame HP lebih mudah dibaca.
   const cropRatio = 0.72;
   const cw = Math.max(240, Math.floor(w * cropRatio));
   const ch = Math.max(240, Math.floor(h * cropRatio));
@@ -94,16 +94,25 @@ function decodeFrame_(sourceCanvas, sourceCtx) {
   return kode && kode.data ? kode : null;
 }
 
+let scannerErrorAktif = false;
+function tampilkanErrorScanner_(pesan) {
+  if (scannerErrorAktif) return;
+  scannerErrorAktif = true;
+  const el = document.getElementById('statusSiap');
+  const instruksi = document.getElementById('statusInstruksi');
+  if (el) el.textContent = 'SCANNER QR TIDAK SIAP';
+  if (el) el.style.background = 'rgba(178,58,58,.92)';
+  if (instruksi) instruksi.textContent = pesan;
+}
+
 function loopBacaQr_() {
   if (loopHandle) cancelAnimationFrame(loopHandle);
   const tick = (timestamp) => {
-    if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA && !sedangProses && !cooldownAktif && (timestamp - waktuFrameQrTerakhir >= INTERVAL_SCAN_QR_MS)) {
+    if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA && !sedangProses && !cooldownAktif && modeAbsensi && (timestamp - waktuFrameQrTerakhir >= INTERVAL_SCAN_QR_MS)) {
       waktuFrameQrTerakhir = timestamp;
 
-      // Jika library decoder gagal dimuat, tampilkan error yang jelas
-      // daripada membiarkan loop berhenti diam-diam karena ReferenceError.
       if (typeof window.jsQR !== 'function') {
-        tampilkanErrorScanner_('Mesin pembaca QR belum termuat. Muat ulang halaman dengan koneksi internet aktif.');
+        tampilkanErrorScanner_('Mesin pembaca QR belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
       } else {
         const w = videoEl.videoWidth;
         const h = videoEl.videoHeight;
@@ -125,26 +134,15 @@ function loopBacaQr_() {
   loopHandle = requestAnimationFrame(tick);
 }
 
-let scannerErrorAktif = false;
-function tampilkanErrorScanner_(pesan) {
-  if (scannerErrorAktif) return;
-  scannerErrorAktif = true;
-  const el = document.getElementById('statusSiap');
-  const instruksi = document.getElementById('statusInstruksi');
-  if (el) { el.textContent = 'SCANNER QR TIDAK SIAP'; el.style.color = '#b23a3a'; }
-  if (instruksi) instruksi.textContent = pesan;
-}
-
 // ============================================================
 // KIRIM KE BACKEND + TAMPILKAN HASIL
 // ============================================================
 async function prosesHasilScan_(tokenKartu) {
-  if (!tokenKartu || sedangProses) return;
+  if (!tokenKartu || sedangProses || !modeAbsensi) return;
   sedangProses = true;
   tampilkanStatusSiap_(false);
   try {
-    const res = await apiPost('submitAbsensiQr', { tokenKartu: tokenKartu }, 15000);
-    // Kompatibilitas defensif: jika backend lama masih membungkus data satu tingkat, buka di sini.
+    const res = await apiPost('submitAbsensiQr', { tokenKartu: tokenKartu, mode: modeAbsensi }, 15000);
     const hasil = (res && res.kode) ? res : ((res && res.data && res.data.kode) ? res.data : res);
     tampilkanHasil_(hasil);
   } catch (err) {
@@ -158,6 +156,7 @@ const TAMPILAN_HASIL = {
   BERHASIL_MASUK: { ikon: '✓', judul: 'ABSENSI MASUK BERHASIL', warna: 'sukses', target: 'sukses', suara: 'BERHASIL_MASUK' },
   BERHASIL_PULANG: { ikon: '✓', judul: 'ABSENSI PULANG BERHASIL', warna: 'sukses', target: 'sukses', suara: 'BERHASIL_PULANG' },
   SUDAH_MASUK: { ikon: 'ℹ', judul: 'SUDAH ABSEN MASUK', warna: 'info', target: '', suara: 'INFO' },
+  BELUM_BISA_PULANG: { ikon: 'ℹ', judul: 'BELUM BISA ABSEN PULANG', warna: 'info', target: '', suara: 'INFO' },
   SUDAH_LENGKAP: { ikon: 'ℹ', judul: 'ABSENSI SUDAH LENGKAP', warna: 'info', target: '', suara: 'INFO' },
   BELUM_WAKTUNYA: { ikon: 'ℹ', judul: 'BELUM WAKTUNYA', warna: 'info', target: 'gagal', suara: 'INFO' },
   DI_LUAR_JENDELA: { ikon: '✕', judul: 'JADWAL SUDAH LEWAT', warna: 'bahaya', target: 'gagal', suara: 'ERROR' },
@@ -182,6 +181,7 @@ function tampilkanHasil_(d) {
   document.getElementById('hasilNama').textContent = d.nama || '-';
   document.getElementById('hasilDivisi').textContent = d.divisi ? ('Divisi: ' + d.divisi) : '';
   document.getElementById('hasilPesan').textContent = d.pesan || '';
+  if (d.tanggal) document.getElementById('operasionalTanggal').textContent = 'Operasional: ' + d.tanggal;
 
   const jamEl = document.getElementById('hasilJam');
   jamEl.textContent = d.jam || '';
@@ -206,7 +206,7 @@ function tampilkanHasil_(d) {
     target.className = 'kamera-target';
     tampilkanStatusSiap_(true);
     cooldownAktif = false;
-  }, 4000);
+  }, COOLDOWN_HASIL_MS);
 }
 
 function tampilkanStatusSiap_(siap) {
@@ -215,27 +215,41 @@ function tampilkanStatusSiap_(siap) {
 }
 
 // ============================================================
+// PILIH MODE ABSENSI
+// ============================================================
+function pilihModeAbsensi_(mode) {
+  modeAbsensi = mode;
+  const btnMasuk = document.getElementById('btnMasuk');
+  const btnPulang = document.getElementById('btnPulang');
+  btnMasuk.classList.toggle('aktif-masuk', mode === 'MASUK');
+  btnPulang.classList.toggle('aktif-pulang', mode === 'PULANG');
+  document.getElementById('statusSiap').textContent = 'SIAP MEMBACA';
+}
+
+// ============================================================
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   videoEl = document.getElementById('video');
-  canvasEl = document.createElement('canvas'); // tidak perlu tampil di halaman, cuma media proses decode
+  canvasEl = document.createElement('canvas');
   ctx = canvasEl.getContext('2d', { willReadFrequently: true });
 
-  document.getElementById('btnMulaiKamera').addEventListener('click', () => {
-    // Buka AudioContext dari gestur pengguna (wajib di banyak browser mobile
-    // sebelum audio bisa dimainkan) -- sekaligus tombol yang sama memicu izin kamera.
+  document.getElementById('btnMasuk').addEventListener('click', () => pilihModeAbsensi_('MASUK'));
+  document.getElementById('btnPulang').addEventListener('click', () => pilihModeAbsensi_('PULANG'));
+
+  // Penting: tombol ini harus tetap responsif di Android/iOS.
+  // Tunggu library QR selesai dimuat tanpa memutus event click dengan
+  // syntax/await yang tidak valid. Permission kamera dipicu dari gestur ini.
+  document.getElementById('btnMulaiKamera').addEventListener('click', async () => {
     ambilAudioCtx_();
     const siapDecoder = await (window.sipresQrReady || Promise.resolve(typeof window.jsQR === 'function'));
     if (!siapDecoder || typeof window.jsQR !== 'function') {
       tampilkanErrorScanner_('Library pembaca QR gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.');
       return;
     }
-    mulaiKamera_();
+    await mulaiKamera_();
   });
 
-  // Audit runtime: halaman tidak boleh masuk mode siap jika decoder belum ada.
-  // Ini mencegah kegagalan diam-diam ketika CDN library gagal dimuat.
   window.addEventListener('load', async () => {
     const siapDecoder = await (window.sipresQrReady || Promise.resolve(typeof window.jsQR === 'function'));
     if (!siapDecoder || typeof window.jsQR !== 'function') {

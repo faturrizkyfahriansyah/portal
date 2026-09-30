@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>SIPRES — Absensi QR — SPPG Jeungjing</title>
+<title>SIPRES — SPPG Jeungjing</title>
 <link rel="manifest" href="manifest-sipres.json">
 <link rel="icon" href="assets/logo.png">
 <link rel="apple-touch-icon" href="assets/logo.png">
@@ -36,7 +36,19 @@
   .header h1 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: .5px; }
   .header p { margin: 2px 0 0; font-size: 11px; opacity: .85; }
 
-  .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; gap: 14px; min-height: 0; }
+  .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 16px 8px; gap: 10px; min-height: 0; overflow:auto; }
+  .operasional { width:100%; max-width:420px; background:#fff; border:1px solid #dfe5ec; border-radius:14px; padding:10px 14px; text-align:center; box-shadow:0 4px 14px rgba(11,35,64,.08); }
+  .operasional-status { font-size:12px; font-weight:800; color:var(--sukses); letter-spacing:.3px; }
+  .operasional-tanggal { font-size:13px; font-weight:700; color:var(--navy); margin-top:2px; }
+  .pilih-absensi { width:100%; max-width:420px; }
+  .pilih-judul { margin:0 0 8px; text-align:center; font-size:12px; font-weight:800; color:var(--navy); letter-spacing:.4px; }
+  .pilih-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .btn-mode { border:2px solid #d9e0e8; background:#fff; color:var(--navy); border-radius:14px; min-height:54px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(11,35,64,.07); }
+  .btn-mode.aktif-masuk { border-color:var(--sukses); background:#eef9f3; color:var(--sukses); }
+  .btn-mode.aktif-pulang { border-color:#3b7dd8; background:#eef5ff; color:#2c67b7; }
+  .petunjuk-mode { margin:7px 0 0; text-align:center; font-size:11.5px; line-height:1.4; color:#667; }
+  .mode-terkunci .btn-mode { opacity:.55; pointer-events:none; }
+
 
   .kamera-wrap {
     position: relative; width: 100%; max-width: 420px; aspect-ratio: 1 / 1;
@@ -52,7 +64,7 @@
   .kamera-target.gagal { border-color: var(--bahaya); box-shadow: 0 0 0 999px rgba(178,58,58,.2); }
 
   .status-siap { font-size: 15px; font-weight: 800; color: var(--navy); text-align: center; }
-  .status-instruksi { font-size: 13px; color: #667; text-align: center; margin-top: -8px; }
+  .status-instruksi { font-size: 13px; color: #667; text-align: center; margin-top: -6px; margin-bottom:0; }
 
   .kartu-hasil {
     display: none; width: 100%; max-width: 420px; background: var(--kartu); border-radius: 20px;
@@ -90,17 +102,33 @@
     <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional">
     <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
   </div>
-  <h1>SIPRES — ABSENSI QR</h1>
-  <p>SPPG Jeungjing</p>
+  <h1>SIPRES</h1>
+  <p>SPPG JEUNGJING</p>
 </div>
 
 <div class="stage">
+  <div class="operasional" id="operasionalBox">
+    <div class="operasional-status">● OPERASIONAL AKTIF</div>
+    <div class="operasional-tanggal" id="operasionalTanggal">Menunggu data operasional</div>
+  </div>
+
   <div class="kamera-wrap">
     <video id="video" autoplay playsinline muted></video>
     <div class="kamera-target" id="kameraTarget"></div>
+    <div style="position:absolute;left:0;right:0;bottom:12px;text-align:center;pointer-events:none;">
+      <div id="statusSiap" style="display:inline-block;background:rgba(0,0,0,.68);color:#fff;padding:7px 13px;border-radius:999px;font-size:14px;font-weight:800;">SIAP MEMBACA</div>
+      <div id="statusInstruksi" style="margin-top:6px;display:inline-block;background:rgba(0,0,0,.58);color:#fff;padding:5px 10px;border-radius:999px;font-size:11.5px;">Arahkan QR kartu ke area kamera</div>
+    </div>
   </div>
-  <p class="status-siap" id="statusSiap">SIAP MEMBACA</p>
-  <p class="status-instruksi" id="statusInstruksi">Arahkan QR kartu ke area kamera</p>
+
+  <div class="pilih-absensi" id="pilihAbsensi">
+    <p class="pilih-judul">PILIH ABSENSI</p>
+    <div class="pilih-grid">
+      <button type="button" class="btn-mode" id="btnMasuk">MASUK</button>
+      <button type="button" class="btn-mode" id="btnPulang">PULANG</button>
+    </div>
+    <p class="petunjuk-mode">Pilih jenis absensi terlebih dahulu, kemudian scan QR Kartu Absensi.</p>
+  </div>
 
   <div class="kartu-hasil" id="kartuHasil">
     <div class="hasil-ikon" id="hasilIkon">✓</div>
@@ -124,15 +152,14 @@
 </div>
 
 <script>
-// SIPRES QR DECODER LOADER — coba sumber berurutan. Kamera tidak dimulai
-// sebelum decoder benar-benar siap. Sumber utama GitHub Raw, lalu CDN fallback.
+// Loader QR berurutan. Halaman menunggu library decoder sampai benar-benar siap.
 window.sipresQrReady = (async function () {
   const sources = [
-    'jsQR.js',
-    'https://raw.githubusercontent.com/cozmo/jsQR/master/dist/jsQR.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js',
     'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js',
     'https://unpkg.com/jsqr@1.4.0/dist/jsQR.js'
   ];
+  if (typeof window.jsQR === 'function') return true;
   for (const src of sources) {
     try {
       await new Promise((resolve, reject) => {
@@ -148,7 +175,7 @@ window.sipresQrReady = (async function () {
 </script>
 <script src="config.js?v=20260929a"></script>
 <script src="common.js?v=20260929a"></script>
-<script src="absensi-qr.js?v=20261001b"></script>
+<script src="absensi-qr.js?v=20261001c"></script>
 <script>
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {})); }
 </script>
