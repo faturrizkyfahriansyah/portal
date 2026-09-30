@@ -92,6 +92,7 @@
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDuaMinggu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Rekap 2 Minggu</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelMonitoringPresensi"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></span><span>Monitoring Presensi</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPengajuanKetidakhadiranAdmin"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M12 9v6"/><circle cx="12" cy="12" r="9"/></svg></span><span>Pengajuan Ketidakhadiran</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelKartuQr"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M7 6V4h4v2"/><rect x="7" y="9.5" width="5" height="5"/><path d="M15 10h2M15 13h2"/></svg></span><span>Kartu QR</span></button>
 
       <p class="shell-nav-group-title">SIKOP</p>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPeriode"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Periode Kerja</span></button>
@@ -475,6 +476,50 @@
     <div id="pengajuanAdminList" class="riwayat-list"></div>
     <div id="pengajuanAdminKosong" class="empty-state" style="display:none;">Tidak ada pengajuan pada filter ini.</div>
   </div>
+
+  <!-- KARTU QR (SIPRES — Absensi QR) -->
+  <div class="admin-panel" id="panelKartuQr">
+    <div class="shell-page-head">
+      <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><rect x="7" y="9.5" width="5" height="5"/></svg></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Kartu QR — SIPRES Absensi QR</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Kelola kartu QR pribadi relawan untuk jalur absensi via kamera. Database sama dengan absensi HP.</p></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input type="text" id="kqCari" class="form-field-input" placeholder="🔍 Cari nama/ID relawan...">
+      <button class="btn-mini primary" id="btnCetakTerpilihKq" disabled>🖨️ Cetak Terpilih (<span id="kqJumlahTerpilih">0</span>)</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="text-align:left;border-bottom:2px solid var(--color-border);">
+            <th style="padding:8px 6px;"><input type="checkbox" id="kqPilihSemua"></th>
+            <th style="padding:8px 6px;">ID</th><th>Nama</th><th>Divisi</th><th>Status Relawan</th><th>Status Kartu</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="kqTbody"></tbody>
+      </table>
+    </div>
+    <div id="kqEmpty" class="empty-state" style="display:none;">Tidak ada relawan ditemukan.</div>
+
+    <!-- Preview 1 kartu (modal sederhana) -->
+    <div id="kqPreviewOverlay" class="detail-sheet-overlay is-hidden">
+      <div class="detail-sheet" style="max-width:420px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <strong>Preview Kartu</strong>
+          <button class="btn-mini" id="btnTutupPreviewKq">Tutup</button>
+        </div>
+        <div id="kqPreviewArea" style="display:flex;justify-content:center;margin-bottom:14px;"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-outline" id="btnDownloadPreviewKq" style="flex:1;">⬇️ Download PNG</button>
+          <button class="btn-submit" id="btnPrintPreviewKq" style="flex:1;margin-top:0;">🖨️ Print</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Area cetak (TERSEMBUNYI di layar, TERLIHAT hanya saat print — lihat CSS @media print) -->
+  <div id="areaCetakKartuQr"></div>
 
   <!-- PERIODE KERJA -->
   <div class="admin-panel" id="panelPeriode">
@@ -1423,6 +1468,7 @@
 <script src="common.js?v=20260903c"></script>
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="admin.js?v=20260903c"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>
 <!-- FASE 2: admin-stok.js, admin-shift.js, admin-role.js, admin-export.js,
