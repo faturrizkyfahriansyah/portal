@@ -2,7 +2,7 @@
   "name": "Portal SPPG Jeungjing",
   "short_name": "SPPG Jeungjing",
   "description": "Portal SPPG Jeungjing — SIPRES, SIRAGA, SIPANDU, dan layanan relawan.",
-  "start_url": "absensi-qr.html",
+  "start_url": "login.html",
   "scope": ".",
   "display": "standalone",
   "orientation": "portrait",
