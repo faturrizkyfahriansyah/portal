@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template Kartu ID Relawan — SPPG Jeungjing</title>
+<style>
+  /* ============================================================
+     TEMPLATE KARTU ID RELAWAN — SPPG JEUNGJING
+     CR80 / ID-1, PORTRAIT: 54mm (lebar) x 86mm (tinggi).
+     Satuan mm dipakai di seluruh elemen utama (bukan px/vw) supaya
+     ukuran fisik akurat baik di layar maupun saat dicetak.
+     ============================================================ */
+
+  :root {
+    --navy: #0B2A52;
+    --navy-dark: #071D3A;
+    --gold: #D9A62E;
+    --gold-light: #F2C75C;
+    --putih: #FFFFFF;
+    --abu-muda: #F4F6F8;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px; background: #e7ebf0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 24px;
+  }
+  .halaman-judul { text-align: center; color: var(--navy); margin: 0; }
+  .halaman-judul h1 { font-size: 20px; margin: 0 0 4px; }
+  .halaman-judul p { font-size: 13px; color: #667; margin: 0; }
+
+  /* Wrapper preview: HANYA elemen ini yang di-scale untuk kenyamanan layar
+     (54mm asli terlalu kecil dilihat di layar biasa) -- kartu itu sendiri
+     ("#idCard") TIDAK PERNAH di-transform, dan saat print wrapper ini
+     dinetralkan sepenuhnya (lihat @media print), jadi ukuran cetak fisik
+     selalu 54mm x 86mm apa adanya, tidak terpengaruh skala pratinjau. */
+  .preview-wrapper { transform: scale(2.7); transform-origin: top center; margin-bottom: 190mm; }
+
+  /* ============================================================
+     KARTU
+     ============================================================ */
+  .id-card {
+    width: 54mm;
+    height: 86mm;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    border-radius: 3.5mm;
+    background: var(--abu-muda);
+    box-shadow: 0 2mm 6mm rgba(7,29,58,.35);
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, Inter, sans-serif;
+  }
+
+  /* ---- HEADER ---- */
+  .card-header {
+    position: relative;
+    background: linear-gradient(160deg, var(--navy) 0%, var(--navy-dark) 100%);
+    padding: 3mm 3mm 2.6mm;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .card-header .ornamen-sudut { position: absolute; width: 11mm; height: 11mm; opacity: .9; }
+  .card-header .ornamen-sudut.kiri { top: -1.5mm; left: -1.5mm; }
+  .card-header .ornamen-sudut.kanan { top: -1.5mm; right: -1.5mm; transform: scaleX(-1); }
+
+  .logo-row {
+    display: flex; align-items: center; justify-content: center; gap: 2.4mm;
+    position: relative; z-index: 1;
+  }
+  .logo-row img.logo {
+    height: 8mm; width: auto; max-width: 14mm;
+    object-fit: contain; display: block;
+  }
+  .logo-divider { width: .25mm; height: 7mm; background: rgba(255,255,255,.55); }
+
+  .organization-name {
+    position: relative; z-index: 1;
+    margin-top: 1.8mm; text-align: center;
+    color: var(--putih); font-weight: 800;
+    font-size: 3.3mm; letter-spacing: .4mm;
+  }
+
+  .header-divider {
+    position: relative; z-index: 1;
+    height: .4mm; margin-top: 1.8mm;
+    background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold-light) 50%, var(--gold) 80%, transparent);
+  }
+
+  /* ---- KONTEN ---- */
+  .card-content {
+    position: relative;
+    flex: 1;
+    padding: 3mm 3.2mm 0;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 0;
+  }
+
+  /* Watermark batik tipis kiri/kanan -- dekorasi, tidak boleh mengganggu keterbacaan. */
+  .watermark { position: absolute; top: 6mm; width: 9mm; height: 9mm; opacity: .1; z-index: 0; }
+  .watermark.kiri { left: -1mm; }
+  .watermark.kanan { right: -1mm; transform: scaleX(-1); }
+
+  .card-title {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 1.6mm;
+    margin-top: .5mm;
+    color: var(--gold);
+    font-weight: 700; font-size: 2.75mm; letter-spacing: .3mm;
+    text-transform: uppercase;
+  }
+  .card-title .garis { width: 5mm; height: .3mm; background: var(--gold); }
+  .card-title .belah-ketupat { width: 1.4mm; height: 1.4mm; background: var(--navy); transform: rotate(45deg); flex-shrink: 0; }
+
+  .volunteer-info {
+    position: relative; z-index: 1;
+    margin-top: 3mm; text-align: center; width: 100%;
+    padding: 0 1mm;
+  }
+  .volunteer-name {
+    color: var(--navy); font-weight: 800;
+    font-size: 4.6mm; line-height: 1.14;
+    text-transform: uppercase;
+    overflow-wrap: break-word; word-break: normal;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .volunteer-id, .volunteer-division {
+    margin-top: 1.6mm; font-size: 2.65mm; color: #33455f;
+    overflow-wrap: break-word;
+  }
+  .volunteer-id strong, .volunteer-division strong { color: var(--navy); font-weight: 700; }
+
+  .qr-section { position: relative; z-index: 1; margin-top: 3mm; }
+  .qr-wrapper {
+    background: var(--putih);
+    padding: 1.6mm;
+    border-radius: 1.6mm;
+    border: .35mm solid var(--navy);
+    box-shadow: 0 0 0 .35mm var(--gold);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .qr-code { width: 24mm; height: 24mm; display: block; }
+  .qr-code img, .qr-code canvas { width: 100%; height: 100%; display: block; }
+
+  /* ---- FOOTER ---- */
+  .card-footer {
+    position: relative; flex-shrink: 0;
+    height: 7mm; margin-top: 2.5mm;
+    background: linear-gradient(100deg, var(--navy) 0%, var(--navy-dark) 100%);
+    overflow: hidden;
+  }
+  .card-footer::before {
+    content: ''; position: absolute; top: -4.5mm; left: -10%; width: 120%; height: 9mm;
+    background: var(--abu-muda);
+    border-radius: 50%;
+  }
+  .card-footer .ornamen-footer {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 16mm; height: 5mm; opacity: .95;
+  }
+
+  @media print {
+    body { margin: 0; padding: 0; background: #fff; }
+    .halaman-judul, .preview-wrapper > .keterangan { display: none; }
+    .preview-wrapper { transform: none; margin: 0; }
+    @page { size: 54mm 86mm; margin: 0; }
+    .id-card { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="halaman-judul">
+    <h1>Template Kartu ID Relawan — SPPG Jeungjing</h1>
+    <p>54mm × 86mm (CR80/ID-1, portrait) — pratinjau diperbesar 2.7x untuk kenyamanan layar, ukuran cetak tetap asli.</p>
+  </div>
+
+  <div class="preview-wrapper">
+    <div class="id-card" id="idCard">
+
+      <div class="card-header">
+        <!-- Ornamen sudut: reproduksi SVG dari motif batik referensi (gold di atas navy), bukan file gambar terpisah -- selalu tajam pada ukuran cetak berapa pun. -->
+        <span class="ornamen-sudut kiri"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 9.81 27.74 L 12.09 24.54 L 14.7 21.76 L 17.59 19.42 L 20.69 17.54 L 23.92 16.15 L 27.21 15.23 L 30.49 14.78 L 33.71 14.79 L 36.79 15.23 L 39.69 16.06 L 42.35 17.25 L 44.74 18.74 L 46.81 20.49 L 48.56 22.44 L 49.95 24.54 L 50.99 26.72 L 51.67 28.94 L 52.01 31.14 L 52.02 33.27 L 51.73 35.28 L 51.17 37.13 L 50.37 38.8 L 49.38 40.24 L 48.24 41.44 L 46.99 42.38 L 45.68 43.07 L 44.35 43.5 L 43.05 43.68 L 41.83 43.62 L 40.71 43.36" stroke="#0B2A52" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="30" cy="14" r="5" stroke="#D9A62E" stroke-width="2.6" fill="none"/><circle cx="14" cy="30" r="3.2" stroke="#D9A62E" stroke-width="2.2" fill="none"/></svg></span>
+        <span class="ornamen-sudut kanan"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 9.81 27.74 L 12.09 24.54 L 14.7 21.76 L 17.59 19.42 L 20.69 17.54 L 23.92 16.15 L 27.21 15.23 L 30.49 14.78 L 33.71 14.79 L 36.79 15.23 L 39.69 16.06 L 42.35 17.25 L 44.74 18.74 L 46.81 20.49 L 48.56 22.44 L 49.95 24.54 L 50.99 26.72 L 51.67 28.94 L 52.01 31.14 L 52.02 33.27 L 51.73 35.28 L 51.17 37.13 L 50.37 38.8 L 49.38 40.24 L 48.24 41.44 L 46.99 42.38 L 45.68 43.07 L 44.35 43.5 L 43.05 43.68 L 41.83 43.62 L 40.71 43.36" stroke="#0B2A52" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="30" cy="14" r="5" stroke="#D9A62E" stroke-width="2.6" fill="none"/><circle cx="14" cy="30" r="3.2" stroke="#D9A62E" stroke-width="2.2" fill="none"/></svg></span>
+
+        <div class="logo-row">
+          <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional" class="logo logo-bgn">
+          <div class="logo-divider"></div>
+          <img src="assets/logo.png" alt="Logo SPPG Jeungjing" class="logo logo-sppg">
+        </div>
+        <div class="organization-name">SPPG JEUNGJING</div>
+        <div class="header-divider"></div>
+      </div>
+
+      <div class="card-content">
+        <span class="watermark kiri"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 84.08 84.08 L 83.97 84.4 L 83.75 84.71 L 83.42 84.97 L 83.01 85.15 L 82.52 85.22 L 82.0 85.16 L 81.47 84.96 L 80.97 84.62 L 80.55 84.14 L 80.24 83.53 L 80.07 82.83 L 80.07 82.07 L 80.26 81.29 L 80.64 80.54 L 81.22 79.87 L 81.97 79.33 L 82.86 78.97 L 83.85 78.81 L 84.88 78.89 L 85.91 79.22 L 86.88 79.8 L 87.71 80.61 L 88.36 81.63 L 88.77 82.8 L 88.9 84.07 L 88.74 85.39 L 88.27 86.67 L 87.49 87.84 L 86.44 88.84 L 85.16 89.59 L 83.7 90.04 L 82.14 90.15" stroke="#0B2A52" stroke-width="5.5" stroke-linecap="round" fill="none"/><rect x="69.58" y="69.58" width="4.4" height="4.4" transform="rotate(45 71.78 71.78)" fill="#0B2A52"/><path d="M 15.92 84.08 L 15.6 83.97 L 15.29 83.75 L 15.03 83.42 L 14.85 83.01 L 14.78 82.52 L 14.84 82.0 L 15.04 81.47 L 15.38 80.97 L 15.86 80.55 L 16.47 80.24 L 17.17 80.07 L 17.93 80.07 L 18.71 80.26 L 19.46 80.64 L 20.13 81.22 L 20.67 81.97 L 21.03 82.86 L 21.19 83.85 L 21.11 84.88 L 20.78 85.91 L 20.2 86.88 L 19.39 87.71 L 18.37 88.36 L 17.2 88.77 L 15.93 88.9 L 14.61 88.74 L 13.33 88.27 L 12.16 87.49 L 11.16 86.44 L 10.41 85.16 L 9.96 83.7 L 9.85 82.14" stroke="#0B2A52" stroke-width="5.5" stroke-linecap="round" fill="none"/><rect x="26.02" y="69.58" width="4.4" height="4.4" transform="rotate(45 28.22 71.78)" fill="#0B2A52"/><path d="M 15.92 15.92 L 16.03 15.6 L 16.25 15.29 L 16.58 15.03 L 16.99 14.85 L 17.48 14.78 L 18.0 14.84 L 18.53 15.04 L 19.03 15.38 L 19.45 15.86 L 19.76 16.47 L 19.93 17.17 L 19.93 17.93 L 19.74 18.71 L 19.36 19.46 L 18.78 20.13 L 18.03 20.67 L 17.14 21.03 L 16.15 21.19 L 15.12 21.11 L 14.09 20.78 L 13.12 20.2 L 12.29 19.39 L 11.64 18.37 L 11.23 17.2 L 11.1 15.93 L 11.26 14.61 L 11.73 13.33 L 12.51 12.16 L 13.56 11.16 L 14.84 10.41 L 16.3 9.96 L 17.86 9.85" stroke="#0B2A52" stroke-width="5.5" stroke-linecap="round" fill="none"/><rect x="26.02" y="26.02" width="4.4" height="4.4" transform="rotate(45 28.22 28.22)" fill="#0B2A52"/><path d="M 84.08 15.92 L 84.4 16.03 L 84.71 16.25 L 84.97 16.58 L 85.15 16.99 L 85.22 17.48 L 85.16 18.0 L 84.96 18.53 L 84.62 19.03 L 84.14 19.45 L 83.53 19.76 L 82.83 19.93 L 82.07 19.93 L 81.29 19.74 L 80.54 19.36 L 79.87 18.78 L 79.33 18.03 L 78.97 17.14 L 78.81 16.15 L 78.89 15.12 L 79.22 14.09 L 79.8 13.12 L 80.61 12.29 L 81.63 11.64 L 82.8 11.23 L 84.07 11.1 L 85.39 11.26 L 86.67 11.73 L 87.84 12.51 L 88.84 13.56 L 89.59 14.84 L 90.04 16.3 L 90.15 17.86" stroke="#0B2A52" stroke-width="5.5" stroke-linecap="round" fill="none"/><rect x="69.58" y="26.02" width="4.4" height="4.4" transform="rotate(45 71.78 28.22)" fill="#0B2A52"/><circle cx="50" cy="50" r="5" stroke="#D9A62E" stroke-width="2.4" fill="none"/><circle cx="50" cy="38" r="4.2" stroke="#D9A62E" stroke-width="2.4" fill="none"/><circle cx="62" cy="50" r="4.2" stroke="#D9A62E" stroke-width="2.4" fill="none"/><circle cx="50" cy="62" r="4.2" stroke="#D9A62E" stroke-width="2.4" fill="none"/><circle cx="38" cy="50" r="4.2" stroke="#D9A62E" stroke-width="2.4" fill="none"/></svg></span>
+        <span class="watermark kanan"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 84.08 84.08 L 83.97 84.4 L 83.75 84.71 L 83.42 84.97 L 83.01 85.15 L 82.52 85.22 L 82.0 85.16 L 81.47 84.96 L 80.97 84.62 L 80.55 84.14 L 80.24 83.53 L 80.07 82.83 L 80.07 82.07 L 80.26 81.29 L 80.64 80.54 L 81.22 79.87 L 81.97 79.33 L 82.86 78.97 L 83.85 78.81 L 84.88 78.89 L 85.91 79.22 L 86.88 79.8 L 87.71 80.61 L 88.36 81.63 L 88.77 82.8 L 88.9 84.07 L 88.74 85.39 L 88.27 86.67 L 87.49 87.84 L 86.44 88.84 L 85.16 89.59 L 83.7 90.04 L 82.14 90.15" stroke="#0B2A52" stroke-width="5.5" stroke-linecap="round" fill="none"/><rect x="69.58" y="69.58" width="4.4" height="4.4" transform="rotate(45 71.78 71.78)" fill="#0B2A52"/><path d="M 15.92 84.08 L 15.6 83.97 L 15.29 83.75 L 15.03 83.42 L 14.85 83.01 L 14.78 82.52 L 14.84 82.0 L 15.04 81.47 L 15.38 80.97 L 15.86 80.55 L 16.47 80.24 L 17.17 80.07 L 17.93 80.07 L 18.71 80.26 L 19.46 80.64 L 20.13 81.22 L 20.67 81.97 L 21.03 82.86 L 21.19 83.85 L 21.11 84.88 L 20.78 85.91 L 20.2 86.88 L 19.39 87.71 L 18.37 88.36 L 17.2 88.77 L 15.93 88.9 L 14.61 88.74 L 13.33 88.27 L 12.16 87.49 L 11.16 86.44 L 10.41 85.16 L 9.96 83.7 L 9.85 82.14" stroke="#0B2A52" stroke-width="5.5" stroke-linecap="round" fill="none"/><rect x="26.02" y="69.58" width="4.4" height="4.4" transform="rotate(45 28.22 71.78)" fill="#0B2A52"/><path d="M 15.92 15.92 L 16.03 15.6 L 16.25 15.29 L 16.58 15.03 L 16.99 14.85 L 17.48 14.78 L 18.0 14.84 L 18.53 15.04 L 19.03 15.38 L 19.45 15.86 L 19.76 16.47 L 19.93 17.17 L 19.93 17.93 L 19.74 18.71 L 19.36 19.46 L 18.78 20.13 L 18.03 20.67 L 17.14 21.03 L 16.15 21.19 L 15.12 21.11 L 14.09 20.78 L 13.12 20.2 L 12.29 19.39 L 11.64 18.37 L 11.23 17.2 L 11.1 15.93 L 11.26 14.61 L 11.73 13.33 L 12.51 12.16 L 13.56 11.16 L 14.84 10.41 L 16.3 9.96 L 17.86 9.85" stroke="#0B2A52" stroke-width="5.5" stroke-linecap="round" fill="none"/><rect x="26.02" y="26.02" width="4.4" height="4.4" transform="rotate(45 28.22 28.22)" fill="#0B2A52"/><path d="M 84.08 15.92 L 84.4 16.03 L 84.71 16.25 L 84.97 16.58 L 85.15 16.99 L 85.22 17.48 L 85.16 18.0 L 84.96 18.53 L 84.62 19.03 L 84.14 19.45 L 83.53 19.76 L 82.83 19.93 L 82.07 19.93 L 81.29 19.74 L 80.54 19.36 L 79.87 18.78 L 79.33 18.03 L 78.97 17.14 L 78.81 16.15 L 78.89 15.12 L 79.22 14.09 L 79.8 13.12 L 80.61 12.29 L 81.63 11.64 L 82.8 11.23 L 84.07 11.1 L 85.39 11.26 L 86.67 11.73 L 87.84 12.51 L 88.84 13.56 L 89.59 14.84 L 90.04 16.3 L 90.15 17.86" stroke="#0B2A52" stroke-width="5.5" stroke-linecap="round" fill="none"/><rect x="69.58" y="26.02" width="4.4" height="4.4" transform="rotate(45 71.78 28.22)" fill="#0B2A52"/><circle cx="50" cy="50" r="5" stroke="#D9A62E" stroke-width="2.4" fill="none"/><circle cx="50" cy="38" r="4.2" stroke="#D9A62E" stroke-width="2.4" fill="none"/><circle cx="62" cy="50" r="4.2" stroke="#D9A62E" stroke-width="2.4" fill="none"/><circle cx="50" cy="62" r="4.2" stroke="#D9A62E" stroke-width="2.4" fill="none"/><circle cx="38" cy="50" r="4.2" stroke="#D9A62E" stroke-width="2.4" fill="none"/></svg></span>
+
+        <div class="card-title">
+          <span class="garis"></span><span class="belah-ketupat"></span>
+          <span>Kartu Absensi Relawan</span>
+          <span class="belah-ketupat"></span><span class="garis"></span>
+        </div>
+
+        <div class="volunteer-info">
+          <div class="volunteer-name" id="volunteerName">FATUR RIZKY FAHRIANSYAH</div>
+          <div class="volunteer-id" id="volunteerId">ID: <strong>R-ASL-001</strong></div>
+          <div class="volunteer-division" id="volunteerDivision">Divisi: <strong>ASISTEN LAPANGAN</strong></div>
+        </div>
+
+        <div class="qr-section">
+          <div class="qr-wrapper">
+            <!-- {{ qr_code }}: diisi qrcodejs (sama seperti admin-kartu-qr.js project ini) dari TOKEN_KARTU,
+                 BUKAN ID relawan polos. new QRCode() mengisi div ini dengan <img>/<canvas> miliknya sendiri. -->
+            <div class="qr-code" id="qrCode"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="ornamen-footer"><svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg"><path d="M 20.0 66.2 L 19.69 66.35 L 19.32 66.41 L 18.91 66.36 L 18.49 66.19 L 18.1 65.9 L 17.77 65.49 L 17.53 64.98 L 17.42 64.38 L 17.46 63.74 L 17.67 63.09 L 18.05 62.47 L 18.59 61.94 L 19.27 61.52 L 20.07 61.26 L 20.95 61.2 L 21.86 61.35 L 22.75 61.72 L 23.56 62.31 L 24.24 63.1 L 24.73 64.06 L 25.0 65.15 L 25.02 66.31 L 24.76 67.48 L 24.22 68.6 L 23.41 69.6 L 22.37 70.42 L 21.13 70.99 L 19.75 71.27 L 18.31 71.23 L 16.87 70.85 L 15.52 70.14 L 14.34 69.11" stroke="#0B2A52" stroke-width="4.5" stroke-linecap="round" fill="none" transform="translate(0,-4)"/><circle cx="40" cy="30" r="6" stroke="#D9A62E" stroke-width="2.2" fill="none"/><path d="M 60.0 -6.2 L 60.31 -6.35 L 60.68 -6.41 L 61.09 -6.36 L 61.51 -6.19 L 61.9 -5.9 L 62.23 -5.49 L 62.47 -4.98 L 62.58 -4.38 L 62.54 -3.74 L 62.33 -3.09 L 61.95 -2.47 L 61.41 -1.94 L 60.73 -1.52 L 59.93 -1.26 L 59.05 -1.2 L 58.14 -1.35 L 57.25 -1.72 L 56.44 -2.31 L 55.76 -3.1 L 55.27 -4.06 L 55.0 -5.15 L 54.98 -6.31 L 55.24 -7.48 L 55.78 -8.6 L 56.59 -9.6 L 57.63 -10.42 L 58.87 -10.99 L 60.25 -11.27 L 61.69 -11.23 L 63.13 -10.85 L 64.48 -10.14 L 65.66 -9.11" stroke="#0B2A52" stroke-width="4.5" stroke-linecap="round" fill="none" transform="translate(0,4)"/><circle cx="80" cy="30" r="6" stroke="#D9A62E" stroke-width="2.2" fill="none"/><path d="M 100.0 66.2 L 99.69 66.35 L 99.32 66.41 L 98.91 66.36 L 98.49 66.19 L 98.1 65.9 L 97.77 65.49 L 97.53 64.98 L 97.42 64.38 L 97.46 63.74 L 97.67 63.09 L 98.05 62.47 L 98.59 61.94 L 99.27 61.52 L 100.07 61.26 L 100.95 61.2 L 101.86 61.35 L 102.75 61.72 L 103.56 62.31 L 104.24 63.1 L 104.73 64.06 L 105.0 65.15 L 105.02 66.31 L 104.76 67.48 L 104.22 68.6 L 103.41 69.6 L 102.37 70.42 L 101.13 70.99 L 99.75 71.27 L 98.31 71.23 L 96.87 70.85 L 95.52 70.14 L 94.34 69.11" stroke="#0B2A52" stroke-width="4.5" stroke-linecap="round" fill="none" transform="translate(0,-4)"/><circle cx="120" cy="30" r="6" stroke="#D9A62E" stroke-width="2.2" fill="none"/><path d="M 140.0 -6.2 L 140.31 -6.35 L 140.68 -6.41 L 141.09 -6.36 L 141.51 -6.19 L 141.9 -5.9 L 142.23 -5.49 L 142.47 -4.98 L 142.58 -4.38 L 142.54 -3.74 L 142.33 -3.09 L 141.95 -2.47 L 141.41 -1.94 L 140.73 -1.52 L 139.93 -1.26 L 139.05 -1.2 L 138.14 -1.35 L 137.25 -1.72 L 136.44 -2.31 L 135.76 -3.1 L 135.27 -4.06 L 135.0 -5.15 L 134.98 -6.31 L 135.24 -7.48 L 135.78 -8.6 L 136.59 -9.6 L 137.63 -10.42 L 138.87 -10.99 L 140.25 -11.27 L 141.69 -11.23 L 143.13 -10.85 L 144.48 -10.14 L 145.66 -9.11" stroke="#0B2A52" stroke-width="4.5" stroke-linecap="round" fill="none" transform="translate(0,4)"/><circle cx="160" cy="30" r="6" stroke="#D9A62E" stroke-width="2.2" fill="none"/><path d="M 180.0 66.2 L 179.69 66.35 L 179.32 66.41 L 178.91 66.36 L 178.49 66.19 L 178.1 65.9 L 177.77 65.49 L 177.53 64.98 L 177.42 64.38 L 177.46 63.74 L 177.67 63.09 L 178.05 62.47 L 178.59 61.94 L 179.27 61.52 L 180.07 61.26 L 180.95 61.2 L 181.86 61.35 L 182.75 61.72 L 183.56 62.31 L 184.24 63.1 L 184.73 64.06 L 185.0 65.15 L 185.02 66.31 L 184.76 67.48 L 184.22 68.6 L 183.41 69.6 L 182.37 70.42 L 181.13 70.99 L 179.75 71.27 L 178.31 71.23 L 176.87 70.85 L 175.52 70.14 L 174.34 69.11" stroke="#0B2A52" stroke-width="4.5" stroke-linecap="round" fill="none" transform="translate(0,-4)"/></svg></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CONTOH PENGISIAN DATA DINAMIS
+       Tidak wajib dipakai kalau kartu dirender langsung dari server
+       (mis. string HTML dibangun di backend/Admin, seperti di
+       admin-kartu-qr.js project ini) -- disediakan sebagai contoh
+       kalau template ini dipakai murni di sisi klien.
+       ============================================================ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    /**
+     * Contoh pengisian data dinamis. qrTeks HARUS TOKEN_KARTU acak dari
+     * backend (kolom TOKEN_KARTU di 01_DATA_RELAWAN) -- bukan ID relawan
+     * polos, sesuai aturan keamanan kartu yang sudah disepakati.
+     */
+    function isiKartuIdRelawan(data) {
+      document.getElementById('volunteerName').textContent = String(data.nama || '').toUpperCase();
+      document.getElementById('volunteerId').innerHTML = 'ID: <strong>' + (data.id || '') + '</strong>';
+      document.getElementById('volunteerDivision').innerHTML = 'Divisi: <strong>' + String(data.divisi || '').toUpperCase() + '</strong>';
+      const elQr = document.getElementById('qrCode');
+      elQr.innerHTML = '';
+      new QRCode(elQr, { text: data.qrTeks || '', width: 300, height: 300, correctLevel: QRCode.CorrectLevel.M });
+    }
+
+    // Contoh preview (persis data di brief) -- qrTeks di sini HANYA contoh
+    // acak untuk demo visual, bukan token sungguhan.
+    isiKartuIdRelawan({
+      nama: 'FATUR RIZKY FAHRIANSYAH',
+      id: 'R-ASL-001',
+      divisi: 'ASISTEN LAPANGAN',
+      qrTeks: '550e8400-e29b-41d4-a716-446655440000'
+    });
+  </script>
+
+</body>
+</html>

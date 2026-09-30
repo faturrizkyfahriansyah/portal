@@ -86,19 +86,58 @@ async function tanganiAksiKartu_(aksi, id, status) {
 // ============================================================
 // TEMPLATE KARTU (dipakai preview & print, sama persis)
 // ============================================================
+/** Ornamen sudut header (SVG, sama untuk kiri via CSS transform scaleX(-1) di sisi kanan -- lihat portal.css). */
+const SIRAGA_ORNAMEN_SUDUT_SVG = `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 45 C10 45 18 40 22 30 C26 20 34 15 45 15 L45 0 L0 0 Z" fill="#D9A62E" opacity=".85"/>
+  <circle cx="30" cy="30" r="7" stroke="#D9A62E" stroke-width="3" fill="none" opacity=".9"/>
+  <path d="M0 60 C16 60 28 52 34 38" stroke="#D9A62E" stroke-width="3" fill="none" opacity=".6"/>
+</svg>`;
+const SIRAGA_WATERMARK_SVG = `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="12" stroke="#0B2A52" stroke-width="6" fill="none"/>
+  <circle cx="50" cy="50" r="30" stroke="#0B2A52" stroke-width="4" fill="none"/>
+  <circle cx="50" cy="50" r="46" stroke="#D9A62E" stroke-width="3" fill="none"/>
+</svg>`;
+const SIRAGA_ORNAMEN_FOOTER_SVG = `<svg viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="40" cy="30" r="10" stroke="#D9A62E" stroke-width="3" fill="none"/>
+  <circle cx="100" cy="24" r="13" stroke="#D9A62E" stroke-width="3" fill="none"/>
+  <circle cx="160" cy="30" r="10" stroke="#D9A62E" stroke-width="3" fill="none"/>
+  <path d="M10 45 Q100 10 190 45" stroke="#D9A62E" stroke-width="2.5" fill="none" opacity=".7"/>
+</svg>`;
+
+/**
+ * Kartu ID Relawan — CR80/ID-1 PORTRAIT 54mm x 86mm. Desain baru (navy
+ * #0B2A52/#071D3A + gold #D9A62E/#F2C75C) menggantikan versi lama yang
+ * lebih sederhana, sesuai revisi desain kartu. Struktur & kelas CSS
+ * dipertahankan sinkron dengan portal.css (.id-card dkk) dan dengan
+ * kartu-id-relawan-template.html (contoh standalone) -- ubah salah satu,
+ * ubah semuanya, supaya pratinjau Admin dan cetak selalu identik.
+ */
 function htmlKartuQr_(data, idQrUnik) {
   return `
-    <div class="kartu-qr">
-      <div class="kartu-qr-header"><img src="assets/logo.png" alt="Logo SPPG"><span>SPPG JEUNGJING</span></div>
-      <div class="kartu-qr-judul">Kartu Absensi Relawan</div>
-      <div class="kartu-qr-body">
-        <div class="kartu-qr-info">
-          <div class="kartu-qr-nama">${escapeHtmlKq_(data.nama)}</div>
-          <div class="kartu-qr-meta">ID: ${escapeHtmlKq_(data.id)}<br>Divisi: ${escapeHtmlKq_(data.divisi)}</div>
+    <div class="id-card">
+      <div class="card-header">
+        <span class="ornamen-sudut kiri">${SIRAGA_ORNAMEN_SUDUT_SVG}</span>
+        <span class="ornamen-sudut kanan">${SIRAGA_ORNAMEN_SUDUT_SVG}</span>
+        <div class="logo-row">
+          <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional" class="logo logo-bgn">
+          <div class="logo-divider"></div>
+          <img src="assets/logo.png" alt="Logo SPPG Jeungjing" class="logo logo-sppg">
         </div>
-        <div class="kartu-qr-qr" id="${idQrUnik}"></div>
+        <div class="organization-name">SPPG JEUNGJING</div>
+        <div class="header-divider"></div>
       </div>
-      <div class="kartu-qr-footer">SIPRES • SPPG Jeungjing</div>
+      <div class="card-content">
+        <span class="watermark kiri">${SIRAGA_WATERMARK_SVG}</span>
+        <span class="watermark kanan">${SIRAGA_WATERMARK_SVG}</span>
+        <div class="card-title"><span class="garis"></span><span class="belah-ketupat"></span><span>Kartu Absensi Relawan</span><span class="belah-ketupat"></span><span class="garis"></span></div>
+        <div class="volunteer-info">
+          <div class="volunteer-name">${escapeHtmlKq_(data.nama).toUpperCase()}</div>
+          <div class="volunteer-id">ID: <strong>${escapeHtmlKq_(data.id)}</strong></div>
+          <div class="volunteer-division">Divisi: <strong>${escapeHtmlKq_(data.divisi).toUpperCase()}</strong></div>
+        </div>
+        <div class="qr-section"><div class="qr-wrapper"><div class="qr-code" id="${idQrUnik}"></div></div></div>
+      </div>
+      <div class="card-footer"><span class="ornamen-footer">${SIRAGA_ORNAMEN_FOOTER_SVG}</span></div>
     </div>`;
 }
 
