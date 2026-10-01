@@ -42,7 +42,11 @@ let modeAbsensi = null;       // MASUK/PULANG dipilih petugas sebelum scan
 let loopHandle = null;
 let waktuFrameQrTerakhir = 0;
 const INTERVAL_SCAN_QR_MS = 140;
-const COOLDOWN_HASIL_MS = 2500;
+// PERBAIKAN: 2500ms terlalu singkat utk membaca kartu hasil (ikon+judul+nama+
+// divisi+jam sekaligus) di kondisi lapangan -- dinaikkan jadi 5 detik supaya
+// petugas sempat membaca DAN menjauhkan kartu lama sebelum kamera siap baca
+// lagi (juga mengurangi risiko salah baca kartu yang belum sempat disingkirkan).
+const COOLDOWN_HASIL_MS = 5000;
 
 // ============================================================
 // SUARA — dibuat langsung lewat Web Audio API (oscillator), BUKAN file
@@ -53,11 +57,20 @@ const COOLDOWN_HASIL_MS = 2500;
 let _audioCtx = null;
 function ambilAudioCtx_() {
   if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // PERBAIKAN: sekadar membuat AudioContext saat klik TIDAK SELALU cukup utk
+  // membukanya secara permanen -- terutama iOS Safari, yang kadang tetap
+  // 'suspended'/'interrupted' walau context dibuat di dalam gesture pengguna.
+  // resume() aman dipanggil berkali-kali (tidak efek apa-apa kalau sudah
+  // 'running'), jadi dipanggil di sini SETIAP kali diambil, bukan cuma sekali.
+  if (_audioCtx.state === 'suspended' || _audioCtx.state === 'interrupted') {
+    _audioCtx.resume().catch(() => {});
+  }
   return _audioCtx;
 }
 function mainkanNada_(pola) {
   try {
     const ac = ambilAudioCtx_();
+    if (ac.state !== 'running') return; // masih terkunci -- diam2 lewati drpd error/berisik salah
     let waktu = ac.currentTime;
     pola.forEach(([freq, durasi, jeda]) => {
       const osc = ac.createOscillator();
@@ -319,7 +332,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Tunggu library QR selesai dimuat tanpa memutus event click dengan
   // syntax/await yang tidak valid. Permission kamera dipicu dari gestur ini.
   document.getElementById('btnMulaiKamera').addEventListener('click', async () => {
-    ambilAudioCtx_();
+    // Buka audio SEKARANG, di dalam gestur klik ini -- bukan menunggu hasil
+    // scan pertama (yang terjadi async, sudah di luar gestur, terlalu
+    // terlambat utk membuka audio di browser yang ketat soal ini).
+    const ac = ambilAudioCtx_();
+    try { await ac.resume(); } catch (_) {}
     const siapDecoder = await (window.sipresQrReady || Promise.resolve(typeof window.jsQR === 'function'));
     if (!siapDecoder || typeof window.jsQR !== 'function') {
       tampilkanErrorScanner_('Library pembaca QR gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.');
