@@ -43,6 +43,11 @@
   .operasional-status.tidak-aktif { color:var(--bahaya); }
   .operasional-status.gagal { color:#b25b16; }
   .operasional-tanggal { font-size:13px; font-weight:700; color:var(--navy); margin-top:2px; }
+  .status-jaringan-baris { margin-top:6px; padding-top:6px; border-top:1px solid #eef1f5; display:flex; align-items:center; justify-content:center; gap:10px; font-size:11px; }
+  .status-online { font-weight:800; letter-spacing:.2px; }
+  .status-online.online { color:var(--sukses); }
+  .status-online.offline { color:var(--bahaya); }
+  .status-antrean { color:#8a5a12; font-weight:700; }
   .pilih-absensi { width:100%; max-width:420px; }
   .pilih-judul { margin:0 0 8px; text-align:center; font-size:12px; font-weight:800; color:var(--navy); letter-spacing:.4px; }
   .pilih-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -113,6 +118,10 @@
   <div class="operasional" id="operasionalBox">
     <div class="operasional-status" id="operasionalStatus">● Memeriksa status operasional...</div>
     <div class="operasional-tanggal" id="operasionalTanggal">Memuat operasional...</div>
+    <div class="status-jaringan-baris">
+      <span id="statusOnline" class="status-online online">● Online</span>
+      <span id="statusAntrean" class="status-antrean"></span>
+    </div>
   </div>
 
   <div class="kamera-wrap">
@@ -178,7 +187,7 @@ window.sipresQrReady = (async function () {
 </script>
 <script src="config.js?v=20260929a"></script>
 <script src="common.js?v=20260929a"></script>
-<script src="absensi-qr.js?v=20261001e"></script>
+<script src="absensi-qr.js?v=20261001f"></script>
 <script>
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {})); }
 </script>

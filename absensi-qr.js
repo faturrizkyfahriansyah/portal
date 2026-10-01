@@ -35,13 +35,123 @@ async function apiPostDiagnostik_(action, payload, timeoutMs) {
   return json.data;
 }
 
+// ============================================================
+// CACHE RELAWAN (lookup instan di perangkat, tanpa ke server tiap scan)
+// PERINGATAN KEAMANAN: ini menyimpan SELURUH TOKEN_KARTU relawan aktif di
+// localStorage perangkat kios. KIOSK_KEY di bawah HANYA proteksi dasar,
+// BUKAN keamanan sungguhan (kode ini bisa dilihat siapa saja yang membuka
+// "view source" halaman). Harus SAMA PERSIS dengan KIOSK_API_KEY di
+// AbsensiQr.gs. GANTI nilainya, jangan pakai contoh ini apa adanya.
+// ============================================================
+const KIOSK_KEY = 'GANTI_DENGAN_KUNCI_RAHASIA_ANDA_SENDIRI_YANG_PANJANG';
+const KUNCI_CACHE_RELAWAN = 'sipres_qr_cache_relawan_v1';
+const KUNCI_WAKTU_CACHE_RELAWAN = 'sipres_qr_cache_relawan_waktu_v1';
+const INTERVAL_REFRESH_CACHE_MS = 5 * 60 * 1000;
+
+let _petaRelawan = new Map();
+
+function muatCacheRelawanDariLocalStorage_() {
+  try {
+    const mentah = localStorage.getItem(KUNCI_CACHE_RELAWAN);
+    if (!mentah) return;
+    const daftar = JSON.parse(mentah);
+    _petaRelawan = new Map(daftar.map((r) => [r.token, r]));
+  } catch (e) { console.warn('SIPRES QR: gagal memuat cache relawan lokal', e); }
+}
+
+async function segarkanCacheRelawan_() {
+  try {
+    const daftar = await apiPostDiagnostik_('getDaftarRingkasKiosk', { kioskKey: KIOSK_KEY }, 20000);
+    if (Array.isArray(daftar)) {
+      _petaRelawan = new Map(daftar.map((r) => [r.token, r]));
+      localStorage.setItem(KUNCI_CACHE_RELAWAN, JSON.stringify(daftar));
+      localStorage.setItem(KUNCI_WAKTU_CACHE_RELAWAN, String(Date.now()));
+    }
+  } catch (e) {
+    // Diam -- cache lama (kalau ada) tetap dipakai. Ini wajar terjadi saat offline.
+    console.warn('SIPRES QR: gagal menyegarkan cache relawan, memakai cache lama', e);
+  }
+}
+
+function cariRelawanLokal_(token) {
+  return _petaRelawan.get(token) || null;
+}
+
+// ============================================================
+// ANTREAN SINKRON OFFLINE-SAFE
+// Absensi yang gagal terkirim (jaringan bermasalah) disimpan di sini,
+// BUKAN dianggap gagal permanen -- dicoba lagi otomatis di latar belakang.
+// idScan per-item dipakai backend utk idempotency (retry tidak terhitung dobel).
+// ============================================================
+const KUNCI_ANTREAN = 'sipres_qr_antrean_v1';
+const BATAS_PERCOBAAN_ANTREAN = 30; // amankan dari macet selamanya kalau datanya memang rusak
+
+function muatAntrean_() {
+  try { return JSON.parse(localStorage.getItem(KUNCI_ANTREAN) || '[]'); }
+  catch (e) { return []; }
+}
+function simpanAntrean_(antrean) {
+  try { localStorage.setItem(KUNCI_ANTREAN, JSON.stringify(antrean)); } catch (e) { /* storage penuh/nonaktif -- tidak fatal */ }
+}
+function tambahKeAntrean_(item) {
+  const antrean = muatAntrean_();
+  antrean.push(item);
+  simpanAntrean_(antrean);
+  perbaruiIndikatorJaringan_();
+}
+
+let _sedangMemprosesAntrean = false;
+async function prosesAntrean_() {
+  if (_sedangMemprosesAntrean || !navigator.onLine) return;
+  _sedangMemprosesAntrean = true;
+  try {
+    let antrean = muatAntrean_();
+    while (antrean.length > 0) {
+      const item = antrean[0];
+      try {
+        await apiPostDiagnostik_('submitAbsensiQr', { tokenKartu: item.tokenKartu, mode: item.mode, idScan: item.idScan }, 15000);
+        antrean.shift();
+        simpanAntrean_(antrean);
+      } catch (e) {
+        item.percobaanKe = (item.percobaanKe || 0) + 1;
+        if (item.percobaanKe > BATAS_PERCOBAAN_ANTREAN) { antrean.shift(); simpanAntrean_(antrean); continue; }
+        simpanAntrean_(antrean);
+        break; // tunggu siklus berikutnya (backoff alami lewat interval, bukan loop ketat)
+      }
+    }
+  } finally {
+    _sedangMemprosesAntrean = false;
+    perbaruiIndikatorJaringan_();
+  }
+}
+
+function perbaruiIndikatorJaringan_() {
+  const elOnline = document.getElementById('statusOnline');
+  const elAntrean = document.getElementById('statusAntrean');
+  if (elOnline) {
+    elOnline.textContent = navigator.onLine ? '● Online' : '● Offline';
+    elOnline.className = 'status-online ' + (navigator.onLine ? 'online' : 'offline');
+  }
+  if (elAntrean) {
+    const n = muatAntrean_().length;
+    elAntrean.textContent = n > 0 ? (n + ' menunggu sinkron') : '';
+  }
+}
+
+function buatIdScan_() {
+  if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return 'scan-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+}
+
 let videoEl, canvasEl, ctx;
 let sedangProses = false;   // true selagi menunggu jawaban server -- cegah kirim ganda
 let cooldownAktif = false;  // jeda singkat SETELAH hasil ditampilkan, sebelum siap baca lagi
 let modeAbsensi = null;       // MASUK/PULANG dipilih petugas sebelum scan
 let loopHandle = null;
 let waktuFrameQrTerakhir = 0;
-const INTERVAL_SCAN_QR_MS = 140;
+// ~11fps (target 10-15fps yang diminta) -- cukup responsif, tidak membebani
+// CPU kamera HP kelas menengah ke bawah yang dipakai relawan di lapangan.
+const INTERVAL_SCAN_QR_MS = 90;
 // PERBAIKAN: 2500ms terlalu singkat utk membaca kartu hasil (ikon+judul+nama+
 // divisi+jam sekaligus) di kondisi lapangan -- dinaikkan jadi 5 detik supaya
 // petugas sempat membaca DAN menjauhkan kartu lama sebelum kamera siap baca
@@ -90,19 +200,44 @@ const SUARA = {
   BERHASIL_MASUK: () => mainkanNada_([[880, .12, .04], [1175, .16, 0]]),
   BERHASIL_PULANG: () => mainkanNada_([[1175, .12, .04], [880, .16, 0]]),
   INFO: () => mainkanNada_([[660, .18, 0]]),
-  ERROR: () => mainkanNada_([[300, .22, .05], [220, .28, 0]])
+  ERROR: () => mainkanNada_([[300, .22, .05], [220, .28, 0]]),
+  // Nada pendek NETRAL -- "scan tertangkap", BUKAN sukses/gagal, dipakai saat
+  // identitas lokal ditemukan dan sedang menunggu konfirmasi server.
+  TERTANGKAP: () => mainkanNada_([[500, .06, 0]])
 };
+function getar_(pola) { try { if (navigator.vibrate) navigator.vibrate(pola); } catch (e) {} }
 
 // ============================================================
 // KAMERA + LOOP BACA QR (jsQR)
 // ============================================================
+let _barcodeDetector = null;
+async function siapkanBarcodeDetector_() {
+  // BarcodeDetector API: decoding native browser, jauh lebih cepat dari jsQR
+  // (JS murni). Tidak didukung semua browser (terutama belum ada di Firefox/
+  // Safari desktop) -- karena itu TETAP jsQR sbg fallback, bukan pengganti.
+  if (!('BarcodeDetector' in window)) return;
+  try {
+    const formatDidukung = await window.BarcodeDetector.getSupportedFormats();
+    if (formatDidukung.includes('qr_code')) {
+      _barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+    }
+  } catch (e) { _barcodeDetector = null; }
+}
+
 async function mulaiKamera_() {
   const pesanError = document.getElementById('pesanErrorKamera');
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    // Resolusi dibatasi 640x480 -- cukup utk baca QR kartu jarak dekat, dan
+    // frame lebih kecil = decode per-frame lebih cepat (penting utk jsQR,
+    // yang memproses piksel di JS murni, bukan native).
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: false
+    });
     videoEl.srcObject = stream;
     await videoEl.play();
     document.getElementById('izinKameraOverlay').classList.add('tersembunyi');
+    await siapkanBarcodeDetector_();
     loopBacaQr_();
   } catch (e) {
     pesanError.textContent = 'Gagal mengakses kamera: ' + (e.message || 'izin ditolak') + '. Periksa izin kamera browser, lalu muat ulang halaman.';
@@ -150,29 +285,41 @@ function tampilkanErrorScanner_(pesan) {
   if (instruksi) instruksi.textContent = pesan;
 }
 
+let _sedangDeteksiFrame = false;
+async function deteksiSatuFrame_() {
+  try {
+    if (_barcodeDetector) {
+      const hasil = await _barcodeDetector.detect(videoEl);
+      if (hasil && hasil.length && hasil[0].rawValue) {
+        prosesHasilScan_(String(hasil[0].rawValue).trim());
+      }
+      return;
+    }
+    if (typeof window.jsQR !== 'function') {
+      tampilkanErrorScanner_('Mesin pembaca QR belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
+      return;
+    }
+    const w = videoEl.videoWidth, h = videoEl.videoHeight;
+    if (!w || !h) return;
+    canvasEl.width = w; canvasEl.height = h;
+    ctx.drawImage(videoEl, 0, 0, w, h);
+    const kode = decodeFrame_(canvasEl, ctx);
+    if (kode && kode.data) prosesHasilScan_(kode.data.trim());
+  } catch (e) {
+    console.error('SIPRES QR decoder error:', e);
+  }
+}
+
 function loopBacaQr_() {
   if (loopHandle) cancelAnimationFrame(loopHandle);
   const tick = (timestamp) => {
-    if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA && !sedangProses && !cooldownAktif && modeAbsensi && (timestamp - waktuFrameQrTerakhir >= INTERVAL_SCAN_QR_MS)) {
+    if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA && !sedangProses && !cooldownAktif && modeAbsensi && !_sedangDeteksiFrame && (timestamp - waktuFrameQrTerakhir >= INTERVAL_SCAN_QR_MS)) {
       waktuFrameQrTerakhir = timestamp;
-
-      if (typeof window.jsQR !== 'function') {
-        tampilkanErrorScanner_('Mesin pembaca QR belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
-      } else {
-        const w = videoEl.videoWidth;
-        const h = videoEl.videoHeight;
-        if (w && h) {
-          canvasEl.width = w;
-          canvasEl.height = h;
-          ctx.drawImage(videoEl, 0, 0, w, h);
-          try {
-            const kode = decodeFrame_(canvasEl, ctx);
-            if (kode && kode.data) prosesHasilScan_(kode.data.trim());
-          } catch (e) {
-            console.error('SIPRES QR decoder error:', e);
-          }
-        }
-      }
+      _sedangDeteksiFrame = true;
+      // Sengaja TIDAK di-await di sini -- requestAnimationFrame harus tetap
+      // sinkron/cepat tiap panggilan. Flag _sedangDeteksiFrame mencegah
+      // deteksi tumpang-tindih tanpa memblokir render loop itu sendiri.
+      deteksiSatuFrame_().finally(() => { _sedangDeteksiFrame = false; });
     }
     loopHandle = requestAnimationFrame(tick);
   };
@@ -182,18 +329,83 @@ function loopBacaQr_() {
 // ============================================================
 // KIRIM KE BACKEND + TAMPILKAN HASIL
 // ============================================================
+let _tokenTerakhirDiproses = null;
+let _waktuTokenTerakhir = 0;
+// Jeda KHUSUS utk token yang SAMA (diminta: 2-3 detik) -- BUKAN jeda umum yg
+// memblokir semua pembacaan. Kartu BERBEDA tetap bisa langsung dipindai
+// berurutan tanpa menunggu, hanya kartu yg SAMA yg ditahan sebentar supaya
+// kamera yg masih melihatnya tidak membaca ulang sbg scan baru.
+const JEDA_TOKEN_SAMA_MS = 2500;
+
 async function prosesHasilScan_(tokenKartu) {
-  if (!tokenKartu || sedangProses || !modeAbsensi) return;
+  if (!tokenKartu || !modeAbsensi) return;
+  const sekarang = Date.now();
+  if (tokenKartu === _tokenTerakhirDiproses && (sekarang - _waktuTokenTerakhir) < JEDA_TOKEN_SAMA_MS) return;
+  if (sedangProses) return;
+  _tokenTerakhirDiproses = tokenKartu;
+  _waktuTokenTerakhir = sekarang;
   sedangProses = true;
-  tampilkanStatusSiap_(false);
+
+  const infoLokal = cariRelawanLokal_(tokenKartu);
+  const idScan = buatIdScan_();
+
+  // Identitas tampil SEKETIKA dari cache lokal (murni pencarian di memori,
+  // tanpa menunggu server) -- TAPI statusnya "memproses konfirmasi", BUKAN
+  // "berhasil". Prinsip "jangan klaim berhasil sebelum server konfirmasi"
+  // tetap dipegang -- yang dipercepat hanya MUNCULNYA IDENTITAS, bukan
+  // KEPASTIAN HASIL.
+  if (infoLokal) tampilkanMemproses_(infoLokal);
+  else tampilkanStatusSiap_(false);
+
   try {
-    const hasil = await apiPostDiagnostik_('submitAbsensiQr', { tokenKartu: tokenKartu, mode: modeAbsensi }, 15000);
+    const hasil = await apiPostDiagnostik_('submitAbsensiQr', { tokenKartu, mode: modeAbsensi, idScan }, 15000);
     tampilkanHasil_(hasil);
   } catch (err) {
-    tampilkanHasil_({ kode: 'ERROR_KONEKSI', pesan: err.message || 'Tidak dapat terhubung ke server.' });
+    // Gagal terkirim (jaringan/timeout) -- SIMPAN ke antrean utk dicoba lagi
+    // otomatis, JANGAN langsung diklaim error permanen kalau identitasnya
+    // dikenali lokal (kemungkinan besar cuma soal koneksi sesaat).
+    tambahKeAntrean_({ idScan, tokenKartu, mode: modeAbsensi, waktu: Date.now() });
+    if (infoLokal) tampilkanMenungguSinkron_(infoLokal);
+    else tampilkanHasil_({ kode: 'ERROR_KONEKSI', pesan: 'Server tidak dapat diakses. Mode offline aktif -- absen tersimpan dan akan dikirim otomatis.' });
   } finally {
     sedangProses = false;
   }
+}
+
+function tampilkanMemproses_(info) {
+  const kartu = document.getElementById('kartuHasil');
+  kartu.className = 'kartu-hasil tampil warna-info';
+  document.getElementById('hasilIkon').textContent = '…';
+  document.getElementById('hasilJudul').textContent = 'MEMPROSES KONFIRMASI';
+  document.getElementById('hasilNama').textContent = info.nama || '-';
+  document.getElementById('hasilDivisi').textContent = info.divisi ? ('Divisi: ' + info.divisi) : '';
+  document.getElementById('hasilPesan').textContent = 'Menunggu konfirmasi server...';
+  document.getElementById('hasilJam').textContent = '';
+  document.getElementById('hasilBadge').style.display = 'none';
+  SUARA.TERTANGKAP();
+  getar_(35);
+}
+
+function tampilkanMenungguSinkron_(info) {
+  const kartu = document.getElementById('kartuHasil');
+  kartu.className = 'kartu-hasil tampil warna-info';
+  document.getElementById('hasilIkon').textContent = '⏳';
+  document.getElementById('hasilJudul').textContent = 'TERSIMPAN, MENUNGGU SINKRON';
+  document.getElementById('hasilNama').textContent = info.nama || '-';
+  document.getElementById('hasilDivisi').textContent = info.divisi ? ('Divisi: ' + info.divisi) : '';
+  document.getElementById('hasilPesan').textContent = 'Koneksi bermasalah. BELUM DIPASTIKAN BERHASIL -- akan dikirim otomatis & diproses server begitu koneksi kembali.';
+  document.getElementById('hasilJam').textContent = '';
+  document.getElementById('hasilBadge').style.display = 'none';
+  getar_([30, 40, 30]);
+
+  const target = document.getElementById('kameraTarget');
+  cooldownAktif = true;
+  setTimeout(() => {
+    kartu.classList.remove('tampil');
+    target.className = 'kamera-target';
+    tampilkanStatusSiap_(true);
+    cooldownAktif = false;
+  }, 3500);
 }
 
 const TAMPILAN_HASIL = {
@@ -243,6 +455,9 @@ function tampilkanHasil_(d) {
   target.className = 'kamera-target' + (tampilan.target ? ' ' + tampilan.target : '');
 
   if (SUARA[tampilan.suara]) SUARA[tampilan.suara]();
+  if (tampilan.warna === 'sukses') getar_(60);
+  else if (tampilan.warna === 'bahaya') getar_([40, 50, 40, 50]);
+  else getar_(35);
 
   cooldownAktif = true;
   setTimeout(() => {
@@ -324,6 +539,21 @@ document.addEventListener('DOMContentLoaded', () => {
   ctx = canvasEl.getContext('2d', { willReadFrequently: true });
 
   muatOperasionalKios_();
+
+  // Cache relawan: muat yang tersimpan SEKETIKA (sinkron, dari localStorage)
+  // supaya lookup lokal langsung bisa dipakai sejak scan pertama, lalu
+  // segarkan di latar belakang tanpa memblokir apa pun.
+  muatCacheRelawanDariLocalStorage_();
+  segarkanCacheRelawan_();
+  setInterval(segarkanCacheRelawan_, INTERVAL_REFRESH_CACHE_MS);
+
+  // Antrean sinkron: coba proses segera (kalau ada sisa dari sesi sebelumnya
+  // yang belum terkirim), lalu berkala + setiap kali koneksi kembali online.
+  perbaruiIndikatorJaringan_();
+  prosesAntrean_();
+  setInterval(prosesAntrean_, 8000);
+  window.addEventListener('online', () => { perbaruiIndikatorJaringan_(); prosesAntrean_(); });
+  window.addEventListener('offline', perbaruiIndikatorJaringan_);
 
   document.getElementById('btnMasuk').addEventListener('click', () => pilihModeAbsensi_('MASUK'));
   document.getElementById('btnPulang').addEventListener('click', () => pilihModeAbsensi_('PULANG'));
