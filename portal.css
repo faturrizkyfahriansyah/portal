@@ -853,6 +853,13 @@ button.riwayat-item {
 #areaCetakKartuQr { display: none; }
 
 @media print {
+  /* PENTING: tanpa ini, Chrome/browser lain MEMBUANG semua background-color
+     dan background-image (termasuk gradient navy header, gradient footer)
+     dari hasil cetak secara default (demi hemat tinta) -- border dan teks
+     tetap tercetak, tapi semua warna ISI jadi putih polos. Inilah penyebab
+     persis kartu tercetak "putih polos" walau di layar warnanya benar. */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+
   body * { visibility: hidden; }
   #areaCetakKartuQr, #areaCetakKartuQr * { visibility: visible; }
   #areaCetakKartuQr { display: block; position: absolute; left: 0; top: 0; width: 100%; }
