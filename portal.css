@@ -803,14 +803,20 @@ button.riwayat-item {
   font-family: Arial, "Segoe UI", sans-serif; isolation: isolate;
 }
 .card.front::after { content: ''; position: absolute; inset: 0; border: .35mm solid rgba(11,42,82,.18); border-radius: 3.2mm; pointer-events: none; z-index: 30; }
-.card.front .batik { position: absolute; width: 18mm; height: 18mm; object-fit: contain; pointer-events: none; }
+.card.front .batik { position: absolute; width: 18mm; height: 18mm; object-fit: contain; pointer-events: none; z-index: 0; }
 .card.front .watermark { opacity: .055; }
 .card.front .c1 { top: 18mm; left: -7mm; }
 .card.front .c2 { top: 18mm; right: -7mm; transform: scaleX(-1); }
 .card.front .c3 { bottom: 10mm; left: -7mm; transform: scaleY(-1); }
 .card.front .c4 { bottom: 10mm; right: -7mm; transform: scale(-1,-1); }
 
-.card.front .top { height: 23mm; background: linear-gradient(145deg, var(--navy), var(--navy2)); color: #fff; position: relative; overflow: hidden; }
+/* PENTING: .top/.body/.bottom BERADA SETELAH watermark di DOM (lihat
+   admin-kartu-qr.js) dan punya background OPAQUE. Tanpa z-index eksplisit,
+   CSS mengecat elemen positioned ber-z-index:auto sesuai urutan DOM --
+   artinya .top/.body akan menimpa watermark sepenuhnya, membuatnya TAK
+   TERLIHAT walau opacity sudah diatur benar. z-index:1 di sini memastikan
+   watermark (z-index:0 di atas) benar-benar di LAPISAN BELAKANG. */
+.card.front .top { height: 23mm; background: linear-gradient(145deg, var(--navy), var(--navy2)); color: #fff; position: relative; z-index: 1; overflow: hidden; }
 .card.front .logos { position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; gap: 2.4mm; padding-top: 2.7mm; }
 .card.front .logo { width: 10mm; height: 10mm; object-fit: contain; border-radius: 50%; background: #fff; display: block; }
 .card.front .logo.sppg { width: 10.5mm; height: 10.5mm; }
@@ -819,9 +825,10 @@ button.riwayat-item {
 .card.front .brand-sub { position: relative; z-index: 2; text-align: center; margin-top: .6mm; font-size: 1.95mm; letter-spacing: .18mm; opacity: .92; }
 .card.front .gold-line { position: absolute; left: 5mm; right: 5mm; bottom: 0; height: .7mm; background: linear-gradient(90deg, transparent, var(--gold2), var(--gold), transparent); }
 
-.card.front .body { position: relative; height: 56mm; padding: 3.5mm 4mm 2.6mm; background: #fff; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.card.front .body { position: relative; z-index: 1; height: 56mm; padding: 3.5mm 4mm 2.6mm; background: #fff; text-align: center; display: flex; flex-direction: column; align-items: center; }
 .card.front .title { color: var(--gold); font-size: 2.65mm; font-weight: 800; letter-spacing: .28mm; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 1.4mm; }
-.card.front .title span { display: block; width: 7mm; height: .3mm; background: var(--gold); }
+.card.front .title .garis { display: block; width: 7mm; height: .3mm; background: var(--gold); flex-shrink: 0; }
+.card.front .title .title-teks { white-space: nowrap; }
 .card.front .diamond { width: 1.25mm; height: 1.25mm; background: var(--navy); transform: rotate(45deg); display: block; }
 .card.front .name { margin-top: 2mm; margin-left: 2mm; margin-right: 2mm; color: var(--navy); font-weight: 900; font-size: 4.15mm; line-height: 1.12; text-transform: uppercase; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-shrink: 0; }
 .card.front .meta { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: .8mm; margin-top: 1.6mm; font-size: 2.3mm; color: #5d6b7d; flex-shrink: 0; }
@@ -832,7 +839,7 @@ button.riwayat-item {
 .card.front .qr-wrap > div { width: 23.2mm; height: 23.2mm; display: flex; align-items: center; justify-content: center; }
 .card.front .qr-wrap img, .card.front .qr-wrap canvas { width: 100% !important; height: 100% !important; display: block; }
 
-.card.front .bottom { position: absolute; left: 0; right: 0; bottom: 0; height: 10mm; overflow: hidden; background: linear-gradient(180deg, #173c6c 0%, #12345e 42%, #0b2a52 100%); }
+.card.front .bottom { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 10mm; overflow: hidden; background: linear-gradient(180deg, #173c6c 0%, #12345e 42%, #0b2a52 100%); }
 .card.front .bottom::before { content: ''; position: absolute; left: -8%; right: -8%; top: -6mm; height: 10mm; background: #fff; opacity: .96; border-radius: 50% 50% 0 0/100% 100% 0 0; }
 .card.front .bottom::after { content: ''; position: absolute; left: 0; right: 0; top: -.8mm; height: .45mm; background: linear-gradient(90deg, transparent 0%, #d9a62e 16%, #f2c75c 50%, #d9a62e 84%, transparent 100%); }
 .card.front .batik-footer { position: absolute; width: 8.5mm; height: 8.5mm; bottom: -3.4mm; z-index: 2; opacity: .24; }
