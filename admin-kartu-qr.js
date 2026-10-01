@@ -107,7 +107,6 @@ function htmlKartuQr_(data, idQrUnik) {
           <img class="logo sppg" src="assets/logo.png" alt="Logo SPPG Jeungjing">
         </div>
         <div class="brand">SPPG JEUNGJING</div>
-        <div class="brand-sub">SATUAN PELAYANAN PEMENUHAN GIZI</div>
         <div class="gold-line"></div>
       </div>
       <div class="body">
@@ -119,10 +118,7 @@ function htmlKartuQr_(data, idQrUnik) {
         </div>
         <div class="qr-wrap"><div id="${idQrUnik}"></div></div>
       </div>
-      <div class="bottom">
-        <img class="batik-footer left" src="assets/batik-ornamen.png" alt="">
-        <img class="batik-footer right" src="assets/batik-ornamen.png" alt="">
-      </div>
+      <div class="bottom"></div>
     </div>`;
 }
 
@@ -171,61 +167,78 @@ async function cetakTerpilih_() {
   } catch (err) { showError(err.message || 'Gagal menyiapkan cetak.'); }
 }
 
-/** Download PNG kartu yang sedang dipreview. Tidak memakai library tambahan: QR diambil dari canvas qrcodejs, lalu seluruh kartu digambar ulang ke canvas. */
+let _kqCssTeksCache = null;
+/**
+ * Download PNG dari KARTU YANG BENAR-BENAR TAMPIL di layar (lewat SVG
+ * foreignObject), bukan menggambar ulang dari nol dengan koordinat
+ * hardcode terpisah seperti versi sebelumnya. PERBAIKAN PENTING: versi lama
+ * punya implementasi duplikat -- rasio landscape lama, 1 logo, teks "SIPRES"
+ * yang sudah dihapus dari desain utama -- semuanya diam-diam tidak ikut
+ * ter-update setiap kali desain kartu direvisi di admin-kartu-qr.js/portal.css,
+ * persis itu yang dilaporkan ("hasil unduh masih yang lama"). Dengan
+ * menangkap elemen kartu yang SUNGGUHAN, hasil unduh dijamin SELALU sama
+ * dengan yang tampil di preview -- tidak mungkin menyimpang lagi di masa depan.
+ */
 async function downloadPreviewSebagaiPng_() {
+  const kartuAsli = document.querySelector('#kqPreviewArea .card.front');
+  if (!kartuAsli) { showError('Pratinjau kartu belum siap. Tunggu sebentar lalu coba lagi.'); return; }
   const data = window._kqDataPreviewAktif;
-  if (!data) return;
   try {
-    const qrEl = document.getElementById('kqPreviewQr');
-    const qrCanvas = qrEl && qrEl.querySelector('canvas');
-    const qrImg = qrEl && qrEl.querySelector('img');
-    if (!qrCanvas && !qrImg) throw new Error('QR belum selesai dibuat. Tunggu sebentar lalu coba lagi.');
-
-    const W = 1011, H = 638; // rasio CR80 85.6 x 54 mm pada ~300 DPI
-    const c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    const x = c.getContext('2d');
-    x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
-
-    // Ornamen header navy + aksen emas.
-    x.fillStyle = '#0b2340'; x.fillRect(0, 0, W, 108);
-    x.fillStyle = '#c9962c'; x.fillRect(0, 103, W, 5);
-    x.fillStyle = '#eaf0f7'; x.beginPath(); x.arc(W - 28, 24, 88, 0, Math.PI * 2); x.fill();
-
-    const logo = new Image();
-    logo.src = 'assets/logo.png';
-    await new Promise((resolve, reject) => { logo.onload = resolve; logo.onerror = reject; });
-    const lh = 62, lw = logo.naturalWidth ? lh * logo.naturalWidth / logo.naturalHeight : 62;
-    x.drawImage(logo, 30, 22, lw, lh);
-
-    x.fillStyle = '#ffffff'; x.font = '800 30px Arial';
-    x.fillText('SPPG JEUNGJING', 30 + lw + 18, 58);
-    x.font = '700 22px Arial'; x.fillStyle = '#c9962c';
-    x.fillText('KARTU ABSENSI RELAWAN', 30, 155);
-
-    x.fillStyle = '#0b2340'; x.font = '800 38px Arial';
-    const nama = String(data.nama || '-');
-    let namaTampil = nama;
-    if (namaTampil.length > 25) namaTampil = namaTampil.slice(0, 24) + '…';
-    x.fillText(namaTampil, 30, 225);
-
-    x.fillStyle = '#556070'; x.font = '500 25px Arial';
-    x.fillText('ID: ' + String(data.id || '-'), 30, 270);
-    x.fillText('Divisi: ' + String(data.divisi || '-'), 30, 307);
-
-    const qSize = 270;
-    if (qrCanvas) x.drawImage(qrCanvas, W - qSize - 42, 155, qSize, qSize);
-    else {
-      const img = new Image(); img.src = qrImg.src;
-      await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
-      x.drawImage(img, W - qSize - 42, 155, qSize, qSize);
+    if (!_kqCssTeksCache) {
+      const res = await fetch('portal.css');
+      _kqCssTeksCache = await res.text();
     }
 
-    x.fillStyle = '#8b95a3'; x.font = '500 18px Arial';
-    x.fillText('SIPRES • SPPG Jeungjing', 30, H - 28);
+    const MM_KE_PX = 300 / 25.4; // target ~300dpi
+    const W = Math.round(54 * MM_KE_PX), H = Math.round(86 * MM_KE_PX);
+
+    const klon = kartuAsli.cloneNode(true);
+    // QR dirender qrcodejs sbg <canvas> atau <img> -- SVG foreignObject tidak
+    // selalu merender <canvas> hidup dgn benar, jadi diganti dulu dgn <img> dari data URL.
+    const qrAsli = kartuAsli.querySelector('.qr-wrap canvas, .qr-wrap img');
+    const qrKlon = klon.querySelector('.qr-wrap canvas, .qr-wrap img');
+    if (qrAsli && qrKlon) {
+      const dataUrlQr = qrAsli.tagName === 'CANVAS' ? qrAsli.toDataURL('image/png') : qrAsli.src;
+      const imgPengganti = document.createElement('img');
+      imgPengganti.src = dataUrlQr;
+      imgPengganti.style.cssText = qrKlon.style.cssText || 'width:100%;height:100%;display:block;';
+      qrKlon.replaceWith(imgPengganti);
+    }
+
+    const svgNs = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNs, 'svg');
+    svg.setAttribute('xmlns', svgNs);
+    svg.setAttribute('width', W); svg.setAttribute('height', H);
+    svg.setAttribute('viewBox', '0 0 54 86');
+    const fo = document.createElementNS(svgNs, 'foreignObject');
+    fo.setAttribute('width', '54'); fo.setAttribute('height', '86');
+    const style = document.createElement('style');
+    style.textContent = _kqCssTeksCache;
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'width:54mm;height:86mm;';
+    wrapper.appendChild(klon);
+    fo.appendChild(style);
+    fo.appendChild(wrapper);
+    svg.appendChild(fo);
+
+    const svgTeks = new XMLSerializer().serializeToString(svg);
+    const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgTeks);
+
+    const gambarSvg = new Image();
+    await new Promise((resolve, reject) => {
+      gambarSvg.onload = resolve;
+      gambarSvg.onerror = () => reject(new Error('Gagal merender kartu ke gambar.'));
+      gambarSvg.src = svgUrl;
+    });
+
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(gambarSvg, 0, 0, W, H);
 
     const a = document.createElement('a');
-    a.download = 'Kartu-QR-' + String(data.id || 'Relawan').replace(/[^a-zA-Z0-9_-]+/g, '-') + '.png';
+    a.download = 'Kartu-ID-' + String((data && data.id) || 'Relawan').replace(/[^a-zA-Z0-9_-]+/g, '-') + '.png';
     a.href = c.toDataURL('image/png');
     a.click();
   } catch (err) {

@@ -7,140 +7,21 @@
 .preview{display:flex;justify-content:center;align-items:flex-start;gap:70px;flex-wrap:wrap}.side-label{text-align:center;font-weight:800;color:var(--navy);margin:0 0 10px;font-size:13px;letter-spacing:.5px}
 .card{width:54mm;height:86mm;position:relative;overflow:hidden;border-radius:3.2mm;background:#fff;box-shadow:0 12px 35px rgba(7,29,58,.24);font-family:Arial,"Segoe UI",sans-serif;isolation:isolate}
 .card::after{content:"";position:absolute;inset:0;border:.35mm solid rgba(11,42,82,.18);border-radius:3.2mm;pointer-events:none;z-index:30}
-.batik{position:absolute;width:18mm;height:18mm;object-fit:contain;pointer-events:none;z-index:0}.watermark{opacity:.075}
+.batik{position:absolute;width:18mm;height:18mm;object-fit:contain;pointer-events:none;z-index:0}.watermark{opacity:.055}
 .front .c1{top:18mm;left:-7mm}.front .c2{top:18mm;right:-7mm;transform:scaleX(-1)}.front .c3{bottom:10mm;left:-7mm;transform:scaleY(-1)}.front .c4{bottom:10mm;right:-7mm;transform:scale(-1,-1)}
-/* PENTING: watermark datang SEBELUM .top/.body di DOM dgn background opaque -- tanpa z-index eksplisit, .top/.body akan menimpa watermark sepenuhnya (lihat portal.css utk penjelasan lengkap). */
-.front .top{height:23mm;background:linear-gradient(145deg,var(--navy),var(--navy2));color:#fff;position:relative;z-index:1;overflow:hidden}
-.front .top::before,.front .top::after{content:"";position:absolute;width:18mm;height:18mm;background:url("assets/batik-ornamen.png") center/contain no-repeat;opacity:.16}.front .top::before{left:-5mm;top:-6mm}.front .top::after{right:-5mm;top:-6mm;transform:scaleX(-1)}
-.logos{position:relative;z-index:2;display:flex;justify-content:center;align-items:center;gap:2.4mm;padding-top:2.7mm}.logo{width:10mm;height:10mm;object-fit:contain;border-radius:50%;background:#fff;display:block}.logo.sppg{width:10.5mm;height:10.5mm}.logo-divider{height:7.2mm;width:.25mm;background:rgba(255,255,255,.7)}
-.brand{position:relative;z-index:2;text-align:center;margin-top:1.3mm;font-weight:900;letter-spacing:.55mm;font-size:3.65mm}.brand-sub{position:relative;z-index:2;text-align:center;margin-top:.6mm;font-size:1.95mm;letter-spacing:.18mm;opacity:.92}.gold-line{position:absolute;left:5mm;right:5mm;bottom:0;height:.7mm;background:linear-gradient(90deg,transparent,var(--gold2),var(--gold),transparent)}
-.front .body{position:relative;z-index:1;height:56mm;padding:3.5mm 4mm 2.6mm;background:#fff;text-align:center}.title{color:var(--gold);font-size:2.65mm;font-weight:800;letter-spacing:.28mm;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:1.4mm}.title .garis{display:block;width:7mm;height:.3mm;background:var(--gold);flex-shrink:0}.title .title-teks{white-space:nowrap}.diamond{width:1.25mm;height:1.25mm;background:var(--navy);transform:rotate(45deg);display:block}
-.name{margin-top:3.1mm;color:var(--navy);font-weight:900;font-size:4.45mm;line-height:1.08;text-transform:uppercase;letter-spacing:.08mm;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.meta{margin-top:1.8mm;font-size:2.45mm;color:#53657c;line-height:1.45}.meta strong{color:var(--navy)}
-.qr-wrap{position:absolute;left:50%;transform:translateX(-50%);bottom:3.3mm;width:27.5mm;height:27.5mm;padding:1.35mm;background:#fff;border:.42mm solid var(--navy);box-shadow:0 0 0 .45mm var(--gold);border-radius:1.8mm;display:flex;align-items:center;justify-content:center}#qrCode{width:24.5mm;height:24.5mm;display:flex;align-items:center;justify-content:center}#qrCode img,#qrCode canvas{width:100%!important;height:100%!important;display:block}
-.front .bottom{position:absolute;z-index:1;left:0;right:0;bottom:0;height:10mm;background:var(--navy);overflow:hidden}.front .bottom::before{content:"";position:absolute;left:-8%;right:-8%;top:-6mm;height:10mm;background:#fff;border-radius:50% 50% 0 0/100% 100% 0 0}.front .bottom::after{content:"";position:absolute;left:0;right:0;top:-1.1mm;height:.65mm;background:var(--gold)}.batik-footer{position:absolute;width:11mm;height:11mm;left:50%;bottom:-5mm;transform:translateX(-50%);z-index:2;opacity:.98}
+/* PENTING: watermark datang SEBELUM .top/.body di DOM dgn background opaque -- tanpa z-index eksplisit, .top/.body akan menimpa watermark sepenuhnya. */
+.front .top{height:20mm;background:linear-gradient(145deg,var(--navy),var(--navy2));color:#fff;position:relative;z-index:1;overflow:hidden}
+.logos{position:relative;z-index:2;display:flex;justify-content:center;align-items:center;gap:2.4mm;padding-top:3mm}.logo{width:10mm;height:10mm;object-fit:contain;border-radius:50%;background:#fff;display:block}.logo.sppg{width:10.5mm;height:10.5mm}.logo-divider{height:7.2mm;width:.25mm;background:rgba(255,255,255,.7)}
+.brand{position:relative;z-index:2;text-align:center;margin-top:1.8mm;font-weight:900;letter-spacing:.55mm;font-size:3.65mm}.gold-line{position:absolute;left:5mm;right:5mm;bottom:0;height:.7mm;background:linear-gradient(90deg,transparent,var(--gold2),var(--gold),transparent)}
+/* body 60mm (naik dari 56mm): ruang didapat dari .top dikecilkan (subtitle dihapus) + .bottom disederhanakan tanpa overlap. Dihitung ulang: aman utk skenario terburuk nama+divisi 2 baris. */
+.front .body{position:relative;z-index:1;height:60mm;padding:3.2mm 4mm 2.2mm;background:#fff;text-align:center;display:flex;flex-direction:column;align-items:center}.title{color:var(--gold);font-size:2.65mm;font-weight:800;letter-spacing:.28mm;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:1.4mm}.title .garis{display:block;width:7mm;height:.3mm;background:var(--gold);flex-shrink:0}.title .title-teks{white-space:nowrap}.diamond{width:1.25mm;height:1.25mm;background:var(--navy);transform:rotate(45deg);display:block}
+.name{margin-top:2mm;margin-left:2mm;margin-right:2mm;color:var(--navy);font-weight:900;font-size:4.15mm;line-height:1.12;text-transform:uppercase;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex-shrink:0}.meta{position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;gap:.8mm;margin-top:1.6mm;font-size:2.3mm;color:#5d6b7d;flex-shrink:0}.meta div{min-width:30mm;max-width:44mm;padding:.5mm 2.5mm;border-radius:5mm;background:#f4f6f9;line-height:1.3}.meta strong{color:#17365f;font-weight:800}
+.qr-wrap{position:relative;flex-shrink:0;margin-top:auto;width:25.8mm;height:25.8mm;padding:1.15mm;background:#fff;border:.42mm solid var(--navy);box-shadow:0 0 0 .35mm var(--gold);border-radius:1.8mm;display:flex;align-items:center;justify-content:center}#qrCode{width:23.2mm;height:23.2mm;display:flex;align-items:center;justify-content:center}#qrCode img,#qrCode canvas{width:100%!important;height:100%!important;display:block}
+/* Footer disederhanakan: dulu overlap 3mm ke .body DAN ornamen diposisikan bottom:-5mm (lebih besar dari tinggi footernya sendiri) -- gabungan keduanya membuat ornamen terpotong overflow:hidden kartu, muncul sebagai "gambar kosong" saat dicetak. Sekarang: strip bersih tanpa overlap, ornamen 5mm 100% di dalam batas footer. */
+.front .bottom{position:relative;z-index:1;flex-shrink:0;height:6mm;overflow:hidden;background:linear-gradient(180deg,#173c6c 0%,#0b2a52 100%)}.front .bottom::before{content:"";position:absolute;left:0;right:0;top:0;height:.5mm;background:linear-gradient(90deg,transparent 0%,#d9a62e 16%,#f2c75c 50%,#d9a62e 84%,transparent 100%)}
 
 .note{max-width:900px;margin:24px auto 0;padding:12px 16px;background:#fff;border-left:4px solid var(--gold);color:#475467;font-size:12px;line-height:1.5}
 @media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}body{padding:0;background:#fff}.toolbar,.side-label,.note{display:none}.preview{display:block}.preview>section{page-break-after:always}.preview>section:last-child{page-break-after:auto}.card{box-shadow:none;width:54mm;height:86mm}@page{size:54mm 86mm;margin:0}}
-</style>
-<style>
-/* === REVISI V3 — ID + DIVISI JELAS, ORNAMEN BAWAH LEBIH HALUS === */
-
-/* Metadata dibuat selalu terlihat jelas di bawah nama */
-/* PERBAIKAN: body sebelumnya text mengalir bebas sementara qr-wrap
-   position:absolute dengan jarak TETAP dari bawah -- kalau nama 2 baris
-   + divisi panjang (melipat jadi 2 baris dalam pill), tinggi teks lebih
-   dari ruang yang disediakan, dan QR TERTIMPA teks. Diperbaiki dengan
-   flexbox: qr-wrap sekarang elemen flow biasa (margin-top:auto mendorongnya
-   ke bawah), jadi overlap TIDAK MUNGKIN terjadi lagi berapa pun panjang
-   teksnya -- ia hanya akan duduk tepat di bawah teks, bukan menimpanya. */
-.front .body{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-.front .name{
-  margin-top:2mm;
-  margin-left:2mm;
-  margin-right:2mm;
-  font-size:4.15mm;
-  line-height:1.12;
-  flex-shrink:0;
-}
-.front .meta{
-  position:relative;
-  z-index:5;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:.8mm;
-  margin-top:1.6mm;
-  font-size:2.3mm;
-  color:#5d6b7d;
-  flex-shrink:0;
-}
-.front .meta div{
-  min-width:30mm;
-  max-width:44mm;
-  padding:.5mm 2.5mm;
-  border-radius:5mm;
-  background:#f4f6f9;
-  line-height:1.3;
-}
-.front .meta strong{
-  color:#17365f;
-  font-weight:800;
-}
-
-/* QR: posisi relative (elemen flow biasa), bukan absolute lagi -- lihat catatan di atas */
-.front .qr-wrap{
-  position:relative;
-  left:auto;
-  bottom:auto;
-  transform:none;
-  flex-shrink:0;
-  margin-top:auto;
-  width:25.8mm;
-  height:25.8mm;
-  padding:1.15mm;
-  box-shadow:0 0 0 .35mm #d9a62e;
-}
-#qrCode{
-  width:23.2mm;
-  height:23.2mm;
-}
-
-/* Ornamen bawah: bukan satu ornamen di tengah, tetapi dua ornamen tipis
-   di kanan-kiri dan dibuat sangat lembut. */
-.front .bottom{
-  height:10mm;
-  background:linear-gradient(
-    180deg,
-    #173c6c 0%,
-    #12345e 42%,
-    #0b2a52 100%
-  );
-}
-.front .bottom::before{
-  background:#fff;
-  opacity:.96;
-}
-.front .bottom::after{
-  height:.45mm;
-  top:-.8mm;
-  background:linear-gradient(
-    90deg,
-    transparent 0%,
-    #d9a62e 16%,
-    #f2c75c 50%,
-    #d9a62e 84%,
-    transparent 100%
-  );
-}
-
-/* Dua motif batik kanan-kiri di footer, kecil dan tidak kaku */
-.front .bottom .batik-footer{
-  width:8.5mm;
-  height:8.5mm;
-  bottom:-3.4mm;
-  opacity:.24;
-}
-.front .bottom::marker{display:none}
-
-/* buat dua elemen ornamen footer tambahan */
-.front .bottom .batik-footer.left{
-  left:14mm;
-  transform:translateX(-50%);
-}
-.front .bottom .batik-footer.right{
-  left:auto;
-  right:14mm;
-  transform:translateX(50%) scaleX(-1);
-}
-
-/* ornamen watermark di area isi lebih lembut */
-.front .watermark{
-  opacity:.055;
-}
 </style>
 
 </head><body>
@@ -148,9 +29,9 @@
 <div class="preview">
 <section><div class="side-label">DEPAN — KARTU ABSENSI RELAWAN</div><div class="card front" id="idCardFront">
 <img class="batik watermark c1" src="assets/batik-ornamen.png" alt=""><img class="batik watermark c2" src="assets/batik-ornamen.png" alt=""><img class="batik watermark c3" src="assets/batik-ornamen.png" alt=""><img class="batik watermark c4" src="assets/batik-ornamen.png" alt="">
-<div class="top"><div class="logos"><img class="logo" src="assets/logo-bgn.png" alt="Logo BGN"><div class="logo-divider"></div><img class="logo sppg" src="assets/logo.png" alt="Logo SPPG Jeungjing"></div><div class="brand">SPPG JEUNGJING</div><div class="brand-sub">SATUAN PELAYANAN PEMENUHAN GIZI</div><div class="gold-line"></div></div>
+<div class="top"><div class="logos"><img class="logo" src="assets/logo-bgn.png" alt="Logo BGN"><div class="logo-divider"></div><img class="logo sppg" src="assets/logo.png" alt="Logo SPPG Jeungjing"></div><div class="brand">SPPG JEUNGJING</div><div class="gold-line"></div></div>
 <div class="body"><div class="title"><span class="garis"></span><i class="diamond"></i><span class="title-teks">Kartu Absensi Relawan</span><i class="diamond"></i><span class="garis"></span></div><div class="name" id="volunteerName">FATUR RIZKY FAHRIANSYAH</div><div class="meta"><div>ID: <strong id="volunteerId">R-ASL-001</strong></div><div>Divisi: <strong id="volunteerDivision">ASISTEN LAPANGAN</strong></div></div><div class="qr-wrap"><div id="qrCode"></div></div></div>
-<div class="bottom"><img class="batik-footer left" src="assets/batik-ornamen.png" alt=""><img class="batik-footer right" src="assets/batik-ornamen.png" alt=""></div></div></section>
+<div class="bottom"></div></div></section>
 </div>
 <div class="note"><strong>Catatan integrasi:</strong> template depan mempertahankan ID <code>volunteerName</code>, <code>volunteerId</code>, <code>volunteerDivision</code>, dan <code>qrCode</code> agar mudah menggantikan template lama. Tidak ada teks “SIPRES”. QR tetap diisi dengan TOKEN_KARTU dari backend.</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script>

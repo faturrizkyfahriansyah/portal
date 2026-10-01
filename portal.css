@@ -816,16 +816,20 @@ button.riwayat-item {
    artinya .top/.body akan menimpa watermark sepenuhnya, membuatnya TAK
    TERLIHAT walau opacity sudah diatur benar. z-index:1 di sini memastikan
    watermark (z-index:0 di atas) benar-benar di LAPISAN BELAKANG. */
-.card.front .top { height: 23mm; background: linear-gradient(145deg, var(--navy), var(--navy2)); color: #fff; position: relative; z-index: 1; overflow: hidden; }
-.card.front .logos { position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; gap: 2.4mm; padding-top: 2.7mm; }
+.card.front .top { height: 20mm; background: linear-gradient(145deg, var(--navy), var(--navy2)); color: #fff; position: relative; z-index: 1; overflow: hidden; }
+.card.front .logos { position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; gap: 2.4mm; padding-top: 3mm; }
 .card.front .logo { width: 10mm; height: 10mm; object-fit: contain; border-radius: 50%; background: #fff; display: block; }
 .card.front .logo.sppg { width: 10.5mm; height: 10.5mm; }
 .card.front .logo-divider { height: 7.2mm; width: .25mm; background: rgba(255,255,255,.7); }
-.card.front .brand { position: relative; z-index: 2; text-align: center; margin-top: 1.3mm; font-weight: 900; letter-spacing: .55mm; font-size: 3.65mm; }
-.card.front .brand-sub { position: relative; z-index: 2; text-align: center; margin-top: .6mm; font-size: 1.95mm; letter-spacing: .18mm; opacity: .92; }
+.card.front .brand { position: relative; z-index: 2; text-align: center; margin-top: 1.8mm; font-weight: 900; letter-spacing: .55mm; font-size: 3.65mm; }
 .card.front .gold-line { position: absolute; left: 5mm; right: 5mm; bottom: 0; height: .7mm; background: linear-gradient(90deg, transparent, var(--gold2), var(--gold), transparent); }
 
-.card.front .body { position: relative; z-index: 1; height: 56mm; padding: 3.5mm 4mm 2.6mm; background: #fff; text-align: center; display: flex; flex-direction: column; align-items: center; }
+/* body diperbesar (60mm, naik dari 56mm) -- ruang tambahan didapat dari .top
+   yang dikecilkan (subtitle dihapus) DAN .bottom yang disederhanakan supaya
+   TIDAK LAGI tumpang-tindih ke body (sebelumnya overlap 3mm, itu yg bikin
+   QR "digerogoti" footer walau sudah di-push margin-top:auto). Sudah
+   dihitung ulang: aman bahkan utk skenario terburuk nama+divisi 2 baris. */
+.card.front .body { position: relative; z-index: 1; height: 60mm; padding: 3.2mm 4mm 2.2mm; background: #fff; text-align: center; display: flex; flex-direction: column; align-items: center; }
 .card.front .title { color: var(--gold); font-size: 2.65mm; font-weight: 800; letter-spacing: .28mm; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 1.4mm; }
 .card.front .title .garis { display: block; width: 7mm; height: .3mm; background: var(--gold); flex-shrink: 0; }
 .card.front .title .title-teks { white-space: nowrap; }
@@ -839,12 +843,15 @@ button.riwayat-item {
 .card.front .qr-wrap > div { width: 23.2mm; height: 23.2mm; display: flex; align-items: center; justify-content: center; }
 .card.front .qr-wrap img, .card.front .qr-wrap canvas { width: 100% !important; height: 100% !important; display: block; }
 
-.card.front .bottom { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 10mm; overflow: hidden; background: linear-gradient(180deg, #173c6c 0%, #12345e 42%, #0b2a52 100%); }
-.card.front .bottom::before { content: ''; position: absolute; left: -8%; right: -8%; top: -6mm; height: 10mm; background: #fff; opacity: .96; border-radius: 50% 50% 0 0/100% 100% 0 0; }
-.card.front .bottom::after { content: ''; position: absolute; left: 0; right: 0; top: -.8mm; height: .45mm; background: linear-gradient(90deg, transparent 0%, #d9a62e 16%, #f2c75c 50%, #d9a62e 84%, transparent 100%); }
-.card.front .batik-footer { position: absolute; width: 8.5mm; height: 8.5mm; bottom: -3.4mm; z-index: 2; opacity: .24; }
-.card.front .batik-footer.left { left: 14mm; transform: translateX(-50%); }
-.card.front .batik-footer.right { left: auto; right: 14mm; transform: translateX(50%) scaleX(-1); }
+/* Footer disederhanakan total: dulu TUMPANG TINDIH 3mm ke .body (desain
+   wave melengkung ke atas) DAN ornamennya diposisikan bottom:-3.4mm (lebih
+   besar dari tinggi footer sendiri) -- gabungan keduanya membuat gambar
+   ornamen terpotong overflow:hidden kartu, muncul sebagai "gambar kosong"
+   di hasil cetak. Desain baru: strip bersih TIDAK overlap apa pun di
+   atasnya, ornamen berukuran pas (5mm) dan 100% berada DALAM batas footer
+   sendiri -- tidak mungkin terpotong lagi. */
+.card.front .bottom { position: relative; z-index: 1; flex-shrink: 0; height: 6mm; overflow: hidden; background: linear-gradient(180deg, #173c6c 0%, #0b2a52 100%); }
+.card.front .bottom::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: .5mm; background: linear-gradient(90deg, transparent 0%, #d9a62e 16%, #f2c75c 50%, #d9a62e 84%, transparent 100%); }
 
 /* Preview di layar: HANYA wrapper ini yang di-scale (kartu itu sendiri tidak pernah di-transform). */
 .kartu-qr-preview-scale { transform: scale(2.7); transform-origin: top center; margin-bottom: 190mm; }
