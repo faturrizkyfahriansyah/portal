@@ -786,59 +786,58 @@ button.riwayat-item {
 .absensi-success-sub { font-size: 13px; color: var(--color-text-muted); margin: 0; }
 
 /* ============================================================
-   KARTU ID RELAWAN — CR80/ID-1 PORTRAIT: 54mm (lebar) x 86mm (tinggi).
-   Desain navy/gold dengan ornamen batik (SVG inline -- tetap tajam pada
-   ukuran cetak berapa pun, tidak bergantung file gambar terpisah).
-   Struktur & kelas identik dengan kartu-id-relawan-template.html supaya
-   pratinjau Admin dan contoh standalone selalu sinkron.
+   KARTU ID RELAWAN — CR80/ID-1 PORTRAIT: 54mm x 86mm.
+   Desain "front v3" DISETUJUI -- ornamen batik ASLI (file gambar nyata,
+   assets/batik-ornamen.png) dan logo asli (assets/logo-bgn.png,
+   assets/logo.png), BUKAN rekonstruksi SVG. Struktur & kelas identik
+   dengan kartu-id-relawan-template.html supaya pratinjau Admin dan
+   contoh standalone selalu sinkron.
    Elemen kartu SELALU dalam satuan mm (ukuran fisik asli), baik saat
    preview maupun print -- hanya WRAPPER preview yang di-scale utk
    kenyamanan layar, bukan kartunya sendiri.
    ============================================================ */
-:root {
-  --idcard-navy: #0B2A52; --idcard-navy-dark: #071D3A;
-  --idcard-gold: #D9A62E; --idcard-gold-light: #F2C75C;
-  --idcard-abu: #F4F6F8;
-}
-.id-card {
+.card.front {
+  --navy: #0B2A52; --navy2: #071D3A; --gold: #D9A62E; --gold2: #F2C75C; --ink: #17365F;
   width: 54mm; height: 86mm; position: relative; overflow: hidden;
-  box-sizing: border-box; border-radius: 3.5mm; background: var(--idcard-abu);
-  box-shadow: 0 2mm 6mm rgba(7,29,58,.35);
-  display: flex; flex-direction: column;
-  font-family: Arial, Inter, sans-serif;
+  border-radius: 3.2mm; background: #fff; box-shadow: 0 2mm 6mm rgba(7,29,58,.35);
+  font-family: Arial, "Segoe UI", sans-serif; isolation: isolate;
 }
-.id-card .card-header { position: relative; background: linear-gradient(160deg, var(--idcard-navy) 0%, var(--idcard-navy-dark) 100%); padding: 3mm 3mm 2.6mm; flex-shrink: 0; overflow: hidden; }
-.id-card .ornamen-sudut { position: absolute; width: 11mm; height: 11mm; opacity: .9; display: block; }
-.id-card .ornamen-sudut.kiri { top: -1.5mm; left: -1.5mm; }
-.id-card .ornamen-sudut.kanan { top: -1.5mm; right: -1.5mm; transform: scaleX(-1); }
-.id-card .ornamen-sudut svg { width: 100%; height: 100%; display: block; }
-.id-card .logo-row { display: flex; align-items: center; justify-content: center; gap: 2.4mm; position: relative; z-index: 1; }
-.id-card .logo-row img.logo { height: 8mm; width: auto; max-width: 14mm; object-fit: contain; display: block; }
-.id-card .logo-divider { width: .25mm; height: 7mm; background: rgba(255,255,255,.55); }
-.id-card .organization-name { position: relative; z-index: 1; margin-top: 1.8mm; text-align: center; color: #fff; font-weight: 800; font-size: 3.3mm; letter-spacing: .4mm; }
-.id-card .header-divider { position: relative; z-index: 1; height: .4mm; margin-top: 1.8mm; background: linear-gradient(90deg, transparent, var(--idcard-gold) 20%, var(--idcard-gold-light) 50%, var(--idcard-gold) 80%, transparent); }
+.card.front::after { content: ''; position: absolute; inset: 0; border: .35mm solid rgba(11,42,82,.18); border-radius: 3.2mm; pointer-events: none; z-index: 30; }
+.card.front .batik { position: absolute; width: 18mm; height: 18mm; object-fit: contain; pointer-events: none; }
+.card.front .watermark { opacity: .055; }
+.card.front .c1 { top: 18mm; left: -7mm; }
+.card.front .c2 { top: 18mm; right: -7mm; transform: scaleX(-1); }
+.card.front .c3 { bottom: 10mm; left: -7mm; transform: scaleY(-1); }
+.card.front .c4 { bottom: 10mm; right: -7mm; transform: scale(-1,-1); }
 
-.id-card .card-content { position: relative; flex: 1; padding: 3mm 3.2mm 0; display: flex; flex-direction: column; align-items: center; min-height: 0; }
-.id-card .watermark { position: absolute; top: 6mm; width: 9mm; height: 9mm; opacity: .1; z-index: 0; display: block; }
-.id-card .watermark.kiri { left: -1mm; }
-.id-card .watermark.kanan { right: -1mm; transform: scaleX(-1); }
-.id-card .watermark svg { width: 100%; height: 100%; }
-.id-card .card-title { position: relative; z-index: 1; display: flex; align-items: center; gap: 1.6mm; margin-top: .5mm; color: var(--idcard-gold); font-weight: 700; font-size: 2.75mm; letter-spacing: .3mm; text-transform: uppercase; }
-.id-card .card-title .garis { width: 5mm; height: .3mm; background: var(--idcard-gold); }
-.id-card .card-title .belah-ketupat { width: 1.4mm; height: 1.4mm; background: var(--idcard-navy); transform: rotate(45deg); flex-shrink: 0; }
-.id-card .volunteer-info { position: relative; z-index: 1; margin-top: 3mm; text-align: center; width: 100%; padding: 0 1mm; }
-.id-card .volunteer-name { color: var(--idcard-navy); font-weight: 800; font-size: 4.6mm; line-height: 1.14; text-transform: uppercase; overflow-wrap: break-word; word-break: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.id-card .volunteer-id, .id-card .volunteer-division { margin-top: 1.6mm; font-size: 2.65mm; color: #33455f; overflow-wrap: break-word; }
-.id-card .volunteer-id strong, .id-card .volunteer-division strong { color: var(--idcard-navy); font-weight: 700; }
-.id-card .qr-section { position: relative; z-index: 1; margin-top: 3mm; }
-.id-card .qr-wrapper { background: #fff; padding: 1.6mm; border-radius: 1.6mm; border: .35mm solid var(--idcard-navy); box-shadow: 0 0 0 .35mm var(--idcard-gold); display: flex; align-items: center; justify-content: center; }
-.id-card .qr-code { width: 24mm; height: 24mm; display: block; }
-.id-card .qr-code img, .id-card .qr-code canvas { width: 100%; height: 100%; display: block; }
+.card.front .top { height: 23mm; background: linear-gradient(145deg, var(--navy), var(--navy2)); color: #fff; position: relative; overflow: hidden; }
+.card.front .logos { position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; gap: 2.4mm; padding-top: 2.7mm; }
+.card.front .logo { width: 10mm; height: 10mm; object-fit: contain; border-radius: 50%; background: #fff; display: block; }
+.card.front .logo.sppg { width: 10.5mm; height: 10.5mm; }
+.card.front .logo-divider { height: 7.2mm; width: .25mm; background: rgba(255,255,255,.7); }
+.card.front .brand { position: relative; z-index: 2; text-align: center; margin-top: 1.3mm; font-weight: 900; letter-spacing: .55mm; font-size: 3.65mm; }
+.card.front .brand-sub { position: relative; z-index: 2; text-align: center; margin-top: .6mm; font-size: 1.95mm; letter-spacing: .18mm; opacity: .92; }
+.card.front .gold-line { position: absolute; left: 5mm; right: 5mm; bottom: 0; height: .7mm; background: linear-gradient(90deg, transparent, var(--gold2), var(--gold), transparent); }
 
-.id-card .card-footer { position: relative; flex-shrink: 0; height: 7mm; margin-top: 2.5mm; background: linear-gradient(100deg, var(--idcard-navy) 0%, var(--idcard-navy-dark) 100%); overflow: hidden; }
-.id-card .card-footer::before { content: ''; position: absolute; top: -4.5mm; left: -10%; width: 120%; height: 9mm; background: var(--idcard-abu); border-radius: 50%; }
-.id-card .ornamen-footer { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 16mm; height: 5mm; opacity: .95; display: block; }
-.id-card .ornamen-footer svg { width: 100%; height: 100%; }
+.card.front .body { position: relative; height: 56mm; padding: 3.5mm 4mm 2.6mm; background: #fff; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.card.front .title { color: var(--gold); font-size: 2.65mm; font-weight: 800; letter-spacing: .28mm; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 1.4mm; }
+.card.front .title span { display: block; width: 7mm; height: .3mm; background: var(--gold); }
+.card.front .diamond { width: 1.25mm; height: 1.25mm; background: var(--navy); transform: rotate(45deg); display: block; }
+.card.front .name { margin-top: 2mm; margin-left: 2mm; margin-right: 2mm; color: var(--navy); font-weight: 900; font-size: 4.15mm; line-height: 1.12; text-transform: uppercase; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-shrink: 0; }
+.card.front .meta { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: .8mm; margin-top: 1.6mm; font-size: 2.3mm; color: #5d6b7d; flex-shrink: 0; }
+.card.front .meta div { min-width: 30mm; max-width: 44mm; padding: .5mm 2.5mm; border-radius: 5mm; background: #f4f6f9; line-height: 1.3; }
+.card.front .meta strong { color: #17365f; font-weight: 800; }
+
+.card.front .qr-wrap { position: relative; flex-shrink: 0; margin-top: auto; width: 25.8mm; height: 25.8mm; padding: 1.15mm; background: #fff; border: .42mm solid var(--navy); box-shadow: 0 0 0 .35mm var(--gold); border-radius: 1.8mm; display: flex; align-items: center; justify-content: center; }
+.card.front .qr-wrap > div { width: 23.2mm; height: 23.2mm; display: flex; align-items: center; justify-content: center; }
+.card.front .qr-wrap img, .card.front .qr-wrap canvas { width: 100% !important; height: 100% !important; display: block; }
+
+.card.front .bottom { position: absolute; left: 0; right: 0; bottom: 0; height: 10mm; overflow: hidden; background: linear-gradient(180deg, #173c6c 0%, #12345e 42%, #0b2a52 100%); }
+.card.front .bottom::before { content: ''; position: absolute; left: -8%; right: -8%; top: -6mm; height: 10mm; background: #fff; opacity: .96; border-radius: 50% 50% 0 0/100% 100% 0 0; }
+.card.front .bottom::after { content: ''; position: absolute; left: 0; right: 0; top: -.8mm; height: .45mm; background: linear-gradient(90deg, transparent 0%, #d9a62e 16%, #f2c75c 50%, #d9a62e 84%, transparent 100%); }
+.card.front .batik-footer { position: absolute; width: 8.5mm; height: 8.5mm; bottom: -3.4mm; z-index: 2; opacity: .24; }
+.card.front .batik-footer.left { left: 14mm; transform: translateX(-50%); }
+.card.front .batik-footer.right { left: auto; right: 14mm; transform: translateX(50%) scaleX(-1); }
 
 /* Preview di layar: HANYA wrapper ini yang di-scale (kartu itu sendiri tidak pernah di-transform). */
 .kartu-qr-preview-scale { transform: scale(2.7); transform-origin: top center; margin-bottom: 190mm; }
@@ -855,5 +854,5 @@ button.riwayat-item {
   /* A4 portrait, margin 10mm: kartu PORTRAIT 54x86mm -> 3 kolom x 3 baris = 9 kartu/lembar.
      Lebar: 54*3 + 5*2 = 172mm (masuk area 190mm). Tinggi: 86*3 + 5*2 = 268mm (masuk area 277mm). */
   .kartu-qr-grid-cetak { display: grid; grid-template-columns: repeat(3, 54mm); grid-auto-rows: 86mm; gap: 5mm; justify-content: center; width: 172mm; margin: 0 auto; }
-  .kartu-qr-grid-cetak .id-card { page-break-inside: avoid; box-shadow: none; }
+  .kartu-qr-grid-cetak .card.front { page-break-inside: avoid; box-shadow: none; }
 }
