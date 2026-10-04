@@ -364,13 +364,14 @@
   // bisa diuji langsung di browser).
   const MODUL_LAZY = {
     panelStok: 'admin-stok.js?v=20260903c',
-    panelShift: 'admin-shift.js?v=20260903c',
+    panelShift: 'admin-shift.js?v=20261005a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
     panelWebsitePublik: 'admin-website-publik.js',
     panelDuaMinggu: 'admin-export.js',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
-    panelRelawan: 'admin-import.js'      // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
+    panelRelawan: 'admin-import.js',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
+    panelKartuQr: 'admin-kartu-qr.js'
   };
   const modulTerpuat = new Set();
 
