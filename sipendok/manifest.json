@@ -1,0 +1,17 @@
+{
+  "name": "SIPENDOK — Sistem Informasi Penerimaan & Dokumen",
+  "short_name": "SIPENDOK",
+  "description": "Penerimaan paket harian, pagu, dan dokumen penerimaan SPPG Jeungjing.",
+  "lang": "id",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0b2e59",
+  "background_color": "#f3f6fb",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
