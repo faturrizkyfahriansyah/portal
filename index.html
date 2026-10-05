@@ -1,26 +1,155 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>SIPENDOK — SPPG Jeungjing</title>
-  <meta name="description" content="Sistem Informasi Penerimaan & Dokumen — SPPG Jeungjing">
-  <meta name="theme-color" content="#0b2e59">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="SIPENDOK">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="css/app.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPPG Jeungjing — Mendukung Program Makanan Bergizi Gratis</title>
+<meta name="description" content="SPPG Jeungjing mendukung Program Makanan Bergizi Gratis (MBG) di Desa Jeungjing, Kecamatan Cisoka, Kabupaten Tangerang.">
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="public.css">
 </head>
-<body>
-  <div id="app" aria-live="polite"></div>
-  <div id="toasts" aria-live="assertive"></div>
-  <div id="modal-root"></div>
-  <noscript>SIPENDOK memerlukan JavaScript.</noscript>
+<body class="pub-body" data-halaman-publik="beranda">
+
+  <header class="pub-header">
+    <div class="pub-header-inner">
+      <a href="index.html" class="pub-header-brand">
+        <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional">
+        <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
+        <span>SPPG Jeungjing</span>
+      </a>
+      <button type="button" class="pub-menu-btn" aria-label="Buka menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="pub-overlay"></div>
+  <aside class="pub-sidebar">
+    <button type="button" class="pub-sidebar-close" aria-label="Tutup menu">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <nav>
+      <a href="index.html">Beranda</a>
+      <a href="profil-sppg.html">Profil SPPG</a>
+      <a href="penerima-manfaat.html">Penerima Manfaat</a>
+      <a href="menu-hari-ini.html">Menu Hari Ini</a>
+      <a href="informasi-publik.html">Informasi</a>
+      <a href="kontak.html">Kontak</a>
+      <a href="portal.html" class="pub-sidebar-cta">Portal SPPG Jeungjing →</a>
+    </nav>
+  </aside>
+
+  <section class="pub-hero">
+    <div class="pub-wrap">
+      <div class="pub-hero-inner">
+        <p class="pub-eyebrow-plain">Satuan Pelayanan Pemenuhan Gizi</p>
+        <h1 data-konten="hero_judul">Mendukung Program<br>Makanan Bergizi Gratis</h1>
+        <p class="lede" data-konten="hero_deskripsi">SPPG Jeungjing menyiapkan dan mendistribusikan makanan bergizi setiap hari untuk mendukung tumbuh kembang anak-anak dan kesehatan ibu di Desa Jeungjing, Kecamatan Cisoka.</p>
+        <div class="pub-hero-actions">
+          <a href="profil-sppg.html" class="pub-btn pub-btn-primary">Tentang Kami</a>
+          <a href="menu-hari-ini.html" class="pub-btn pub-btn-outline">Lihat Menu Hari Ini</a>
+        </div>
+      </div>
+    </div>
+    <div class="pub-hero-art">
+      <img src="assets/ilustrasi-gedung-sppg-web.png" alt="Gedung SPPG Jeungjing">
+    </div>
+  </section>
+
+  <section class="pub-section alt">
+    <div class="pub-wrap">
+      <div class="pub-section-head">
+        <p class="pub-eyebrow-plain">Ringkasan</p>
+        <h2>Melayani Desa Jeungjing dan sekitarnya</h2>
+        <p>SPPG Jeungjing beroperasi setiap hari kerja, menyiapkan makanan bergizi langsung dari dapur menuju satuan pendidikan dan kelompok penerima manfaat di wilayah layanan.</p>
+      </div>
+      <div class="pub-stats">
+        <div class="pub-stat"><b>5</b><span>Hari operasional per minggu</span></div>
+        <div class="pub-stat"><b>1</b><span>Dapur produksi di Desa Jeungjing</span></div>
+        <div class="pub-stat"><b>50+</b><span>Relawan yang bertugas</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pub-section">
+    <div class="pub-wrap">
+      <div class="pub-section-head">
+        <p class="pub-eyebrow-plain">Hari ini</p>
+        <h2>Menu Hari Ini</h2>
+        <p>Susunan menu bergizi seimbang yang sedang disiapkan dan didistribusikan hari ini.</p>
+      </div>
+      <div class="pub-menu-grid">
+        <div class="pub-menu-item"><div class="ico">🍚</div><div class="label">Nasi</div><div class="val">Karbohidrat</div></div>
+        <div class="pub-menu-item"><div class="ico">🍗</div><div class="label">Ayam Bumbu</div><div class="val">Protein</div></div>
+        <div class="pub-menu-item"><div class="ico">🥬</div><div class="label">Sayur Bening</div><div class="val">Serat & Vitamin</div></div>
+        <div class="pub-menu-item"><div class="ico">🍉</div><div class="label">Semangka</div><div class="val">Buah</div></div>
+        <div class="pub-menu-item"><div class="ico">🥛</div><div class="label">Susu</div><div class="val">Pelengkap</div></div>
+      </div>
+      <p style="margin-top:20px;"><a href="menu-hari-ini.html" class="pub-btn pub-btn-outline">Lihat Detail Menu →</a></p>
+    </div>
+  </section>
+
+  <section class="pub-section alt">
+    <div class="pub-wrap">
+      <div class="pub-section-head">
+        <p class="pub-eyebrow-plain">Dampak</p>
+        <h2>Penerima Manfaat</h2>
+        <p>Kelompok yang menerima manfaat langsung dari layanan SPPG Jeungjing.</p>
+      </div>
+      <div class="pub-benef-grid">
+        <div class="pub-benef-card"><b>—</b><span>Peserta Didik</span></div>
+        <div class="pub-benef-card"><b>—</b><span>Ibu Hamil</span></div>
+        <div class="pub-benef-card"><b>—</b><span>Ibu Menyusui</span></div>
+        <div class="pub-benef-card"><b>—</b><span>Balita</span></div>
+      </div>
+      <p style="margin-top:20px;"><a href="penerima-manfaat.html" class="pub-btn pub-btn-outline">Selengkapnya →</a></p>
+    </div>
+  </section>
+
+  <section class="pub-section">
+    <div class="pub-wrap">
+      <div class="pub-section-head">
+        <p class="pub-eyebrow-plain">Kabar Terbaru</p>
+        <h2>Informasi</h2>
+      </div>
+      <div class="pub-info-list" id="infoTerbaruList">
+        <div class="pub-info-row">
+          <time>—</time>
+          <div>
+            <h3>Informasi akan tampil di sini</h3>
+            <p>Kabar dan pengumuman terbaru dari SPPG Jeungjing akan diperbarui secara berkala.</p>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:20px;"><a href="informasi-publik.html" class="pub-btn pub-btn-outline">Lihat Semua Informasi →</a></p>
+    </div>
+  </section>
+
+  <section class="pub-section alt">
+    <div class="pub-wrap pub-two-col">
+      <div>
+        <p class="pub-eyebrow-plain">Lokasi</p>
+        <h2 style="font-family:var(--pub-serif);font-size:26px;color:var(--pub-navy);margin:0 0 14px;">SPPG Jeungjing</h2>
+        <p style="color:var(--pub-ink-soft);margin:0 0 20px;">Kp. Kecok, RT.004, Desa Jeungjing, Kecamatan Cisoka, Kabupaten Tangerang, Banten 15730</p>
+        <a href="kontak.html" class="pub-btn pub-btn-primary">Hubungi Kami</a>
+      </div>
+      <div class="pub-map-frame">
+        <iframe src="https://www.google.com/maps?q=Jeungjing,Cisoka,Tangerang&output=embed" width="100%" height="100%" style="border:0;" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pub-footer">
+    <div class="pub-wrap">
+      <strong>SPPG JEUNGJING</strong>
+      <p style="margin:10px 0 0;">Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang – Banten, 15730</p>
+      <hr class="rule">
+      <p class="fine">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
+    </div>
+  </footer>
+
+  <script src="public-nav.js"></script>
   <script src="config.js"></script>
-  <script type="module" src="js/app.js"></script>
+  <script src="public-konten.js"></script>
 </body>
 </html>
