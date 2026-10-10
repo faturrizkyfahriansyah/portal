@@ -23,6 +23,7 @@
     formPenugasanKhusus: document.getElementById('formPenugasanKhusus'),
     khususOperasional: document.getElementById('khususOperasional'),
     khususPeriode: document.getElementById('khususPeriode'),
+    khususMingguKeterangan: document.getElementById('khususMingguKeterangan'),
     khususModeTanggalHari: document.getElementById('khususModeTanggalHari'),
     khususModeTanggalPeriode: document.getElementById('khususModeTanggalPeriode'),
     khususRelawan: document.getElementById('khususRelawan'),
@@ -85,8 +86,8 @@
         relawan.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.nama)}</option>`).join('');
       el.khususDivisi.innerHTML = '<option value="">Pilih Divisi...</option>' +
         divisi.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
-      el.khususPeriode.innerHTML = '<option value="">Pilih Periode...</option>' +
-        periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
+      // PERUBAHAN: khususPeriode sekarang <input type="date"> (pilih 1 minggu,
+      // bukan lagi dropdown Periode) -- tidak perlu diisi dari daftar periode lagi.
       el.koreksiRelawan.innerHTML = '<option value="">Pilih Relawan...</option>' +
         relawan.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.nama)}</option>`).join('');
       el.khususOperasional.innerHTML = '<option value="">Pilih Tanggal Operasional...</option>' +
@@ -116,7 +117,18 @@
     el.khususModeTanggalHari.classList.remove('primary');
     el.khususOperasional.style.display = 'none';
     el.khususPeriode.style.display = '';
-    el.tbodyPenugasanKhusus.innerHTML = '<tr><td colspan="5"><div class="empty-state">Daftar di bawah menampilkan penugasan per hari. Pilih "Satu Hari" untuk melihat daftarnya, atau lanjutkan di sini untuk membuat penugasan ke seluruh periode sekaligus.</div></td></tr>';
+    el.khususMingguKeterangan.style.display = '';
+    el.tbodyPenugasanKhusus.innerHTML = '<tr><td colspan="5"><div class="empty-state">Daftar di bawah menampilkan penugasan per hari. Pilih "Satu Hari" untuk melihat daftarnya, atau lanjutkan di sini untuk membuat penugasan ke 1 minggu (7 hari) sekaligus.</div></td></tr>';
+  });
+  // PERUBAHAN: dulu "Satu Periode Penuh" (bisa 2+ minggu sekaligus), sekarang
+  // dibatasi 1 minggu (7 hari) dari tanggal yang dipilih -- supaya cakupan
+  // bulk-assign tidak terlalu luas/berisiko secara tidak sengaja.
+  el.khususPeriode.addEventListener('change', () => {
+    if (!el.khususPeriode.value) { el.khususMingguKeterangan.textContent = ''; return; }
+    const mulai = new Date(el.khususPeriode.value + 'T00:00:00');
+    const akhir = new Date(mulai.getTime() + 6 * 86400000);
+    const fmt = (d) => d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    el.khususMingguKeterangan.textContent = `Mencakup: ${fmt(mulai)} s/d ${fmt(akhir)} (7 hari)`;
   });
   el.khususModeRelawanIndividu.addEventListener('click', () => {
     modeRelawan = 'individu';
@@ -232,8 +244,8 @@
     };
 
     if (modeTanggal === 'periode') {
-      if (!el.khususPeriode.value) { showError('Pilih Periode dulu.'); return; }
-      payload.idPeriode = el.khususPeriode.value;
+      if (!el.khususPeriode.value) { showError('Pilih tanggal mulai minggu dulu.'); return; }
+      payload.tanggalMulaiMinggu = el.khususPeriode.value;
     } else {
       if (!el.khususOperasional.value) { showError('Pilih Tanggal Operasional dulu.'); return; }
       payload.idOperasional = el.khususOperasional.value;
@@ -250,9 +262,8 @@
     // Konfirmasi kalau salah satu (atau keduanya) mode bulk aktif -- supaya
     // tidak ada yang tidak sengaja menugaskan seluruh divisi/periode.
     if (modeTanggal === 'periode' || modeRelawan === 'divisi') {
-      const namaPeriode = modeTanggal === 'periode' ? (cache.periode.find(p => p.id === el.khususPeriode.value) || {}).nama : null;
       const keterangan = [
-        modeTanggal === 'periode' ? `seluruh hari di periode "${namaPeriode || el.khususPeriode.value}"` : 'tanggal yang dipilih',
+        modeTanggal === 'periode' ? `1 minggu (7 hari) mulai ${el.khususPeriode.value}` : 'tanggal yang dipilih',
         modeRelawan === 'divisi' ? `seluruh relawan aktif di divisi "${el.khususDivisi.value}"` : 'relawan yang dipilih'
       ];
       if (!confirm(`Ini akan membuat/memperbarui penugasan khusus untuk ${keterangan[1]}, pada ${keterangan[0]}. Lanjutkan?`)) return;
@@ -314,9 +325,28 @@
           <select id="koreksiTujuan${i}">${opsiTujuan}</select>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button type="button" class="btn-mini primary" style="margin-top:8px;" data-aksi-koreksi="${escapeHtml(h.idAbsensi)}" data-koreksi-tujuan-idx="${i}">Koreksi ke Tanggal Ini</button>
+            ${!h.jamMasuk ? `<button type="button" class="btn-mini" style="margin-top:8px;color:#1a7a3c;" data-aksi-tandai-hadir="${escapeHtml(h.idAbsensi)}">✓ Tandai Hadir Manual</button>` : ''}
             <button type="button" class="btn-mini" style="margin-top:8px;color:#b23a3a;" data-aksi-hapus="${escapeHtml(h.idAbsensi)}">🗑️ Hapus Baris Ini</button>
           </div>
         </div>`).join('');
+
+      el.koreksiHasil.querySelectorAll('[data-aksi-tandai-hadir]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          // Keterangan WAJIB -- ini memengaruhi rekap penggajian (lihat
+          // catatan di tandaiHadirManual, Shift.gs), harus ada jejak audit.
+          const keterangan = prompt('Alasan relawan ditandai Hadir manual (wajib diisi, akan tercatat untuk audit & memengaruhi rekap penggajian):');
+          if (keterangan === null) return; // batal
+          if (!keterangan.trim()) { showError('Alasan wajib diisi.'); return; }
+          if (!confirm('Tandai relawan ini Hadir untuk tanggal operasional ini? Jam Masuk/Pulang akan diisi sesuai jadwal shift-nya.')) return;
+          try {
+            const hasilTandai = await apiPost('tandaiHadirManual', { token: token(), idAbsensi: btn.dataset.aksiTandaiHadir, keterangan: keterangan.trim() });
+            showSuccess('Berhasil ditandai Hadir untuk operasional ' + hasilTandai.tanggalOperasional + '.');
+            el.btnCariKoreksi.click();
+          } catch (err) {
+            showError(err.message);
+          }
+        });
+      });
 
       el.koreksiHasil.querySelectorAll('[data-aksi-koreksi]').forEach(btn => {
         btn.addEventListener('click', async () => {

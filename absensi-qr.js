@@ -208,6 +208,32 @@ const SUARA = {
 function getar_(pola) { try { if (navigator.vibrate) navigator.vibrate(pola); } catch (e) {} }
 
 // ============================================================
+// SUARA BICARA (text-to-speech) -- menyebutkan nama + hasil, supaya
+// petugas scan tidak harus terus menatap layar utk tahu hasilnya.
+// Browser (terutama iOS Safari) butuh "dibuka" lewat gestur pengguna
+// langsung, sama seperti AudioContext di atas -- lihat ucapkanTes_()
+// yg dipanggil di tombol Mulai Kamera.
+// ============================================================
+function ucapkan_(teks) {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel(); // hentikan ucapan sebelumnya kalau masih jalan, supaya tidak menumpuk
+    const u = new SpeechSynthesisUtterance(teks);
+    u.lang = 'id-ID';
+    u.rate = 1.05;
+    window.speechSynthesis.speak(u);
+  } catch (e) { console.warn('SIPRES QR: gagal mengucapkan suara', e); }
+}
+function ucapkanTes_() {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0; // nyaris tak terdengar, cuma utk "membuka" izin suara di browser ketat
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+// ============================================================
 // KAMERA + LOOP BACA QR (jsQR)
 // ============================================================
 let _barcodeDetector = null;
@@ -436,8 +462,12 @@ function tampilkanHasil_(d) {
   document.getElementById('hasilJudul').textContent = tampilan.judul;
   document.getElementById('hasilNama').textContent = d.nama || '-';
   document.getElementById('hasilDivisi').textContent = d.divisi ? ('Divisi: ' + d.divisi) : '';
+  // PERBAIKAN: sebelumnya baris ini menimpa teks banner operasional di atas
+  // (yg seharusnya selalu menunjukkan status HARI INI) dengan tanggal dari
+  // hasil scan -- membingungkan kalau beda tanggal. Tanggal yang relevan
+  // sekarang disebutkan eksplisit di dalam d.pesan sendiri (lihat AbsensiQr.gs),
+  // tempat yang lebih jelas drpd diam-diam mengganti banner.
   document.getElementById('hasilPesan').textContent = d.pesan || '';
-  if (d.tanggal) document.getElementById('operasionalTanggal').textContent = 'Operasional: ' + d.tanggal;
 
   const jamEl = document.getElementById('hasilJam');
   jamEl.textContent = d.jam || '';
@@ -455,6 +485,7 @@ function tampilkanHasil_(d) {
   target.className = 'kamera-target' + (tampilan.target ? ' ' + tampilan.target : '');
 
   if (SUARA[tampilan.suara]) SUARA[tampilan.suara]();
+  ucapkan_((d.nama || 'Kartu tidak dikenal') + ', ' + tampilan.judul.toLowerCase());
   if (tampilan.warna === 'sukses') getar_(60);
   else if (tampilan.warna === 'bahaya') getar_([40, 50, 40, 50]);
   else getar_(35);
@@ -567,6 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // terlambat utk membuka audio di browser yang ketat soal ini).
     const ac = ambilAudioCtx_();
     try { await ac.resume(); } catch (_) {}
+    ucapkanTes_();
     const siapDecoder = await (window.sipresQrReady || Promise.resolve(typeof window.jsQR === 'function'));
     if (!siapDecoder || typeof window.jsQR !== 'function') {
       tampilkanErrorScanner_('Library pembaca QR gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.');

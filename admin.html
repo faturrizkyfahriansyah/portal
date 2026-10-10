@@ -888,15 +888,16 @@
 
     <!-- PENUGASAN KHUSUS -->
     <div class="shift-sub" id="shiftSubKhusus" style="display:none;">
-      <p style="font-size:12.5px;color:var(--color-text-muted);margin:-4px 0 12px;">Override jam untuk relawan pada tanggal operasional tertentu — prioritasnya di atas Shift Divisi. Bisa untuk 1 relawan/1 hari, atau sekaligus 1 divisi penuh/1 periode penuh (tetap tersimpan per orang per hari, bisa diedit/dihapus satu-satu setelahnya).</p>
+      <p style="font-size:12.5px;color:var(--color-text-muted);margin:-4px 0 12px;">Override jam untuk relawan pada tanggal operasional tertentu — prioritasnya di atas Shift Divisi. Bisa untuk 1 relawan/1 hari, atau sekaligus 1 divisi penuh/1 minggu (7 hari) (tetap tersimpan per orang per hari, bisa diedit/dihapus satu-satu setelahnya).</p>
       <form class="inline-form" id="formPenugasanKhusus" style="flex-direction:column;align-items:stretch;">
 
         <div style="display:flex;gap:6px;">
           <button type="button" class="btn-mini primary" id="khususModeTanggalHari" data-mode-tanggal="hari" style="flex:1;">Satu Hari</button>
-          <button type="button" class="btn-mini" id="khususModeTanggalPeriode" data-mode-tanggal="periode" style="flex:1;">Satu Periode Penuh</button>
+          <button type="button" class="btn-mini" id="khususModeTanggalPeriode" data-mode-tanggal="periode" style="flex:1;">Satu Minggu</button>
         </div>
         <select id="khususOperasional"><option value="">Pilih Tanggal Operasional...</option></select>
-        <select id="khususPeriode" style="display:none;"><option value="">Pilih Periode...</option></select>
+        <input type="date" id="khususPeriode" style="display:none;" title="Tanggal mulai -- akan mencakup 7 hari dari tanggal ini">
+        <p id="khususMingguKeterangan" style="display:none;font-size:11.5px;color:var(--color-text-muted);margin:4px 0 0;"></p>
 
         <div style="display:flex;gap:6px;margin-top:6px;">
           <button type="button" class="btn-mini primary" id="khususModeRelawanIndividu" data-mode-relawan="individu" style="flex:1;">Individu</button>
