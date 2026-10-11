@@ -630,7 +630,7 @@ async function pindahTabAdminStokPaksa(tab) {
 // ============================================================
 async function muatHakAksesAdmin() {
   const [petugas, semuaRelawan] = await Promise.all([
-    apiPost('getDaftarPetugasStok', { token: sesiAdminStok.token }),
+    apiGet('getDaftarPetugasStok', { token: sesiAdminStok.token }),
     apiGet('getRelawan', { token: sesiAdminStok.token, semua: '0' })
   ]);
   const idPetugasSet = new Set(petugas.map(p => p.idRelawan));

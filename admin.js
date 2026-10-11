@@ -362,7 +362,7 @@
   // sub-tab SIPANDU, bukan klik tab biasa -- terlalu berisiko diubah tanpa
   // bisa diuji langsung di browser).
   const MODUL_LAZY = {
-    panelStok: 'admin-stok.js?v=20260903c',
+    panelStok: 'admin-stok.js?v=20261011a',
     panelShift: 'admin-shift.js?v=20261010b',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
