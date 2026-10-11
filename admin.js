@@ -368,7 +368,7 @@
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
     panelWebsitePublik: 'admin-website-publik.js',
-    panelDuaMinggu: 'admin-export.js?v=20261011a',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
+    panelDuaMinggu: 'admin-export.js?v=20261011b',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'admin-import.js',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
     panelKartuQr: 'admin-kartu-qr.js'
   };
@@ -716,7 +716,7 @@
     if (!idPeriode) { showError('Pilih periode dulu.'); return; }
     showLoading('Memuat rekap...');
     try {
-      const res = await apiGet('getRekapPenggajianAdmin', { idPeriode, token: authToken });
+      const res = await apiPost('getRekapPenggajianAdmin', { idPeriode, token: authToken });
       cache.rekapDuaMinggu = res.data;
       renderRekapDuaMingguTable();
       if (res.jumlahBelumLengkap) showError(res.jumlahBelumLengkap + ' relawan belum ada Master Tarif-nya untuk periode ini -- atur dulu di bagian "Atur Tarif per Relawan" di bawah.');

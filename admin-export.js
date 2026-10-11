@@ -172,7 +172,7 @@
     if (!idPeriode) { status.textContent = '⚠️ Pilih periode dulu.'; return; }
     status.textContent = 'Memuat...';
     try {
-      const data = await apiGet('getMasterTarifUntukPeriodeAdmin', { token: token(), idPeriode });
+      const data = await apiPost('getMasterTarifUntukPeriodeAdmin', { token: token(), idPeriode });
       if (!data.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Belum ada data -- klik "Siapkan Master Tarif" dulu.</div></td></tr>'; status.textContent = ''; return; }
       tbody.innerHTML = data.map(t => `
         <tr>
