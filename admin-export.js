@@ -136,7 +136,8 @@
     wadah.id = 'wadahInsentif';
     wadah.style.marginTop = '16px';
     wadah.innerHTML = `
-      <p class="section-title">Insentif & Penggajian</p>
+      <p class="section-title">Atur Tarif per Relawan</p>
+      <p style="font-size:12px;color:var(--color-text-muted);margin:0 0 10px;">Hasil rekap & insentif terhitung sekarang tampil di tabel utama "Rekap Per Periode" di atas -- bagian ini khusus untuk MENGATUR Jabatan &amp; Tarif Harian tiap relawan.</p>
       <div class="inline-form-relawan" style="flex-wrap:wrap;">
         <select id="insentifPeriode"><option value="">Pilih periode...</option></select>
         <button type="button" class="btn-outline" id="btnSiapkanTarif">Siapkan Master Tarif</button>
@@ -152,23 +153,9 @@
           <tbody id="tbodyInsentifTarif"><tr><td colspan="5"><div class="empty-state">Pilih periode lalu klik Muat Data Tarif.</div></td></tr></tbody>
         </table>
       </div>
-
-      <p class="section-title" style="margin-top:18px;">Rekap Penggajian</p>
-      <button type="button" class="btn-mini primary" id="btnMuatRekapGaji">Hitung Rekap Penggajian</button>
-      <div class="table-wrap" style="margin-top:10px;">
-        <table>
-          <thead><tr><th>Nama</th><th>Divisi</th><th>Jabatan</th><th>Hadir</th><th>Terlambat</th><th>Hari Dibayar</th><th>Tarif/Hari</th><th>Total Gaji</th></tr></thead>
-          <tbody id="tbodyRekapGaji"><tr><td colspan="8"><div class="empty-state">Klik Hitung Rekap Penggajian.</div></td></tr></tbody>
-        </table>
-      </div>
     `;
     panel.appendChild(wadah);
     return wadah;
-  }
-
-  function formatRupiah_(n) {
-    if (n === null || n === undefined) return '-';
-    return 'Rp' + Number(n).toLocaleString('id-ID');
   }
 
   async function muatDaftarPeriodeInsentif_() {
@@ -216,29 +203,6 @@
     } catch (err) { status.textContent = '❌ ' + err.message; }
   }
 
-  async function muatRekapGaji_() {
-    const idPeriode = document.getElementById('insentifPeriode').value;
-    const tbody = document.getElementById('tbodyRekapGaji');
-    if (!idPeriode) { showError('Pilih periode dulu.'); return; }
-    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">Menghitung...</div></td></tr>';
-    try {
-      const hasil = await apiGet('getRekapPenggajianAdmin', { token: token(), idPeriode });
-      if (!hasil.data.length) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">Tidak ada data.</div></td></tr>'; return; }
-      tbody.innerHTML = hasil.data.map(r => `
-        <tr style="${r.tarifLengkap ? '' : 'background:#fdf1de;'}">
-          <td>${escapeHtml(r.namaRelawan)}</td>
-          <td>${escapeHtml(r.divisi)}</td>
-          <td>${escapeHtml(r.jabatan || '-')}</td>
-          <td>${r.hadir}</td>
-          <td>${r.terlambat}</td>
-          <td>${r.hariDibayar}</td>
-          <td>${formatRupiah_(r.tarifHarian)}</td>
-          <td>${r.tarifLengkap ? formatRupiah_(r.totalGaji) : '<span style="color:#8a5a12;">⚠️ Tarif belum lengkap</span>'}</td>
-        </tr>`).join('');
-      if (hasil.jumlahBelumLengkap) showError(hasil.jumlahBelumLengkap + ' relawan belum lengkap tarifnya -- cek tabel di atas (baris oranye).');
-    } catch (err) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">❌ ' + escapeHtml(err.message) + '</div></td></tr>'; }
-  }
-
   const wadahInsentif = bikinWadahInsentif_();
   if (wadahInsentif) {
     muatDaftarPeriodeInsentif_().catch(() => {});
@@ -271,6 +235,5 @@
     });
 
     document.getElementById('btnMuatTarif').addEventListener('click', muatTabelTarif_);
-    document.getElementById('btnMuatRekapGaji').addEventListener('click', muatRekapGaji_);
   }
 })();

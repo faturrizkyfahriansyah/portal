@@ -63,8 +63,7 @@
     divisiGrid: document.getElementById('divisiGrid'),
     tbodyHarian: document.getElementById('tbodyHarian'),
 
-    filterPeriodeAwal: document.getElementById('filterPeriodeAwal'),
-    filterPeriodeAkhir: document.getElementById('filterPeriodeAkhir'),
+    filterPeriodeDuaMinggu: document.getElementById('filterPeriodeDuaMinggu'),
     filterDivisiDuaMinggu: document.getElementById('filterDivisiDuaMinggu'),
     btnMuatDuaMinggu: document.getElementById('btnMuatDuaMinggu'),
     btnExportDuaMinggu: document.getElementById('btnExportDuaMinggu'),
@@ -369,7 +368,7 @@
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
     panelWebsitePublik: 'admin-website-publik.js',
-    panelDuaMinggu: 'admin-export.js?v=20261010a',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
+    panelDuaMinggu: 'admin-export.js?v=20261011a',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'admin-import.js',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
     panelKartuQr: 'admin-kartu-qr.js'
   };
@@ -433,7 +432,7 @@
     { key: 'ringkasanAkun', label: 'Ringkasan Akun', fn: () => apiGet('getRingkasanAkunRelawan', { token: authToken }) },
     { key: 'siragaDashboard', label: 'SIRAGA', fn: () => apiGet('getSiragaDashboard', { token: authToken }) },
     { key: 'sipanduRingkas', label: 'SIPANDU', fn: () => apiGet('getSipanduDashboardRingkas', { token: authToken }) },
-    { key: 'rekapDuaMingguDashboard', label: 'Rekap 2 Minggu', fn: () => apiGet('getRekapDuaMingguDashboard', { token: authToken }) }
+    { key: 'rekapDuaMingguDashboard', label: 'Rekap Per Periode', fn: () => apiGet('getRekapDuaMingguDashboard', { token: authToken }) }
   ];
   const RENDER_UNTUK_KEY = {
     relawanList: renderRelawanTable,
@@ -477,10 +476,8 @@
     // server, jadi diisi SEGERA, bukan menunggu fetch apa pun selesai.
     const now = new Date();
     el.filterTanggal.value = toDateInputValue(now);
-    const periodeDefault = defaultPeriodeDuaMinggu(now);
-    el.filterPeriodeAwal.value = toDateInputValue(periodeDefault.awal);
-    el.filterPeriodeAkhir.value = toDateInputValue(periodeDefault.akhir);
     el.inputTanggalJadwal.value = toDateInputValue(now);
+    muatDaftarPeriodeDuaMinggu_(); // Rekap Per Periode -- isi dropdown + auto-pilih periode AKTIF (tidak perlu tunggu fetch lain)
 
     // OPTIMASI: TIDAK ADA LAGI overlay full-screen di sini -- shell
     // Dashboard SUDAH tampil (dari alur login/pulihkanSesiAdmin_ sebelum
@@ -686,25 +683,45 @@
   });
 
   // ===== REKAP 2 MINGGU =====
+  // ===== REKAP PER PERIODE (revisi dari Rekap 2 Minggu) =====
+  // Sumber data sekarang getRekapPenggajianAdmin (MasterTarif.gs) --
+  // SATU panggilan yang SUDAH menggabungkan kehadiran (reuse
+  // getRekapDuaMinggu secara internal, TIDAK ditulis ulang) + Nomor
+  // Rekening + Master Tarif. Tidak ada lagi tabel kedua terpisah utk
+  // insentif -- itu sekarang DI SINI, bukan duplikat di tempat lain.
+  function formatRupiahDuaMinggu_(n) {
+    if (n === null || n === undefined) return '-';
+    return 'Rp' + Number(n).toLocaleString('id-ID');
+  }
+
+  async function muatDaftarPeriodeDuaMinggu_() {
+    try {
+      const daftar = await apiGet('getPeriodeListAdmin', { token: authToken });
+      cache.periodeDuaMinggu = daftar;
+      const opsi = daftar.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)} (${escapeHtml(p.tanggalMulai)} - ${escapeHtml(p.tanggalSelesai)})</option>`).join('');
+      el.filterPeriodeDuaMinggu.innerHTML = '<option value="">Pilih periode...</option>' + opsi;
+      // Periode aktif menjadi pilihan awal secara otomatis (sesuai spesifikasi) --
+      // kalau tidak ada yang berstatus AKTIF, biarkan kosong (Admin pilih manual).
+      const aktif = daftar.find(p => String(p.status).toUpperCase() === 'AKTIF');
+      if (aktif) { el.filterPeriodeDuaMinggu.value = aktif.id; muatRekapDuaMinggu(); }
+    } catch (err) {
+      console.warn('Gagal memuat daftar periode utk Rekap Per Periode:', err);
+    }
+  }
+
   el.btnMuatDuaMinggu.addEventListener('click', muatRekapDuaMinggu);
 
   async function muatRekapDuaMinggu() {
-    if (!el.filterPeriodeAwal.value || !el.filterPeriodeAkhir.value) return;
-    if (el.filterPeriodeAwal.value > el.filterPeriodeAkhir.value) {
-      showError('Periode awal tidak boleh setelah periode akhir.');
-      return;
-    }
-    showLoading('Memuat rekap 2 minggu...');
+    const idPeriode = el.filterPeriodeDuaMinggu.value;
+    if (!idPeriode) { showError('Pilih periode dulu.'); return; }
+    showLoading('Memuat rekap...');
     try {
-      const res = await apiGet('getRekapDuaMinggu', {
-        periodeAwal: el.filterPeriodeAwal.value,
-        periodeAkhir: el.filterPeriodeAkhir.value,
-        token: authToken
-      });
+      const res = await apiGet('getRekapPenggajianAdmin', { idPeriode, token: authToken });
       cache.rekapDuaMinggu = res.data;
       renderRekapDuaMingguTable();
+      if (res.jumlahBelumLengkap) showError(res.jumlahBelumLengkap + ' relawan belum ada Master Tarif-nya untuk periode ini -- atur dulu di bagian "Atur Tarif per Relawan" di bawah.');
     } catch (err) {
-      showError(err.message || 'Gagal memuat rekap 2 minggu.');
+      showError(err.message || 'Gagal memuat rekap.');
     } finally {
       hideLoading();
     }
@@ -715,28 +732,42 @@
     const divisi = el.filterDivisiDuaMinggu.value;
     if (divisi) rows = rows.filter(r => r.divisi === divisi);
     if (!rows.length) {
-      el.tbodyDuaMinggu.innerHTML = `<tr><td colspan="8"><div class="empty-state">Belum ada data untuk periode ini.</div></td></tr>`;
+      el.tbodyDuaMinggu.innerHTML = `<tr><td colspan="11"><div class="empty-state">Belum ada data untuk periode ini.</div></td></tr>`;
       return;
     }
+    // Urutan kolom WAJIB persis: Nama, Divisi, Nomor Rekening, Total Hari
+    // Kerja, Terlambat, Izin, Sakit, Tidak Hadir, Hadir, Tarif per Hari,
+    // Total Insentif (sesuai spesifikasi Rekap Per Periode).
     el.tbodyDuaMinggu.innerHTML = rows.map(r => `
-      <tr>
-        <td>${escapeHtml(r.nama)}</td>
+      <tr${r.tarifLengkap ? '' : ' style="background:#fdf1de;"'}>
+        <td>${escapeHtml(r.namaRelawan)}</td>
         <td>${escapeHtml(r.divisi)}</td>
-        <td>${r.hadir}</td>
+        <td>${r.nomorRekening ? escapeHtml(r.nomorRekening) : '-'}</td>
+        <td>${r.totalHariKerja}</td>
         <td>${r.terlambat}</td>
         <td>${r.izin}</td>
         <td>${r.sakit}</td>
         <td>${r.tidakHadir}</td>
-        <td>${r.totalHariKerja}</td>
+        <td>${r.hadir + r.terlambat}</td>
+        <td>${r.tarifLengkap ? formatRupiahDuaMinggu_(r.tarifHarian) : '<span style="color:#8a5a12;">⚠️ Tarif belum diatur</span>'}</td>
+        <td>${r.tarifLengkap ? formatRupiahDuaMinggu_(r.totalGaji) : '-'}</td>
       </tr>`).join('');
   }
-  el.filterDivisiDuaMinggu.addEventListener('change', () => cache.rekapDuaMinggu.length && renderRekapDuaMingguTable());
+  el.filterDivisiDuaMinggu.addEventListener('change', () => cache.rekapDuaMinggu && cache.rekapDuaMinggu.length && renderRekapDuaMingguTable());
+  el.filterPeriodeDuaMinggu.addEventListener('change', muatRekapDuaMinggu);
 
   el.btnExportDuaMinggu.addEventListener('click', () => {
-    if (!cache.rekapDuaMinggu.length) { showError('Tidak ada data untuk diexport.'); return; }
-    const rows = [['Nama', 'Divisi', 'Hadir', 'Terlambat', 'Izin', 'Sakit', 'Tidak Hadir', 'Total Hari Kerja']];
-    cache.rekapDuaMinggu.forEach(r => rows.push([r.nama, r.divisi, r.hadir, r.terlambat, r.izin, r.sakit, r.tidakHadir, r.totalHariKerja]));
-    downloadCsv(rows, `rekap-2minggu-${el.filterPeriodeAwal.value}_${el.filterPeriodeAkhir.value}.csv`);
+    if (!cache.rekapDuaMinggu || !cache.rekapDuaMinggu.length) { showError('Tidak ada data untuk diexport.'); return; }
+    // Urutan kolom CSV SAMA PERSIS dengan tabel (sesuai spesifikasi §7).
+    const rows = [['Nama', 'Divisi', 'Nomor Rekening', 'Total Hari Kerja', 'Terlambat', 'Izin', 'Sakit', 'Tidak Hadir', 'Hadir', 'Tarif per Hari', 'Total Insentif']];
+    cache.rekapDuaMinggu.forEach(r => rows.push([
+      r.namaRelawan, r.divisi, r.nomorRekening || '', r.totalHariKerja, r.terlambat, r.izin, r.sakit, r.tidakHadir,
+      r.hadir + r.terlambat,
+      r.tarifLengkap ? r.tarifHarian : 'Tarif belum diatur',
+      r.tarifLengkap ? r.totalGaji : ''
+    ]));
+    const namaPeriode = (cache.periodeDuaMinggu.find(p => p.id === el.filterPeriodeDuaMinggu.value) || {}).nama || el.filterPeriodeDuaMinggu.value;
+    downloadCsv(rows, `rekap-per-periode-${namaPeriode}.csv`);
   });
 
   // ===== KELOLA RELAWAN =====
@@ -774,7 +805,7 @@
     if (status) rows = rows.filter(r => (r.status || 'AKTIF') === status);
 
     if (!rows.length) {
-      el.tbodyRelawan.innerHTML = emptyOrErrorRow('relawanList', 5, 'Tidak ada relawan yang cocok.');
+      el.tbodyRelawan.innerHTML = emptyOrErrorRow('relawanList', 6, 'Tidak ada relawan yang cocok.');
       return;
     }
 
@@ -792,6 +823,12 @@
           </div>
         </td>
         <td><select class="mini-select select-divisi-relawan">${divisiOptions}</select></td>
+        <td>
+          <div class="editable-name">
+            <span class="cell-rekening">${r.nomorRekening ? escapeHtml(r.nomorRekening) : '<span style="color:var(--color-text-muted);">-</span>'}</span>
+            <button type="button" class="btn-mini btn-edit-rekening" title="Ubah nomor rekening">✎</button>
+          </div>
+        </td>
         <td><span class="badge ${status === 'AKTIF' ? 'aktif' : 'nonaktif'}">${status}</span></td>
         <td><button type="button" class="btn-mini toggle-status" data-status="${status}">${status === 'AKTIF' ? 'Nonaktifkan' : 'Aktifkan'}</button></td>
       </tr>`;
@@ -842,6 +879,36 @@
         input.addEventListener('keydown', (e) => { if (e.key === 'Enter') simpanNamaBaru(wrap, input.value.trim()); });
       });
     });
+
+    // Rekap Per Periode -- edit Nomor Rekening, pola SAMA PERSIS dgn edit
+    // nama di atas (klik pensil -> jadi input -> simpan via ✓/Enter).
+    el.tbodyRelawan.querySelectorAll('.btn-edit-rekening').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const wrap = btn.closest('.editable-name');
+        const rekeningLama = wrap.querySelector('.cell-rekening').textContent.trim();
+        wrap.innerHTML = `
+          <input type="text" inputmode="numeric" class="mini-input input-edit-rekening" value="${rekeningLama === '-' ? '' : escapeHtml(rekeningLama)}" placeholder="Nomor rekening" style="width:140px;">
+          <button type="button" class="btn-mini save-rekening">✓</button>`;
+        const input = wrap.querySelector('.input-edit-rekening');
+        input.focus();
+        input.select();
+        wrap.querySelector('.save-rekening').addEventListener('click', () => simpanRekeningBaru(wrap, input.value.trim()));
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') simpanRekeningBaru(wrap, input.value.trim()); });
+      });
+    });
+  }
+
+  async function simpanRekeningBaru(wrap, rekeningBaru) {
+    const id = wrap.closest('tr').dataset.id;
+    showLoading('Menyimpan nomor rekening...');
+    try {
+      await apiPost('updateRelawan', { token: authToken, id, nomorRekening: rekeningBaru });
+      await muatUlangRelawan();
+    } catch (err) {
+      showError(err.message || 'Gagal menyimpan nomor rekening.');
+    } finally {
+      hideLoading();
+    }
   }
 
   async function simpanNamaBaru(wrap, namaBaru) {
@@ -1712,10 +1779,10 @@
       if (rdGagal) {
         rekIsi.textContent = gagalTanda;
       } else if (!rd.tersedia) {
-        rekJudul.textContent = '📊 Rekap 2 Minggu';
+        rekJudul.textContent = '📊 Rekap Per Periode';
         rekIsi.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);margin:0;">Belum ada Periode Kerja untuk direkap.</p>';
       } else {
-        rekJudul.textContent = '📊 Rekap 2 Minggu — ' + (rd.sementara ? 'Sementara' : 'Periode Selesai') + ' (' + rd.judul + ')';
+        rekJudul.textContent = '📊 Rekap Per Periode — ' + (rd.sementara ? 'Sementara' : 'Periode Selesai') + ' (' + rd.judul + ')';
         const rk = rd.data;
         const totalHadir = rk.reduce((a, r) => a + (r.hadir || 0), 0);
         const totalTerlambat = rk.reduce((a, r) => a + (r.terlambat || 0), 0);

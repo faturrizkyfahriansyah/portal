@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       r.id.toLowerCase().indexOf(cari) !== -1 || String(r.instansi).toLowerCase().indexOf(cari) !== -1
     );
     if (!hasil.length) {
-      tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">Tidak ada data yang cocok.</div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state">Tidak ada data yang cocok.</div></td></tr>';
       return;
     }
     // Nilai 0 ditampilkan "—" di sini (presentation layer saja) -- data
@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <td>${r.busui || '—'}</td>
         <td>${r.balita || '—'}</td>
         <td><strong>${r.jumlah}</strong></td>
+        <td>${escapeHtml(r.namaPic || '—')}</td>
       </tr>`).join('');
   }
 
