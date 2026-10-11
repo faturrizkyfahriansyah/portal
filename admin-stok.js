@@ -261,7 +261,7 @@ async function muatDashboardAdminStok() {
 async function muatDaftarBarangAdmin(cari) {
   const list = await apiPost('getSiragaBarangListAdmin', { token: sesiAdminStok.token });
   const q = (cari || '').toLowerCase();
-  const filtered = q ? list.filter(b => b.nama.toLowerCase().indexOf(q) !== -1 || b.kode.toLowerCase().indexOf(q) !== -1) : list;
+  const filtered = q ? list.filter(b => (b.nama || '').toLowerCase().indexOf(q) !== -1 || (b.kode || '').toLowerCase().indexOf(q) !== -1) : list;
   const container = document.getElementById('aBarangList');
   if (!filtered.length) { container.innerHTML = '<div class="empty-state">Tidak ada barang ditemukan.</div>'; return; }
   container.innerHTML = filtered.map(b => `
