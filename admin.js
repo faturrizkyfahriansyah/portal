@@ -61,6 +61,7 @@
     btnMuatHarian: document.getElementById('btnMuatHarian'),
     btnExportHarian: document.getElementById('btnExportHarian'),
     divisiGrid: document.getElementById('divisiGrid'),
+    divisiGridDuaMinggu: document.getElementById('divisiGridDuaMinggu'),
     tbodyHarian: document.getElementById('tbodyHarian'),
 
     filterPeriodeDuaMinggu: document.getElementById('filterPeriodeDuaMinggu'),
@@ -719,6 +720,7 @@
     try {
       const res = await apiPost('getRekapPenggajianAdmin', { idPeriode, token: authToken });
       cache.rekapDuaMinggu = res.data;
+      renderDivisiGridDuaMinggu();
       renderRekapDuaMingguTable();
       if (res.jumlahBelumLengkap) showError(res.jumlahBelumLengkap + ' relawan belum ada Master Tarif-nya untuk periode ini -- atur dulu di bagian "Atur Tarif per Relawan" di bawah.');
     } catch (err) {
@@ -726,6 +728,50 @@
     } finally {
       hideLoading();
     }
+  }
+
+  /**
+   * Ringkasan per divisi UTK SELURUH PERIODE (beda dari renderDivisiGrid
+   * yang itu untuk Rekap Harian, 1 hari saja). SENGAJA tidak ikut
+   * terfilter oleh dropdown divisi tabel di bawahnya -- tujuannya
+   * justru memberi gambaran semua divisi sekaligus dalam satu periode;
+   * memfilternya akan menghilangkan manfaat utamanya.
+   * Total Insentif cuma menjumlahkan relawan yang tarifnya SUDAH
+   * diatur (tarifLengkap) -- relawan yang "Tarif belum diatur" dihitung
+   * terpisah dan ditampilkan sbg peringatan, bukan dianggap Rp0 diam-diam.
+   */
+  function renderDivisiGridDuaMinggu() {
+    const rows = cache.rekapDuaMinggu || [];
+    if (!rows.length) { el.divisiGridDuaMinggu.innerHTML = '<p class="empty-state">Belum ada data untuk periode ini.</p>'; return; }
+
+    const byDivisi = {};
+    rows.forEach(r => {
+      if (!byDivisi[r.divisi]) byDivisi[r.divisi] = { totalHariKerja: 0, terlambat: 0, izin: 0, sakit: 0, tidakHadir: 0, hadir: 0, totalInsentif: 0, jumlahTarifBelumDiatur: 0 };
+      const d = byDivisi[r.divisi];
+      d.totalHariKerja += r.totalHariKerja;
+      d.terlambat += r.terlambat;
+      d.izin += r.izin;
+      d.sakit += r.sakit;
+      d.tidakHadir += r.tidakHadir;
+      d.hadir += (r.hadir + r.terlambat);
+      if (r.tarifLengkap) d.totalInsentif += r.totalGaji; else d.jumlahTarifBelumDiatur++;
+    });
+
+    el.divisiGridDuaMinggu.innerHTML = Object.keys(byDivisi).sort().map(nama => {
+      const d = byDivisi[nama];
+      return `<div class="divisi-card">
+        <div class="divisi-name">${escapeHtml(nama)}</div>
+        <div class="divisi-stats">
+          <span>Hari Kerja: ${d.totalHariKerja}</span>
+          <span>Hadir: ${d.hadir}</span>
+          <span>Terlambat: ${d.terlambat}</span>
+          <span>Izin: ${d.izin}</span>
+          <span>Sakit: ${d.sakit}</span>
+          <span>Tidak Hadir: ${d.tidakHadir}</span>
+          <span>Total Insentif: ${formatRupiahDuaMinggu_(d.totalInsentif)}${d.jumlahTarifBelumDiatur ? ' <span style="color:#8a5a12;">(+' + d.jumlahTarifBelumDiatur + ' belum diatur)</span>' : ''}</span>
+        </div>
+      </div>`;
+    }).join('');
   }
 
   function renderRekapDuaMingguTable() {
