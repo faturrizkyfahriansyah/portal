@@ -3,6 +3,8 @@
 // (admin.js) saat panelJadwalIndividu dibuka -- pola sama dgn
 // admin-shift.js/admin-stok.js di file ini.
 (function () {
+  function token() { return window.sppgAdminToken; } // pola sama persis dgn admin-shift.js/admin-stok.js -- tiap modul lazy-load mendefinisikan sendiri
+
   const el = {
     periode: document.getElementById('jiPeriode'),
     cariRelawan: document.getElementById('jiCariRelawan'),

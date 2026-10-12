@@ -364,7 +364,7 @@
   const MODUL_LAZY = {
     panelStok: 'admin-stok.js?v=20261011b',
     panelShift: 'admin-shift.js?v=20261010b',
-    panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261012a',
+    panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261012b',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
