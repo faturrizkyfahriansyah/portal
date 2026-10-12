@@ -119,6 +119,11 @@
   font-size: 10.5px; font-weight: 800; color: var(--color-text-muted); text-transform: uppercase;
   letter-spacing: .06em; margin: 14px 10px 6px; }
 .shell-nav-group-title:first-child { margin-top: 4px; }
+/* Deskripsi singkat modul (poin 3) -- font lebih kecil & lembut dari judul,
+   satu baris saja supaya sidebar tidak padat di layar kecil. */
+.shell-nav-group-desc {
+  font-size: 10.5px; font-weight: 500; color: var(--color-text-muted); opacity: .8;
+  margin: -4px 10px 7px; line-height: 1.3; }
 .shell-nav-link {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 12px; border-radius: var(--radius-sm);
@@ -340,6 +345,7 @@
   .shell-sidebar.is-collapsed .shell-sidebar-head-text,
   .shell-sidebar.is-collapsed .shell-sidebar-user-text,
   .shell-sidebar.is-collapsed .shell-nav-group-title,
+  .shell-sidebar.is-collapsed .shell-nav-group-desc,
   .shell-sidebar.is-collapsed .shell-nav-link span,
   .shell-sidebar.is-collapsed .shell-sidebar-foot { display: none; }
   .shell-sidebar.is-collapsed .shell-nav-link { justify-content: center; }
