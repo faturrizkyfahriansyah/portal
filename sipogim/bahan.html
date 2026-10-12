@@ -60,6 +60,7 @@
     wajibLoginSipogim();
     pastikanNamaSayaSipogim();
     let idSedangDiedit = null;
+    let versiSedangDiedit = null; // uji terima #10 -- kunci optimis
 
     async function muatDaftar(cari) {
       const wadah = document.getElementById('daftarBahan');
@@ -103,6 +104,7 @@
           document.getElementById('fKarbo').value = b.karbohidratG ?? '';
           document.getElementById('fSerat').value = b.seratG ?? '';
           document.getElementById('fCatatan').value = b.sumberCatatan || '';
+          versiSedangDiedit = b.versi;
         } catch (err) { alert('⚠️ ' + err.message); return; }
       }
       document.getElementById('kartuForm').style.display = 'block';
@@ -126,11 +128,15 @@
         sumberCatatan: document.getElementById('fCatatan').value.trim()
       };
       try {
-        if (idSedangDiedit) { payload.id = idSedangDiedit; await apiPostSipogim('ubahBahan', payload); }
+        if (idSedangDiedit) { payload.id = idSedangDiedit; payload.versi = versiSedangDiedit; await apiPostSipogim('ubahBahan', payload); }
         else { await apiPostSipogim('tambahBahan', payload); }
         document.getElementById('kartuForm').style.display = 'none';
         muatDaftar(document.getElementById('inputCari').value.trim());
       } catch (err) {
+        if (err.message.indexOf('KONFLIK') === 0 && confirm(err.message + '\n\nMuat ulang data terbaru sekarang?')) {
+          bukaForm(idSedangDiedit); // muat ulang -- versi terbaru otomatis terbawa, perubahan yg belum disimpan hilang
+          return;
+        }
         galat.textContent = '⚠️ ' + err.message;
         galat.style.display = 'block';
       }

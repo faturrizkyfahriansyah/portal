@@ -89,6 +89,16 @@
     }
 
     let tanggalDibuka = null;
+    function renderPeringatanBerubah(info, labelPorsi) {
+      if (!info || !info.berubah) return '';
+      const baris = (nama, kunci, satuan) => info.baru
+        ? `${nama}: ${formatAngkaSipogim(info.lama[kunci],1)} → <strong>${formatAngkaSipogim(info.baru[kunci],1)}</strong> ${satuan}<br>`
+        : '';
+      return `<div class="sg-error" style="background:#fff3cd; color:#8a5a12;">
+        ⚠️ <strong>Berubah sejak disalin (Porsi ${labelPorsi})</strong> -- disalin ${new Date(info.waktuSalin || Date.now()).toLocaleDateString('id-ID')}<br>
+        ${info.alasan ? escapeHtmlSipogim(info.alasan) : baris('Energi','energiKkal','kkal') + baris('Protein','proteinG','g') + baris('Lemak','lemakG','g') + baris('KH','karbohidratG','g') + baris('Serat','seratG','g')}
+      </div>`;
+    }
     function renderTotal(hasil, idWadah) {
       if (!hasil.lengkap) {
         return `<p style="color:var(--color-danger); font-size:13px;"><strong>Belum lengkap:</strong></p>
@@ -117,7 +127,9 @@
           </div>`;
         }).join('');
         document.getElementById('isiTotal').innerHTML =
+          renderPeringatanBerubah(d.perubahanSejakSalin.besar, 'Besar') +
           '<p style="font-size:12.5px; font-weight:700; margin:8px 0 2px;">Porsi Besar</p>' + renderTotal(d.totalHariBesar) +
+          renderPeringatanBerubah(d.perubahanSejakSalin.kecil, 'Kecil') +
           '<p style="font-size:12.5px; font-weight:700; margin:10px 0 2px;">Porsi Kecil</p>' + renderTotal(d.totalHariKecil);
         document.getElementById('btnSalinBesar').disabled = !d.totalHariBesar.lengkap;
         document.getElementById('btnSalinKecil').disabled = !d.totalHariKecil.lengkap;

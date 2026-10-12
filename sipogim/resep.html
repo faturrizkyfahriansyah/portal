@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="sipogim.css">
 <style>
   .baris-bahan { display:flex; gap:6px; align-items:center; margin-bottom:8px; }
-  .baris-bahan select { flex:2; } .baris-bahan input { flex:1; min-width:0; }
+  .baris-bahan select { flex:2; min-width:0; } .baris-bahan input { flex:1; min-width:0; }
   .baris-bahan button { flex-shrink:0; }
 </style>
 </head>
@@ -82,6 +82,7 @@
     wajibLoginSipogim();
     pastikanNamaSayaSipogim();
     let idSedangDiedit = null;
+    let versiSedangDiedit = null; // uji terima #10 -- kunci optimis
     let daftarSemuaBahan = [];
 
     async function muatDaftar(cari) {
@@ -169,6 +170,7 @@
           r.bahan.forEach(b => tambahBarisBahan(b.bahanId, b.gramBesar, b.gramKecil));
           document.getElementById('isiHasil').innerHTML = renderHasilHitung(r.giziBesar, 'Porsi Besar') + renderHasilHitung(r.giziKecil, 'Porsi Kecil');
           document.getElementById('btnSetujui').style.display = r.status === 'sudah_dicek' ? 'none' : 'block';
+          versiSedangDiedit = r.versi;
         } catch (err) { alert('⚠️ ' + err.message); return; }
       } else {
         tambahBarisBahan(null, '', '');
@@ -190,11 +192,14 @@
         bahan: kumpulkanBarisBahan()
       };
       try {
-        if (idSedangDiedit) { payload.id = idSedangDiedit; await apiPostSipogim('ubahResep', payload); }
+        if (idSedangDiedit) { payload.id = idSedangDiedit; payload.versi = versiSedangDiedit; await apiPostSipogim('ubahResep', payload); }
         else { await apiPostSipogim('tambahResep', payload); }
         document.getElementById('kartuForm').style.display = 'none';
         muatDaftar(document.getElementById('inputCari').value.trim());
-      } catch (err) { galat.textContent = '⚠️ ' + err.message; galat.style.display = 'block'; }
+      } catch (err) {
+        if (err.message.indexOf('KONFLIK') === 0 && confirm(err.message + '\n\nMuat ulang data terbaru sekarang?')) { bukaForm(idSedangDiedit); return; }
+        galat.textContent = '⚠️ ' + err.message; galat.style.display = 'block';
+      }
     });
 
     document.getElementById('btnSetujui').addEventListener('click', async () => {
