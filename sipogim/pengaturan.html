@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pengaturan — SIPOGIM</title>
+<link rel="stylesheet" href="sipogim.css">
+</head>
+<body>
+  <div class="sg-topbar">
+    <div><strong>SIPOGIM</strong><small>Portal SPPG Jeungjing</small></div>
+    <span class="sg-topbar-spacer"></span>
+  </div>
+  <nav class="sg-tabs">
+    <a class="sg-tab" href="beranda.html">Beranda</a>
+    <a class="sg-tab" href="menu.html">Menu</a>
+    <a class="sg-tab" href="resep.html">Resep</a>
+    <a class="sg-tab" href="bahan.html">Bahan</a>
+    <a class="sg-tab active" href="lainnya.html">Lainnya</a>
+  </nav>
+
+  <main class="sg-main">
+    <div class="sg-card">
+      <p class="sg-title">Nama Saya</p>
+      <p class="sg-subtitle">Dipakai mencatat siapa yang mengubah data. Tersimpan di HP ini saja.</p>
+      <div class="sg-field" style="margin-top:8px;"><input class="sg-input" id="fNamaSaya"></div>
+      <button class="sg-btn primary" id="btnSimpanNama">Simpan</button>
+    </div>
+
+    <div class="sg-card">
+      <p class="sg-title">Ganti Kata Sandi</p>
+      <div class="sg-field"><label>Kata Sandi Lama</label><input class="sg-input" type="password" id="fSandiLama"></div>
+      <div class="sg-field"><label>Kata Sandi Baru</label><input class="sg-input" type="password" id="fSandiBaru"></div>
+      <p id="galatSandi" class="sg-error" style="display:none;"></p>
+      <button class="sg-btn primary" id="btnGantiSandi">Ganti Kata Sandi</button>
+      <p style="font-size:11.5px; color:var(--color-text-muted); margin-top:6px;">Mengganti kata sandi akan keluar dari SEMUA sesi login yang sedang aktif (termasuk ini).</p>
+    </div>
+
+    <div class="sg-card">
+      <p class="sg-title">Ganti PIN</p>
+      <div class="sg-field"><label>PIN Lama</label><input class="sg-input" type="password" inputmode="numeric" id="fPinLama"></div>
+      <div class="sg-field"><label>PIN Baru (4-6 digit)</label><input class="sg-input" type="password" inputmode="numeric" id="fPinBaru"></div>
+      <p id="galatPin" class="sg-error" style="display:none;"></p>
+      <button class="sg-btn primary" id="btnGantiPin">Ganti PIN</button>
+    </div>
+
+    <div class="sg-card">
+      <p class="sg-title">Lainnya</p>
+      <div class="sg-field"><label>Jumlah Desimal Ditampilkan</label>
+        <select class="sg-select" id="fDesimal"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select>
+      </div>
+      <button class="sg-btn" id="btnSimpanDesimal">Simpan</button>
+    </div>
+
+    <div class="sg-card">
+      <button class="sg-btn danger block" id="btnKeluar">Keluar</button>
+    </div>
+  </main>
+
+  <script src="sipogim-config.js"></script>
+  <script src="sipogim-common.js"></script>
+  <script>
+    wajibLoginSipogim();
+    document.getElementById('fNamaSaya').value = namaSayaSipogim();
+
+    document.getElementById('btnSimpanNama').addEventListener('click', () => {
+      const v = document.getElementById('fNamaSaya').value.trim();
+      if (v.length < 2) { alert('Nama minimal 2 karakter.'); return; }
+      localStorage.setItem('sipogim_nama_saya', v);
+      alert('Tersimpan.');
+    });
+
+    document.getElementById('btnGantiSandi').addEventListener('click', async () => {
+      const galat = document.getElementById('galatSandi');
+      galat.style.display = 'none';
+      try {
+        await apiPostSipogim('gantiKataSandi', {
+          kataSandiLama: document.getElementById('fSandiLama').value,
+          kataSandiBaru: document.getElementById('fSandiBaru').value
+        });
+        alert('Kata sandi berhasil diganti. Anda akan diarahkan ke halaman login.');
+        sessionStorage.removeItem('sipogim_token');
+        location.href = 'login.html';
+      } catch (err) { galat.textContent = '⚠️ ' + err.message; galat.style.display = 'block'; }
+    });
+
+    document.getElementById('btnGantiPin').addEventListener('click', async () => {
+      const galat = document.getElementById('galatPin');
+      galat.style.display = 'none';
+      try {
+        await apiPostSipogim('gantiPin', {
+          pinLama: document.getElementById('fPinLama').value,
+          pinBaru: document.getElementById('fPinBaru').value
+        });
+        alert('PIN berhasil diganti.');
+        document.getElementById('fPinLama').value = ''; document.getElementById('fPinBaru').value = '';
+      } catch (err) { galat.textContent = '⚠️ ' + err.message; galat.style.display = 'block'; }
+    });
+
+    async function muatPengaturan() {
+      try {
+        const p = await apiPostSipogim('getPengaturan', {});
+        document.getElementById('fDesimal').value = p.JUMLAH_DESIMAL_TAMPIL || '1';
+      } catch (err) { console.error(err); }
+    }
+    document.getElementById('btnSimpanDesimal').addEventListener('click', async () => {
+      try {
+        await apiPostSipogim('ubahPengaturan', { kunci: 'JUMLAH_DESIMAL_TAMPIL', nilai: document.getElementById('fDesimal').value });
+        alert('Tersimpan.');
+      } catch (err) { alert('⚠️ ' + err.message); }
+    });
+    muatPengaturan();
+
+    document.getElementById('btnKeluar').addEventListener('click', async () => {
+      if (!confirm('Keluar dari SIPOGIM?')) return;
+      try { await apiPostSipogim('logout', {}); } catch (e) {}
+      sessionStorage.removeItem('sipogim_token');
+      location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

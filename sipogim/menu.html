@@ -38,7 +38,14 @@
         <button class="sg-btn" id="btnTutupDetail">✕</button>
       </div>
       <div id="isiDetail" style="margin-top:10px;"></div>
-      <p style="font-size:12px; color:var(--color-text-muted); margin-top:10px;">Nilai gizi &amp; tombol Salin akan tampil setelah Resep &amp; Bahan dibangun (Tahap 3).</p>
+      <div id="kartuTotal" style="margin-top:14px; display:none;">
+        <p class="sg-title" style="font-size:15px;">Total Hari</p>
+        <div id="isiTotal"></div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button class="sg-btn success" id="btnSalinBesar">📋 Salin Porsi Besar</button>
+          <button class="sg-btn success" id="btnSalinKecil">📋 Salin Porsi Kecil</button>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -81,24 +88,57 @@
       } catch (err) { tampilkanGalatSipogim(wadah, err); }
     }
 
+    let tanggalDibuka = null;
+    function renderTotal(hasil, idWadah) {
+      if (!hasil.lengkap) {
+        return `<p style="color:var(--color-danger); font-size:13px;"><strong>Belum lengkap:</strong></p>
+          <ul style="font-size:12.5px; padding-left:18px; color:var(--color-text-muted);">${hasil.penyebab.map(p => `<li>${escapeHtmlSipogim(p)}</li>`).join('')}</ul>`;
+      }
+      const g = hasil.gizi;
+      return `<div style="font-size:14px;">Energi: <strong>${formatAngkaSipogim(g.energiKkal,1)} kkal</strong> · Protein: <strong>${formatAngkaSipogim(g.proteinG,1)} g</strong> · Lemak: <strong>${formatAngkaSipogim(g.lemakG,1)} g</strong> · KH: <strong>${formatAngkaSipogim(g.karbohidratG,1)} g</strong> · Serat: <strong>${formatAngkaSipogim(g.seratG,1)} g</strong></div>`;
+    }
+
     async function bukaDetail(tanggal) {
+      tanggalDibuka = tanggal;
       const kartu = document.getElementById('kartuDetail');
       const isi = document.getElementById('isiDetail');
       document.getElementById('judulDetail').textContent = tanggal;
       isi.innerHTML = '<p class="sg-empty">Memuat...</p>';
+      document.getElementById('kartuTotal').style.display = 'none';
       kartu.style.display = 'block';
       kartu.scrollIntoView({ behavior: 'smooth' });
       try {
-        const komponen = await apiPostSipogim('getMenuHarian', { tanggal });
-        isi.innerHTML = komponen.map(k => {
+        const d = await apiPostSipogim('getMenuHarian', { tanggal });
+        isi.innerHTML = d.komponen.map(k => {
           const [label, kelas] = LABEL_PADANAN[k.statusPadanan] || ['-', 'status-warning'];
           return `<div class="sg-list-item">
             <strong>${escapeHtmlSipogim(k.kategori)}:</strong> ${escapeHtmlSipogim(k.namaMentah)}
             <span class="sg-badge ${kelas}" style="margin-left:6px;">${label}</span>
           </div>`;
         }).join('');
+        document.getElementById('isiTotal').innerHTML =
+          '<p style="font-size:12.5px; font-weight:700; margin:8px 0 2px;">Porsi Besar</p>' + renderTotal(d.totalHariBesar) +
+          '<p style="font-size:12.5px; font-weight:700; margin:10px 0 2px;">Porsi Kecil</p>' + renderTotal(d.totalHariKecil);
+        document.getElementById('btnSalinBesar').disabled = !d.totalHariBesar.lengkap;
+        document.getElementById('btnSalinKecil').disabled = !d.totalHariKecil.lengkap;
+        document.getElementById('kartuTotal').style.display = 'block';
       } catch (err) { tampilkanGalatSipogim(isi, err); }
     }
+
+    async function salinKePoP(porsi) {
+      const hasil = await apiPostSipogim('getMenuHarian', { tanggal: tanggalDibuka });
+      const data = porsi === 'besar' ? hasil.totalHariBesar : hasil.totalHariKecil;
+      if (!data.lengkap) { alert('Belum lengkap, tidak bisa disalin.'); return; }
+      const g = data.gizi;
+      const teks = `${g.energiKkal}\t${g.proteinG}\t${g.lemakG}\t${g.karbohidratG}\t${g.seratG}`;
+      try {
+        await navigator.clipboard.writeText(teks);
+        await apiPostSipogim('catatSalin', { tanggal: tanggalDibuka, porsi });
+        alert('Tersalin! (Energi, Protein, Lemak, KH, Serat dipisah Tab -- siap ditempel ke form PoP)');
+      } catch (err) { alert('Gagal menyalin ke clipboard: ' + err.message); }
+    }
+    document.getElementById('btnSalinBesar').addEventListener('click', () => salinKePoP('besar'));
+    document.getElementById('btnSalinKecil').addEventListener('click', () => salinKePoP('kecil'));
     document.getElementById('btnTutupDetail').addEventListener('click', () => { document.getElementById('kartuDetail').style.display = 'none'; });
 
     muatDaftarPeriode();

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Riwayat — SIPOGIM</title>
+<link rel="stylesheet" href="sipogim.css">
+</head>
+<body>
+  <div class="sg-topbar">
+    <div><strong>SIPOGIM</strong><small>Portal SPPG Jeungjing</small></div>
+    <span class="sg-topbar-spacer"></span>
+  </div>
+  <nav class="sg-tabs">
+    <a class="sg-tab" href="beranda.html">Beranda</a>
+    <a class="sg-tab" href="menu.html">Menu</a>
+    <a class="sg-tab" href="resep.html">Resep</a>
+    <a class="sg-tab" href="bahan.html">Bahan</a>
+    <a class="sg-tab active" href="lainnya.html">Lainnya</a>
+  </nav>
+
+  <main class="sg-main">
+    <div class="sg-card">
+      <p class="sg-title">Riwayat Perubahan</p>
+      <p class="sg-subtitle">100 perubahan terbaru.</p>
+      <select class="sg-select" id="filterEntitas" style="margin-top:10px;">
+        <option value="">Semua</option>
+        <option value="bahan">Bahan</option>
+        <option value="resep">Resep</option>
+        <option value="padanan">Padanan</option>
+        <option value="pengaturan">Pengaturan</option>
+      </select>
+    </div>
+    <div id="daftarRiwayat"><p class="sg-empty">Memuat...</p></div>
+  </main>
+
+  <script src="sipogim-config.js"></script>
+  <script src="sipogim-common.js"></script>
+  <script>
+    wajibLoginSipogim();
+
+    function formatWaktu(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }) + ' ' + d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+    }
+
+    async function muat() {
+      const wadah = document.getElementById('daftarRiwayat');
+      try {
+        const daftar = await apiPostSipogim('getRiwayat', { entitas: document.getElementById('filterEntitas').value });
+        wadah.innerHTML = daftar.length ? daftar.map(r => `
+          <div class="sg-list-item">
+            <div style="font-size:12px; color:var(--color-text-muted);">${formatWaktu(r.waktu)} · ${escapeHtmlSipogim(r.aktorNama)}</div>
+            <div>${escapeHtmlSipogim(r.ringkasan)}</div>
+          </div>`).join('') : '<p class="sg-empty">Belum ada riwayat.</p>';
+      } catch (err) { tampilkanGalatSipogim(wadah, err); }
+    }
+    document.getElementById('filterEntitas').addEventListener('change', muat);
+    muat();
+  </script>
+</body>
+</html>

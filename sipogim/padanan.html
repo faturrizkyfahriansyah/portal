@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Padanan Nama — SIPOGIM</title>
+<link rel="stylesheet" href="sipogim.css">
+</head>
+<body>
+  <div class="sg-topbar">
+    <div><strong>SIPOGIM</strong><small>Portal SPPG Jeungjing</small></div>
+    <span class="sg-topbar-spacer"></span>
+  </div>
+  <nav class="sg-tabs">
+    <a class="sg-tab" href="beranda.html">Beranda</a>
+    <a class="sg-tab" href="menu.html">Menu</a>
+    <a class="sg-tab" href="resep.html">Resep</a>
+    <a class="sg-tab" href="bahan.html">Bahan</a>
+    <a class="sg-tab active" href="lainnya.html">Lainnya</a>
+  </nav>
+
+  <main class="sg-main">
+    <div class="sg-card">
+      <p class="sg-title">Padanan Nama Menu</p>
+      <p class="sg-subtitle">Menu dari MASTER MENU yang usulannya perlu dikonfirmasi, atau belum punya resep sama sekali.</p>
+    </div>
+    <div id="daftarPadanan"><p class="sg-empty">Memuat...</p></div>
+  </main>
+
+  <script src="sipogim-config.js"></script>
+  <script src="sipogim-common.js"></script>
+  <script>
+    wajibLoginSipogim();
+    pastikanNamaSayaSipogim();
+    let daftarSemuaResep = [];
+
+    async function muatDaftar() {
+      const wadah = document.getElementById('daftarPadanan');
+      try {
+        const daftar = await apiPostSipogim('getPadananList', { status: 'perlu_perhatian' });
+        if (!daftar.length) { wadah.innerHTML = '<p class="sg-empty">Tidak ada yang perlu perhatian saat ini. 🎉</p>'; return; }
+        wadah.innerHTML = daftar.map(p => `
+          <div class="sg-card">
+            <strong>${escapeHtmlSipogim(p.namaMenu)}</strong>
+            ${p.status === 'usulan' ? `<span class="sg-badge status-warning">Usulan: ${escapeHtmlSipogim(p.namaResep || '')} (${(p.skor*100).toFixed(0)}%)</span>` : '<span class="sg-badge status-danger">Belum ada resep</span>'}
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+              ${p.status === 'usulan' ? `<button class="sg-btn success" onclick="setuju('${p.id}')">✓ Setuju</button>` : ''}
+              <button class="sg-btn" onclick="pilihManual('${p.id}')">Pilih resep lain</button>
+              <button class="sg-btn" onclick="buatBaru('${p.id}')">+ Buat resep baru</button>
+              <button class="sg-btn danger" onclick="abaikan('${p.id}')">Abaikan</button>
+            </div>
+          </div>`).join('');
+      } catch (err) { tampilkanGalatSipogim(wadah, err); }
+    }
+
+    async function muatSemuaResepJikaBelum() {
+      if (!daftarSemuaResep.length) daftarSemuaResep = await apiPostSipogim('getResepList', {});
+    }
+
+    async function setuju(id) {
+      try { await apiPostSipogim('konfirmasiPadanan', { id, setuju: true }); muatDaftar(); }
+      catch (err) { alert('⚠️ ' + err.message); }
+    }
+    async function abaikan(id) {
+      if (!confirm('Abaikan menu ini? Tidak akan dihitung gizinya dan tidak akan menghalangi total gizi harian.')) return;
+      try { await apiPostSipogim('konfirmasiPadanan', { id, abaikan: true }); muatDaftar(); }
+      catch (err) { alert('⚠️ ' + err.message); }
+    }
+    async function pilihManual(id) {
+      await muatSemuaResepJikaBelum();
+      const nama = prompt('Ketik sebagian nama resep yang dimaksud:');
+      if (!nama) return;
+      const cocok = daftarSemuaResep.filter(r => r.nama.toLowerCase().includes(nama.toLowerCase()));
+      if (!cocok.length) { alert('Tidak ada resep yang cocok dengan "' + nama + '".'); return; }
+      const pilihan = cocok.length === 1 ? cocok[0] : cocok[parseInt(prompt('Beberapa cocok, ketik nomor:\n' + cocok.map((r,i)=>`${i+1}. ${r.nama}`).join('\n')), 10) - 1];
+      if (!pilihan) return;
+      try { await apiPostSipogim('konfirmasiPadanan', { id, resepId: pilihan.id }); muatDaftar(); }
+      catch (err) { alert('⚠️ ' + err.message); }
+    }
+    async function buatBaru(id) {
+      if (!confirm('Buat resep baru langsung dari nama menu ini? Anda bisa isi daftar bahannya nanti di halaman Resep.')) return;
+      try {
+        const hasil = await apiPostSipogim('buatResepDariPadanan', { id });
+        alert('Resep baru dibuat. Buka halaman Resep untuk melengkapi daftar bahannya.');
+        muatDaftar();
+      } catch (err) { alert('⚠️ ' + err.message); }
+    }
+
+    muatDaftar();
+  </script>
+</body>
+</html>
