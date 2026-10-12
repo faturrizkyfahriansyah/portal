@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Login — SIPOGIM</title>
+<link rel="stylesheet" href="sipogim.css">
+</head>
+<body>
+  <div class="sg-topbar">
+    <span class="sg-topbar-spacer"></span>
+  </div>
+  <main class="sg-main" style="max-width:380px; padding-top:40px;">
+    <div style="text-align:center; margin-bottom:22px;">
+      <div style="font-size:15px; font-weight:800; color:var(--color-navy); letter-spacing:.03em;">PORTAL SPPG JEUNGJING</div>
+      <div style="font-size:22px; font-weight:900; color:var(--color-sky); margin-top:4px;">SIPOGIM</div>
+      <div style="font-size:12.5px; color:var(--color-text-muted); margin-top:2px;">Sistem Informasi Gizi &amp; Menu</div>
+    </div>
+
+    <div class="sg-card">
+      <form id="formLogin">
+        <div class="sg-field">
+          <label for="inputUsername">Username</label>
+          <input class="sg-input" id="inputUsername" type="text" autocomplete="username" required>
+        </div>
+        <div class="sg-field">
+          <label for="inputSandi">Kata Sandi</label>
+          <input class="sg-input" id="inputSandi" type="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="sg-btn primary block" id="btnLogin">Masuk</button>
+        <p id="galatLogin" class="sg-error" style="display:none;"></p>
+      </form>
+    </div>
+    <p style="text-align:center; font-size:11.5px; color:var(--color-text-muted);">Akun bersama tim gizi SPPG Jeungjing.</p>
+  </main>
+
+  <script src="sipogim-config.js"></script>
+  <script src="sipogim-common.js"></script>
+  <script>
+    if (sesiSipogimAda()) location.href = 'beranda.html';
+
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const galat = document.getElementById('galatLogin');
+      const btn = document.getElementById('btnLogin');
+      galat.style.display = 'none';
+      btn.disabled = true; btn.textContent = 'Memeriksa...';
+      try {
+        const hasil = await apiPostSipogim('login', {
+          username: document.getElementById('inputUsername').value.trim(),
+          kataSandi: document.getElementById('inputSandi').value
+        });
+        sessionStorage.setItem('sipogim_token', hasil.token);
+        pastikanNamaSayaSipogim();
+        location.href = 'beranda.html';
+      } catch (err) {
+        galat.textContent = '⚠️ ' + err.message;
+        galat.style.display = 'block';
+      } finally {
+        btn.disabled = false; btn.textContent = 'Masuk';
+      }
+    });
+  </script>
+</body>
+</html>
