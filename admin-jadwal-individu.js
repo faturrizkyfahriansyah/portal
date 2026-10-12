@@ -7,8 +7,7 @@
 
   const el = {
     periode: document.getElementById('jiPeriode'),
-    cariRelawan: document.getElementById('jiCariRelawan'),
-    daftarCari: document.getElementById('jiDaftarRelawanCari'),
+    pilihRelawan: document.getElementById('jiPilihRelawan'),
     hasil: document.getElementById('jiHasil'),
     namaRelawan: document.getElementById('jiNamaRelawan'),
     divisiRelawan: document.getElementById('jiDivisiRelawan'),
@@ -46,29 +45,18 @@
   }
 
   async function muatDaftarRelawan() {
-    if (daftarRelawanSemua.length) return;
-    try { daftarRelawanSemua = await apiPost('getDaftarRelawanUntukJadwalIndividu', { token: token() }); }
-    catch (err) { showError(err.message); }
+    try {
+      daftarRelawanSemua = await apiPost('getDaftarRelawanUntukJadwalIndividu', { token: token() });
+      const terurut = [...daftarRelawanSemua].sort((a, b) => a.nama.localeCompare(b.nama));
+      el.pilihRelawan.innerHTML = '<option value="">Pilih relawan...</option>' +
+        terurut.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.nama)} — ${escapeHtml(r.divisi)}</option>`).join('');
+    } catch (err) { showError(err.message); }
   }
 
-  el.cariRelawan.addEventListener('input', async () => {
-    await muatDaftarRelawan();
-    const q = el.cariRelawan.value.trim().toLowerCase();
-    if (!q) { el.daftarCari.style.display = 'none'; return; }
-    const cocok = daftarRelawanSemua.filter(r => r.nama.toLowerCase().includes(q)).slice(0, 15);
-    if (!cocok.length) { el.daftarCari.innerHTML = '<div class="empty-state">Tidak ada relawan yang cocok.</div>'; el.daftarCari.style.display = 'block'; return; }
-    el.daftarCari.innerHTML = '<table><tbody>' + cocok.map(r =>
-      `<tr style="cursor:pointer;" data-id="${escapeHtml(r.id)}"><td>${escapeHtml(r.nama)}</td><td style="color:var(--color-text-muted);">${escapeHtml(r.divisi)}</td></tr>`
-    ).join('') + '</tbody></table>';
-    el.daftarCari.style.display = 'block';
-    el.daftarCari.querySelectorAll('tr[data-id]').forEach(tr => {
-      tr.addEventListener('click', () => {
-        relawanTerpilih = daftarRelawanSemua.find(r => r.id === tr.dataset.id);
-        el.cariRelawan.value = relawanTerpilih.nama;
-        el.daftarCari.style.display = 'none';
-        muatPemeriksaan();
-      });
-    });
+  el.pilihRelawan.addEventListener('change', () => {
+    relawanTerpilih = daftarRelawanSemua.find(r => r.id === el.pilihRelawan.value) || null;
+    if (relawanTerpilih) muatPemeriksaan();
+    else el.hasil.style.display = 'none';
   });
 
   el.periode.addEventListener('change', () => { if (relawanTerpilih) muatPemeriksaan(); });
@@ -168,4 +156,5 @@
   });
 
   muatPeriode();
+  muatDaftarRelawan();
 })();
