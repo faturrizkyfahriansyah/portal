@@ -32,7 +32,8 @@
   let daftarRelawanSemua = [];
   let relawanTerpilih = null;
   let idOperasionalSedangDiedit = null; // dipakai saat Buat Jadwal (tanggal kosong)
-  let idAbsensiSedangDiedit = null;     // dipakai saat Edit Jadwal (sudah ada baris)
+  let idAbsensiSedangDiedit = null;     // dipakai saat Edit Jadwal (sudah ada baris, belum absen)
+  let idKoreksiSedangDiedit = null;     // dipakai saat Koreksi Absen (sudah ada baris, SUDAH absen)
 
   async function muatPeriode() {
     try {
@@ -82,7 +83,10 @@
         const statusSel = t.adaJadwal
           ? `<span class="badge aktif">${escapeHtml(t.statusKehadiran || '-')}</span>`
           : (t.perluDibuat ? '<span class="badge nonaktif">Belum Dibuat</span>' : '<span style="color:var(--color-text-muted);">-</span>');
-        const tombol = t.adaJadwal
+        const sudahAbsen = t.adaJadwal && t.statusMasuk && t.statusMasuk !== 'BELUM';
+        const tombol = sudahAbsen
+          ? `<button type="button" class="btn-mini" data-koreksi="${escapeHtml(t.idAbsensi)}">Koreksi Absen</button>`
+          : t.adaJadwal
           ? `<button type="button" class="btn-mini" data-edit="${escapeHtml(t.idAbsensi)}">Edit</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`
           : (t.perluDibuat ? `<button type="button" class="btn-mini primary" data-buat="${escapeHtml(t.idOperasional)}" data-tanggal="${escapeHtml(t.tanggal)}">Buat Jadwal</button>` : '');
         return `<tr${t.perluDibuat ? ' style="background:#fdf1de;"' : ''}>
@@ -96,6 +100,7 @@
       el.tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => bukaFormEdit(btn.dataset.edit, d.daftarTanggal)));
       el.tbody.querySelectorAll('[data-buat]').forEach(btn => btn.addEventListener('click', () => bukaFormBuat(btn.dataset.buat, btn.dataset.tanggal)));
       el.tbody.querySelectorAll('[data-hapus]').forEach(btn => btn.addEventListener('click', () => hapusJadwal(btn.dataset.hapus)));
+      el.tbody.querySelectorAll('[data-koreksi]').forEach(btn => btn.addEventListener('click', () => bukaFormKoreksi(btn.dataset.koreksi, d.daftarTanggal)));
     } catch (err) {
       el.tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
     }
@@ -104,9 +109,11 @@
   function bukaFormBuat(idOperasional, tanggal) {
     idOperasionalSedangDiedit = idOperasional;
     idAbsensiSedangDiedit = null;
+    idKoreksiSedangDiedit = null;
     el.judulForm.textContent = 'Buat Jadwal';
     el.subjudulForm.textContent = relawanTerpilih.nama + ' · ' + tanggal;
     el.jamMasuk.value = ''; el.jamPulang.value = ''; el.catatan.value = '';
+    el.catatan.placeholder = 'Catatan penugasan (opsional)';
     el.kartuForm.style.display = 'block';
     el.kartuForm.scrollIntoView({ behavior: 'smooth' });
   }
@@ -116,11 +123,36 @@
     if (!baris) return;
     idAbsensiSedangDiedit = idAbsensi;
     idOperasionalSedangDiedit = null;
+    idKoreksiSedangDiedit = null;
     el.judulForm.textContent = 'Edit Jadwal';
     el.subjudulForm.textContent = relawanTerpilih.nama + ' · ' + baris.tanggal;
     el.jamMasuk.value = baris.jamMasuk || '';
     el.jamPulang.value = baris.jamPulang || '';
     el.catatan.value = baris.catatan || '';
+    el.catatan.placeholder = 'Catatan penugasan (opsional)';
+    el.kartuForm.style.display = 'block';
+    el.kartuForm.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  /**
+   * Koreksi Absen -- BEDA dari Edit Jadwal: ini membetulkan jam yg SUDAH
+   * TERCATAT hasil scan sungguhan (jamMasukAktual/jamPulangAktual), bukan
+   * jam rencana. Keterangan WAJIB diisi (dipakai sbg textarea catatan yg
+   * sama, tapi labelnya diganti supaya jelas ini wajib & akan tercatat
+   * audit -- lihat koreksiAbsensiAktual di backend).
+   */
+  function bukaFormKoreksi(idAbsensi, daftarTanggal) {
+    const baris = daftarTanggal.find(t => t.idAbsensi === idAbsensi);
+    if (!baris) return;
+    idKoreksiSedangDiedit = idAbsensi;
+    idAbsensiSedangDiedit = null;
+    idOperasionalSedangDiedit = null;
+    el.judulForm.textContent = 'Koreksi Absen';
+    el.subjudulForm.textContent = relawanTerpilih.nama + ' · ' + baris.tanggal + ' · jam di bawah ini jam ABSEN SUNGGUHAN (bukan jadwal)';
+    el.jamMasuk.value = baris.jamMasukAktual || '';
+    el.jamPulang.value = baris.jamPulangAktual || '';
+    el.catatan.value = '';
+    el.catatan.placeholder = 'Alasan koreksi (WAJIB diisi -- tercatat untuk audit & rekap penggajian)';
     el.kartuForm.style.display = 'block';
     el.kartuForm.scrollIntoView({ behavior: 'smooth' });
   }
@@ -138,18 +170,26 @@
 
   el.btnSimpan.addEventListener('click', async () => {
     if (!el.jamMasuk.value) { showError('Jam masuk wajib diisi.'); return; }
-    const konfirmasi = idAbsensiSedangDiedit
+    if (idKoreksiSedangDiedit) {
+      if (!el.jamPulang.value) { showError('Jam pulang wajib diisi utk Koreksi Absen.'); return; }
+      if (!el.catatan.value.trim()) { showError('Alasan koreksi wajib diisi (tercatat utk audit & rekap penggajian).'); return; }
+    }
+    const konfirmasi = idKoreksiSedangDiedit
+      ? 'Simpan koreksi jam absen ini? Perubahan ini memengaruhi data kehadiran & rekap penggajian, dan akan tercatat di riwayat audit.'
+      : idAbsensiSedangDiedit
       ? 'Simpan perubahan jadwal ini? Jam absensi yang SUDAH tercatat (kalau ada) tidak akan berubah -- ini hanya mengubah jadwal rencananya.'
       : 'Buat jadwal baru untuk relawan ini di tanggal tersebut?';
     if (!confirm(konfirmasi)) return;
 
     try {
-      if (idAbsensiSedangDiedit) {
+      if (idKoreksiSedangDiedit) {
+        await apiPost('koreksiAbsensiAktual', { token: token(), idAbsensi: idKoreksiSedangDiedit, jamMasuk: el.jamMasuk.value, jamPulang: el.jamPulang.value, keterangan: el.catatan.value });
+      } else if (idAbsensiSedangDiedit) {
         await apiPost('ubahJadwalIndividu', { token: token(), idAbsensi: idAbsensiSedangDiedit, jamMasuk: el.jamMasuk.value, jamPulang: el.jamPulang.value, catatan: el.catatan.value });
       } else {
         await apiPost('buatJadwalIndividu', { token: token(), idOperasional: idOperasionalSedangDiedit, idRelawan: relawanTerpilih.id, jamMasuk: el.jamMasuk.value, jamPulang: el.jamPulang.value, catatan: el.catatan.value });
       }
-      showSuccess('Jadwal berhasil disimpan.');
+      showSuccess(idKoreksiSedangDiedit ? 'Absen berhasil dikoreksi.' : 'Jadwal berhasil disimpan.');
       el.kartuForm.style.display = 'none';
       muatPemeriksaan(); // muat ulang -- otomatis mencerminkan data tersimpan terbaru, termasuk target/terjadwal/status
     } catch (err) { showError(err.message); }
