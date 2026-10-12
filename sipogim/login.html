@@ -25,11 +25,17 @@
         </div>
         <div class="sg-field">
           <label for="inputSandi">Kata Sandi</label>
-          <input class="sg-input" id="inputSandi" type="password" autocomplete="current-password" required>
+          <div style="position:relative;">
+            <input class="sg-input" id="inputSandi" type="password" autocomplete="current-password" required style="padding-right:46px;">
+            <button type="button" id="btnLihatSandi" aria-label="Lihat kata sandi" style="position:absolute; right:4px; top:4px; bottom:4px; width:40px; border:none; background:none; cursor:pointer; color:var(--color-text-muted); font-size:18px;">👁️</button>
+          </div>
         </div>
         <button type="submit" class="sg-btn primary block" id="btnLogin">Masuk</button>
         <p id="galatLogin" class="sg-error" style="display:none;"></p>
       </form>
+      <p style="text-align:center; margin:10px 0 0;">
+        <a href="#" id="tautanLupaSandi" style="font-size:13px; color:var(--color-sky);">Lupa kata sandi?</a>
+      </p>
     </div>
     <p style="text-align:center; font-size:11.5px; color:var(--color-text-muted);">Akun bersama tim gizi SPPG Jeungjing.</p>
   </main>
@@ -38,6 +44,23 @@
   <script src="sipogim-common.js"></script>
   <script>
     if (sesiSipogimAda()) location.href = 'beranda.html';
+
+    document.getElementById('btnLihatSandi').addEventListener('click', () => {
+      const input = document.getElementById('inputSandi');
+      const tampil = input.type === 'password';
+      input.type = tampil ? 'text' : 'password';
+      document.getElementById('btnLihatSandi').textContent = tampil ? '🙈' : '👁️';
+    });
+
+    // Akun ini BERSAMA (1 kata sandi utk seluruh tim, lihat spesifikasi) --
+    // tidak ada email per-pengguna utk reset otomatis. "Lupa kata sandi"
+    // di sini mengarahkan ke jalur pemulihan yg SUDAH ADA (lewat editor
+    // Apps Script), bukan membangun sistem reset-email terpisah yg
+    // sebenarnya tidak dibutuhkan utk tim 1-2 orang.
+    document.getElementById('tautanLupaSandi').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Kata sandi ini dipakai bersama satu tim, jadi tidak ada reset otomatis lewat email.\n\nUntuk mengatur ulang:\n1. Hubungi pengelola teknis Portal.\n2. Buka proyek Apps Script SIPOGIM.\n3. Jalankan fungsi "jalankanSetKataSandiAwal" dengan kata sandi baru (lihat Setup.gs).\n\nKalau mau cara yang lebih mudah (reset sendiri lewat email), beri tahu -- itu bisa dibangun juga.');
+    });
 
     document.getElementById('formLogin').addEventListener('submit', async (e) => {
       e.preventDefault();
