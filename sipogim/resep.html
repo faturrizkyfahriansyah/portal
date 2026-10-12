@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Resep — SIPOGIM</title>
 <link rel="stylesheet" href="sipogim.css">
+<style>
+  .baris-bahan { display:flex; gap:6px; align-items:center; margin-bottom:8px; }
+  .baris-bahan select { flex:2; } .baris-bahan input { flex:1; min-width:0; }
+  .baris-bahan button { flex-shrink:0; }
+</style>
 </head>
 <body>
   <div class="sg-topbar">
@@ -15,17 +20,194 @@
     <a class="sg-tab" href="beranda.html">Beranda</a>
     <a class="sg-tab" href="menu.html">Menu</a>
     <a class="sg-tab active" href="resep.html">Resep</a>
-    <a class="sg-tab " href="bahan.html">Bahan</a>
-    <a class="sg-tab " href="lainnya.html">Lainnya</a>
+    <a class="sg-tab" href="bahan.html">Bahan</a>
+    <a class="sg-tab" href="lainnya.html">Lainnya</a>
   </nav>
+
   <main class="sg-main">
     <div class="sg-card">
-      <p class="sg-title">Resep</p>
-      <p class="sg-subtitle">Sedang dibangun — Tahap 3.</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <p class="sg-title" style="margin:0;">Resep</p>
+        <button class="sg-btn primary" id="btnResepBaru">+ Resep</button>
+      </div>
+      <div class="sg-field" style="margin:10px 0 0;">
+        <input class="sg-input" id="inputCari" placeholder="Cari nama resep...">
+      </div>
     </div>
+    <div id="daftarResep"><p class="sg-empty">Memuat...</p></div>
   </main>
+
+  <div class="sg-main" id="kartuForm" style="display:none;">
+    <div class="sg-card">
+      <p class="sg-title" id="judulForm">Resep Baru</p>
+      <div class="sg-field"><label>Nama Resep</label><input class="sg-input" id="fNama"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="sg-field"><label>Kategori</label>
+          <select class="sg-select" id="fKategori">
+            <option>Karbohidrat</option><option>Lauk Hewani</option><option>Lauk Nabati</option>
+            <option>Sayur</option><option>Buah</option><option>Pelengkap / Finishing</option>
+          </select>
+        </div>
+        <div class="sg-field"><label>Jenis</label>
+          <select class="sg-select" id="fJenis"><option value="utuh">Utuh</option><option value="dasar">Dasar</option></select>
+        </div>
+      </div>
+
+      <label style="font-size:13px; font-weight:700; display:block; margin:14px 0 6px;">Bahan (gram per porsi)</label>
+      <div style="font-size:11.5px; color:var(--color-text-muted); display:flex; gap:6px; margin-bottom:4px;">
+        <span style="flex:2;">Bahan</span><span style="flex:1;">Besar (g)</span><span style="flex:1;">Kecil (g)</span><span style="width:30px;"></span>
+      </div>
+      <div id="daftarBarisBahan"></div>
+      <button class="sg-btn" id="btnTambahBaris" style="margin-top:4px;" type="button">+ Tambah Bahan</button>
+
+      <div class="sg-field" style="margin-top:14px;"><label>Catatan (opsional)</label><textarea class="sg-textarea" id="fCatatan"></textarea></div>
+      <p id="galatForm" class="sg-error" style="display:none;"></p>
+      <div style="display:flex; gap:8px; margin-top:6px;">
+        <button class="sg-btn primary block" id="btnSimpanResep">Simpan</button>
+        <button class="sg-btn" id="btnBatalForm">Batal</button>
+      </div>
+    </div>
+
+    <!-- Hasil hitung + tombol Setujui -- hanya tampil saat MENGUBAH resep yang sudah ada -->
+    <div class="sg-card" id="kartuHasil" style="display:none;">
+      <p class="sg-title">Hasil Perhitungan Gizi</p>
+      <div id="isiHasil"></div>
+      <button class="sg-btn success block" id="btnSetujui" style="margin-top:10px;">✓ Setujui Resep</button>
+    </div>
+  </div>
+
   <script src="sipogim-config.js"></script>
   <script src="sipogim-common.js"></script>
-  <script>wajibLoginSipogim();</script>
+  <script>
+    wajibLoginSipogim();
+    pastikanNamaSayaSipogim();
+    let idSedangDiedit = null;
+    let daftarSemuaBahan = [];
+
+    async function muatDaftar(cari) {
+      const wadah = document.getElementById('daftarResep');
+      try {
+        const daftar = await apiPostSipogim('getResepList', { cari: cari || '' });
+        wadah.innerHTML = daftar.length ? daftar.map(r => `
+          <div class="sg-card" style="cursor:pointer;" onclick="bukaForm('${r.id}')">
+            <strong>${escapeHtmlSipogim(r.nama)}</strong> ${badgeStatusSipogim(r.status)}
+            <div style="font-size:12px; color:var(--color-text-muted); margin-top:3px;">${escapeHtmlSipogim(r.kategori || '-')}</div>
+          </div>`).join('') : '<p class="sg-empty">Tidak ada resep yang cocok.</p>';
+      } catch (err) { tampilkanGalatSipogim(wadah, err); }
+    }
+    let waktuTunda;
+    document.getElementById('inputCari').addEventListener('input', (e) => {
+      clearTimeout(waktuTunda);
+      waktuTunda = setTimeout(() => muatDaftar(e.target.value.trim()), 300);
+    });
+
+    function opsiBahanHtml(bahanIdTerpilih) {
+      return '<option value="">Pilih bahan...</option>' + daftarSemuaBahan.map(b =>
+        `<option value="${b.id}" ${b.id === bahanIdTerpilih ? 'selected' : ''}>${escapeHtmlSipogim(b.nama)}${!b.lengkap ? ' (data belum lengkap)' : ''}</option>`
+      ).join('');
+    }
+
+    function tambahBarisBahan(bahanId, gramBesar, gramKecil) {
+      const wadah = document.getElementById('daftarBarisBahan');
+      const div = document.createElement('div');
+      div.className = 'baris-bahan';
+      div.innerHTML = `
+        <select class="sg-select">${opsiBahanHtml(bahanId)}</select>
+        <input class="sg-input" type="number" step="0.1" placeholder="gram" value="${gramBesar ?? ''}">
+        <input class="sg-input" type="number" step="0.1" placeholder="gram" value="${gramKecil ?? ''}">
+        <button class="sg-btn" type="button" onclick="this.parentElement.remove()">✕</button>`;
+      wadah.appendChild(div);
+    }
+    document.getElementById('btnTambahBaris').addEventListener('click', () => tambahBarisBahan(null, '', ''));
+
+    function kumpulkanBarisBahan() {
+      return Array.from(document.querySelectorAll('#daftarBarisBahan .baris-bahan')).map(div => {
+        const [sel, gB, gK] = div.querySelectorAll('select, input');
+        return { bahanId: sel.value, gramBesar: gB.value, gramKecil: gK.value };
+      }).filter(b => b.bahanId); // baris tanpa bahan dipilih diabaikan
+    }
+
+    function renderHasilHitung(gizi, label) {
+      if (!gizi.lengkap) {
+        return `<p style="font-size:13px; color:var(--color-danger); margin:6px 0;"><strong>${label}: Belum lengkap</strong></p>
+          <ul style="font-size:12.5px; color:var(--color-text-muted); margin:0 0 10px; padding-left:18px;">
+            ${gizi.penyebab.map(p => `<li>${escapeHtmlSipogim(p)}</li>`).join('')}
+          </ul>`;
+      }
+      const g = gizi.gizi;
+      return `<p style="font-size:13px; font-weight:700; margin:10px 0 4px;">${label} ${badgeStatusSipogim(gizi.status)}</p>
+        <div style="font-size:13px; color:var(--color-text);">
+          Energi: <strong>${formatAngkaSipogim(g.energiKkal,1)} kkal</strong> ·
+          Protein: <strong>${formatAngkaSipogim(g.proteinG,1)} g</strong> ·
+          Lemak: <strong>${formatAngkaSipogim(g.lemakG,1)} g</strong> ·
+          KH: <strong>${formatAngkaSipogim(g.karbohidratG,1)} g</strong> ·
+          Serat: <strong>${formatAngkaSipogim(g.seratG,1)} g</strong>
+        </div>`;
+    }
+
+    async function bukaForm(id) {
+      idSedangDiedit = id || null;
+      document.getElementById('fNama').value = '';
+      document.getElementById('fCatatan').value = '';
+      document.getElementById('daftarBarisBahan').innerHTML = '';
+      document.getElementById('galatForm').style.display = 'none';
+      document.getElementById('kartuHasil').style.display = id ? 'block' : 'none';
+      document.getElementById('judulForm').textContent = id ? 'Ubah Resep' : 'Resep Baru';
+
+      if (!daftarSemuaBahan.length) {
+        try { daftarSemuaBahan = await apiPostSipogim('getBahanList', {}); }
+        catch (err) { alert('⚠️ Gagal memuat daftar bahan: ' + err.message); return; }
+      }
+
+      if (id) {
+        try {
+          const r = await apiPostSipogim('getResepDetail', { id });
+          document.getElementById('fNama').value = r.nama || '';
+          document.getElementById('fKategori').value = r.kategori || 'Karbohidrat';
+          document.getElementById('fJenis').value = r.jenis || 'utuh';
+          document.getElementById('fCatatan').value = r.catatan || '';
+          r.bahan.forEach(b => tambahBarisBahan(b.bahanId, b.gramBesar, b.gramKecil));
+          document.getElementById('isiHasil').innerHTML = renderHasilHitung(r.giziBesar, 'Porsi Besar') + renderHasilHitung(r.giziKecil, 'Porsi Kecil');
+          document.getElementById('btnSetujui').style.display = r.status === 'sudah_dicek' ? 'none' : 'block';
+        } catch (err) { alert('⚠️ ' + err.message); return; }
+      } else {
+        tambahBarisBahan(null, '', '');
+      }
+      document.getElementById('kartuForm').style.display = 'block';
+      document.getElementById('kartuForm').scrollIntoView({ behavior: 'smooth' });
+    }
+    document.getElementById('btnResepBaru').addEventListener('click', () => bukaForm(null));
+    document.getElementById('btnBatalForm').addEventListener('click', () => { document.getElementById('kartuForm').style.display = 'none'; });
+
+    document.getElementById('btnSimpanResep').addEventListener('click', async () => {
+      const galat = document.getElementById('galatForm');
+      galat.style.display = 'none';
+      const payload = {
+        nama: document.getElementById('fNama').value.trim(),
+        kategori: document.getElementById('fKategori').value,
+        jenis: document.getElementById('fJenis').value,
+        catatan: document.getElementById('fCatatan').value.trim(),
+        bahan: kumpulkanBarisBahan()
+      };
+      try {
+        if (idSedangDiedit) { payload.id = idSedangDiedit; await apiPostSipogim('ubahResep', payload); }
+        else { await apiPostSipogim('tambahResep', payload); }
+        document.getElementById('kartuForm').style.display = 'none';
+        muatDaftar(document.getElementById('inputCari').value.trim());
+      } catch (err) { galat.textContent = '⚠️ ' + err.message; galat.style.display = 'block'; }
+    });
+
+    document.getElementById('btnSetujui').addEventListener('click', async () => {
+      const pin = prompt('Masukkan PIN untuk menyetujui resep ini:');
+      if (!pin) return;
+      try {
+        await apiPostSipogim('setujuiResep', { id: idSedangDiedit, pin });
+        alert('Resep disetujui.');
+        bukaForm(idSedangDiedit);
+      } catch (err) { alert('⚠️ ' + err.message); }
+    });
+
+    muatDaftar('');
+  </script>
 </body>
 </html>

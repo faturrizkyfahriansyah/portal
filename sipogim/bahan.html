@@ -14,18 +14,129 @@
   <nav class="sg-tabs">
     <a class="sg-tab" href="beranda.html">Beranda</a>
     <a class="sg-tab" href="menu.html">Menu</a>
-    <a class="sg-tab " href="resep.html">Resep</a>
+    <a class="sg-tab" href="resep.html">Resep</a>
     <a class="sg-tab active" href="bahan.html">Bahan</a>
-    <a class="sg-tab " href="lainnya.html">Lainnya</a>
+    <a class="sg-tab" href="lainnya.html">Lainnya</a>
   </nav>
+
   <main class="sg-main">
     <div class="sg-card">
-      <p class="sg-title">Bahan</p>
-      <p class="sg-subtitle">Sedang dibangun — Tahap 3.</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <p class="sg-title" style="margin:0;">Bahan</p>
+        <button class="sg-btn primary" id="btnBahanBaru">+ Bahan</button>
+      </div>
+      <div class="sg-field" style="margin:10px 0 0;">
+        <input class="sg-input" id="inputCari" placeholder="Cari nama bahan...">
+      </div>
     </div>
+    <div id="daftarBahan"><p class="sg-empty">Memuat...</p></div>
   </main>
+
+  <div class="sg-main" id="kartuForm" style="display:none;">
+    <div class="sg-card">
+      <p class="sg-title" id="judulForm">Bahan Baru</p>
+      <div class="sg-field"><label>Nama Bahan</label><input class="sg-input" id="fNama"></div>
+      <div class="sg-field"><label>Bentuk saat disajikan (opsional)</label><input class="sg-input" id="fBentuk" placeholder="mis. nasi matang"></div>
+      <div class="sg-field"><label>Takaran Dasar (gram)</label><input class="sg-input" id="fTakaran" type="number" value="100"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="sg-field"><label>Energi (kkal)</label><input class="sg-input" id="fEnergi" type="number" step="0.01" placeholder="kosongkan bila belum tahu"></div>
+        <div class="sg-field"><label>Protein (g)</label><input class="sg-input" id="fProtein" type="number" step="0.01"></div>
+        <div class="sg-field"><label>Lemak (g)</label><input class="sg-input" id="fLemak" type="number" step="0.01"></div>
+        <div class="sg-field"><label>Karbohidrat (g)</label><input class="sg-input" id="fKarbo" type="number" step="0.01"></div>
+        <div class="sg-field"><label>Serat (g)</label><input class="sg-input" id="fSerat" type="number" step="0.01"></div>
+      </div>
+      <div class="sg-field"><label>Catatan sumber (opsional)</label><textarea class="sg-textarea" id="fCatatan"></textarea></div>
+      <p id="galatForm" class="sg-error" style="display:none;"></p>
+      <div style="display:flex; gap:8px;">
+        <button class="sg-btn primary block" id="btnSimpanBahan">Simpan</button>
+        <button class="sg-btn" id="btnBatalForm">Batal</button>
+      </div>
+    </div>
+  </div>
+
   <script src="sipogim-config.js"></script>
   <script src="sipogim-common.js"></script>
-  <script>wajibLoginSipogim();</script>
+  <script>
+    wajibLoginSipogim();
+    pastikanNamaSayaSipogim();
+    let idSedangDiedit = null;
+
+    async function muatDaftar(cari) {
+      const wadah = document.getElementById('daftarBahan');
+      try {
+        const daftar = await apiPostSipogim('getBahanList', { cari: cari || '' });
+        wadah.innerHTML = daftar.length ? daftar.map(b => `
+          <div class="sg-card" style="cursor:pointer;" onclick="bukaForm('${b.id}')">
+            <strong>${escapeHtmlSipogim(b.nama)}</strong>
+            ${badgeStatusSipogim(b.status)}
+            ${!b.lengkap ? '<span style="font-size:12px; color:var(--color-text-muted); display:block; margin-top:3px;">Data gizi belum lengkap</span>' : ''}
+          </div>`).join('') : '<p class="sg-empty">Tidak ada bahan yang cocok.</p>';
+      } catch (err) { tampilkanGalatSipogim(wadah, err); }
+    }
+
+    let waktuTunda;
+    document.getElementById('inputCari').addEventListener('input', (e) => {
+      clearTimeout(waktuTunda);
+      waktuTunda = setTimeout(() => muatDaftar(e.target.value.trim()), 300);
+    });
+
+    function kosongkanForm() {
+      ['fNama','fBentuk','fCatatan'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('fTakaran').value = 100;
+      ['fEnergi','fProtein','fLemak','fKarbo','fSerat'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('galatForm').style.display = 'none';
+    }
+
+    async function bukaForm(id) {
+      idSedangDiedit = id || null;
+      kosongkanForm();
+      document.getElementById('judulForm').textContent = id ? 'Ubah Bahan' : 'Bahan Baru';
+      if (id) {
+        try {
+          const b = await apiPostSipogim('getBahanDetail', { id });
+          document.getElementById('fNama').value = b.nama || '';
+          document.getElementById('fBentuk').value = b.bentuk || '';
+          document.getElementById('fTakaran').value = b.takaranG || 100;
+          document.getElementById('fEnergi').value = b.energiKkal ?? '';
+          document.getElementById('fProtein').value = b.proteinG ?? '';
+          document.getElementById('fLemak').value = b.lemakG ?? '';
+          document.getElementById('fKarbo').value = b.karbohidratG ?? '';
+          document.getElementById('fSerat').value = b.seratG ?? '';
+          document.getElementById('fCatatan').value = b.sumberCatatan || '';
+        } catch (err) { alert('⚠️ ' + err.message); return; }
+      }
+      document.getElementById('kartuForm').style.display = 'block';
+      document.getElementById('kartuForm').scrollIntoView({ behavior: 'smooth' });
+    }
+    document.getElementById('btnBahanBaru').addEventListener('click', () => bukaForm(null));
+    document.getElementById('btnBatalForm').addEventListener('click', () => { document.getElementById('kartuForm').style.display = 'none'; });
+
+    document.getElementById('btnSimpanBahan').addEventListener('click', async () => {
+      const galat = document.getElementById('galatForm');
+      galat.style.display = 'none';
+      const payload = {
+        nama: document.getElementById('fNama').value.trim(),
+        bentuk: document.getElementById('fBentuk').value.trim(),
+        takaranG: document.getElementById('fTakaran').value,
+        energiKkal: document.getElementById('fEnergi').value,
+        proteinG: document.getElementById('fProtein').value,
+        lemakG: document.getElementById('fLemak').value,
+        karbohidratG: document.getElementById('fKarbo').value,
+        seratG: document.getElementById('fSerat').value,
+        sumberCatatan: document.getElementById('fCatatan').value.trim()
+      };
+      try {
+        if (idSedangDiedit) { payload.id = idSedangDiedit; await apiPostSipogim('ubahBahan', payload); }
+        else { await apiPostSipogim('tambahBahan', payload); }
+        document.getElementById('kartuForm').style.display = 'none';
+        muatDaftar(document.getElementById('inputCari').value.trim());
+      } catch (err) {
+        galat.textContent = '⚠️ ' + err.message;
+        galat.style.display = 'block';
+      }
+    });
+
+    muatDaftar('');
+  </script>
 </body>
 </html>
