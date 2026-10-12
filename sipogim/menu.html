@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Menu per Periode — SIPOGIM</title>
+<link rel="stylesheet" href="sipogim.css">
+</head>
+<body>
+  <div class="sg-topbar">
+    <div><strong>SIPOGIM</strong><small>Portal SPPG Jeungjing</small></div>
+    <span class="sg-topbar-spacer"></span>
+  </div>
+  <nav class="sg-tabs">
+    <a class="sg-tab" href="beranda.html">Beranda</a>
+    <a class="sg-tab active" href="menu.html">Menu</a>
+    <a class="sg-tab" href="resep.html">Resep</a>
+    <a class="sg-tab" href="bahan.html">Bahan</a>
+    <a class="sg-tab" href="lainnya.html">Lainnya</a>
+  </nav>
+
+  <main class="sg-main">
+    <div class="sg-card">
+      <p class="sg-title">Menu per Periode</p>
+      <div class="sg-field" style="margin:10px 0 0;">
+        <select class="sg-select" id="pilihPeriode"><option value="">Memuat periode...</option></select>
+      </div>
+    </div>
+
+    <div id="tampilanDaftarTanggal">
+      <p class="sg-empty">Pilih periode di atas.</p>
+    </div>
+
+    <!-- Detail satu hari -- disembunyikan sampai salah satu tanggal diketuk -->
+    <div class="sg-card" id="kartuDetail" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <p class="sg-title" id="judulDetail" style="margin:0;"></p>
+        <button class="sg-btn" id="btnTutupDetail">✕</button>
+      </div>
+      <div id="isiDetail" style="margin-top:10px;"></div>
+      <p style="font-size:12px; color:var(--color-text-muted); margin-top:10px;">Nilai gizi &amp; tombol Salin akan tampil setelah Resep &amp; Bahan dibangun (Tahap 3).</p>
+    </div>
+  </main>
+
+  <script src="sipogim-config.js"></script>
+  <script src="sipogim-common.js"></script>
+  <script>
+    wajibLoginSipogim();
+    pastikanNamaSayaSipogim();
+
+    const LABEL_PADANAN = {
+      terkonfirmasi: ['Resep terpasang', 'status-success'],
+      usulan: ['Usulan menunggu', 'status-warning'],
+      belum_ada_resep: ['Belum ada resep', 'status-danger'],
+      diabaikan: ['Diabaikan', 'status-warning']
+    };
+
+    async function muatDaftarPeriode() {
+      try {
+        const daftar = await apiPostSipogim('getPeriodeList', {});
+        const sel = document.getElementById('pilihPeriode');
+        if (!daftar.length) { sel.innerHTML = '<option value="">Belum ada periode tersinkron</option>'; return; }
+        sel.innerHTML = daftar.map(p => `<option value="${escapeHtmlSipogim(p)}">${escapeHtmlSipogim(p)}</option>`).join('');
+        sel.addEventListener('change', muatDaftarTanggal);
+        muatDaftarTanggal();
+      } catch (err) { tampilkanGalatSipogim('tampilanDaftarTanggal', err); }
+    }
+
+    async function muatDaftarTanggal() {
+      const periode = document.getElementById('pilihPeriode').value;
+      const wadah = document.getElementById('tampilanDaftarTanggal');
+      if (!periode) { wadah.innerHTML = '<p class="sg-empty">Pilih periode.</p>'; return; }
+      wadah.innerHTML = '<p class="sg-empty">Memuat...</p>';
+      try {
+        const daftar = await apiPostSipogim('getMenuPeriode', { periode });
+        wadah.innerHTML = daftar.length ? daftar.map(t => `
+          <div class="sg-card" style="cursor:pointer;" onclick="bukaDetail('${t.tanggal}')">
+            <strong>${escapeHtmlSipogim(t.tanggal)}</strong>
+            <span style="float:right; color:var(--color-text-muted); font-size:13px;">${t.jumlahKomponen} komponen</span>
+          </div>`).join('') : '<p class="sg-empty">Belum ada tanggal terisi di periode ini.</p>';
+      } catch (err) { tampilkanGalatSipogim(wadah, err); }
+    }
+
+    async function bukaDetail(tanggal) {
+      const kartu = document.getElementById('kartuDetail');
+      const isi = document.getElementById('isiDetail');
+      document.getElementById('judulDetail').textContent = tanggal;
+      isi.innerHTML = '<p class="sg-empty">Memuat...</p>';
+      kartu.style.display = 'block';
+      kartu.scrollIntoView({ behavior: 'smooth' });
+      try {
+        const komponen = await apiPostSipogim('getMenuHarian', { tanggal });
+        isi.innerHTML = komponen.map(k => {
+          const [label, kelas] = LABEL_PADANAN[k.statusPadanan] || ['-', 'status-warning'];
+          return `<div class="sg-list-item">
+            <strong>${escapeHtmlSipogim(k.kategori)}:</strong> ${escapeHtmlSipogim(k.namaMentah)}
+            <span class="sg-badge ${kelas}" style="margin-left:6px;">${label}</span>
+          </div>`;
+        }).join('');
+      } catch (err) { tampilkanGalatSipogim(isi, err); }
+    }
+    document.getElementById('btnTutupDetail').addEventListener('click', () => { document.getElementById('kartuDetail').style.display = 'none'; });
+
+    muatDaftarPeriode();
+  </script>
+</body>
+</html>

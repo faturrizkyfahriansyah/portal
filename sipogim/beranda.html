@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Beranda — SIPOGIM</title>
+<link rel="stylesheet" href="sipogim.css">
+</head>
+<body>
+  <div class="sg-topbar">
+    <div>
+      <strong>SIPOGIM</strong>
+      <small>Portal SPPG Jeungjing</small>
+    </div>
+    <span class="sg-topbar-spacer"></span>
+  </div>
+  <nav class="sg-tabs">
+    <a class="sg-tab active" href="beranda.html">Beranda</a>
+    <a class="sg-tab" href="menu.html">Menu</a>
+    <a class="sg-tab" href="resep.html">Resep</a>
+    <a class="sg-tab" href="bahan.html">Bahan</a>
+    <a class="sg-tab" href="lainnya.html">Lainnya</a>
+  </nav>
+
+  <main class="sg-main">
+    <div class="sg-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <div>
+          <p class="sg-title" style="margin:0;">Status Sinkron</p>
+          <p class="sg-subtitle" id="txtStatusSinkron">Memuat...</p>
+        </div>
+        <button class="sg-btn primary" id="btnTarikUlang">🔄 Tarik Ulang</button>
+      </div>
+      <p id="galatSinkron" class="sg-error" style="display:none;"></p>
+    </div>
+
+    <div class="sg-card accent">
+      <p class="sg-title">📋 Menu Tanpa Resep <span id="jmlTanpaResep"></span></p>
+      <p class="sg-subtitle">14 hari ke depan</p>
+      <div id="listTanpaResep"><p class="sg-empty">Memuat...</p></div>
+    </div>
+
+    <div class="sg-card accent">
+      <p class="sg-title">🔍 Usulan Padanan Menunggu <span id="jmlUsulan"></span></p>
+      <div id="listUsulan"><p class="sg-empty">Memuat...</p></div>
+    </div>
+  </main>
+
+  <script src="sipogim-config.js"></script>
+  <script src="sipogim-common.js"></script>
+  <script>
+    wajibLoginSipogim();
+    pastikanNamaSayaSipogim();
+
+    function formatWaktuRelatif(iso) {
+      if (!iso) return 'belum pernah';
+      const detik = (Date.now() - new Date(iso).getTime()) / 1000;
+      if (detik < 60) return 'baru saja';
+      if (detik < 3600) return Math.floor(detik / 60) + ' menit lalu';
+      if (detik < 86400) return Math.floor(detik / 3600) + ' jam lalu';
+      return Math.floor(detik / 86400) + ' hari lalu';
+    }
+
+    async function muatBeranda() {
+      try {
+        const d = await apiPostSipogim('getBeranda', {});
+
+        document.getElementById('txtStatusSinkron').textContent = d.sinkronTerakhir
+          ? 'Terakhir berhasil ditarik ' + formatWaktuRelatif(d.sinkronTerakhir.selesai)
+          : 'Belum pernah sinkron';
+
+        const galatEl = document.getElementById('galatSinkron');
+        if (d.sinkronBermasalah) {
+          galatEl.style.display = 'block';
+          galatEl.textContent = '⚠️ Sinkron terakhir ' + d.sinkronBermasalah.hasil + ': ' + (d.sinkronBermasalah.pesan || '-');
+        } else { galatEl.style.display = 'none'; }
+
+        document.getElementById('jmlTanpaResep').textContent = d.menuTanpaResep.length ? '(' + d.menuTanpaResep.length + ')' : '';
+        document.getElementById('listTanpaResep').innerHTML = d.menuTanpaResep.length
+          ? d.menuTanpaResep.map(m => `<div class="sg-list-item"><strong>${escapeHtmlSipogim(m.namaMentah)}</strong><br><a href="padanan.html?cari=${encodeURIComponent(m.namaNorm)}" style="font-size:12.5px;">Tangani di Padanan Nama →</a></div>`).join('')
+          : '<p class="sg-empty">Semua menu 14 hari ke depan sudah punya resep.</p>';
+
+        document.getElementById('jmlUsulan').textContent = d.usulanMenunggu.length ? '(' + d.usulanMenunggu.length + ')' : '';
+        document.getElementById('listUsulan').innerHTML = d.usulanMenunggu.length
+          ? d.usulanMenunggu.map(u => `<div class="sg-list-item"><strong>${escapeHtmlSipogim(u.namaContoh)}</strong> <span style="color:var(--color-text-muted); font-size:12px;">(skor ${(u.skor*100).toFixed(0)}%)</span><br><a href="padanan.html?cari=${encodeURIComponent(u.namaNorm)}" style="font-size:12.5px;">Konfirmasi di Padanan Nama →</a></div>`).join('')
+          : '<p class="sg-empty">Tidak ada usulan menunggu.</p>';
+      } catch (err) {
+        tampilkanGalatSipogim('listTanpaResep', err);
+      }
+    }
+
+    document.getElementById('btnTarikUlang').addEventListener('click', async () => {
+      const btn = document.getElementById('btnTarikUlang');
+      btn.disabled = true; btn.textContent = 'Menarik...';
+      try {
+        const hasil = await apiPostSipogim('sinkronSekarang', {});
+        alert('Sinkron selesai: ' + hasil.barisBaru + ' baru, ' + hasil.barisBerubah + ' berubah, ' + hasil.barisGalat + ' galat.');
+        muatBeranda();
+      } catch (err) {
+        alert('⚠️ ' + err.message);
+      } finally {
+        btn.disabled = false; btn.textContent = '🔄 Tarik Ulang';
+      }
+    });
+
+    muatBeranda();
+  </script>
+</body>
+</html>
