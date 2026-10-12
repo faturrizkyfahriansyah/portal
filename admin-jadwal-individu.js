@@ -37,7 +37,7 @@
 
   async function muatPeriode() {
     try {
-      const daftar = await apiPost('getPeriodeListAdmin', { token: token() });
+      const daftar = await apiGet('getPeriodeListAdmin', { token: token() });
       el.periode.innerHTML = '<option value="">Pilih periode...</option>' +
         daftar.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)} (${escapeHtml(p.tanggalMulai)} - ${escapeHtml(p.tanggalSelesai)})</option>`).join('');
       const aktif = daftar.find(p => String(p.status).toUpperCase() === 'AKTIF');
