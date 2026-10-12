@@ -95,7 +95,7 @@
           ? `<span class="badge aktif">${escapeHtml(t.statusKehadiran || '-')}</span>`
           : (t.perluDibuat ? '<span class="badge nonaktif">Belum Dibuat</span>' : '<span style="color:var(--color-text-muted);">-</span>');
         const tombol = t.adaJadwal
-          ? `<button type="button" class="btn-mini" data-edit="${escapeHtml(t.idAbsensi)}">Edit</button>`
+          ? `<button type="button" class="btn-mini" data-edit="${escapeHtml(t.idAbsensi)}">Edit</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`
           : (t.perluDibuat ? `<button type="button" class="btn-mini primary" data-buat="${escapeHtml(t.idOperasional)}" data-tanggal="${escapeHtml(t.tanggal)}">Buat Jadwal</button>` : '');
         return `<tr${t.perluDibuat ? ' style="background:#fdf1de;"' : ''}>
           <td>${escapeHtml(t.tanggal)}</td><td>${escapeHtml(t.hari || '-')}</td>
@@ -107,6 +107,7 @@
 
       el.tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => bukaFormEdit(btn.dataset.edit, d.daftarTanggal)));
       el.tbody.querySelectorAll('[data-buat]').forEach(btn => btn.addEventListener('click', () => bukaFormBuat(btn.dataset.buat, btn.dataset.tanggal)));
+      el.tbody.querySelectorAll('[data-hapus]').forEach(btn => btn.addEventListener('click', () => hapusJadwal(btn.dataset.hapus)));
     } catch (err) {
       el.tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
     }
@@ -134,6 +135,15 @@
     el.catatan.value = baris.catatan || '';
     el.kartuForm.style.display = 'block';
     el.kartuForm.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function hapusJadwal(idAbsensi) {
+    if (!confirm('Hapus jadwal ini sepenuhnya? Tindakan ini tidak bisa dibatalkan.\n\nCatatan: hanya bisa dihapus kalau relawan belum pernah absen di tanggal ini -- kalau sudah ada absensi sungguhan, sistem akan menolak.')) return;
+    try {
+      await apiPost('hapusJadwalIndividu', { token: token(), idAbsensi });
+      showSuccess('Jadwal berhasil dihapus.');
+      muatPemeriksaan(); // muat ulang -- Target/Terjadwal otomatis ikut terkoreksi
+    } catch (err) { showError(err.message); }
   }
 
   el.btnBatal.addEventListener('click', () => { el.kartuForm.style.display = 'none'; });
