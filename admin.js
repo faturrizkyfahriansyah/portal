@@ -366,6 +366,7 @@
     panelStok: 'admin-stok.js?v=20261011b',
     panelShift: 'admin-shift.js?v=20261010b',
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261013c',
+    panelLaporan: 'admin-laporan.js?v=20261013a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
