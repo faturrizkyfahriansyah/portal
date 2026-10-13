@@ -210,12 +210,7 @@ const SIRAGA_SUB_PANEL = {
   dashboard: 'siragaSubDashboard', barang: 'siragaSubBarang', masuk: 'siragaSubMasuk',
   keluar: 'siragaSubKeluar', transfer: 'siragaSubTransfer', pemusnahan: 'siragaSubPemusnahan',
   opname: 'siragaSubOpname', kartustok: 'siragaSubKartuStok', batch: 'siragaSubBatch',
-  laporan: 'siragaSubLaporan'
-  // 'masterdata'/'pengaturan' SENGAJA dihapus dari sini -- panel & tombol
-  // tabnya juga sudah dihapus dari siraga.html. Pengaturan SIRAGA
-  // (Kategori/Supplier/Tambah Barang/Hak Akses/Log) sekarang HANYA ada
-  // di admin-stok.js (Portal Pengelola), sesuai keputusan: relawan
-  // Petugas Stok cuma boleh lihat menu operasional, bukan pengaturan.
+  laporan: 'siragaSubLaporan', masterdata: 'siragaSubMasterData', pengaturan: 'siragaSubPengaturan'
 };
 const sudahDimuatTab = {};
 
@@ -237,6 +232,8 @@ async function pindahTabSiraga(tab) {
     else if (tab === 'kartustok') { inisialisasiKartuStok(); }
     else if (tab === 'batch') await muatBatchList();
     else if (tab === 'laporan') await muatLaporanList();
+    else if (tab === 'masterdata') await muatMasterDataAwal();
+    else if (tab === 'pengaturan') await muatPengaturanAwal();
   } catch (err) {
     showError(err.message || 'Gagal memuat data.');
   }
@@ -593,6 +590,159 @@ async function muatLaporanList_() {
     </div>`).join('');
 }
 
+// ============================================================
+// MASTER DATA (Admin: Kategori, Supplier, Tambah Barang)
+// ============================================================
+async function muatMasterDataAwal() {
+  document.querySelectorAll('#siragaSubMasterData .stok-subtab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#siragaSubMasterData .stok-subtab').forEach(b => b.classList.toggle('active', b === btn));
+      document.getElementById('msubKategori').style.display = btn.dataset.msub === 'kategori' ? 'block' : 'none';
+      document.getElementById('msubSupplier').style.display = btn.dataset.msub === 'supplier' ? 'block' : 'none';
+      document.getElementById('msubTambahBarang').style.display = btn.dataset.msub === 'tambahbarang' ? 'block' : 'none';
+    });
+  });
+  await muatKategoriList();
+  await muatSupplierList();
+
+  const selKategori = document.getElementById('barangBaruKategori');
+  const kategoriList = await apiPost('getSiragaKategoriList', { token: sesiSiraga.token });
+  kategoriList.forEach(k => selKategori.insertAdjacentHTML('beforeend', `<option value="${k.id}">${escapeHtml(k.nama)}</option>`));
+  const selSatuan = document.getElementById('barangBaruSatuan');
+  const satuanList = await apiPost('getSiragaSatuanList', {});
+  satuanList.forEach(s => selSatuan.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
+
+  document.getElementById('btnTambahKategori').addEventListener('click', async () => {
+    const nama = document.getElementById('kategoriBaruNama').value.trim();
+    if (!nama) return;
+    try {
+      await apiPost('addSiragaKategori', { token: sesiSiraga.token, nama: nama });
+      document.getElementById('kategoriBaruNama').value = '';
+      await muatKategoriList();
+    } catch (err) { showError(err.message); }
+  });
+
+  document.getElementById('btnTambahSupplier').addEventListener('click', async () => {
+    const nama = document.getElementById('supplierBaruNama').value.trim();
+    if (!nama) return;
+    try {
+      await apiPost('addSiragaSupplier', {
+        token: sesiSiraga.token, nama: nama,
+        kontak: document.getElementById('supplierBaruKontak').value.trim(),
+        alamat: document.getElementById('supplierBaruAlamat').value.trim()
+      });
+      document.getElementById('supplierBaruNama').value = '';
+      document.getElementById('supplierBaruKontak').value = '';
+      document.getElementById('supplierBaruAlamat').value = '';
+      await muatSupplierList();
+    } catch (err) { showError(err.message); }
+  });
+
+  document.getElementById('btnSimpanBarangBaru').addEventListener('click', async () => {
+    const tombol = document.getElementById('btnSimpanBarangBaru');
+    try {
+      const nama = document.getElementById('barangBaruNama').value.trim();
+      const idKategori = selKategori.value;
+      const satuan = selSatuan.value;
+      if (!nama || !idKategori || !satuan) throw new Error('Nama, Kategori, dan Satuan wajib diisi.');
+      tombol.disabled = true;
+      await apiPost('addSiragaBarang', {
+        token: sesiSiraga.token, nama: nama, idKategori: idKategori, satuan: satuan,
+        stokMinimum: Number(document.getElementById('barangBaruStokMinimum').value) || 0,
+        kelolaBatch: document.getElementById('barangBaruKelolaBatch').checked,
+        kelolaExpired: document.getElementById('barangBaruKelolaExpired').checked
+      });
+      showError('✅ Barang berhasil ditambahkan.');
+      document.getElementById('barangBaruNama').value = '';
+      document.getElementById('barangBaruStokMinimum').value = '0';
+      document.getElementById('barangBaruKelolaBatch').checked = false;
+      document.getElementById('barangBaruKelolaExpired').checked = false;
+      delete sudahDimuatTab.barang;
+    } catch (err) { showError(err.message || 'Gagal menambah barang.'); }
+    finally { tombol.disabled = false; }
+  });
+}
+
+async function muatKategoriList() {
+  const list = await apiPost('getSiragaKategoriListAdmin', { token: sesiSiraga.token });
+  document.getElementById('kategoriList').innerHTML = list.map(k => `
+    <div class="riwayat-item is-${k.status === 'AKTIF' ? 'hadir' : 'tidak-hadir'}">
+      <div class="riwayat-item-detail"><div class="riwayat-item-top"><strong class="riwayat-item-shift">${escapeHtml(k.nama)}</strong>
+      <button class="btn-mini" data-id="${k.id}" data-status="${k.status === 'AKTIF' ? 'NONAKTIF' : 'AKTIF'}" onclick="toggleStatusKategori(this)">${k.status === 'AKTIF' ? 'Nonaktifkan' : 'Aktifkan'}</button></div></div>
+    </div>`).join('') || '<div class="empty-state">Belum ada kategori.</div>';
+}
+async function toggleStatusKategori(btn) {
+  try { await apiPost('updateSiragaKategoriStatus', { token: sesiSiraga.token, id: btn.dataset.id, status: btn.dataset.status }); await muatKategoriList(); }
+  catch (err) { showError(err.message); }
+}
+
+async function muatSupplierList() {
+  const list = await apiPost('getSiragaSupplierListAdmin', { token: sesiSiraga.token });
+  document.getElementById('supplierList').innerHTML = list.map(s => `
+    <div class="riwayat-item is-${s.status === 'AKTIF' ? 'hadir' : 'tidak-hadir'}">
+      <div class="riwayat-item-detail"><div class="riwayat-item-top"><strong class="riwayat-item-shift">${escapeHtml(s.nama)}</strong>
+      <button class="btn-mini" data-id="${s.id}" data-status="${s.status === 'AKTIF' ? 'NONAKTIF' : 'AKTIF'}" onclick="toggleStatusSupplier(this)">${s.status === 'AKTIF' ? 'Nonaktifkan' : 'Aktifkan'}</button></div>
+      <div class="riwayat-item-jam">${escapeHtml(s.kontak || '-')}</div></div>
+    </div>`).join('') || '<div class="empty-state">Belum ada supplier.</div>';
+}
+async function toggleStatusSupplier(btn) {
+  try { await apiPost('updateSiragaSupplier', { token: sesiSiraga.token, id: btn.dataset.id, status: btn.dataset.status }); await muatSupplierList(); }
+  catch (err) { showError(err.message); }
+}
+
+// ============================================================
+// PENGATURAN (Admin: Hak Akses, Log Aktivitas)
+// ============================================================
+async function muatPengaturanAwal() {
+  document.querySelectorAll('#siragaSubPengaturan .stok-subtab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#siragaSubPengaturan .stok-subtab').forEach(b => b.classList.toggle('active', b === btn));
+      document.getElementById('psubHakAkses').style.display = btn.dataset.psub === 'hakakses' ? 'block' : 'none';
+      document.getElementById('psubLog').style.display = btn.dataset.psub === 'log' ? 'block' : 'none';
+      if (btn.dataset.psub === 'log') muatLogAktivitas();
+    });
+  });
+  await muatHakAkses();
+}
+
+async function muatHakAkses() {
+  const [petugas, semuaRelawan] = await Promise.all([
+    apiGet('getDaftarPetugasStok', { token: sesiSiraga.token }),
+    apiGet('getRelawan', { token: sesiSiraga.token, semua: '0' })
+  ]);
+  const idPetugasSet = new Set(petugas.map(p => p.idRelawan));
+  const container = document.getElementById('hakAksesList');
+  container.innerHTML = `
+    <p class="section-title">Petugas Stok Saat Ini</p>
+    ${petugas.map(p => `<div class="riwayat-item is-hadir"><div class="riwayat-item-detail"><div class="riwayat-item-top"><strong class="riwayat-item-shift">${escapeHtml(p.nama)}</strong>
+      <button class="btn-mini" data-id="${p.idRelawan}" data-jadi="false" onclick="ubahRoleStok(this)">Cabut Akses</button></div></div></div>`).join('') || '<div class="empty-state">Belum ada Petugas Stok.</div>'}
+    <p class="section-title" style="margin-top:18px;">Tambahkan Petugas Baru</p>
+    <select id="pilihRelawanBaruPetugas" class="form-field-input" style="margin-bottom:8px;">
+      <option value="">— Pilih Relawan —</option>
+      ${semuaRelawan.filter(r => !idPetugasSet.has(r.id)).map(r => `<option value="${r.id}">${escapeHtml(r.nama)}</option>`).join('')}
+    </select>
+    <button class="btn-submit" id="btnJadikanPetugas">+ Berikan Akses Petugas Stok</button>
+  `;
+  document.getElementById('btnJadikanPetugas').addEventListener('click', async () => {
+    const id = document.getElementById('pilihRelawanBaruPetugas').value;
+    if (!id) return;
+    try { await apiPost('setRoleStok', { token: sesiSiraga.token, idRelawan: id, jadikanPetugas: true }); await muatHakAkses(); }
+    catch (err) { showError(err.message); }
+  });
+}
+async function ubahRoleStok(btn) {
+  try { await apiPost('setRoleStok', { token: sesiSiraga.token, idRelawan: btn.dataset.id, jadikanPetugas: btn.dataset.jadi === 'true' }); await muatHakAkses(); }
+  catch (err) { showError(err.message); }
+}
+
+async function muatLogAktivitas() {
+  const list = await apiPost('getSiragaActivityLogs', { token: sesiSiraga.token });
+  document.getElementById('logAktivitasList').innerHTML = list.map(l => `
+    <div class="riwayat-item is-belum-absen"><div class="riwayat-item-detail">
+      <div class="riwayat-item-top"><strong class="riwayat-item-shift">${l.aksi}</strong></div>
+      <div class="riwayat-item-jam">${escapeHtml(l.aktor)} · ${l.waktu ? new Date(l.waktu).toLocaleString('id-ID') : '-'}</div>
+    </div></div>`).join('') || '<div class="empty-state">Belum ada log.</div>';
+}
 
 // ============================================================
 // INIT
@@ -612,10 +762,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     window._siragaCariTimeout = setTimeout(() => muatDaftarBarang(e.target.value.trim()), 350);
   });
 
-  // Pengaturan SIRAGA (Kategori/Supplier/Tambah Barang/Hak Akses/Log) HANYA
-  // ada di Portal Pengelola (admin-stok.js) -- lihat catatan di
-  // SIRAGA_SUB_PANEL di atas. Halaman ini (relawan/Petugas Stok) cuma
-  // menu operasional.
+  // Tab Master Data & Pengaturan ditampilkan ke semua yang berhasil
+  // masuk (Petugas Stok/Staff/Admin) -- AKSI TULIS di dalamnya (tambah
+  // kategori/supplier/barang, ubah Hak Akses) tetap digerbangi khusus
+  // Admin di BACKEND (requireSiragaAdmin_), sesuai prinsip "Backend
+  // adalah pengaman utama" (§28). Kalau Petugas Stok mencoba aksi tulis,
+  // akan muncul pesan jelas dari server, bukan disembunyikan diam-diam.
+  document.getElementById('tabMasterData').style.display = 'inline-block';
+  document.getElementById('tabPengaturan').style.display = 'inline-block';
 
   try {
     await pindahTabSiraga('dashboard');
