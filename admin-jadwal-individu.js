@@ -19,6 +19,9 @@
     kartuForm: document.getElementById('jiKartuForm'),
     judulForm: document.getElementById('jiJudulForm'),
     subjudulForm: document.getElementById('jiSubjudulForm'),
+    blokStatus: document.getElementById('jiBlokStatus'),
+    statusBaru: document.getElementById('jiStatusBaru'),
+    blokJam: document.getElementById('jiBlokJam'),
     jamMasuk: document.getElementById('jiJamMasuk'),
     jamPulang: document.getElementById('jiJamPulang'),
     catatan: document.getElementById('jiCatatan'),
@@ -83,7 +86,11 @@
         const statusSel = t.adaJadwal
           ? `<span class="badge aktif">${escapeHtml(t.statusKehadiran || '-')}</span>`
           : (t.perluDibuat ? '<span class="badge nonaktif">Belum Dibuat</span>' : '<span style="color:var(--color-text-muted);">-</span>');
-        const sudahAbsen = t.adaJadwal && t.statusMasuk && t.statusMasuk !== 'BELUM';
+        // Pakai statusKehadiran (bukan statusMasuk) -- krn Koreksi Absen bisa
+        // mengubah baris jadi IZIN/SAKIT/CUTI dgn statusMasuk kembali ke
+        // 'BELUM', tapi baris itu TETAP sudah "terisi" & harus tetap
+        // tampil Koreksi Absen, bukan balik ke Edit/Hapus.
+        const sudahAbsen = t.adaJadwal && t.statusKehadiran && t.statusKehadiran !== 'BELUM ABSEN';
         const tombol = sudahAbsen
           ? `<button type="button" class="btn-mini" data-koreksi="${escapeHtml(t.idAbsensi)}">Koreksi Absen</button>`
           : t.adaJadwal
@@ -112,6 +119,8 @@
     idKoreksiSedangDiedit = null;
     el.judulForm.textContent = 'Buat Jadwal';
     el.subjudulForm.textContent = relawanTerpilih.nama + ' · ' + tanggal;
+    el.blokStatus.style.display = 'none';
+    el.blokJam.style.display = 'flex';
     el.jamMasuk.value = ''; el.jamPulang.value = ''; el.catatan.value = '';
     el.catatan.placeholder = 'Catatan penugasan (opsional)';
     el.kartuForm.style.display = 'block';
@@ -126,6 +135,8 @@
     idKoreksiSedangDiedit = null;
     el.judulForm.textContent = 'Edit Jadwal';
     el.subjudulForm.textContent = relawanTerpilih.nama + ' · ' + baris.tanggal;
+    el.blokStatus.style.display = 'none';
+    el.blokJam.style.display = 'flex';
     el.jamMasuk.value = baris.jamMasuk || '';
     el.jamPulang.value = baris.jamPulang || '';
     el.catatan.value = baris.catatan || '';
@@ -141,6 +152,10 @@
    * sama, tapi labelnya diganti supaya jelas ini wajib & akan tercatat
    * audit -- lihat koreksiAbsensiAktual di backend).
    */
+  function perbaruiTampilanBlokJam() {
+    el.blokJam.style.display = el.statusBaru.value === 'HADIR' ? 'flex' : 'none';
+  }
+
   function bukaFormKoreksi(idAbsensi, daftarTanggal) {
     const baris = daftarTanggal.find(t => t.idAbsensi === idAbsensi);
     if (!baris) return;
@@ -148,7 +163,10 @@
     idAbsensiSedangDiedit = null;
     idOperasionalSedangDiedit = null;
     el.judulForm.textContent = 'Koreksi Absen';
-    el.subjudulForm.textContent = relawanTerpilih.nama + ' · ' + baris.tanggal + ' · jam di bawah ini jam ABSEN SUNGGUHAN (bukan jadwal)';
+    el.subjudulForm.textContent = relawanTerpilih.nama + ' · ' + baris.tanggal;
+    el.blokStatus.style.display = 'block';
+    el.statusBaru.value = 'HADIR';
+    perbaruiTampilanBlokJam();
     el.jamMasuk.value = baris.jamMasukAktual || '';
     el.jamPulang.value = baris.jamPulangAktual || '';
     el.catatan.value = '';
@@ -156,6 +174,7 @@
     el.kartuForm.style.display = 'block';
     el.kartuForm.scrollIntoView({ behavior: 'smooth' });
   }
+  el.statusBaru.addEventListener('change', perbaruiTampilanBlokJam);
 
   async function hapusJadwal(idAbsensi) {
     if (!confirm('Hapus jadwal ini sepenuhnya? Tindakan ini tidak bisa dibatalkan.\n\nCatatan: hanya bisa dihapus kalau relawan belum pernah absen di tanggal ini -- kalau sudah ada absensi sungguhan, sistem akan menolak.')) return;
@@ -169,13 +188,17 @@
   el.btnBatal.addEventListener('click', () => { el.kartuForm.style.display = 'none'; });
 
   el.btnSimpan.addEventListener('click', async () => {
-    if (!el.jamMasuk.value) { showError('Jam masuk wajib diisi.'); return; }
     if (idKoreksiSedangDiedit) {
-      if (!el.jamPulang.value) { showError('Jam pulang wajib diisi utk Koreksi Absen.'); return; }
       if (!el.catatan.value.trim()) { showError('Alasan koreksi wajib diisi (tercatat utk audit & rekap penggajian).'); return; }
+      if (el.statusBaru.value === 'HADIR') {
+        if (!el.jamMasuk.value || !el.jamPulang.value) { showError('Jam masuk & jam pulang wajib diisi utk status Hadir.'); return; }
+      }
+    } else {
+      if (!el.jamMasuk.value) { showError('Jam masuk wajib diisi.'); return; }
     }
+    const label = { HADIR: 'Hadir', IZIN: 'Izin', SAKIT: 'Sakit', CUTI: 'Cuti', ALFA: 'Alfa' }[el.statusBaru.value] || '';
     const konfirmasi = idKoreksiSedangDiedit
-      ? 'Simpan koreksi jam absen ini? Perubahan ini memengaruhi data kehadiran & rekap penggajian, dan akan tercatat di riwayat audit.'
+      ? 'Ubah status kehadiran jadi "' + label + '"? Perubahan ini memengaruhi data kehadiran & rekap penggajian, dan akan tercatat di riwayat audit.'
       : idAbsensiSedangDiedit
       ? 'Simpan perubahan jadwal ini? Jam absensi yang SUDAH tercatat (kalau ada) tidak akan berubah -- ini hanya mengubah jadwal rencananya.'
       : 'Buat jadwal baru untuk relawan ini di tanggal tersebut?';
@@ -183,7 +206,7 @@
 
     try {
       if (idKoreksiSedangDiedit) {
-        await apiPost('koreksiAbsensiAktual', { token: token(), idAbsensi: idKoreksiSedangDiedit, jamMasuk: el.jamMasuk.value, jamPulang: el.jamPulang.value, keterangan: el.catatan.value });
+        await apiPost('koreksiAbsensiAktual', { token: token(), idAbsensi: idKoreksiSedangDiedit, statusBaru: el.statusBaru.value, jamMasuk: el.jamMasuk.value, jamPulang: el.jamPulang.value, keterangan: el.catatan.value });
       } else if (idAbsensiSedangDiedit) {
         await apiPost('ubahJadwalIndividu', { token: token(), idAbsensi: idAbsensiSedangDiedit, jamMasuk: el.jamMasuk.value, jamPulang: el.jamPulang.value, catatan: el.catatan.value });
       } else {

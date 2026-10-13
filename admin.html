@@ -1000,7 +1000,19 @@
     <div class="panel-block" id="jiKartuForm" style="display:none;margin-top:14px;">
       <p class="panel-block-title" id="jiJudulForm">Buat Jadwal</p>
       <p style="font-size:12.5px;color:var(--color-text-muted);margin:2px 0 10px;" id="jiSubjudulForm"></p>
-      <div class="inline-form-relawan" style="flex-wrap:wrap;">
+
+      <div id="jiBlokStatus" style="display:none;margin-bottom:10px;">
+        <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:4px;">Status Kehadiran</label>
+        <select id="jiStatusBaru" style="width:100%;padding:8px;border:1px solid var(--color-border);border-radius:8px;">
+          <option value="HADIR">Hadir</option>
+          <option value="IZIN">Izin</option>
+          <option value="SAKIT">Sakit</option>
+          <option value="CUTI">Cuti</option>
+          <option value="ALFA">Alfa (tidak masuk, tidak ada keterangan)</option>
+        </select>
+      </div>
+
+      <div class="inline-form-relawan" style="flex-wrap:wrap;" id="jiBlokJam">
         <input type="time" id="jiJamMasuk">
         <span style="align-self:center;">s/d</span>
         <input type="time" id="jiJamPulang">
