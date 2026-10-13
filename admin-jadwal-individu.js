@@ -90,11 +90,14 @@
         // mengubah baris jadi IZIN/SAKIT/CUTI dgn statusMasuk kembali ke
         // 'BELUM', tapi baris itu TETAP sudah "terisi" & harus tetap
         // tampil Koreksi Absen, bukan balik ke Edit/Hapus.
+        // PENYATUAN KOREKSI TANGGAL + KOREKSI ABSEN (Keputusan Final
+        // Implementasi, poin 1): satu tempat, aksi lengkap sesuai kondisi
+        // baris -- bukan 2 panel terpisah seperti sebelumnya.
         const sudahAbsen = t.adaJadwal && t.statusKehadiran && t.statusKehadiran !== 'BELUM ABSEN';
         const tombol = sudahAbsen
-          ? `<button type="button" class="btn-mini" data-koreksi="${escapeHtml(t.idAbsensi)}">Koreksi Absen</button>`
+          ? `<button type="button" class="btn-mini" data-koreksi="${escapeHtml(t.idAbsensi)}">Koreksi Absen</button> <button type="button" class="btn-mini" data-pindah="${escapeHtml(t.idAbsensi)}">Pindah Tanggal</button>`
           : t.adaJadwal
-          ? `<button type="button" class="btn-mini" data-edit="${escapeHtml(t.idAbsensi)}">Edit</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`
+          ? `<button type="button" class="btn-mini" data-edit="${escapeHtml(t.idAbsensi)}">Edit</button> <button type="button" class="btn-mini" data-tandai="${escapeHtml(t.idAbsensi)}">Tandai Hadir</button> <button type="button" class="btn-mini" data-pindah="${escapeHtml(t.idAbsensi)}">Pindah Tanggal</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`
           : (t.perluDibuat ? `<button type="button" class="btn-mini primary" data-buat="${escapeHtml(t.idOperasional)}" data-tanggal="${escapeHtml(t.tanggal)}">Buat Jadwal</button>` : '');
         return `<tr${t.perluDibuat ? ' style="background:#fdf1de;"' : ''}>
           <td>${escapeHtml(t.tanggal)}</td><td>${escapeHtml(t.hari || '-')}</td>
@@ -108,6 +111,8 @@
       el.tbody.querySelectorAll('[data-buat]').forEach(btn => btn.addEventListener('click', () => bukaFormBuat(btn.dataset.buat, btn.dataset.tanggal)));
       el.tbody.querySelectorAll('[data-hapus]').forEach(btn => btn.addEventListener('click', () => hapusJadwal(btn.dataset.hapus)));
       el.tbody.querySelectorAll('[data-koreksi]').forEach(btn => btn.addEventListener('click', () => bukaFormKoreksi(btn.dataset.koreksi, d.daftarTanggal)));
+      el.tbody.querySelectorAll('[data-tandai]').forEach(btn => btn.addEventListener('click', () => tandaiHadir(btn.dataset.tandai, d.daftarTanggal)));
+      el.tbody.querySelectorAll('[data-pindah]').forEach(btn => btn.addEventListener('click', () => pindahTanggal(btn.dataset.pindah, d.daftarTanggal)));
     } catch (err) {
       el.tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
     }
@@ -175,6 +180,36 @@
     el.kartuForm.scrollIntoView({ behavior: 'smooth' });
   }
   el.statusBaru.addEventListener('change', perbaruiTampilanBlokJam);
+
+  async function tandaiHadir(idAbsensi, daftarTanggal) {
+    const baris = daftarTanggal.find(t => t.idAbsensi === idAbsensi);
+    const keterangan = prompt('Tandai hadir memakai jam jadwal (' + (baris ? baris.jamMasuk + ' s/d ' + (baris.jamPulang || '-') : '') + ').\n\nAlasan (WAJIB, tercatat utk audit & rekap penggajian):');
+    if (keterangan === null) return; // batal
+    if (!keterangan.trim()) { showError('Alasan wajib diisi.'); return; }
+    try {
+      await apiPost('tandaiHadirJadwalIndividu', { token: token(), idAbsensi, keterangan });
+      showSuccess('Berhasil ditandai hadir.');
+      muatPemeriksaan();
+    } catch (err) { showError(err.message); }
+  }
+
+  async function pindahTanggal(idAbsensi, daftarTanggal) {
+    const baris = daftarTanggal.find(t => t.idAbsensi === idAbsensi);
+    const pilihanLain = daftarTanggal.filter(t => t.idOperasional && t.idOperasional !== (baris && baris.idOperasional));
+    if (!pilihanLain.length) { showError('Tidak ada tanggal lain dalam periode ini untuk dipindahkan.'); return; }
+    const daftarTeks = pilihanLain.map((t, i) => (i + 1) + '. ' + t.tanggal + ' (' + t.hari + ')').join('\n');
+    const pilihan = prompt('Pindahkan jadwal ini (' + (baris ? baris.tanggal : '') + ') ke tanggal mana?\n\n' + daftarTeks + '\n\nKetik nomornya:');
+    if (pilihan === null) return;
+    const idx = parseInt(pilihan, 10) - 1;
+    if (isNaN(idx) || !pilihanLain[idx]) { showError('Pilihan tidak valid.'); return; }
+    const tujuan = pilihanLain[idx];
+    if (!confirm('Pindahkan ke ' + tujuan.tanggal + ' (' + tujuan.hari + ')? Jam & status presensi asli TIDAK berubah, hanya tanggalnya.')) return;
+    try {
+      await apiPost('pindahTanggalJadwalIndividu', { token: token(), idAbsensi, idOperasionalBaru: tujuan.idOperasional });
+      showSuccess('Jadwal berhasil dipindahkan ke ' + tujuan.tanggal + '.');
+      muatPemeriksaan();
+    } catch (err) { showError(err.message); }
+  }
 
   async function hapusJadwal(idAbsensi) {
     if (!confirm('Hapus jadwal ini sepenuhnya? Tindakan ini tidak bisa dibatalkan.\n\nCatatan: hanya bisa dihapus kalau relawan belum pernah absen di tanggal ini -- kalau sudah ada absensi sungguhan, sistem akan menolak.')) return;
