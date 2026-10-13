@@ -160,14 +160,14 @@ async function apiGet(action, params, _attempt) {
     const cuplikan = cuplikanRespon_(teksMentah);
     logDebug_('RAW_RESPONSE', action, cuplikan);
     if (/authorization|permission|accounts\.google\.com|sign in/i.test(cuplikan)) {
-      throw new Error('Server perlu otorisasi ulang oleh Admin (buka Apps Script sekali, klik Run pada salah satu fungsi, izinkan aksesnya). Detail: ' + cuplikan);
+      throw new Error('Server perlu otorisasi ulang oleh Admin (buka Apps Script sekali, klik Run pada salah satu fungsi, izinkan aksesnya).');
     }
     if (attempt < 3) {
       logDebug_('RETRY_RAW_RESPONSE', action, 'percobaan ke-' + (attempt + 1));
       await new Promise(r => setTimeout(r, 600 * attempt)); // backoff singkat
       return apiGet(action, params, attempt + 1);
     }
-    throw new Error('Server memberikan respons yang tidak bisa dibaca. Cuplikan: "' + (cuplikan || '(kosong)') + '"');
+    throw new Error('Terjadi kendala pada sistem. Silakan muat ulang halaman dan coba kembali.');
   }
   logDebug_('OK', action, (Date.now() - mulai) + 'ms');
   if (!json.success) throw new Error(json.message || 'Terjadi kesalahan pada server.');
@@ -214,9 +214,9 @@ async function apiPost(action, payload, timeoutMs, pesanTimeoutKustom) {
     const cuplikan = cuplikanRespon_(teksMentah);
     logDebug_('RAW_RESPONSE', action, cuplikan);
     if (/authorization|permission|accounts\.google\.com|sign in/i.test(cuplikan)) {
-      throw new Error('Server perlu otorisasi ulang oleh Admin (buka Apps Script sekali, klik Run pada salah satu fungsi, izinkan aksesnya). Detail: ' + cuplikan);
+      throw new Error('Server perlu otorisasi ulang oleh Admin (buka Apps Script sekali, klik Run pada salah satu fungsi, izinkan aksesnya).');
     }
-    throw new Error('Server memberikan respons yang tidak bisa dibaca. Cuplikan: "' + (cuplikan || '(kosong)') + '" — Data KEMUNGKINAN sudah tersimpan di server meski responsnya rusak; periksa dulu sebelum mengulang.');
+    throw new Error('Terjadi kendala pada sistem. Data yang Anda kirim mungkin sudah tersimpan — periksa dulu sebelum mencoba mengirim ulang.');
   }
   logDebug_('OK', action, (Date.now() - mulai) + 'ms');
   if (!json.success) throw new Error(json.message || 'Terjadi kesalahan pada server.');

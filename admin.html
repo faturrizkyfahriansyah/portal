@@ -502,6 +502,22 @@
       <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Kartu QR — SIPRES Absensi QR</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Kelola kartu QR pribadi relawan untuk jalur absensi via kamera. Database sama dengan absensi HP.</p></div>
     </div>
 
+    <!-- AKSES QR KIOS (Keputusan Final Implementasi #3). Halaman kios
+         (absensi-qr.html) SUDAH ADA & berjalan sendiri (tanpa login,
+         memang dirancang begitu utk dipasang di titik distribusi) --
+         ini CUMA pintasan, BUKAN membuat aplikasi/alur baru. SENGAJA
+         dibedakan penamaannya dari "akses portal" -- ini QR PRESENSI,
+         jalur yg sudah berjalan, bukan jalur baru masuk ke Portal. -->
+    <div class="panel-block" style="margin-bottom:14px;background:var(--color-sky-soft,#eef6fb);">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div>
+          <p class="panel-block-title" style="margin:0;">📷 Kios Presensi QR</p>
+          <p style="font-size:12.5px;color:var(--color-text-muted);margin:3px 0 0;">Halaman pindai yang dipasang di titik distribusi. Tidak perlu login — relawan tinggal arahkan kartu ke kamera.</p>
+        </div>
+        <a href="absensi-qr.html" target="_blank" rel="noopener" class="btn-mini primary" style="text-decoration:none;display:inline-block;">Buka Kios Presensi →</a>
+      </div>
+    </div>
+
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <input type="text" id="kqCari" class="form-field-input" placeholder="🔍 Cari nama/ID relawan...">
       <button class="btn-mini primary" id="btnCetakTerpilihKq" disabled>🖨️ Cetak Terpilih (<span id="kqJumlahTerpilih">0</span>)</button>
