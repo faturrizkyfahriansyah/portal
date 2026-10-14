@@ -22,6 +22,8 @@
     blokStatus: document.getElementById('jiBlokStatus'),
     statusBaru: document.getElementById('jiStatusBaru'),
     blokJam: document.getElementById('jiBlokJam'),
+    blokPindahTanggal: document.getElementById('jiBlokPindahTanggal'),
+    tanggalTujuan: document.getElementById('jiTanggalTujuan'),
     jamMasuk: document.getElementById('jiJamMasuk'),
     jamPulang: document.getElementById('jiJamPulang'),
     catatan: document.getElementById('jiCatatan'),
@@ -42,7 +44,7 @@
     try {
       const daftar = await apiGet('getPeriodeListAdmin', { token: token() });
       el.periode.innerHTML = '<option value="">Pilih periode...</option>' +
-        daftar.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)} (${escapeHtml(p.tanggalMulai)} - ${escapeHtml(p.tanggalSelesai)})</option>`).join('');
+        daftar.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join(''); // Perbaikan C -- cuma nama, rentang tanggal tetap dipakai internal
       const aktif = daftar.find(p => String(p.status).toUpperCase() === 'AKTIF');
       if (aktif) el.periode.value = aktif.id;
     } catch (err) { showError(err.message); }
@@ -91,14 +93,21 @@
         // 'BELUM', tapi baris itu TETAP sudah "terisi" & harus tetap
         // tampil Koreksi Absen, bukan balik ke Edit/Hapus.
         // PENYATUAN KOREKSI TANGGAL + KOREKSI ABSEN (Keputusan Final
-        // Implementasi, poin 1): satu tempat, aksi lengkap sesuai kondisi
-        // baris -- bukan 2 panel terpisah seperti sebelumnya.
-        const sudahAbsen = t.adaJadwal && t.statusKehadiran && t.statusKehadiran !== 'BELUM ABSEN';
-        const tombol = sudahAbsen
-          ? `<button type="button" class="btn-mini" data-koreksi="${escapeHtml(t.idAbsensi)}">Koreksi Absen</button> <button type="button" class="btn-mini" data-pindah="${escapeHtml(t.idAbsensi)}">Pindah Tanggal</button>`
-          : t.adaJadwal
-          ? `<button type="button" class="btn-mini" data-edit="${escapeHtml(t.idAbsensi)}">Edit</button> <button type="button" class="btn-mini" data-tandai="${escapeHtml(t.idAbsensi)}">Tandai Hadir</button> <button type="button" class="btn-mini" data-pindah="${escapeHtml(t.idAbsensi)}">Pindah Tanggal</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`
-          : (t.perluDibuat ? `<button type="button" class="btn-mini primary" data-buat="${escapeHtml(t.idOperasional)}" data-tanggal="${escapeHtml(t.tanggal)}">Buat Jadwal</button>` : '');
+        // Implementasi, poin 1) + Perbaikan 3/4/5/6 (Prompt Final):
+        // aksi SEKARANG ditentukan dari t.sudahLewat (tanggal operasional
+        // SIPRES dibanding tanggal SERVER, dihitung backend) -- BUKAN lagi
+        // dari status presensi. Ini perbaikan utama: dulu baris "Belum
+        // Absen" pada tanggal LAMPAU tetap dapat Edit/Tandai Hadir (seakan
+        // tanggal itu belum lewat), padahal seharusnya Koreksi Absen --
+        // supaya Admin bisa langsung set Sakit/Izin/dll TANPA membuat
+        // catatan Hadir palsu sbg perantara. "Tandai Hadir" & tombol
+        // "Pindah Tanggal" terpisah DIHAPUS -- keduanya sekarang bagian
+        // dari form Koreksi Absen yang sama (dropdown Status Koreksi).
+        const tombol = !t.adaJadwal
+          ? (t.perluDibuat ? `<button type="button" class="btn-mini primary" data-buat="${escapeHtml(t.idOperasional)}" data-tanggal="${escapeHtml(t.tanggal)}">Buat Jadwal</button>` : '')
+          : t.sudahLewat
+          ? `<button type="button" class="btn-mini" data-koreksi="${escapeHtml(t.idAbsensi)}">Koreksi Absen</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`
+          : `<button type="button" class="btn-mini" data-edit="${escapeHtml(t.idAbsensi)}">Edit</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`;
         return `<tr${t.perluDibuat ? ' style="background:#fdf1de;"' : ''}>
           <td>${escapeHtml(t.tanggal)}</td><td>${escapeHtml(t.hari || '-')}</td>
           <td>${escapeHtml(t.divisi || '-')}</td><td>${escapeHtml(t.jenisPenugasan || '-')}</td>
@@ -111,8 +120,9 @@
       el.tbody.querySelectorAll('[data-buat]').forEach(btn => btn.addEventListener('click', () => bukaFormBuat(btn.dataset.buat, btn.dataset.tanggal)));
       el.tbody.querySelectorAll('[data-hapus]').forEach(btn => btn.addEventListener('click', () => hapusJadwal(btn.dataset.hapus)));
       el.tbody.querySelectorAll('[data-koreksi]').forEach(btn => btn.addEventListener('click', () => bukaFormKoreksi(btn.dataset.koreksi, d.daftarTanggal)));
-      el.tbody.querySelectorAll('[data-tandai]').forEach(btn => btn.addEventListener('click', () => tandaiHadir(btn.dataset.tandai, d.daftarTanggal)));
-      el.tbody.querySelectorAll('[data-pindah]').forEach(btn => btn.addEventListener('click', () => pindahTanggal(btn.dataset.pindah, d.daftarTanggal)));
+      // data-tandai & data-pindah (sbg tombol baris tersendiri) sudah
+      // tidak digenerate lagi sejak Perbaikan 3/4/5/6 -- keduanya
+      // sekarang bagian dari form Koreksi Absen (dropdown Status Koreksi).
     } catch (err) {
       el.tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
     }
@@ -157,8 +167,18 @@
    * sama, tapi labelnya diganti supaya jelas ini wajib & akan tercatat
    * audit -- lihat koreksiAbsensiAktual di backend).
    */
-  function perbaruiTampilanBlokJam() {
-    el.blokJam.style.display = el.statusBaru.value === 'HADIR' ? 'flex' : 'none';
+  // Perbaikan E: form dinamis -- blok Jam cuma utk Hadir, blok Tanggal
+  // Tujuan cuma utk Pindah Tanggal, Izin/Sakit/Cuti/Alfa cuma field
+  // Catatan/Alasan yg sudah ada di form (placeholder-nya diubah per
+  // status, lihat bukaFormKoreksi).
+  function perbaruiTampilanBlokDinamis(daftarTanggal, idAbsensiSedangDikoreksi) {
+    const status = el.statusBaru.value;
+    el.blokJam.style.display = status === 'HADIR' ? 'flex' : 'none';
+    el.blokPindahTanggal.style.display = status === 'PINDAH_TANGGAL' ? 'block' : 'none';
+    if (status === 'PINDAH_TANGGAL' && daftarTanggal) {
+      const pilihanLain = daftarTanggal.filter(t => t.idOperasional && t.idAbsensi !== idAbsensiSedangDikoreksi);
+      el.tanggalTujuan.innerHTML = pilihanLain.map(t => `<option value="${escapeHtml(t.idOperasional)}">${escapeHtml(t.tanggal)} (${escapeHtml(t.hari)})</option>`).join('');
+    }
   }
 
   function bukaFormKoreksi(idAbsensi, daftarTanggal) {
@@ -167,49 +187,35 @@
     idKoreksiSedangDiedit = idAbsensi;
     idAbsensiSedangDiedit = null;
     idOperasionalSedangDiedit = null;
+    daftarTanggalUntukFormAktif = daftarTanggal; // disimpan supaya listener 'change' di bawah bisa akses tanpa parameter ulang
     el.judulForm.textContent = 'Koreksi Absen';
-    el.subjudulForm.textContent = relawanTerpilih.nama + ' · ' + baris.tanggal;
+    el.subjudulForm.textContent = relawanTerpilih.nama + ' · ' + baris.tanggal + (baris.statusKehadiran === 'BELUM ABSEN' ? ' · Belum Absen' : '');
     el.blokStatus.style.display = 'block';
+    // Perbaikan E poin 2: bisa langsung dikoreksi dari Belum Absen TANPA
+    // melalui "Tandai Hadir" dulu -- form ini SEKARANG satu-satunya pintu
+    // utk status apa pun (termasuk dari Belum Absen), bukan cuma utk yg
+    // sudah pernah diisi. Default pilihan tetap HADIR (kasus tersering),
+    // Admin tinggal ganti dropdown kalau yg benar Izin/Sakit/Cuti/Alfa/Pindah.
     el.statusBaru.value = 'HADIR';
-    perbaruiTampilanBlokJam();
-    el.jamMasuk.value = baris.jamMasukAktual || '';
-    el.jamPulang.value = baris.jamPulangAktual || '';
+    perbaruiTampilanBlokDinamis(daftarTanggal, idAbsensi);
+    el.jamMasuk.value = baris.jamMasukAktual || baris.jamMasuk || '';
+    el.jamPulang.value = baris.jamPulangAktual || baris.jamPulang || '';
     el.catatan.value = '';
     el.catatan.placeholder = 'Alasan koreksi (WAJIB diisi -- tercatat untuk audit & rekap penggajian)';
     el.kartuForm.style.display = 'block';
     el.kartuForm.scrollIntoView({ behavior: 'smooth' });
   }
-  el.statusBaru.addEventListener('change', perbaruiTampilanBlokJam);
+  let daftarTanggalUntukFormAktif = null;
+  el.statusBaru.addEventListener('change', () => perbaruiTampilanBlokDinamis(daftarTanggalUntukFormAktif, idKoreksiSedangDiedit));
 
-  async function tandaiHadir(idAbsensi, daftarTanggal) {
-    const baris = daftarTanggal.find(t => t.idAbsensi === idAbsensi);
-    const keterangan = prompt('Tandai hadir memakai jam jadwal (' + (baris ? baris.jamMasuk + ' s/d ' + (baris.jamPulang || '-') : '') + ').\n\nAlasan (WAJIB, tercatat utk audit & rekap penggajian):');
-    if (keterangan === null) return; // batal
-    if (!keterangan.trim()) { showError('Alasan wajib diisi.'); return; }
-    try {
-      await apiPost('tandaiHadirJadwalIndividu', { token: token(), idAbsensi, keterangan });
-      showSuccess('Berhasil ditandai hadir.');
-      muatPemeriksaan();
-    } catch (err) { showError(err.message); }
-  }
-
-  async function pindahTanggal(idAbsensi, daftarTanggal) {
-    const baris = daftarTanggal.find(t => t.idAbsensi === idAbsensi);
-    const pilihanLain = daftarTanggal.filter(t => t.idOperasional && t.idOperasional !== (baris && baris.idOperasional));
-    if (!pilihanLain.length) { showError('Tidak ada tanggal lain dalam periode ini untuk dipindahkan.'); return; }
-    const daftarTeks = pilihanLain.map((t, i) => (i + 1) + '. ' + t.tanggal + ' (' + t.hari + ')').join('\n');
-    const pilihan = prompt('Pindahkan jadwal ini (' + (baris ? baris.tanggal : '') + ') ke tanggal mana?\n\n' + daftarTeks + '\n\nKetik nomornya:');
-    if (pilihan === null) return;
-    const idx = parseInt(pilihan, 10) - 1;
-    if (isNaN(idx) || !pilihanLain[idx]) { showError('Pilihan tidak valid.'); return; }
-    const tujuan = pilihanLain[idx];
-    if (!confirm('Pindahkan ke ' + tujuan.tanggal + ' (' + tujuan.hari + ')? Jam & status presensi asli TIDAK berubah, hanya tanggalnya.')) return;
-    try {
-      await apiPost('pindahTanggalJadwalIndividu', { token: token(), idAbsensi, idOperasionalBaru: tujuan.idOperasional });
-      showSuccess('Jadwal berhasil dipindahkan ke ' + tujuan.tanggal + '.');
-      muatPemeriksaan();
-    } catch (err) { showError(err.message); }
-  }
+  // tandaiHadir() & pindahTanggal() (versi prompt()-based, tombol baris
+  // tersendiri) DIHAPUS -- kemampuannya sekarang bagian dari form Koreksi
+  // Absen yg sama (dropdown Status Koreksi: Hadir / Pindah Tanggal),
+  // diakses lewat bukaFormKoreksi() + handler el.btnSimpan di bawah.
+  // Backend tandaiHadirJadwalIndividu/pindahTanggalJadwalIndividu (Code.gs/
+  // JadwalIndividu.gs) TIDAK dihapus -- pindahTanggalJadwalIndividu MASIH
+  // dipakai (lihat el.btnSimpan), tandaiHadirJadwalIndividu ditinggal
+  // sbg kemampuan tak terpakai drpd dihapus tanpa alasan kuat.
 
   async function hapusJadwal(idAbsensi) {
     if (!confirm('Hapus jadwal ini sepenuhnya? Tindakan ini tidak bisa dibatalkan.\n\nCatatan: hanya bisa dihapus kalau relawan belum pernah absen di tanggal ini -- kalau sudah ada absensi sungguhan, sistem akan menolak.')) return;
@@ -223,6 +229,23 @@
   el.btnBatal.addEventListener('click', () => { el.kartuForm.style.display = 'none'; });
 
   el.btnSimpan.addEventListener('click', async () => {
+    // Perbaikan E: Pindah Tanggal BUKAN status kehadiran -- jalur
+    // tersendiri (pindahTanggalJadwalIndividu), bukan koreksiAbsensiAktual,
+    // supaya tidak diperlakukan sbg status kehadiran permanen di model
+    // data (sesuai larangan eksplisit di prompt).
+    if (idKoreksiSedangDiedit && el.statusBaru.value === 'PINDAH_TANGGAL') {
+      if (!el.tanggalTujuan.value) { showError('Pilih tanggal tujuan.'); return; }
+      const teksTujuan = el.tanggalTujuan.selectedOptions[0].textContent;
+      if (!confirm('Pindahkan jadwal ini ke ' + teksTujuan + '? Jam & status presensi asli TIDAK berubah, hanya tanggalnya.')) return;
+      try {
+        await apiPost('pindahTanggalJadwalIndividu', { token: token(), idAbsensi: idKoreksiSedangDiedit, idOperasionalBaru: el.tanggalTujuan.value });
+        showSuccess('Jadwal berhasil dipindahkan ke ' + teksTujuan + '.');
+        el.kartuForm.style.display = 'none';
+        muatPemeriksaan();
+      } catch (err) { showError(err.message); }
+      return;
+    }
+
     if (idKoreksiSedangDiedit) {
       if (!el.catatan.value.trim()) { showError('Alasan koreksi wajib diisi (tercatat utk audit & rekap penggajian).'); return; }
       if (el.statusBaru.value === 'HADIR') {

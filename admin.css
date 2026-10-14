@@ -172,3 +172,30 @@ tbody tr:hover { background: var(--color-bg); }
   font-family: var(--font-main); font-size: 12.5px; padding: 7px 8px;
   border-radius: 8px; border: 1.5px solid var(--color-border); min-width: 100px; flex: 1;
 }
+
+/* Perbaikan D (Prompt Final): Pemeriksaan Jadwal -- tabel tetap dipakai
+   (bukan kartu) sesuai opsi yg diizinkan prompt ("horizontal scrolling
+   yang terkontrol"), tapi kolom Tanggal dibuat sticky supaya saat geser
+   ke kanan di HP, Admin tidak kehilangan konteks "baris ini tanggal
+   berapa". Kolom Aksi juga dibatasi lebarnya -- sejak tombol disederhanakan
+   jadi maksimal 2 per baris (lihat admin-jadwal-individu.js), kolom ini
+   sudah jauh lebih ringkas drpd sebelumnya (dulu bisa sampai 4 tombol). */
+#panelJadwalIndividu .table-wrap table { min-width: 760px; }
+#panelJadwalIndividu .table-wrap th:first-child,
+#panelJadwalIndividu .table-wrap td:first-child {
+  position: sticky; left: 0; background: #fff; z-index: 1;
+  box-shadow: 1px 0 0 var(--color-border); min-width: 92px;
+}
+#panelJadwalIndividu .table-wrap th:last-child,
+#panelJadwalIndividu .table-wrap td:last-child { min-width: 170px; white-space: nowrap; }
+#panelJadwalIndividu .table-wrap td:nth-child(7) { max-width: 160px; white-space: normal; word-break: break-word; } /* Catatan -- boleh patah baris, jangan melebarkan tabel */
+
+/* Modal/form Koreksi Absen & Buat/Edit Jadwal -- menyesuaikan layar kecil
+   (bukan lebar tetap yg bisa terpotong di HP). */
+#jiKartuForm { max-width: 100%; }
+@media (max-width: 480px) {
+  #panelJadwalIndividu .filter-bar { flex-direction: column; align-items: stretch; }
+  #panelJadwalIndividu .filter-bar select { width: 100%; }
+  #jiBlokJam { flex-direction: column; }
+  #jiBlokJam input { width: 100%; }
+}

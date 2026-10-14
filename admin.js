@@ -365,7 +365,7 @@
   const MODUL_LAZY = {
     panelStok: 'admin-stok.js?v=20261011b',
     panelShift: 'admin-shift.js?v=20261010b',
-    panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261013c',
+    panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261015a',
     panelLaporan: 'admin-laporan.js?v=20261014a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
@@ -701,7 +701,10 @@
     try {
       const daftar = await apiGet('getPeriodeListAdmin', { token: authToken });
       cache.periodeDuaMinggu = daftar;
-      const opsi = daftar.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)} (${escapeHtml(p.tanggalMulai)} - ${escapeHtml(p.tanggalSelesai)})</option>`).join('');
+      // Perbaikan C: cuma nama periode -- rentang tanggal TETAP ada di data
+      // (p.tanggalMulai/tanggalSelesai, dipakai internal utk hitung2), cuma
+      // tidak lagi ditulis di teks dropdown (terlalu lebar, khususnya di HP).
+      const opsi = daftar.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
       el.filterPeriodeDuaMinggu.innerHTML = '<option value="">Pilih periode...</option>' + opsi;
       // Periode aktif menjadi pilihan awal secara otomatis (sesuai spesifikasi) --
       // kalau tidak ada yang berstatus AKTIF, biarkan kosong (Admin pilih manual).
@@ -741,35 +744,72 @@
    * diatur (tarifLengkap) -- relawan yang "Tarif belum diatur" dihitung
    * terpisah dan ditampilkan sbg peringatan, bukan dianggap Rp0 diam-diam.
    */
-  function renderDivisiGridDuaMinggu() {
+  /**
+   * Perbaikan B (hitung sekali, dipakai 2 tampilan): agregasi per-divisi
+   * DAN total global dihitung dari array MENTAH yg SAMA (cache.rekapDuaMinggu,
+   * dari getRekapPenggajianAdmin/getRekapDuaMinggu) -- bukan 2 sumber
+   * terpisah yg berisiko tidak sinkron. "Hadir" = hadir+terlambat (terlambat
+   * tetap dianggap hadir, cuma telat -- konvensi yg SUDAH dipakai sebelum
+   * perbaikan ini, dipertahankan apa adanya, bukan rumus baru). tidakHadir
+   * dari backend SECARA HARFIAH berarti STATUS_KEHADIRAN='BELUM ABSEN'
+   * (lihat Absensi.gs) -- makanya di tampilan ini diberi label "Belum
+   * Absen", bukan "Tidak Hadir", supaya sesuai makna sebenarnya.
+   */
+  function hitungAgregatRekapDuaMinggu_() {
     const rows = cache.rekapDuaMinggu || [];
-    if (!rows.length) { el.divisiGridDuaMinggu.innerHTML = '<p class="empty-state">Belum ada data untuk periode ini.</p>'; return; }
-
     const byDivisi = {};
+    const total = { totalHariKerja: 0, terlambat: 0, izin: 0, sakit: 0, belumAbsen: 0, hadir: 0, totalInsentif: 0, jumlahTarifBelumDiatur: 0 };
     rows.forEach(r => {
-      if (!byDivisi[r.divisi]) byDivisi[r.divisi] = { totalHariKerja: 0, terlambat: 0, izin: 0, sakit: 0, tidakHadir: 0, hadir: 0, totalInsentif: 0, jumlahTarifBelumDiatur: 0 };
-      const d = byDivisi[r.divisi];
-      d.totalHariKerja += r.totalHariKerja;
-      d.terlambat += r.terlambat;
-      d.izin += r.izin;
-      d.sakit += r.sakit;
-      d.tidakHadir += r.tidakHadir;
-      d.hadir += (r.hadir + r.terlambat);
-      if (r.tarifLengkap) d.totalInsentif += r.totalGaji; else d.jumlahTarifBelumDiatur++;
-    });
+      if (!byDivisi[r.divisi]) byDivisi[r.divisi] = { hadir: 0 };
+      byDivisi[r.divisi].hadir += (r.hadir + r.terlambat);
 
+      total.totalHariKerja += r.totalHariKerja;
+      total.terlambat += r.terlambat;
+      total.izin += r.izin;
+      total.sakit += r.sakit;
+      total.belumAbsen += r.tidakHadir; // nama field backend "tidakHadir" = status BELUM ABSEN, lihat komentar di atas
+      total.hadir += (r.hadir + r.terlambat);
+      if (r.tarifLengkap) total.totalInsentif += r.totalGaji; else total.jumlahTarifBelumDiatur++;
+    });
+    return { byDivisi, total };
+  }
+
+  function renderRingkasanPeriode(total) {
+    document.getElementById('rpTotalInsentif').textContent = formatRupiahDuaMinggu_(total.totalInsentif);
+    document.getElementById('rpTotalHadir').textContent = total.hadir;
+    document.getElementById('rpTotalIzin').textContent = total.izin;
+    document.getElementById('rpTotalSakit').textContent = total.sakit;
+    document.getElementById('rpTotalTerlambat').textContent = total.terlambat;
+    document.getElementById('rpTotalBelumAbsen').textContent = total.belumAbsen;
+    document.getElementById('rpTotalHariKerja').textContent = total.totalHariKerja;
+    const elPeringatan = document.getElementById('rpPeringatanTarif');
+    if (total.jumlahTarifBelumDiatur) {
+      elPeringatan.style.display = '';
+      elPeringatan.textContent = '⚠ Total Insentif belum termasuk ' + total.jumlahTarifBelumDiatur + ' relawan yang tarifnya belum diatur untuk periode ini.';
+    } else {
+      elPeringatan.style.display = 'none';
+    }
+  }
+
+  function renderDivisiGridDuaMinggu() {
+    if (!(cache.rekapDuaMinggu || []).length) {
+      el.divisiGridDuaMinggu.innerHTML = '<p class="empty-state">Belum ada data untuk periode ini.</p>';
+      renderRingkasanPeriode({ totalHariKerja: 0, terlambat: 0, izin: 0, sakit: 0, belumAbsen: 0, hadir: 0, totalInsentif: 0, jumlahTarifBelumDiatur: 0 });
+      return;
+    }
+    const { byDivisi, total } = hitungAgregatRekapDuaMinggu_();
+    renderRingkasanPeriode(total);
+
+    // Kartu per-divisi disederhanakan (Perbaikan B): cuma nama + Total
+    // Kehadiran. Rincian hari kerja/izin/sakit/terlambat/insentif SUDAH
+    // ada di kartu Ringkasan Seluruh Periode di atas -- tidak perlu
+    // diulang di 11 kartu divisi (itu sumber kepadatan yg dikeluhkan).
     el.divisiGridDuaMinggu.innerHTML = Object.keys(byDivisi).sort().map(nama => {
       const d = byDivisi[nama];
       return `<div class="divisi-card">
         <div class="divisi-name">${escapeHtml(nama)}</div>
         <div class="divisi-stats">
-          <span>Hari Kerja: ${d.totalHariKerja}</span>
-          <span>Hadir: ${d.hadir}</span>
-          <span>Terlambat: ${d.terlambat}</span>
-          <span>Izin: ${d.izin}</span>
-          <span>Sakit: ${d.sakit}</span>
-          <span>Tidak Hadir: ${d.tidakHadir}</span>
-          <span>Total Insentif: ${formatRupiahDuaMinggu_(d.totalInsentif)}${d.jumlahTarifBelumDiatur ? ' <span style="color:#8a5a12;">(+' + d.jumlahTarifBelumDiatur + ' belum diatur)</span>' : ''}</span>
+          <span>Total Kehadiran: ${d.hadir}</span>
         </div>
       </div>`;
     }).join('');
