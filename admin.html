@@ -1134,7 +1134,7 @@
        laporan akhir soal rencana per kategori, drpd menampilkan pilihan
        yg kalau diklik tidak melakukan apa-apa (persis masalah lama ini). -->
   <div class="admin-panel" id="panelLaporan">
-    <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Laporan</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">SIPIKA — kategori laporan operasional. Baru "Koreksi Presensi" yang tersedia; kategori lain menyusul.</p></div>
+    <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Laporan</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">SIPIKA — 3 kategori tersedia. Laporan Presensi & Laporan Operasional/Stok sengaja tidak dibuat terpisah (lihat catatan P3C) — sudah terjawab Rekap Harian/Per Periode dan dasbor SIRAGA.</p></div>
 
     <p class="section-title" style="margin-top:14px;">Koreksi Presensi</p>
     <p style="font-size:12.5px;color:var(--color-text-muted);margin:-8px 0 10px;">Setiap perubahan jadwal, koreksi jam/status, dan penghapusan presensi — dari Pemeriksaan Jadwal Individu maupun Koreksi Tanggal.</p>
@@ -1149,6 +1149,35 @@
       <table>
         <thead><tr><th>Waktu</th><th>Jenis Koreksi</th><th>Petugas</th><th>Keterangan Admin</th><th>Ringkasan Perubahan</th></tr></thead>
         <tbody id="tbodyLaporanKoreksi"><tr><td colspan="5"><div class="empty-state">Pilih rentang tanggal lalu klik Tampilkan.</div></td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="section-title" style="margin-top:28px;">Relawan</p>
+    <p style="font-size:12.5px;color:var(--color-text-muted);margin:-8px 0 10px;">Jumlah relawan aktif/nonaktif per divisi, plus daftar lengkap.</p>
+    <div class="filter-bar">
+      <button type="button" class="btn-mini primary" id="btnMuatLaporanRelawan">Tampilkan</button>
+      <button type="button" class="btn-mini export" id="btnExportLaporanRelawan">Export CSV</button>
+    </div>
+    <div id="ringkasanLaporanRelawan" style="margin-bottom:10px;"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Nama</th><th>Divisi</th><th>Status</th></tr></thead>
+        <tbody id="tbodyLaporanRelawan"><tr><td colspan="4"><div class="empty-state">Klik Tampilkan.</div></td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="section-title" style="margin-top:28px;">Jadwal &amp; Penugasan</p>
+    <p style="font-size:12.5px;color:var(--color-text-muted);margin:-8px 0 10px;">Ringkasan Target vs Terjadwal SEMUA relawan dalam 1 periode. Untuk detail harian 1 relawan, pakai Pemeriksaan Jadwal Individu.</p>
+    <div class="filter-bar">
+      <select id="laporanJadwalPeriode"></select>
+      <select id="laporanJadwalDivisi"><option value="">Semua Divisi</option></select>
+      <button type="button" class="btn-mini primary" id="btnMuatLaporanJadwal">Tampilkan</button>
+      <button type="button" class="btn-mini export" id="btnExportLaporanJadwal">Export CSV</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nama</th><th>Divisi</th><th>Target</th><th>Terjadwal</th><th>Status</th></tr></thead>
+        <tbody id="tbodyLaporanJadwal"><tr><td colspan="5"><div class="empty-state">Pilih periode lalu klik Tampilkan.</div></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1582,11 +1611,11 @@
 </div>
 
 <script src="config.js?v=20260903c"></script>
-<script src="common.js?v=20260903c"></script>
+<script src="common.js?v=20261014a"></script>
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261013d"></script>
+<script src="admin.js?v=20261014b"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>

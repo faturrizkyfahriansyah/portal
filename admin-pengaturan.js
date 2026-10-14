@@ -21,7 +21,7 @@
       // Isi dropdown Target Default dengan daftar Divisi (reuse cache yang sudah dimuat Dashboard)
       const selTarget = document.getElementById('inputTargetDefaultNotif');
       try {
-        const divisi = await apiGetCached('getDivisi', {}, 600000);
+        const divisi = await apiGetCached('getDivisi', { token: token() }, 600000);
         selTarget.innerHTML = '<option value="SEMUA">Semua Relawan</option>' +
           divisi.map(d => `<option value="DIVISI:${escapeHtml(d.nama)}">Divisi: ${escapeHtml(d.nama)}</option>`).join('');
       } catch (e) { /* biarkan cuma "Semua Relawan" kalau divisi gagal dimuat */ }
@@ -124,7 +124,7 @@
       try {
         const [usulan, daftarRelawan] = await Promise.all([
           apiGet('usulkanPemetaanIdRelawan', { token: token() }),
-          apiGet('getRelawan', { semua: 1 })
+          apiGet('getRelawan', { semua: 1, token: token() })
         ]);
 
         if (!usulan.length) {

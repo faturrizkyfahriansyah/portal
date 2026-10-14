@@ -366,7 +366,7 @@
     panelStok: 'admin-stok.js?v=20261011b',
     panelShift: 'admin-shift.js?v=20261010b',
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261013c',
-    panelLaporan: 'admin-laporan.js?v=20261013a',
+    panelLaporan: 'admin-laporan.js?v=20261014a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
@@ -406,8 +406,8 @@
   // satu modul yang gagal (mis. Jadwal) tidak ikut mengosongkan modul lain
   // yang datanya sebenarnya berhasil diambil (Relawan, Akun, dst).
   const SUMBER_DASHBOARD = [
-    { key: 'divisiList', label: 'Divisi', fn: () => apiGetCached('getDivisi', {}, 600000) },
-    { key: 'relawanList', label: 'Relawan', fn: () => apiGet('getRelawan', { semua: '1' }) },
+    { key: 'divisiList', label: 'Divisi', fn: () => apiGetCached('getDivisi', { token: authToken }, 600000) },
+    { key: 'relawanList', label: 'Relawan', fn: () => apiGet('getRelawan', { semua: '1', token: authToken }) },
     { key: 'akunList', label: 'Akun Relawan', fn: () => apiGet('getAkunRelawanList', { token: authToken }) },
     { key: 'informasiList', label: 'Informasi', fn: () => apiGet('getInformasiListAdmin', { token: authToken }) },
     { key: 'periodeList', label: 'Periode Kerja', fn: () => apiGet('getPeriodeListAdmin', { token: authToken }) },
@@ -838,7 +838,7 @@
   });
 
   async function muatUlangRelawan() {
-    cache.relawanList = await apiGet('getRelawan', { semua: '1' });
+    cache.relawanList = await apiGet('getRelawan', { semua: '1', token: authToken });
     renderRelawanTable();
     renderDivisiTable();
   }
@@ -985,7 +985,7 @@
     try {
       await apiPost('addDivisi', { token: authToken, nama: el.inputDivisiBaru.value.trim() });
       el.inputDivisiBaru.value = '';
-      cache.divisiList = await apiGetCached('getDivisi', {}, 600000);
+      cache.divisiList = await apiGetCached('getDivisi', { token: authToken }, 600000);
       fillDivisiSelects();
       renderDivisiTable();
     } catch (err) {
