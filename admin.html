@@ -477,7 +477,7 @@
       <div class="admin-stat-card accent-info"><div class="admin-stat-value" id="rpTotalIzin">–</div><div class="admin-stat-label">Total Izin</div></div>
       <div class="admin-stat-card accent-danger"><div class="admin-stat-value" id="rpTotalSakit">–</div><div class="admin-stat-label">Total Sakit</div></div>
       <div class="admin-stat-card accent-warning"><div class="admin-stat-value" id="rpTotalTerlambat">–</div><div class="admin-stat-label">Total Terlambat</div></div>
-      <div class="admin-stat-card accent-danger"><div class="admin-stat-value" id="rpTotalBelumAbsen">–</div><div class="admin-stat-label">Total Belum Absen</div></div>
+      <div class="admin-stat-card accent-danger"><div class="admin-stat-value" id="rpTotalBelumAbsen">–</div><div class="admin-stat-label">Total Alfa</div></div>
       <div class="admin-stat-card"><div class="admin-stat-value" id="rpTotalHariKerja">–</div><div class="admin-stat-label">Total Hari Kerja</div></div>
     </div>
     <p id="rpPeringatanTarif" style="font-size:12px;color:#8a5a12;margin:-10px 0 14px;display:none;"></p>
@@ -488,7 +488,11 @@
     <p class="section-title">Rekap per Relawan</p>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Nama</th><th>Divisi</th><th>Nomor Rekening</th><th>Total Hari Kerja</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Tidak Hadir</th><th>Hadir</th><th>Tarif per Hari</th><th>Total Insentif</th></tr></thead>
+        <!-- "Tidak Hadir" -> "Alfa" (permintaan Admin, 15 Okt 2026) --
+             sesuai makna field tidakHadir di backend (getRekapDuaMinggu,
+             Absensi.gs) yang SEKARANG cuma menghitung BELUM ABSEN pada
+             tanggal yang sudah lewat/hari ini, bukan ke depan. -->
+        <thead><tr><th>Nama</th><th>Divisi</th><th>Nomor Rekening</th><th>Total Hari Kerja</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Alfa</th><th>Hadir</th><th>Tarif per Hari</th><th>Total Insentif</th></tr></thead>
         <tbody id="tbodyDuaMinggu"><tr><td colspan="11"><div class="empty-state">Pilih periode lalu klik Tampilkan.</div></td></tr></tbody>
       </table>
     </div>
@@ -1716,7 +1720,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261015c"></script>
+<script src="admin.js?v=20261015d"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>

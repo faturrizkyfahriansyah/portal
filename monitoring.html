@@ -138,6 +138,33 @@
     </div>
     <div id="monitoringSipanduKosong" class="empty-state" style="display:none;">Modul SIPANDU belum tersambung ke Monitoring. Lihat panduan pemasangan.</div>
 
+    <div id="monitoringMenuWrap">
+      <p class="section-title">Rincian Menu Hari Ini — <span id="monMenuHariTgl">–</span></p>
+      <p style="font-size:12px;color:var(--color-text-muted);margin:-8px 0 10px;" id="monMenuTema"></p>
+      <div class="stok-summary-grid" style="text-align:left;">
+        <div class="stok-summary-card" style="align-items:flex-start;"><p style="margin:0 0 4px;font-weight:700;font-size:11px;color:var(--color-text-muted);">Karbohidrat</p><span id="monMenuKarbohidrat" style="font-size:15px;">–</span></div>
+        <div class="stok-summary-card" style="align-items:flex-start;"><p style="margin:0 0 4px;font-weight:700;font-size:11px;color:var(--color-text-muted);">Lauk Hewani</p><span id="monMenuLaukHewani" style="font-size:15px;">–</span></div>
+        <div class="stok-summary-card" style="align-items:flex-start;"><p style="margin:0 0 4px;font-weight:700;font-size:11px;color:var(--color-text-muted);">Lauk Nabati</p><span id="monMenuLaukNabati" style="font-size:15px;">–</span></div>
+        <div class="stok-summary-card" style="align-items:flex-start;"><p style="margin:0 0 4px;font-weight:700;font-size:11px;color:var(--color-text-muted);">Sayur</p><span id="monMenuSayur" style="font-size:15px;">–</span></div>
+        <div class="stok-summary-card" style="align-items:flex-start;"><p style="margin:0 0 4px;font-weight:700;font-size:11px;color:var(--color-text-muted);">Buah</p><span id="monMenuBuah" style="font-size:15px;">–</span></div>
+        <div class="stok-summary-card" style="align-items:flex-start;"><p style="margin:0 0 4px;font-weight:700;font-size:11px;color:var(--color-text-muted);">Pelengkap / Finishing</p><span id="monMenuPelengkap" style="font-size:15px;">–</span></div>
+      </div>
+    </div>
+    <div id="monitoringMenuKosong" class="empty-state" style="display:none;">Menu hari ini belum tersedia di database siklus menu (di luar jadwal yang sudah diisi, atau sheet belum dapat diakses).</div>
+
+    <div id="monitoringPmWrap">
+      <p class="section-title">Ringkasan Penerima Manfaat (SIPENDOK) — <span id="monPmTanggal">–</span></p>
+      <div class="stok-summary-grid">
+        <div class="stok-summary-card stok-card-aman"><span id="monPmHariIni">0</span><p>PM Hari Ini (Aktif)</p></div>
+        <div class="stok-summary-card stok-card-habis"><span id="monPmLibur">0</span><p>PM Libur</p></div>
+        <div class="stok-summary-card"><span id="monPmPK">0</span><p>Porsi Kecil (PK)</p></div>
+        <div class="stok-summary-card"><span id="monPmPB">0</span><p>Porsi Besar (PB)</p></div>
+        <div class="stok-summary-card"><span id="monPm3B">0</span><p>Balita+Bumil+Busui (3B)</p></div>
+        <div class="stok-summary-card stok-card-aman"><span id="monPmTotal">0</span><p>Total Porsi Hari Ini</p></div>
+      </div>
+    </div>
+    <div id="monitoringPmKosong" class="empty-state" style="display:none;">SIPENDOK belum dapat dihubungi. Periksa koneksi atau coba lagi nanti.</div>
+
     <p style="font-size:12px;color:var(--color-text-muted);margin-top:24px;">
       Catatan: rincian per-divisi, filter periode, dan laporan lengkap (Informasi, Jadwal, Dokumen) menyusul di tahap pengembangan berikutnya.
     </p>
@@ -159,9 +186,9 @@
 </div>
 
 <script src="config.js?v=20260903c"></script>
-<script src="common.js?v=20260903c"></script>
+<script src="common.js?v=20261014a"></script>
 <script src="auth-relawan.js?v=20260903c"></script>
 <script src="app-shell.js?v=20260903c"></script>
-<script src="monitoring.js?v=20260903c"></script>
+<script src="monitoring.js?v=20261015b"></script>
 </body>
 </html>

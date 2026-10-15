@@ -838,7 +838,7 @@
       total.terlambat += r.terlambat;
       total.izin += r.izin;
       total.sakit += r.sakit;
-      total.belumAbsen += r.tidakHadir; // nama field backend "tidakHadir" = status BELUM ABSEN, lihat komentar di atas
+      total.belumAbsen += r.tidakHadir; // Perbaikan 15 Okt 2026: field backend "tidakHadir" (Absensi.gs, getRekapDuaMinggu) SEKARANG cuma menghitung BELUM ABSEN pada tanggal yg sudah lewat/hari ini (bukan ke depan) -- makanya ditampilkan sbg "Alfa", bukan "Belum Absen" mentah lagi
       total.hadir += (r.hadir + r.terlambat);
       if (r.tarifLengkap) total.totalInsentif += r.totalGaji; else total.jumlahTarifBelumDiatur++;
     });
@@ -918,7 +918,7 @@
   el.btnExportDuaMinggu.addEventListener('click', () => {
     if (!cache.rekapDuaMinggu || !cache.rekapDuaMinggu.length) { showError('Tidak ada data untuk diexport.'); return; }
     // Urutan kolom CSV SAMA PERSIS dengan tabel (sesuai spesifikasi §7).
-    const rows = [['Nama', 'Divisi', 'Nomor Rekening', 'Total Hari Kerja', 'Terlambat', 'Izin', 'Sakit', 'Tidak Hadir', 'Hadir', 'Tarif per Hari', 'Total Insentif']];
+    const rows = [['Nama', 'Divisi', 'Nomor Rekening', 'Total Hari Kerja', 'Terlambat', 'Izin', 'Sakit', 'Alfa', 'Hadir', 'Tarif per Hari', 'Total Insentif']];
     cache.rekapDuaMinggu.forEach(r => rows.push([
       r.namaRelawan, r.divisi, r.nomorRekening || '', r.totalHariKerja, r.terlambat, r.izin, r.sakit, r.tidakHadir,
       r.hadir + r.terlambat,
@@ -1953,7 +1953,7 @@
         rekIsi.innerHTML = `<div class="admin-stat-grid">
           <div class="admin-stat-card accent-success"><div class="admin-stat-value">${totalHadir}</div><div class="admin-stat-label">Total Hadir</div></div>
           <div class="admin-stat-card accent-warning"><div class="admin-stat-value">${totalTerlambat}</div><div class="admin-stat-label">Total Terlambat</div></div>
-          <div class="admin-stat-card accent-danger"><div class="admin-stat-value">${totalTidakHadir}</div><div class="admin-stat-label">Total Tidak Hadir</div></div>
+          <div class="admin-stat-card accent-danger"><div class="admin-stat-value">${totalTidakHadir}</div><div class="admin-stat-label">Total Alfa</div></div>
         </div>`;
       }
     }

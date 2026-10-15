@@ -28,7 +28,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     monSipanduTotal: document.getElementById('monSipanduTotal'),
     monSipanduDraft: document.getElementById('monSipanduDraft'),
     monSipanduReady: document.getElementById('monSipanduReady'),
-    monSipanduSelesai: document.getElementById('monSipanduSelesai')
+    monSipanduSelesai: document.getElementById('monSipanduSelesai'),
+    monitoringPmWrap: document.getElementById('monitoringPmWrap'),
+    monitoringPmKosong: document.getElementById('monitoringPmKosong'),
+    monPmTanggal: document.getElementById('monPmTanggal'),
+    monPmHariIni: document.getElementById('monPmHariIni'),
+    monPmLibur: document.getElementById('monPmLibur'),
+    monPmPK: document.getElementById('monPmPK'),
+    monPmPB: document.getElementById('monPmPB'),
+    monPm3B: document.getElementById('monPm3B'),
+    monPmTotal: document.getElementById('monPmTotal'),
+    monitoringMenuWrap: document.getElementById('monitoringMenuWrap'),
+    monitoringMenuKosong: document.getElementById('monitoringMenuKosong'),
+    monMenuHariTgl: document.getElementById('monMenuHariTgl'),
+    monMenuTema: document.getElementById('monMenuTema'),
+    monMenuKarbohidrat: document.getElementById('monMenuKarbohidrat'),
+    monMenuLaukHewani: document.getElementById('monMenuLaukHewani'),
+    monMenuLaukNabati: document.getElementById('monMenuLaukNabati'),
+    monMenuSayur: document.getElementById('monMenuSayur'),
+    monMenuBuah: document.getElementById('monMenuBuah'),
+    monMenuPelengkap: document.getElementById('monMenuPelengkap')
   };
 
   try {
@@ -58,6 +77,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       el.monitoringSipanduWrap.style.display = 'none';
       el.monitoringSipanduKosong.style.display = 'block';
+    }
+
+    // Rincian Menu Hari Ini -- dibaca langsung dari spreadsheet siklus
+    // menu eksternal (SiklusMenu.gs). null kalau sheet belum bisa
+    // diakses ATAU hari ini memang tidak ada di jadwal siklus.
+    if (d.menuHariIni) {
+      const m = d.menuHariIni;
+      el.monMenuHariTgl.textContent = m.hari + ', ' + m.tanggal;
+      el.monMenuTema.textContent = m.tema ? ('Tema: ' + m.tema) : '';
+      el.monMenuKarbohidrat.textContent = m.karbohidrat || '-';
+      el.monMenuLaukHewani.textContent = m.laukHewani || '-';
+      el.monMenuLaukNabati.textContent = m.laukNabati || '-';
+      el.monMenuSayur.textContent = m.sayur || '-';
+      el.monMenuBuah.textContent = m.buah || '-';
+      el.monMenuPelengkap.textContent = m.pelengkap || '-';
+    } else {
+      el.monitoringMenuWrap.style.display = 'none';
+      el.monitoringMenuKosong.style.display = 'block';
+    }
+
+    // Ringkasan Penerima Manfaat (SIPENDOK, via panggilSipendok_ yg sudah
+    // ada) -- null kalau SIPENDOK tidak bisa dihubungi, pola SAMA dgn
+    // Stok & SIPANDU di atas.
+    if (d.penerimaManfaat) {
+      const pm = d.penerimaManfaat;
+      el.monPmTanggal.textContent = pm.tanggalIndo;
+      el.monPmHariIni.textContent = pm.jumlahPmHariIni;
+      el.monPmLibur.textContent = pm.jumlahPmLibur;
+      el.monPmPK.textContent = pm.totalPK;
+      el.monPmPB.textContent = pm.totalPB;
+      el.monPm3B.textContent = pm.total3B;
+      el.monPmTotal.textContent = pm.totalJumlah;
+    } else {
+      el.monitoringPmWrap.style.display = 'none';
+      el.monitoringPmKosong.style.display = 'block';
     }
 
     el.konten.style.display = 'block';
