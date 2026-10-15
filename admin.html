@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="style.css?v=20260903c">
 <link rel="stylesheet" href="portal.css?v=20261001g">
 <link rel="stylesheet" href="admin.css?v=20261015b">
-<link rel="stylesheet" href="app-shell.css?v=20261015a">
+<link rel="stylesheet" href="app-shell.css?v=20261015b">
 <link rel="stylesheet" href="rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#12294d">
@@ -78,6 +78,16 @@
       <button type="button" class="shell-sidebar-close" id="shellSidebarClose" aria-label="Tutup menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
     </div>
     <nav class="shell-nav" aria-label="Menu Portal Pengelola">
+      <!-- Pencarian Global Relawan DIPINDAH ke sidebar (permintaan Admin,
+           15 Okt 2026) -- sebelumnya di topbar, mendesak ikon lonceng &
+           pengaturan turun ke baris kedua di layar sempit. Logika JS
+           (admin.js) TIDAK berubah -- cuma ID elemen yg dirujuk, posisi
+           DOM-nya saja yang pindah. -->
+      <div class="shell-sidebar-search" style="position:relative;padding:0 14px 14px;">
+        <input type="text" id="pencarianGlobalRelawan" placeholder="🔍 Cari relawan..." autocomplete="off"
+          style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--color-border);background:#f5f7fa;color:var(--color-navy);font-size:13px;">
+        <div id="hasilPencarianGlobalRelawan" style="display:none;position:absolute;top:calc(100% - 8px);left:14px;right:14px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);max-height:320px;overflow-y:auto;z-index:50;"></div>
+      </div>
       <button type="button" class="shell-nav-link admin-tab-btn active" data-panel="panelOverview"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span><span>Dashboard</span></button>
 
       <p class="shell-nav-group-title">SIMSDM</p>
@@ -175,16 +185,6 @@
         <span class="shell-topbar-brand-label">PORTAL</span>
         <strong>SPPG JEUNGJING</strong>
       </div>
-    </div>
-    <!-- Pencarian Global Relawan: ketik nama, langsung ke profil (panel
-         Relawan) -- drpd buka panel Relawan lalu filter manual. Dipisah
-         dari pencarian LOKAL yg sudah ada di dalam panel Relawan
-         (#cariRelawan) -- yg itu filter tabel setelah sudah di panelnya;
-         ini untuk LOMPAT ke panelnya dari mana saja. -->
-    <div class="shell-topbar-search" style="position:relative;flex:1;max-width:320px;margin:0 8px;">
-      <input type="text" id="pencarianGlobalRelawan" placeholder="Cari relawan..." autocomplete="off"
-        style="width:100%;padding:8px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.1);color:#fff;font-size:13px;">
-      <div id="hasilPencarianGlobalRelawan" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);max-height:320px;overflow-y:auto;z-index:50;"></div>
     </div>
     <div class="shell-topbar-right">
       <button type="button" class="shell-topbar-bell admin-tab-btn" data-panel="panelNotifikasiAdmin" aria-label="Notifikasi" style="border:none;background:none;cursor:pointer;">
@@ -1772,7 +1772,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261015f"></script>
+<script src="admin.js?v=20261015g"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>

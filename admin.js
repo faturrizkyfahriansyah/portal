@@ -459,7 +459,7 @@
       }, 250); // debounce ringan -- cukup utk hindari filter tiap ketukan huruf tanpa terasa lambat
     });
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.shell-topbar-search')) hasilBox.style.display = 'none';
+      if (!e.target.closest('.shell-sidebar-search')) hasilBox.style.display = 'none';
     });
     input.addEventListener('keydown', (e) => { if (e.key === 'Escape') { hasilBox.style.display = 'none'; input.blur(); } });
   })();
