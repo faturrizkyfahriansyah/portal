@@ -105,10 +105,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       el.monPmTanggal.textContent = pm.tanggalIndo;
       el.monPmHariIni.textContent = pm.jumlahPmHariIni;
       el.monPmLibur.textContent = pm.jumlahPmLibur;
-      el.monPmPK.textContent = pm.totalPK;
-      el.monPmPB.textContent = pm.totalPB;
-      el.monPm3B.textContent = pm.total3B;
-      el.monPmTotal.textContent = pm.totalJumlah;
+      el.monPmPK.textContent = pm.totalPK.toLocaleString('id-ID');
+      el.monPmPB.textContent = pm.totalPB.toLocaleString('id-ID');
+      el.monPm3B.textContent = pm.total3B.toLocaleString('id-ID');
+      // Dihitung dari PK+PB+3B scr eksplisit (bukan field totalJumlah
+      // mentah dari SIPENDOK) -- konsisten dgn admin.js & dashboard.js,
+      // dan memastikan "Total Porsi" SELALU = jumlah 3 rincian di bawahnya.
+      el.monPmTotal.textContent = (pm.totalPK + pm.totalPB + pm.total3B).toLocaleString('id-ID');
     } else {
       el.monitoringPmWrap.style.display = 'none';
       el.monitoringPmKosong.style.display = 'block';

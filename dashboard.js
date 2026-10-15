@@ -92,15 +92,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       const pm = await apiGet('getRingkasanPmDashboard', {});
       const el = document.getElementById('dbPmIsi');
       if (!pm) { el.innerHTML = '<p style="margin:0;font-size:12.5px;color:#8a93a3;">Data Penerima Manfaat belum tersedia.</p>'; return; }
+      // Perbaikan 15 Okt 2026: angka utama = TOTAL PORSI (PK+PB+3B),
+      // bukan jumlah institusi -- pola sama dgn admin.js (Portal Pengelola).
+      const totalPorsi = pm.totalPK + pm.totalPB + pm.total3B;
       el.innerHTML = `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;margin-bottom:10px;">
-          <div><p style="margin:0;font-size:11px;color:#55606f;">PM Hari Ini</p><p style="margin:2px 0 0;font-size:18px;font-weight:800;color:#2e7d32;">${pm.jumlahPmHariIni}</p></div>
-          <div><p style="margin:0;font-size:11px;color:#55606f;">PM Libur</p><p style="margin:2px 0 0;font-size:18px;font-weight:800;color:#8a93a3;">${pm.jumlahPmLibur}</p></div>
+        <div style="text-align:center;margin-bottom:12px;">
+          <div style="font-size:30px;font-weight:800;color:#2e7d32;line-height:1;">${totalPorsi.toLocaleString('id-ID')}</div>
+          <div style="font-size:12px;color:#55606f;margin-top:4px;font-weight:600;">Total Porsi PM Hari Ini</div>
+          <div style="font-size:11px;color:#8a93a3;margin-top:6px;">${pm.jumlahPmHariIni} institusi aktif · ${pm.jumlahPmLibur} libur</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;font-size:12px;border-top:1px solid #e8ebef;padding-top:10px;">
-          <div><b>${pm.totalPK}</b><br>PK</div>
-          <div><b>${pm.totalPB}</b><br>PB</div>
-          <div><b>${pm.total3B}</b><br>3B</div>
+          <div><b>${pm.totalPK.toLocaleString('id-ID')}</b><br>PK</div>
+          <div><b>${pm.totalPB.toLocaleString('id-ID')}</b><br>PB</div>
+          <div><b>${pm.total3B.toLocaleString('id-ID')}</b><br>3B</div>
         </div>`;
     } catch (e) {
       document.getElementById('dbPmWrap').style.display = 'none';

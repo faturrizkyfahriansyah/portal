@@ -368,6 +368,8 @@
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261015a',
     panelLaporan: 'admin-laporan.js?v=20261014a',
     panelProfilRelawan: 'admin-profil-relawan.js?v=20261015b',
+    panelMenuHariIni: 'admin-menu-hari-ini.js?v=20261015a',
+    panelPenerimaManfaatOps: 'admin-penerima-manfaat-ops.js?v=20261015a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
@@ -532,18 +534,33 @@
       </div>`;
   }
 
+  // Perbaikan 15 Okt 2026: "PM Hari Ini" sekarang menampilkan TOTAL
+  // PORSI (PK+PB+3B dijumlah) sbg angka utama -- sebelumnya menampilkan
+  // JUMLAH INSTITUSI yang lapor (mis. "15"), padahal angka yg lebih
+  // berarti operasional adalah total porsi yg disajikan hari ini.
+  // Jumlah institusi (PM Hari Ini vs Libur) dipindah jadi info sekunder.
+  // UI dirapikan: 1 angka hero + rincian PK/PB/3B rapi di bawahnya.
   function renderRingkasanPmOverview_() {
     const pm = cache.ringkasanPmDash;
     const el = document.getElementById('ovPmIsi');
     if (cache.errors.ringkasanPmDash) { document.getElementById('ovPmWrap').style.display = 'none'; return; }
     if (!pm) { el.innerHTML = '<p style="margin:0;font-size:12.5px;color:var(--color-text-muted);">Data Penerima Manfaat belum tersedia.</p>'; return; }
+    const totalPorsi = pm.totalPK + pm.totalPB + pm.total3B;
     el.innerHTML = `
-      <div class="admin-stat-grid" style="grid-template-columns:repeat(5,1fr);">
-        <div class="admin-stat-card accent-success"><div class="admin-stat-value">${pm.jumlahPmHariIni}</div><div class="admin-stat-label">PM Hari Ini</div></div>
-        <div class="admin-stat-card"><div class="admin-stat-value">${pm.jumlahPmLibur}</div><div class="admin-stat-label">PM Libur</div></div>
-        <div class="admin-stat-card accent-info"><div class="admin-stat-value">${pm.totalPK}</div><div class="admin-stat-label">PK</div></div>
-        <div class="admin-stat-card accent-info"><div class="admin-stat-value">${pm.totalPB}</div><div class="admin-stat-label">PB</div></div>
-        <div class="admin-stat-card accent-warning"><div class="admin-stat-value">${pm.total3B}</div><div class="admin-stat-label">3B</div></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div>
+          <div style="font-size:32px;font-weight:800;color:var(--color-success);line-height:1;">${totalPorsi.toLocaleString('id-ID')}</div>
+          <div style="font-size:12.5px;color:var(--color-text-muted);margin-top:4px;font-weight:600;">Total Porsi PM Hari Ini</div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:var(--color-text-muted);">
+          <div>${pm.jumlahPmHariIni} institusi aktif hari ini</div>
+          <div>${pm.jumlahPmLibur} institusi libur</div>
+        </div>
+      </div>
+      <div class="admin-stat-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="admin-stat-card accent-info"><div class="admin-stat-value">${pm.totalPK.toLocaleString('id-ID')}</div><div class="admin-stat-label">Porsi Kecil (PK)</div></div>
+        <div class="admin-stat-card accent-info"><div class="admin-stat-value">${pm.totalPB.toLocaleString('id-ID')}</div><div class="admin-stat-label">Porsi Besar (PB)</div></div>
+        <div class="admin-stat-card accent-warning"><div class="admin-stat-value">${pm.total3B.toLocaleString('id-ID')}</div><div class="admin-stat-label">Balita+Bumil+Busui (3B)</div></div>
       </div>`;
   }
 
