@@ -367,13 +367,14 @@
     panelShift: 'admin-shift.js?v=20261010b',
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261015a',
     panelLaporan: 'admin-laporan.js?v=20261014a',
+    panelProfilRelawan: 'admin-profil-relawan.js?v=20261015b',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
     panelWebsitePublik: 'admin-website-publik.js',
     panelDuaMinggu: 'admin-export.js?v=20261011b',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'admin-import.js',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
-    panelKartuQr: 'admin-kartu-qr.js'
+    panelKartuQr: 'admin-kartu-qr.js?v=20261015a'
   };
   const modulTerpuat = new Set();
 
@@ -390,6 +391,76 @@
     };
     document.head.appendChild(s);
   }
+
+  // Bagian B (Redesain Terintegrasi): buka halaman Profil Relawan dari
+  // mana saja (panel Relawan, Pencarian Global). Fungsi ini SELALU ada
+  // sejak admin.js dimuat (tidak lazy) -- modul admin-profil-relawan.js
+  // SENDIRI yg lazy, lewat tombol tersembunyi data-panel="panelProfilRelawan".
+  window.bukaProfilRelawan = function (idRelawan) {
+    window.idRelawanDibukaProfil = idRelawan;
+    const tombolTersembunyi = document.querySelector('.admin-tab-btn[data-panel="panelProfilRelawan"]');
+    if (tombolTersembunyi) tombolTersembunyi.click(); // pindah panel + pancing lazy-load kalau modul belum pernah dimuat
+    if (window.muatProfilRelawanLangsung) window.muatProfilRelawanLangsung(idRelawan); // modul SUDAH pernah dimuat sebelumnya -- panggil langsung, jangan nunggu lazy-load (yg tidak akan terpicu lagi krn skrip sudah ada)
+  };
+
+  // ===== PENCARIAN GLOBAL RELAWAN =====
+  // Ketik nama -> klik hasil -> langsung ke panel Relawan dengan baris
+  // tersorot & tabel sudah terfilter ke relawan itu. Sumber data: PAKAI
+  // ULANG cache.relawanList yg sudah dimuat Dashboard (getRelawan) --
+  // tidak ada permintaan backend baru khusus utk fitur ini.
+  (function setupPencarianGlobalRelawan() {
+    const input = document.getElementById('pencarianGlobalRelawan');
+    const hasilBox = document.getElementById('hasilPencarianGlobalRelawan');
+    if (!input || !hasilBox) return; // elemen cuma ada di admin.html, aman kalau ternyata tidak ada
+
+    async function pastikanRelawanListTerisi() {
+      if (cache.relawanList && cache.relawanList.length) return cache.relawanList;
+      try { cache.relawanList = await apiGet('getRelawan', { semua: '1', token: authToken }); } catch (e) { return []; }
+      return cache.relawanList;
+    }
+
+    function tampilkanHasil(daftar, kueri) {
+      if (!daftar.length) {
+        hasilBox.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--color-text-muted);">Tidak ada relawan bernama "' + escapeHtml(kueri) + '".</div>';
+        hasilBox.style.display = 'block';
+        return;
+      }
+      hasilBox.innerHTML = daftar.slice(0, 8).map(r => `
+        <button type="button" class="hasil-pencarian-relawan" data-id="${escapeHtml(r.id)}" style="display:block;width:100%;text-align:left;padding:10px 14px;border:none;background:none;cursor:pointer;border-bottom:1px solid var(--color-border);font-family:var(--font-main);">
+          <div style="font-weight:700;font-size:13.5px;color:var(--color-navy);">${escapeHtml(r.nama)}</div>
+          <div style="font-size:11.5px;color:var(--color-text-muted);">${escapeHtml(r.divisi || '-')} · ${escapeHtml(r.status)}</div>
+        </button>`).join('');
+      hasilBox.style.display = 'block';
+      hasilBox.querySelectorAll('[data-id]').forEach(btn => {
+        btn.addEventListener('click', () => lompatKeProfilRelawan(btn.dataset.id));
+      });
+    }
+
+    function lompatKeProfilRelawan(id) {
+      hasilBox.style.display = 'none';
+      input.value = '';
+      // Perbaikan sesuai klarifikasi Admin: lompat ke halaman PROFIL
+      // (Bagian B, Redesain Terintegrasi) -- sebelumnya ke tabel Relawan
+      // + sorot baris, sekarang langsung ke profil lengkapnya.
+      window.bukaProfilRelawan(id);
+    }
+
+    let timer = null;
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      const kueri = input.value.trim();
+      if (!kueri) { hasilBox.style.display = 'none'; return; }
+      timer = setTimeout(async () => {
+        const daftar = await pastikanRelawanListTerisi();
+        const cocok = daftar.filter(r => r.nama.toLowerCase().includes(kueri.toLowerCase()));
+        tampilkanHasil(cocok, kueri);
+      }, 250); // debounce ringan -- cukup utk hindari filter tiap ketukan huruf tanpa terasa lambat
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.shell-topbar-search')) hasilBox.style.display = 'none';
+    });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Escape') { hasilBox.style.display = 'none'; input.blur(); } });
+  })();
 
   el.tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -883,7 +954,19 @@
     renderDivisiTable();
   }
 
+  function renderRingkasanRelawan_() {
+    const semua = cache.relawanList || [];
+    const aktif = semua.filter(r => (r.status || 'AKTIF') === 'AKTIF').length;
+    const elTotal = document.getElementById('rvTotalRelawan');
+    const elAktif = document.getElementById('rvRelawanAktif');
+    const elNonaktif = document.getElementById('rvRelawanNonaktif');
+    if (elTotal) elTotal.textContent = semua.length;
+    if (elAktif) elAktif.textContent = aktif;
+    if (elNonaktif) elNonaktif.textContent = semua.length - aktif;
+  }
+
   function renderRelawanTable() {
+    renderRingkasanRelawan_(); // selalu dari SELURUH data (cache.relawanList), bukan hasil filter di bawah -- ringkasan global, bukan ringkasan tampilan
     let rows = cache.relawanList;
     const cari = el.cariRelawan.value.trim().toLowerCase();
     const divisi = el.filterDivisiRelawan.value;
@@ -893,34 +976,45 @@
     if (status) rows = rows.filter(r => (r.status || 'AKTIF') === status);
 
     if (!rows.length) {
-      el.tbodyRelawan.innerHTML = emptyOrErrorRow('relawanList', 6, 'Tidak ada relawan yang cocok.');
+      el.tbodyRelawan.innerHTML = emptyOrErrorRow('relawanList', 5, 'Tidak ada relawan yang cocok.');
       return;
     }
 
+    // Perbaikan Bagian A (Redesain Terintegrasi): kolom Nomor Rekening
+    // DIHAPUS dari tabel ini -- dipindah ke halaman Profil Relawan
+    // (Bagian B.F, lihat admin-profil-relawan.js), sesuai instruksi "info
+    // rekening tidak perlu di tabel utama". "Lihat Profil" ditambah sbg
+    // aksi utama -- nama/divisi inline-edit TETAP dipertahankan (sudah
+    // berfungsi, bukan duplikasi, murni percepatan kecil yg sudah ada).
     el.tbodyRelawan.innerHTML = rows.map(r => {
       const status = r.status || 'AKTIF';
       const divisiOptions = cache.divisiList.map(d =>
         `<option value="${escapeHtml(d)}" ${d === r.divisi ? 'selected' : ''}>${escapeHtml(d)}</option>`).join('');
+      // data-label di tiap <td>: dipakai CSS (@media max-width di admin.css,
+      // ".tabel-jadi-kartu") utk menyusun ulang tabel SAMA PERSIS jadi
+      // kartu vertikal di HP lewat td::before -- BUKAN render terpisah,
+      // jadi datanya selalu sinkron antara tampilan desktop & HP.
       return `
       <tr data-id="${escapeHtml(r.id)}">
-        <td>${escapeHtml(r.id)}</td>
-        <td>
+        <td data-label="ID">${escapeHtml(r.id)}</td>
+        <td data-label="Nama">
           <div class="editable-name">
             <span class="cell-nama">${escapeHtml(r.nama)}</span>
             <button type="button" class="btn-mini btn-edit-nama" title="Ubah nama">✎</button>
           </div>
         </td>
-        <td><select class="mini-select select-divisi-relawan">${divisiOptions}</select></td>
-        <td>
-          <div class="editable-name">
-            <span class="cell-rekening">${r.nomorRekening ? escapeHtml(r.nomorRekening) : '<span style="color:var(--color-text-muted);">-</span>'}</span>
-            <button type="button" class="btn-mini btn-edit-rekening" title="Ubah nomor rekening">✎</button>
-          </div>
+        <td data-label="Divisi"><select class="mini-select select-divisi-relawan">${divisiOptions}</select></td>
+        <td data-label="Status"><span class="badge ${status === 'AKTIF' ? 'aktif' : 'nonaktif'}">${status}</span></td>
+        <td data-label="Aksi" style="white-space:nowrap;">
+          <button type="button" class="btn-mini primary btn-lihat-profil">Lihat Profil</button>
+          <button type="button" class="btn-mini toggle-status" data-status="${status}">${status === 'AKTIF' ? 'Nonaktifkan' : 'Aktifkan'}</button>
         </td>
-        <td><span class="badge ${status === 'AKTIF' ? 'aktif' : 'nonaktif'}">${status}</span></td>
-        <td><button type="button" class="btn-mini toggle-status" data-status="${status}">${status === 'AKTIF' ? 'Nonaktifkan' : 'Aktifkan'}</button></td>
       </tr>`;
     }).join('');
+
+    el.tbodyRelawan.querySelectorAll('.btn-lihat-profil').forEach(btn => {
+      btn.addEventListener('click', () => window.bukaProfilRelawan(btn.closest('tr').dataset.id));
+    });
 
     el.tbodyRelawan.querySelectorAll('.toggle-status').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -968,35 +1062,10 @@
       });
     });
 
-    // Rekap Per Periode -- edit Nomor Rekening, pola SAMA PERSIS dgn edit
-    // nama di atas (klik pensil -> jadi input -> simpan via ✓/Enter).
-    el.tbodyRelawan.querySelectorAll('.btn-edit-rekening').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const wrap = btn.closest('.editable-name');
-        const rekeningLama = wrap.querySelector('.cell-rekening').textContent.trim();
-        wrap.innerHTML = `
-          <input type="text" inputmode="numeric" class="mini-input input-edit-rekening" value="${rekeningLama === '-' ? '' : escapeHtml(rekeningLama)}" placeholder="Nomor rekening" style="width:140px;">
-          <button type="button" class="btn-mini save-rekening">✓</button>`;
-        const input = wrap.querySelector('.input-edit-rekening');
-        input.focus();
-        input.select();
-        wrap.querySelector('.save-rekening').addEventListener('click', () => simpanRekeningBaru(wrap, input.value.trim()));
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') simpanRekeningBaru(wrap, input.value.trim()); });
-      });
-    });
-  }
-
-  async function simpanRekeningBaru(wrap, rekeningBaru) {
-    const id = wrap.closest('tr').dataset.id;
-    showLoading('Menyimpan nomor rekening...');
-    try {
-      await apiPost('updateRelawan', { token: authToken, id, nomorRekening: rekeningBaru });
-      await muatUlangRelawan();
-    } catch (err) {
-      showError(err.message || 'Gagal menyimpan nomor rekening.');
-    } finally {
-      hideLoading();
-    }
+    // Edit Nomor Rekening langsung di tabel ini DIHAPUS (Bagian A) --
+    // sekarang lewat halaman Profil Relawan (tombol Edit Profil di
+    // bagian Informasi Rekening), memanggil updateRelawan yg SAMA persis
+    // (backend tidak diduplikasi, cuma titik aksesnya dipindah).
   }
 
   async function simpanNamaBaru(wrap, namaBaru) {
@@ -1117,19 +1186,25 @@
       return;
     }
 
+    // Bagian C (Redesain Terintegrasi): Username & Status Akun SEKARANG
+    // kolom terpisah (sebelumnya digabung 1 kolom "Akun") -- cocok dgn 4
+    // kolom yg diminta (Pemilik Akun/Username/Status Akun/Aksi), dan
+    // Divisi dihapus (lihat perubahan header di admin.html).
     el.tbodyAkun.innerHTML = rows.map(r => {
       const akun = akunById[r.id];
-      let akunCell;
-      let aksiCell;
+      let usernameCell, statusCell, aksiCell;
 
       if (!akun) {
-        akunCell = `<span class="badge nonaktif">Belum Ada Akun</span>`;
+        usernameCell = '<span style="color:var(--color-text-muted);">—</span>';
+        statusCell = `<span class="badge nonaktif">Belum Ada Akun</span>`;
         aksiCell = `<button type="button" class="btn-mini primary btn-buat-akun">+ Buat Akun</button>`;
       } else if (akun.statusAkun === 'NONAKTIF') {
-        akunCell = `${escapeHtml(akun.username)} <span class="badge akun-nonaktif">Nonaktif</span>`;
+        usernameCell = escapeHtml(akun.username);
+        statusCell = `<span class="badge akun-nonaktif">Nonaktif</span>`;
         aksiCell = `<button type="button" class="btn-mini btn-toggle-status" data-status-baru="AKTIF">Aktifkan</button>`;
       } else {
-        akunCell = `${escapeHtml(akun.username)} <span class="badge ${akun.wajibGantiPassword ? 'terlambat' : 'aktif'}">${akun.wajibGantiPassword ? 'Wajib Ganti Password' : 'Aktif'}</span>`;
+        usernameCell = escapeHtml(akun.username);
+        statusCell = `<span class="badge ${akun.wajibGantiPassword ? 'terlambat' : 'aktif'}">${akun.wajibGantiPassword ? 'Wajib Ganti Password' : 'Aktif'}</span>`;
         aksiCell = `<button type="button" class="btn-mini btn-reset-password">Reset Password</button>
           <button type="button" class="btn-mini btn-toggle-status" data-status-baru="NONAKTIF">Nonaktifkan</button>`;
       }
@@ -1138,8 +1213,8 @@
       <tr data-id="${escapeHtml(r.id)}" data-nama="${escapeHtml(r.nama)}">
         <td>${escapeHtml(r.id)}</td>
         <td>${escapeHtml(r.nama)}</td>
-        <td>${escapeHtml(r.divisi)}</td>
-        <td class="cell-akun">${akunCell}</td>
+        <td>${usernameCell}</td>
+        <td class="cell-akun">${statusCell}</td>
         <td class="cell-aksi-akun">${aksiCell}</td>
       </tr>`;
     }).join('');

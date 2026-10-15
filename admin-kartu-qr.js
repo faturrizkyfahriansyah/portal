@@ -24,9 +24,27 @@ function badgeStatusKartuKq_(status) {
   return 'belum-absen'; // BELUM_DIBUAT
 }
 
+// Bagian D.A (Redesain Terintegrasi): ringkasan dihitung dari SELURUH
+// daftarKartuCache (bukan hasil filter/pencarian) -- angka global, bukan
+// ikut berubah saat Admin mengetik di kotak cari.
+function perbaruiRingkasanKartuQr_() {
+  const total = daftarKartuCache.length;
+  const tersedia = daftarKartuCache.filter(r => r.statusKartu === 'AKTIF').length;
+  const belumDibuat = daftarKartuCache.filter(r => r.statusKartu === 'BELUM_DIBUAT').length;
+  const elTotal = document.getElementById('kqTotalRelawan');
+  const elTersedia = document.getElementById('kqKartuTersedia');
+  const elBelum = document.getElementById('kqBelumDibuat');
+  if (elTotal) elTotal.textContent = total;
+  if (elTersedia) elTersedia.textContent = tersedia;
+  if (elBelum) elBelum.textContent = belumDibuat;
+}
+
 function renderDaftarKartuAdmin_(cari) {
+  perbaruiRingkasanKartuQr_();
   const q = (cari || '').toLowerCase();
-  const list = q ? daftarKartuCache.filter(r => r.nama.toLowerCase().includes(q) || r.id.toLowerCase().includes(q)) : daftarKartuCache;
+  const filterStatus = (document.getElementById('kqFilterStatus') || {}).value || '';
+  let list = q ? daftarKartuCache.filter(r => r.nama.toLowerCase().includes(q) || r.id.toLowerCase().includes(q)) : daftarKartuCache;
+  if (filterStatus) list = list.filter(r => r.statusKartu === filterStatus);
   const tbody = document.getElementById('kqTbody');
   document.getElementById('kqEmpty').style.display = list.length ? 'none' : 'block';
 
@@ -259,6 +277,7 @@ function initKartuQr_() {
     clearTimeout(window._kqCariTimeout);
     window._kqCariTimeout = setTimeout(() => renderDaftarKartuAdmin_(e.target.value.trim()), 300);
   });
+  document.getElementById('kqFilterStatus').addEventListener('change', () => renderDaftarKartuAdmin_(document.getElementById('kqCari').value.trim()));
   document.getElementById('kqPilihSemua').addEventListener('change', (e) => {
     daftarKartuCache.forEach(r => { if (r.statusKartu !== 'BELUM_DIBUAT') { if (e.target.checked) idTerpilihKq.add(r.id); else idTerpilihKq.delete(r.id); } });
     renderDaftarKartuAdmin_(document.getElementById('kqCari').value.trim());

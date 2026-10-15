@@ -199,3 +199,34 @@ tbody tr:hover { background: var(--color-bg); }
   #jiBlokJam { flex-direction: column; }
   #jiBlokJam input { width: 100%; }
 }
+
+/* Bagian A/B/D (Redesain Terintegrasi Relawan/Profil/Akun/Kartu QR) */
+
+/* Tabel Relawan -> kartu vertikal di HP (Bagian A.3), teknik CSS murni
+   drpd render JS terpisah -- data SELALU sinkron krn sumbernya 1 sama.
+   data-label diisi JS (lihat admin.js) dipakai td::before sbg label. */
+@media (max-width: 640px) {
+  .tabel-jadi-kartu thead { display: none; }
+  .tabel-jadi-kartu, .tabel-jadi-kartu tbody, .tabel-jadi-kartu tr, .tabel-jadi-kartu td { display: block; width: 100%; }
+  .tabel-jadi-kartu tr {
+    border: 1px solid var(--color-border); border-radius: var(--radius-md);
+    margin-bottom: 10px; padding: 10px 12px; background: #fff;
+  }
+  .tabel-jadi-kartu td {
+    border: none; padding: 5px 0; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .tabel-jadi-kartu td::before {
+    content: attr(data-label); font-size: 11px; font-weight: 700; color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+  .tabel-jadi-kartu td[data-label="Aksi"] { flex-direction: column; align-items: stretch; gap: 6px; }
+  .tabel-jadi-kartu td[data-label="Aksi"]::before { margin-bottom: 2px; }
+  .tabel-jadi-kartu td[data-label="Aksi"] button { width: 100%; padding: 10px; } /* tombol nyaman disentuh, tidak bertumpuk */
+}
+
+/* Profil Relawan -- 2 kolom di layar lebar (Bagian B.I), 1 kolom di HP
+   (default #prGridBagian sudah grid-template-columns:1fr lewat inline
+   style, media query ini HANYA menambah utk layar >=860px). */
+@media (min-width: 860px) {
+  #prGridBagian { grid-template-columns: 1fr 1fr !important; }
+}
