@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="style.css?v=20260903b">
 <link rel="stylesheet" href="preferensi-tampilan.css">
 <link rel="stylesheet" href="portal.css?v=20261001g">
-<link rel="stylesheet" href="app-shell.css?v=20261012a">
+<link rel="stylesheet" href="app-shell.css?v=20261015a">
 <link rel="stylesheet" href="rebrand.css?v=20260903b">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#12294d">
@@ -142,6 +142,27 @@
             <div id="jadwalSayaHariIni"></div>
           </section>
 
+          <!-- MENU HARI INI (BARU, 15 Okt 2026) -- tampil di dashboard
+               UTAMA, semua relawan, bukan cuma role ASN di Monitoring.
+               Sumber data SAMA dgn Monitoring (getMenuHariIniSiklus_),
+               cuma pintu aksesnya baru (getMenuHariIniDashboard, tanpa
+               gerbang role). -->
+          <section style="margin-top:16px;" id="dbMenuWrap">
+            <p class="section-title">Menu Hari Ini</p>
+            <div class="card-item" style="padding:16px;" id="dbMenuIsi">
+              <p style="margin:0;font-size:12.5px;color:#55606f;">Memuat...</p>
+            </div>
+          </section>
+
+          <!-- RINGKASAN PENERIMA MANFAAT (BARU, 15 Okt 2026) -- sama spt
+               di atas, dashboard utama bukan cuma Monitoring ASN. -->
+          <section style="margin-top:16px;" id="dbPmWrap">
+            <p class="section-title">Penerima Manfaat Hari Ini</p>
+            <div class="card-item" style="padding:16px;" id="dbPmIsi">
+              <p style="margin:0;font-size:12.5px;color:#55606f;">Memuat...</p>
+            </div>
+          </section>
+
           <!-- RINGKASAN SIPRES -->
           <section style="margin-top:16px;">
             <p class="section-title">Ringkasan SIPRES</p>
@@ -248,7 +269,7 @@
 <script src="common.js?v=20261014a"></script>
 <script src="auth-relawan.js?v=20260903b"></script>
 <script src="app-shell.js?v=20260903b"></script>
-<script src="dashboard.js?v=20260903b"></script>
+<script src="dashboard.js?v=20261015a"></script>
 <script>document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("btnLogoutMenu");if(b)b.addEventListener("click",function(){document.getElementById("btnLogoutShell").click();});});</script>
 </body>
 </html>

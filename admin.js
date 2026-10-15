@@ -506,9 +506,50 @@
     { key: 'ringkasanAkun', label: 'Ringkasan Akun', fn: () => apiGet('getRingkasanAkunRelawan', { token: authToken }) },
     { key: 'siragaDashboard', label: 'SIRAGA', fn: () => apiGet('getSiragaDashboard', { token: authToken }) },
     { key: 'sipanduRingkas', label: 'SIPANDU', fn: () => apiGet('getSipanduDashboardRingkas', { token: authToken }) },
-    { key: 'rekapDuaMingguDashboard', label: 'Rekap Per Periode', fn: () => apiGet('getRekapDuaMingguDashboard', { token: authToken }) }
+    { key: 'rekapDuaMingguDashboard', label: 'Rekap Per Periode', fn: () => apiGet('getRekapDuaMingguDashboard', { token: authToken }) },
+    // BARU (15 Okt 2026): Menu Hari Ini & Penerima Manfaat di dashboard
+    // UTAMA Pengelola (sebelumnya cuma di Monitoring, khusus role ASN).
+    // Tanpa token krn aksinya memang tanpa gerbang role (lihat Code.gs).
+    { key: 'menuHariIniDash', label: 'Menu Hari Ini', fn: () => apiGet('getMenuHariIniDashboard', {}) },
+    { key: 'ringkasanPmDash', label: 'Penerima Manfaat', fn: () => apiGet('getRingkasanPmDashboard', {}) }
   ];
+  // Dua fungsi render utk kartu BARU di dashboard Overview (15 Okt 2026).
+  // Pola sama dgn dashboard.html Portal Relawan -- cuma beda wadah DOM.
+  function renderMenuHariIniOverview_() {
+    const m = cache.menuHariIniDash;
+    const el = document.getElementById('ovMenuIsi');
+    if (cache.errors.menuHariIniDash) { document.getElementById('ovMenuWrap').style.display = 'none'; return; }
+    if (!m) { el.innerHTML = '<p style="margin:0;font-size:12.5px;color:var(--color-text-muted);">Menu hari ini belum tersedia di database siklus menu.</p>'; return; }
+    el.innerHTML = `
+      <p style="margin:0 0 10px;font-size:12.5px;color:var(--color-text-muted);">${escapeHtml(m.hari)}, ${escapeHtml(m.tanggal)}${m.tema ? ' · ' + escapeHtml(m.tema) : ''}</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:12.5px;">
+        <div><b>Karbohidrat</b><br>${escapeHtml(m.karbohidrat || '-')}</div>
+        <div><b>Lauk Hewani</b><br>${escapeHtml(m.laukHewani || '-')}</div>
+        <div><b>Lauk Nabati</b><br>${escapeHtml(m.laukNabati || '-')}</div>
+        <div><b>Sayur</b><br>${escapeHtml(m.sayur || '-')}</div>
+        <div><b>Buah</b><br>${escapeHtml(m.buah || '-')}</div>
+        <div><b>Pelengkap</b><br>${escapeHtml(m.pelengkap || '-')}</div>
+      </div>`;
+  }
+
+  function renderRingkasanPmOverview_() {
+    const pm = cache.ringkasanPmDash;
+    const el = document.getElementById('ovPmIsi');
+    if (cache.errors.ringkasanPmDash) { document.getElementById('ovPmWrap').style.display = 'none'; return; }
+    if (!pm) { el.innerHTML = '<p style="margin:0;font-size:12.5px;color:var(--color-text-muted);">Data Penerima Manfaat belum tersedia.</p>'; return; }
+    el.innerHTML = `
+      <div class="admin-stat-grid" style="grid-template-columns:repeat(5,1fr);">
+        <div class="admin-stat-card accent-success"><div class="admin-stat-value">${pm.jumlahPmHariIni}</div><div class="admin-stat-label">PM Hari Ini</div></div>
+        <div class="admin-stat-card"><div class="admin-stat-value">${pm.jumlahPmLibur}</div><div class="admin-stat-label">PM Libur</div></div>
+        <div class="admin-stat-card accent-info"><div class="admin-stat-value">${pm.totalPK}</div><div class="admin-stat-label">PK</div></div>
+        <div class="admin-stat-card accent-info"><div class="admin-stat-value">${pm.totalPB}</div><div class="admin-stat-label">PB</div></div>
+        <div class="admin-stat-card accent-warning"><div class="admin-stat-value">${pm.total3B}</div><div class="admin-stat-label">3B</div></div>
+      </div>`;
+  }
+
   const RENDER_UNTUK_KEY = {
+    menuHariIniDash: renderMenuHariIniOverview_,
+    ringkasanPmDash: renderRingkasanPmOverview_,
     relawanList: renderRelawanTable,
     divisiList: () => { fillDivisiSelects(); renderDivisiTable(); },
     akunList: renderAkunTable,

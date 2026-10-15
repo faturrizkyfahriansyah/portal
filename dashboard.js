@@ -61,6 +61,53 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ============================================================
+  // MENU HARI INI & RINGKASAN PENERIMA MANFAAT (BARU, 15 Okt 2026) --
+  // independen, TIDAK menahan P0/P1 (pola sama: fetch terpisah, render
+  // begitu siap). Tanpa token krn aksinya memang tanpa gerbang role
+  // (lihat komentar di Code.gs) -- data agregat operasional, bukan
+  // data pribadi relawan.
+  // ============================================================
+  (async function muatMenuDanPmDashboard_() {
+    try {
+      const m = await apiGet('getMenuHariIniDashboard', {});
+      const el = document.getElementById('dbMenuIsi');
+      if (!m) { el.innerHTML = '<p style="margin:0;font-size:12.5px;color:#8a93a3;">Menu hari ini belum tersedia.</p>'; return; }
+      el.innerHTML = `
+        <p style="margin:0 0 10px;font-size:12px;color:#55606f;">${escapeHtml(m.hari)}, ${escapeHtml(m.tanggal)}${m.tema ? ' · ' + escapeHtml(m.tema) : ''}</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;">
+          <div><b>Karbohidrat</b><br>${escapeHtml(m.karbohidrat || '-')}</div>
+          <div><b>Lauk Hewani</b><br>${escapeHtml(m.laukHewani || '-')}</div>
+          <div><b>Lauk Nabati</b><br>${escapeHtml(m.laukNabati || '-')}</div>
+          <div><b>Sayur</b><br>${escapeHtml(m.sayur || '-')}</div>
+          <div><b>Buah</b><br>${escapeHtml(m.buah || '-')}</div>
+          <div><b>Pelengkap</b><br>${escapeHtml(m.pelengkap || '-')}</div>
+        </div>`;
+    } catch (e) {
+      document.getElementById('dbMenuWrap').style.display = 'none'; // gagal diam-diam -- bagian lain Dashboard tetap jalan normal
+    }
+  })();
+
+  (async function muatPmDashboard_() {
+    try {
+      const pm = await apiGet('getRingkasanPmDashboard', {});
+      const el = document.getElementById('dbPmIsi');
+      if (!pm) { el.innerHTML = '<p style="margin:0;font-size:12.5px;color:#8a93a3;">Data Penerima Manfaat belum tersedia.</p>'; return; }
+      el.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;margin-bottom:10px;">
+          <div><p style="margin:0;font-size:11px;color:#55606f;">PM Hari Ini</p><p style="margin:2px 0 0;font-size:18px;font-weight:800;color:#2e7d32;">${pm.jumlahPmHariIni}</p></div>
+          <div><p style="margin:0;font-size:11px;color:#55606f;">PM Libur</p><p style="margin:2px 0 0;font-size:18px;font-weight:800;color:#8a93a3;">${pm.jumlahPmLibur}</p></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;font-size:12px;border-top:1px solid #e8ebef;padding-top:10px;">
+          <div><b>${pm.totalPK}</b><br>PK</div>
+          <div><b>${pm.totalPB}</b><br>PB</div>
+          <div><b>${pm.total3B}</b><br>3B</div>
+        </div>`;
+    } catch (e) {
+      document.getElementById('dbPmWrap').style.display = 'none';
+    }
+  })();
+
+  // ============================================================
   // AUDIT PERFORMANCE (disetujui) — P0 dan P1 SEKARANG DUA PERMINTAAN
   // INDEPENDEN (sebelumnya SATU getDashboardLengkapRelawan yang menahan
   // seluruh render sampai semuanya siap). P0 = Identitas/Status
