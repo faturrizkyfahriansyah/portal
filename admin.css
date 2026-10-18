@@ -264,3 +264,44 @@ tbody tr:hover { background: var(--color-bg); }
   background: var(--color-bg-muted, #f5f7fa); z-index: 3;
 }
 .tabel-kolom-beku-3 th:nth-child(1), .tabel-kolom-beku-3 th:nth-child(2), .tabel-kolom-beku-3 th:nth-child(3) { z-index: 4; } /* pojok kiri-atas: menang dari th biasa (z-index 3) DAN td kolom beku (z-index 1) */
+
+/* ===== Manajemen Hak Akses (16-18 Okt 2026) =====
+   Warna navy #0B2D6B & aksen oranye #F58220 KHUSUS di sini, sesuai
+   permintaan eksplisit dokumen -- tidak memengaruhi warna Portal lain. */
+.mha-tabs {
+  display: flex; gap: 4px; border-bottom: 2px solid var(--color-border);
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.mha-tab-btn {
+  padding: 10px 16px; background: none; border: none; border-bottom: 2px solid transparent;
+  margin-bottom: -2px; font-size: 13.5px; font-weight: 600; color: var(--color-text-muted);
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.mha-tab-btn.active { color: #0B2D6B; border-bottom-color: #0B2D6B; }
+.mha-tab-content { }
+
+.mha-modal-overlay {
+  position: fixed; inset: 0; background: rgba(11,45,107,0.35); z-index: 200;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.mha-modal {
+  background: #fff; border-radius: 14px; padding: 20px; max-width: 460px; width: 100%;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 48px rgba(11,45,107,0.25);
+}
+
+/* Grid izin tindakan (Tab Konfigurasi) -- 2 kolom di layar lebar, 1 di HP */
+.mha-izin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .mha-izin-grid { grid-template-columns: 1fr; } }
+.mha-izin-item {
+  display: flex; align-items: center; gap: 8px; font-size: 13px;
+  padding: 8px 10px; border: 1px solid var(--color-border); border-radius: 8px; cursor: pointer;
+}
+.mha-izin-item input { width: 16px; height: 16px; cursor: pointer; }
+
+/* Kartu riwayat (Tab 3) */
+.mha-riwayat-item {
+  border: 1px solid var(--color-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: #fff;
+}
+.mha-riwayat-item .waktu { font-size: 11px; color: var(--color-text-muted); }
+.mha-riwayat-item .judul { font-weight: 700; color: #0B2D6B; margin: 3px 0; }
+.mha-riwayat-item .pelaku { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }

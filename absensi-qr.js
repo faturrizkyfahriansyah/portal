@@ -109,7 +109,7 @@ async function prosesAntrean_() {
     while (antrean.length > 0) {
       const item = antrean[0];
       try {
-        await apiPostDiagnostik_('submitAbsensiQr', { tokenKartu: item.tokenKartu, mode: item.mode, idScan: item.idScan }, 15000);
+        await apiPostDiagnostik_('submitAbsensiQr', { kioskKey: KIOSK_KEY, tokenKartu: item.tokenKartu, mode: item.mode, idScan: item.idScan }, 15000);
         antrean.shift();
         simpanAntrean_(antrean);
       } catch (e) {
@@ -384,7 +384,7 @@ async function prosesHasilScan_(tokenKartu) {
   else tampilkanStatusSiap_(false);
 
   try {
-    const hasil = await apiPostDiagnostik_('submitAbsensiQr', { tokenKartu, mode: modeAbsensi, idScan }, 15000);
+    const hasil = await apiPostDiagnostik_('submitAbsensiQr', { kioskKey: KIOSK_KEY, tokenKartu, mode: modeAbsensi, idScan }, 15000);
     tampilkanHasil_(hasil);
   } catch (err) {
     // Gagal terkirim (jaringan/timeout) -- SIMPAN ke antrean utk dicoba lagi

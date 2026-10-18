@@ -368,9 +368,9 @@
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261015a',
     panelLaporan: 'admin-laporan.js?v=20261014a',
     panelProfilRelawan: 'admin-profil-relawan.js?v=20261016a',
-    panelMenuHariIni: 'admin-menu-hari-ini.js?v=20261015a',
+    panelMenuHariIni: 'admin-menu-hari-ini.js?v=20261016a',
     panelPenerimaManfaatOps: 'admin-penerima-manfaat-ops.js?v=20261015a',
-    panelManajemenHakAkses: 'admin-manajemen-hak-akses.js?v=20261016a',
+    panelManajemenHakAkses: 'admin-manajemen-hak-akses.js?v=20261018a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
@@ -1998,6 +1998,7 @@
     const dGagal = cache.errors.dashboardPengelola;
     if (d) {
       // -- Kehadiran Hari Ini (6 kategori) --
+      document.getElementById('ovTotalTerjadwal').textContent = dGagal ? gagalTanda : d.kehadiran.totalTerjadwal;
       document.getElementById('ovTerlambat').textContent = dGagal ? gagalTanda : d.kehadiran.terlambat;
       document.getElementById('ovSudahMasuk').textContent = dGagal ? gagalTanda : d.kehadiran.sudahMasuk;
       document.getElementById('ovSudahPulang').textContent = dGagal ? gagalTanda : d.kehadiran.sudahPulang;
