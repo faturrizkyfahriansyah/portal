@@ -127,16 +127,37 @@
           <p style="font-size:11px;color:var(--color-text-muted);margin:8px 0 0;">Tersamarkan secara default. Nama bank &amp; nama pemilik rekening belum menjadi bagian dari data sistem saat ini — hanya nomor rekening yang tersimpan.</p>
         </div>
 
-        <!-- HAK AKSES (read-only, murni informasi) -->
+        <!-- HAK AKSES -- Role & Petugas Stok SEKARANG bisa diatur
+             LANGSUNG dari sini (permintaan Admin, 16 Okt 2026) --
+             sebelumnya cuma informasi, mengarahkan ke 2 panel terpisah
+             (Role ASN & Kepala SPPG, Stok & Persediaan). Backend TIDAK
+             diduplikasi -- tetap memanggil setRoleRelawan/setRoleStok
+             yg sudah ada, cuma titik aksesnya dipusatkan di sini.
+             Username/Status Akun/Wajib Ganti Password TETAP di
+             Akun Relawan -- itu soal AUTENTIKASI (login), beda konsep
+             dari Role/Petugas Stok (soal OTORISASI/izin akses modul). -->
         <div class="panel-block">
           <p class="panel-block-title">Hak Akses</p>
           ${baris_('Username', p.username)}
-          ${baris_('Role', p.akses.role)}
-          ${baris_('Hak Akses Tambahan', p.akses.hakAkses)}
           ${baris_('Status Akun', p.akses.statusAkun)}
           ${baris_('Wajib Ganti Password', p.akses.wajibGantiPassword ? 'Ya' : 'Tidak')}
           ${baris_('Login Terakhir', p.akses.terakhirLogin ? new Date(p.akses.terakhirLogin).toLocaleString('id-ID') : null, 'Belum pernah login')}
-          <p style="font-size:11px;color:var(--color-text-muted);margin:8px 0 0;">Bagian ini murni informasi — perubahan role/status akun dilakukan lewat menu Akun Relawan atau Role ASN &amp; Kepala SPPG, bukan dari sini.</p>
+          <p style="font-size:11px;color:var(--color-text-muted);margin:8px 0 10px;">Username, status akun, dan password diatur lewat menu Akun Relawan (soal LOGIN) — bagian di bawah ini khusus Role & akses modul (soal IZIN).</p>
+
+          <label style="font-size:11px;font-weight:600;display:block;margin:10px 0 3px;">Role</label>
+          <select id="prRole" class="input" style="width:100%;padding:7px;border:1px solid var(--color-border);border-radius:8px;margin-bottom:10px;">
+            <option value="" ${p.akses.role === 'RELAWAN' || !p.akses.role ? 'selected' : ''}>Relawan Biasa</option>
+            <option value="ASN" ${p.akses.role === 'ASN' ? 'selected' : ''}>ASN</option>
+            <option value="KEPALA_SPPG" ${p.akses.role === 'KEPALA_SPPG' ? 'selected' : ''}>Kepala SPPG</option>
+          </select>
+          <!-- Checkbox, BUKAN pilihan sejajar dgn Role -- Role (ASN/Kepala
+               SPPG) saling eksklusif (cuma 1 nilai per relawan), Petugas
+               Stok BOLEH berdampingan dgn Role apa pun (independen). -->
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:12px;cursor:pointer;">
+            <input type="checkbox" id="prPetugasStok" ${p.akses.petugasStok ? 'checked' : ''} style="width:16px;height:16px;">
+            Petugas Stok (akses modul SIRAGA)
+          </label>
+          <button type="button" class="btn-mini primary" id="prBtnSimpanHakAkses">💾 Simpan Hak Akses</button>
         </div>
       </div>
 
@@ -210,6 +231,35 @@
     });
     const btnSimpan = document.getElementById('prBtnSimpan');
     if (btnSimpan) btnSimpan.addEventListener('click', simpanPerubahan_);
+    document.getElementById('prBtnSimpanHakAkses').addEventListener('click', simpanHakAkses_);
+  }
+
+  async function simpanHakAkses_() {
+    const btn = document.getElementById('prBtnSimpanHakAkses');
+    const roleBaru = document.getElementById('prRole').value;
+    const petugasStokBaru = document.getElementById('prPetugasStok').checked;
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    try {
+      // Dua panggilan terpisah -- Role & Petugas Stok memang 2 sistem
+      // backend berbeda (Role.gs vs Stok.gs), tidak digabung jadi 1
+      // fungsi baru supaya tetap pakai yg sudah ada & teruji. Keduanya
+      // dipanggil kalau NILAINYA BERUBAH saja (bukan selalu, hemat 1
+      // panggilan kalau cuma salah satu yg diubah Admin).
+      const panggilan = [];
+      if (roleBaru !== (profilSaatIni.akses.role === 'RELAWAN' ? '' : profilSaatIni.akses.role)) {
+        panggilan.push(apiPost('setRoleRelawan', { token: token(), idRelawan: profilSaatIni.id, role: roleBaru }));
+      }
+      if (petugasStokBaru !== profilSaatIni.akses.petugasStok) {
+        panggilan.push(apiPost('setRoleStok', { token: token(), idRelawan: profilSaatIni.id, jadikanPetugas: petugasStokBaru }));
+      }
+      if (!panggilan.length) { showError('Tidak ada perubahan untuk disimpan.'); btn.disabled = false; btn.textContent = '💾 Simpan Hak Akses'; return; }
+      await Promise.all(panggilan);
+      showSuccess('Hak akses berhasil disimpan.');
+      await muatProfil(profilSaatIni.id);
+    } catch (err) {
+      showError(err.message);
+      btn.disabled = false; btn.textContent = '💾 Simpan Hak Akses';
+    }
   }
 
   async function simpanPerubahan_() {

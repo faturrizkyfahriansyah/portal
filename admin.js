@@ -367,16 +367,17 @@
     panelShift: 'admin-shift.js?v=20261010b',
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261015a',
     panelLaporan: 'admin-laporan.js?v=20261014a',
-    panelProfilRelawan: 'admin-profil-relawan.js?v=20261015b',
+    panelProfilRelawan: 'admin-profil-relawan.js?v=20261016a',
     panelMenuHariIni: 'admin-menu-hari-ini.js?v=20261015a',
     panelPenerimaManfaatOps: 'admin-penerima-manfaat-ops.js?v=20261015a',
+    panelManajemenHakAkses: 'admin-manajemen-hak-akses.js?v=20261016a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
     panelWebsitePublik: 'admin-website-publik.js',
     panelDuaMinggu: 'admin-export.js?v=20261011b',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'admin-import.js',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
-    panelKartuQr: 'admin-kartu-qr.js?v=20261015a'
+    panelKartuQr: 'admin-kartu-qr.js?v=20261016a'
   };
   const modulTerpuat = new Set();
 
@@ -845,6 +846,47 @@
   }
 
   el.btnMuatDuaMinggu.addEventListener('click', muatRekapDuaMinggu);
+
+  // Diagnostik Duplikat Roster (15 Okt 2026) -- menjawab laporan Admin
+  // soal Total Hari Kerja tidak konsisten (13/14 vs 10). Dipanggil
+  // terpisah dari muatRekapDuaMinggu (tidak otomatis, hanya saat
+  // tombolnya diklik) -- pemindaian penuh 1 periode, tidak perlu
+  // dijalankan tiap kali Rekap dibuka.
+  document.getElementById('btnCekDuplikatRoster').addEventListener('click', async () => {
+    const idPeriode = el.filterPeriodeDuaMinggu.value;
+    if (!idPeriode) { showError('Pilih periode dulu.'); return; }
+    const hasilBox = document.getElementById('hasilCekDuplikat');
+    hasilBox.style.display = 'block';
+    hasilBox.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Memindai...</p>';
+    try {
+      const res = await apiPost('getDuplikatRosterAdmin', { token: authToken, idPeriode });
+      if (!res.jumlahMasalah) {
+        hasilBox.innerHTML = '<div class="panel-block" style="background:var(--color-success-bg);"><p style="margin:0;color:var(--color-success);font-weight:600;">✓ Tidak ditemukan baris presensi ganda di periode ini. Total Hari Kerja untuk semua relawan sudah akurat.</p></div>';
+        return;
+      }
+      hasilBox.innerHTML = `
+        <div class="panel-block" style="background:#fff3cd;">
+          <p style="margin:0 0 10px;font-weight:700;color:#8a5a12;">⚠ Ditemukan ${res.jumlahMasalah} kasus baris ganda -- ini kemungkinan besar penyebab Total Hari Kerja tidak akurat.</p>
+          ${res.data.map(d => `
+            <div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+              <b>${escapeHtml(d.nama)}</b> (${escapeHtml(d.divisi || '-')}) — tanggal <b>${escapeHtml(d.tanggal)}</b>: ${d.jumlahDuplikat} baris
+              <ul style="margin:6px 0 0;padding-left:20px;font-size:12px;color:var(--color-text-muted);">
+                ${d.baris.map(b => `<li>ID ${escapeHtml(b.idAbsensi)} — status: ${escapeHtml(b.status || '-')}, jadwal: ${escapeHtml(b.jamJadwal)}, aktual: ${escapeHtml(b.jamAktual)}</li>`).join('')}
+              </ul>
+              <button type="button" class="btn-mini" style="margin-top:8px;" data-lihat-profil="${escapeHtml(d.idRelawan)}">Buka Pemeriksaan Jadwal — Hapus Baris yang Salah</button>
+            </div>`).join('')}
+          <p style="margin:10px 0 0;font-size:11.5px;color:var(--color-text-muted);">Hapus baris yang SALAH (biasanya yang statusnya "Belum Absen" atau tidak masuk akal) lewat tombol "Hapus" di Pemeriksaan Jadwal Individu -- pilih relawannya, cari tanggal yang sama, baris manapun yang keliru.</p>
+        </div>`;
+      hasilBox.querySelectorAll('[data-lihat-profil]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tombolPanel = document.querySelector('.admin-tab-btn[data-panel="panelJadwalIndividu"]');
+          if (tombolPanel) tombolPanel.click();
+        });
+      });
+    } catch (err) {
+      hasilBox.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+    }
+  });
 
   async function muatRekapDuaMinggu() {
     const idPeriode = el.filterPeriodeDuaMinggu.value;
@@ -1485,7 +1527,8 @@
             ${opsiStatus.map(s => `<option value="${s}" ${s === p.status ? 'selected' : ''}>${s}</option>`).join('')}
           </select>
         </td>
-        <td>
+        <td style="white-space:nowrap;">
+          <button type="button" class="btn-mini btn-edit-periode" data-id="${escapeHtml(p.id)}" data-nama="${escapeHtml(p.nama)}" data-mulai="${escapeHtml(dmyKeIsoFrontend_(p.tanggalMulai))}" data-selesai="${escapeHtml(dmyKeIsoFrontend_(p.tanggalSelesai))}" data-keterangan="${escapeHtml(p.keterangan || '')}">✎ Edit</button>
           <a href="#" class="btn-mini btn-lihat-kalender-periode" data-id="${escapeHtml(p.id)}">Lihat Kalender</a>
           <button type="button" class="btn-mini btn-hapus-periode" data-id="${escapeHtml(p.id)}" style="background:var(--color-danger-bg);color:var(--color-danger);border-color:var(--color-danger);">Hapus</button>
         </td>
@@ -1538,22 +1581,66 @@
     });
   }
 
+  // Perbaikan 16 Okt 2026 (diminta Admin -- gap nyata, backend
+  // updatePeriode SUDAH ADA tapi sebelumnya tidak ada tombol sama
+  // sekali): form "Tambah Periode" yg SAMA sekarang dipakai ganda --
+  // mode Tambah (default) & mode Edit (saat tombol ✎ Edit diklik di
+  // baris tabel). Bukan form terpisah -- lebih ringkas, 1 tempat.
+  let idPeriodeSedangDiedit = null;
+
+  function dmyKeIsoFrontend_(dmy) {
+    if (!dmy) return '';
+    const b = String(dmy).split('/');
+    if (b.length !== 3) return '';
+    return b[2] + '-' + b[1].padStart(2, '0') + '-' + b[0].padStart(2, '0');
+  }
+
+  el.tbodyPeriode.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-edit-periode');
+    if (!btn) return;
+    idPeriodeSedangDiedit = btn.dataset.id;
+    el.inputNamaPeriode.value = btn.dataset.nama;
+    el.inputMulaiPeriode.value = btn.dataset.mulai;
+    el.inputSelesaiPeriode.value = btn.dataset.selesai;
+    el.inputKeteranganPeriode.value = btn.dataset.keterangan;
+    el.formTambahPeriode.querySelector('button[type="submit"]').textContent = '💾 Simpan Perubahan';
+    document.getElementById('btnBatalEditPeriode').style.display = '';
+    el.formTambahPeriode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  document.getElementById('btnBatalEditPeriode').addEventListener('click', () => {
+    idPeriodeSedangDiedit = null;
+    el.formTambahPeriode.reset();
+    el.formTambahPeriode.querySelector('button[type="submit"]').textContent = '+ Tambah Periode';
+    document.getElementById('btnBatalEditPeriode').style.display = 'none';
+  });
+
   el.formTambahPeriode.addEventListener('submit', async (e) => {
     e.preventDefault();
-    showLoading('Menambah periode...');
+    const sedangEdit = !!idPeriodeSedangDiedit;
+    showLoading(sedangEdit ? 'Menyimpan perubahan periode...' : 'Menambah periode...');
     try {
-      await apiPost('addPeriode', {
+      const payload = {
         token: authToken,
         nama: el.inputNamaPeriode.value.trim(),
         tanggalMulai: el.inputMulaiPeriode.value,
         tanggalSelesai: el.inputSelesaiPeriode.value,
         keterangan: el.inputKeteranganPeriode.value.trim()
-      });
+      };
+      if (sedangEdit) {
+        payload.id = idPeriodeSedangDiedit;
+        await apiPost('updatePeriode', payload);
+      } else {
+        await apiPost('addPeriode', payload);
+      }
       el.formTambahPeriode.reset();
+      idPeriodeSedangDiedit = null;
+      el.formTambahPeriode.querySelector('button[type="submit"]').textContent = '+ Tambah Periode';
+      document.getElementById('btnBatalEditPeriode').style.display = 'none';
       await muatUlangPeriode();
-      showSuccess('Periode berhasil ditambahkan (status DRAFT).');
+      showSuccess(sedangEdit ? 'Perubahan periode disimpan.' : 'Periode berhasil ditambahkan (status DRAFT).');
     } catch (err) {
-      showError(err.message || 'Gagal menambah periode.');
+      showError(err.message || (sedangEdit ? 'Gagal menyimpan perubahan.' : 'Gagal menambah periode.'));
     } finally {
       hideLoading();
     }

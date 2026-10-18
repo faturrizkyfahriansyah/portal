@@ -204,22 +204,29 @@ tbody tr:hover { background: var(--color-bg); }
 
 /* Tabel Relawan -> kartu vertikal di HP (Bagian A.3), teknik CSS murni
    drpd render JS terpisah -- data SELALU sinkron krn sumbernya 1 sama.
-   data-label diisi JS (lihat admin.js) dipakai td::before sbg label. */
+   data-label diisi JS (lihat admin.js) dipakai td::before sbg label.
+   Diperbaiki 16 Okt 2026 (dilaporkan Admin, tangkapan layar -- tampilan
+   berantakan): SEBELUMNYA label & isi sejajar (flex-row) -- rusak kalau
+   isinya lebar (dropdown Divisi, grup nama+tombol edit). SEKARANG label
+   di ATAS, isi di BAWAH (block, bukan flex) -- kokoh utk isi apa pun. */
 @media (max-width: 640px) {
   .tabel-jadi-kartu thead { display: none; }
   .tabel-jadi-kartu, .tabel-jadi-kartu tbody, .tabel-jadi-kartu tr, .tabel-jadi-kartu td { display: block; width: 100%; }
   .tabel-jadi-kartu tr {
     border: 1px solid var(--color-border); border-radius: var(--radius-md);
-    margin-bottom: 10px; padding: 10px 12px; background: #fff;
+    margin-bottom: 10px; padding: 12px 14px; background: #fff;
   }
   .tabel-jadi-kartu td {
-    border: none; padding: 5px 0; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    border: none; padding: 7px 0; border-bottom: 1px solid #f1f3f6;
   }
+  .tabel-jadi-kartu td:last-child { border-bottom: none; padding-bottom: 0; }
   .tabel-jadi-kartu td::before {
-    content: attr(data-label); font-size: 11px; font-weight: 700; color: var(--color-text-muted);
-    flex-shrink: 0;
+    content: attr(data-label); display: block; font-size: 10.5px; font-weight: 700;
+    color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px;
   }
-  .tabel-jadi-kartu td[data-label="Aksi"] { flex-direction: column; align-items: stretch; gap: 6px; }
+  .tabel-jadi-kartu td .mini-select,
+  .tabel-jadi-kartu td select { width: 100%; }
+  .tabel-jadi-kartu td[data-label="Aksi"] { display: flex; flex-direction: column; gap: 6px; }
   .tabel-jadi-kartu td[data-label="Aksi"]::before { margin-bottom: 2px; }
   .tabel-jadi-kartu td[data-label="Aksi"] button { width: 100%; padding: 10px; } /* tombol nyaman disentuh, tidak bertumpuk */
 }
@@ -230,3 +237,30 @@ tbody tr:hover { background: var(--color-bg); }
 @media (min-width: 860px) {
   #prGridBagian { grid-template-columns: 1fr 1fr !important; }
 }
+
+/* Kolom beku Nama/Divisi/Nomor Rekening -- tabel Rekap per Relawan
+   (Rekap Per Periode, 16 Okt 2026, dilaporkan Admin). Lebar kolom
+   DITETAPKAN (bukan otomatis) supaya posisi "left" tiap kolom beku
+   presisi -- kolom ke-2 nempel persis di tepi kanan kolom ke-1, dst. */
+.tabel-kolom-beku-3 { min-width: 1000px; }
+/* Horizontal: 3 kolom pertama (Nama/Divisi/No Rekening) beku saat
+   digeser SAMPING. Lebar DITETAPKAN (bukan otomatis) supaya posisi
+   "left" tiap kolom presisi -- kolom ke-2 nempel persis di tepi kanan
+   kolom ke-1, dst. */
+.tabel-kolom-beku-3 th:nth-child(1), .tabel-kolom-beku-3 td:nth-child(1) { position: sticky; left: 0; width: 160px; min-width: 160px; }
+.tabel-kolom-beku-3 th:nth-child(2), .tabel-kolom-beku-3 td:nth-child(2) { position: sticky; left: 160px; width: 130px; min-width: 130px; }
+.tabel-kolom-beku-3 th:nth-child(3), .tabel-kolom-beku-3 td:nth-child(3) { position: sticky; left: 290px; width: 140px; min-width: 140px; }
+.tabel-kolom-beku-3 td:nth-child(1), .tabel-kolom-beku-3 td:nth-child(2), .tabel-kolom-beku-3 td:nth-child(3) { background: #fff; z-index: 1; }
+.tabel-kolom-beku-3 td:nth-child(3) { box-shadow: 2px 0 0 var(--color-border); } /* garis pemisah tipis -- batas antara kolom beku & yg bisa digeser */
+
+/* Vertikal (BARU, 16 Okt 2026, diminta Admin): SELURUH baris header
+   (bukan cuma 3 kolom pertama) beku saat digeser ke BAWAH -- top
+   mengikuti tinggi topbar yg SUDAH sticky (--shell-topbar-h, lihat
+   app-shell.css) supaya header tabel nongol TEPAT di bawah topbar,
+   tidak ketiban/menabrak. z-index lebih tinggi dari kolom beku
+   horizontal (th di pojok kiri-atas perlu menang dari KEDUANYA). */
+.tabel-kolom-beku-3 th {
+  position: sticky; top: calc(var(--shell-topbar-h) + env(safe-area-inset-top, 0px));
+  background: var(--color-bg-muted, #f5f7fa); z-index: 3;
+}
+.tabel-kolom-beku-3 th:nth-child(1), .tabel-kolom-beku-3 th:nth-child(2), .tabel-kolom-beku-3 th:nth-child(3) { z-index: 4; } /* pojok kiri-atas: menang dari th biasa (z-index 3) DAN td kolom beku (z-index 1) */

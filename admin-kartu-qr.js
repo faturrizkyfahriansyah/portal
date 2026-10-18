@@ -17,11 +17,15 @@ async function muatDaftarKartuAdmin_() {
   renderDaftarKartuAdmin_(document.getElementById('kqCari').value.trim());
 }
 
-function badgeStatusRelawanKq_(status) { return status === 'AKTIF' ? 'hadir' : 'tidak-hadir'; }
+// Diperbaiki 16 Okt 2026 (diminta Admin -- "beda warna bentuk" dari
+// tabel lain): SEBELUMNYA pakai class "riwayat-badge" dgn kosakata
+// hadir/sakit/tidak-hadir yg dipakai ulang scr tidak masuk akal utk
+// status kartu (mis. NONAKTIF diberi warna "sakit"). SEKARANG pakai
+// .badge standar yg SAMA PERSIS dgn panel Relawan/Akun (.aktif/.nonaktif).
+function badgeStatusRelawanKq_(status) { return status === 'AKTIF' ? 'aktif' : 'nonaktif'; }
 function badgeStatusKartuKq_(status) {
-  if (status === 'AKTIF') return 'hadir';
-  if (status === 'NONAKTIF') return 'sakit';
-  return 'belum-absen'; // BELUM_DIBUAT
+  if (status === 'AKTIF') return 'aktif';
+  return 'nonaktif'; // NONAKTIF maupun BELUM_DIBUAT -- keduanya "belum/tidak tersedia", warna netral yg sama
 }
 
 // Bagian D.A (Redesain Terintegrasi): ringkasan dihitung dari SELURUH
@@ -49,13 +53,13 @@ function renderDaftarKartuAdmin_(cari) {
   document.getElementById('kqEmpty').style.display = list.length ? 'none' : 'block';
 
   tbody.innerHTML = list.map(r => `
-    <tr style="border-bottom:1px solid var(--color-border);">
-      <td style="padding:6px;"><input type="checkbox" class="kq-check" data-id="${r.id}" data-nama="${escapeHtmlKq_(r.nama)}" ${r.statusKartu === 'BELUM_DIBUAT' ? 'disabled' : ''} ${idTerpilihKq.has(r.id) ? 'checked' : ''}></td>
-      <td style="padding:6px;">${r.id}</td>
+    <tr>
+      <td><input type="checkbox" class="kq-check" data-id="${r.id}" data-nama="${escapeHtmlKq_(r.nama)}" ${r.statusKartu === 'BELUM_DIBUAT' ? 'disabled' : ''} ${idTerpilihKq.has(r.id) ? 'checked' : ''}></td>
+      <td>${r.id}</td>
       <td>${escapeHtmlKq_(r.nama)}</td>
       <td>${escapeHtmlKq_(r.divisi)}</td>
-      <td><span class="riwayat-badge ${badgeStatusRelawanKq_(r.statusRelawan)}">${r.statusRelawan}</span></td>
-      <td><span class="riwayat-badge ${badgeStatusKartuKq_(r.statusKartu)}">${r.statusKartu === 'BELUM_DIBUAT' ? 'Belum Dibuat' : r.statusKartu}</span></td>
+      <td><span class="badge ${badgeStatusRelawanKq_(r.statusRelawan)}">${r.statusRelawan}</span></td>
+      <td><span class="badge ${badgeStatusKartuKq_(r.statusKartu)}">${r.statusKartu === 'BELUM_DIBUAT' ? 'Belum Dibuat' : r.statusKartu}</span></td>
       <td style="white-space:nowrap;">
         ${r.statusKartu === 'BELUM_DIBUAT'
           ? `<button class="btn-mini primary" data-aksi="generate" data-id="${r.id}">Generate</button>`
