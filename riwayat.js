@@ -142,7 +142,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    document.getElementById('periodeRange').textContent = `${hasil.periode.nama} (${hasil.periode.tanggalMulai} – ${hasil.periode.tanggalSelesai})`;
+    // Perbaikan 18 Okt 2026 (diminta Admin): cukup judul periode yang
+    // DIBUAT PENGELOLA (mis. "Periode 16-29 September 2026" kalau itu
+    // namanya), TANPA rentang tanggal mentah di belakangnya -- nama
+    // periode itu sendiri sudah cukup jelas, tidak perlu diulang.
+    document.getElementById('periodeRange').textContent = hasil.periode.nama;
     document.getElementById('periodeTotalJadwal').textContent = hasil.totalJadwal;
 
     const s = hasil.stats || {};

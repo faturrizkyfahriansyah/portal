@@ -106,7 +106,14 @@
         const tombol = !t.adaJadwal
           ? (t.perluDibuat ? `<button type="button" class="btn-mini primary" data-buat="${escapeHtml(t.idOperasional)}" data-tanggal="${escapeHtml(t.tanggal)}">Buat Jadwal</button>` : '')
           : t.sudahLewat
-          ? `<button type="button" class="btn-mini" data-koreksi="${escapeHtml(t.idAbsensi)}">Koreksi Absen</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`
+          // Perbaikan 18 Okt 2026 (diminta Admin): label tombol "Tandai
+          // Hadir" KHUSUS utk baris yg belum pernah disentuh sama sekali
+          // (BELUM ABSEN) -- kasus paling umum (lupa absen/barcode
+          // bermasalah), supaya tombolnya langsung menjelaskan maksudnya.
+          // Form yg terbuka TETAP SAMA (Koreksi Absen, dropdown status
+          // lengkap) -- Admin masih bisa pilih Izin/Sakit/dll kalau
+          // ternyata bukan Hadir, cuma label awalnya lebih pas.
+          ? `<button type="button" class="btn-mini" data-koreksi="${escapeHtml(t.idAbsensi)}">${t.statusKehadiran === 'BELUM ABSEN' ? 'Tandai Hadir' : 'Koreksi Absen'}</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`
           : `<button type="button" class="btn-mini" data-edit="${escapeHtml(t.idAbsensi)}">Edit</button> <button type="button" class="btn-mini" style="color:var(--color-danger);" data-hapus="${escapeHtml(t.idAbsensi)}">Hapus</button>`;
         return `<tr${t.perluDibuat ? ' style="background:#fdf1de;"' : ''}>
           <td>${escapeHtml(t.tanggal)}</td><td>${escapeHtml(t.hari || '-')}</td>
