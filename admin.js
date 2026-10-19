@@ -364,7 +364,7 @@
   // bisa diuji langsung di browser).
   const MODUL_LAZY = {
     panelStok: 'admin-stok.js?v=20261011b',
-    panelShift: 'admin-shift.js?v=20261010b',
+    panelShift: 'admin-shift.js?v=20261018a',
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261015a',
     panelLaporan: 'admin-laporan.js?v=20261014a',
     panelProfilRelawan: 'admin-profil-relawan.js?v=20261016a',
@@ -1655,6 +1655,11 @@
     renderKalenderTable();
   }
 
+  // BARU (18 Okt 2026, Kalender 4-status) -- label & warna yg layak utk
+  // 4 status, bukan cuma AKTIF/nonaktif generik spt sebelumnya.
+  const LABEL_STATUS_KALENDER = { AKTIF: 'Operasional', DIBATALKAN: 'Dibatalkan', LIBUR: 'Libur', TANGGAL_MERAH: 'Tanggal Merah' };
+  const BADGE_STATUS_KALENDER = { AKTIF: 'aktif', DIBATALKAN: 'nonaktif', LIBUR: 'nonaktif', TANGGAL_MERAH: 'nonaktif' }; // semua "bukan operasional" pakai badge netral yg sama -- hindari pakai kosakata lain yg maknanya tidak cocok
+
   function renderKalenderTable() {
     if (!cache.kalenderList.length) {
       el.tbodyKalender.innerHTML = emptyOrErrorRow('kalenderList', 5, 'Belum ada tanggal operasional.');
@@ -1664,7 +1669,7 @@
       <tr data-id="${escapeHtml(k.id)}">
         <td>${escapeHtml(k.tanggal)}<br><span style="font-size:11px;color:var(--color-text-muted);">${escapeHtml(k.hari || '')}</span></td>
         <td>${escapeHtml(k.namaPeriode)}</td>
-        <td><span class="badge ${k.status === 'AKTIF' ? 'aktif' : 'nonaktif'}">${escapeHtml(k.status)}</span></td>
+        <td><span class="badge ${BADGE_STATUS_KALENDER[k.status] || 'nonaktif'}">${escapeHtml(LABEL_STATUS_KALENDER[k.status] || k.status)}</span></td>
         <td>${escapeHtml(k.keterangan || '-')}${(k.divisiKhusus && k.divisiKhusus.length) ? `<br><span style="display:inline-block;margin-top:4px;font-size:11px;padding:2px 8px;background:#fff4e5;color:#8a5a12;border-radius:6px;">🔒 Khusus: ${escapeHtml(k.divisiKhusus.join(', '))}</span>` : ''}</td>
         <td>
           <button type="button" class="btn-mini btn-toggle-operasional" data-status-baru="${k.status === 'AKTIF' ? 'DIBATALKAN' : 'AKTIF'}">${k.status === 'AKTIF' ? 'Batalkan' : 'Aktifkan'}</button>
@@ -1754,6 +1759,12 @@
     }
   });
 
+  // Sembunyikan opsi "divisi khusus" kalau status bukan Operasional --
+  // konsep DIVISI_KHUSUS cuma relevan utk hari operasional, bukan Libur/Tanggal Merah.
+  document.getElementById('selectStatusOperasional').addEventListener('change', (e) => {
+    document.getElementById('detailsDivisiKhusus').style.display = e.target.value === 'AKTIF' ? '' : 'none';
+  });
+
   el.formTambahOperasional.addEventListener('submit', async (e) => {
     e.preventDefault();
     const divisiKhususTerpilih = Array.from(document.querySelectorAll('.cb-divisi-khusus:checked')).map(cb => cb.value);
@@ -1767,6 +1778,7 @@
         token: authToken,
         idPeriode: el.selectPeriodeOperasional.value,
         tanggal: el.inputTanggalOperasional.value,
+        status: document.getElementById('selectStatusOperasional').value, // BARU (18 Okt 2026, Kalender 4-status)
         keterangan: el.inputKeteranganOperasional.value.trim(),
         divisiKhusus: divisiKhususTerpilih
       });

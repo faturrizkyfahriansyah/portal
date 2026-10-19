@@ -860,8 +860,18 @@
     <form class="inline-form" id="formTambahOperasional" style="flex-direction:column;align-items:stretch;">
       <select id="selectPeriodeOperasional" required><option value="" disabled selected>Pilih Periode</option></select>
       <input type="date" id="inputTanggalOperasional" required>
+      <!-- BARU (18 Okt 2026, Kalender 4-status): sebelumnya status
+           SELALU "Operasional" (tersembunyi, tidak bisa dipilih) --
+           Libur/Tanggal Merah hanya tersirat (tidak ada entri = libur).
+           Sekarang bisa disimpan eksplisit. Default tetap "Operasional"
+           -- tidak mengubah kebiasaan yg sudah ada. -->
+      <select id="selectStatusOperasional">
+        <option value="AKTIF" selected>Operasional</option>
+        <option value="LIBUR">Libur</option>
+        <option value="TANGGAL_MERAH">Tanggal Merah</option>
+      </select>
       <input type="text" id="inputKeteranganOperasional" placeholder="Keterangan (opsional)">
-      <details style="margin:2px 0;">
+      <details style="margin:2px 0;" id="detailsDivisiKhusus">
         <summary style="cursor:pointer;font-size:12.5px;color:var(--color-text-muted);">Khusus untuk divisi tertentu? (opsional — kosongkan = berlaku semua divisi)</summary>
         <p style="font-size:11.5px;color:var(--color-text-muted);margin:6px 0;">Kalau dicentang, divisi LAIN dianggap tidak punya operasional (libur) pada tanggal ini.</p>
         <div id="checkboxDivisiKhusus" style="display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:4px;padding:10px;background:#f9fafb;border-radius:8px;"></div>
@@ -1158,6 +1168,104 @@
            ada alasan menghapus markup lamanya juga. -->
       <button type="button" class="btn-mini admin-tab-btn" data-panel="panelJadwalIndividu" title="Sekarang di Pemeriksaan Jadwal Individu">Koreksi Presensi →</button>
       <button type="button" class="btn-mini shift-subtab" data-sub="isiMassal">Isi Absen Massal</button>
+      <!-- Multi-Shift (18 Okt 2026, SIKOP) -- KHUSUS divisi yg butuh
+           lebih dari 1 shift (Security, Pengolahan, Persiapan). Divisi
+           yg TIDAK diisi di sini tetap pakai "Shift Divisi" biasa di
+           atas, tidak terpengaruh sama sekali. -->
+      <button type="button" class="btn-mini shift-subtab" data-sub="multiShift">Multi-Shift</button>
+      <button type="button" class="btn-mini shift-subtab" data-sub="penetapan">Pemeriksaan &amp; Penetapan</button>
+    </div>
+
+    <!-- PEMERIKSAAN & PENETAPAN (18 Okt 2026, SIKOP) -->
+    <div class="shift-sub" id="shiftSubPenetapan" style="display:none;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+        <select id="ptpPeriode" class="mini-select" style="flex:1;min-width:160px;"><option value="">Pilih Periode...</option></select>
+      </div>
+      <div id="ptpRingkasan" style="margin-bottom:16px;"></div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <select id="ptpDivisi" class="mini-select" style="flex:1;min-width:160px;"><option value="">Pilih Divisi untuk Lihat Detail...</option></select>
+      </div>
+      <div id="ptpDetail"></div>
+    </div>
+
+    <!-- MULTI-SHIFT (Security/Pengolahan/Persiapan) -->
+    <div class="shift-sub" id="shiftSubMultiShift" style="display:none;">
+      <p style="font-size:12.5px;color:var(--color-text-muted);margin:-4px 0 14px;">Untuk divisi dengan lebih dari 1 shift (mis. Security, Pengolahan) atau shift tambahan di tanggal tertentu (mis. Persiapan). Divisi yang tidak diisi di sini tetap pakai "Shift Divisi" biasa.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <select id="msPeriode" class="mini-select" style="flex:1;min-width:160px;"><option value="">Pilih Periode...</option></select>
+        <select id="msDivisi" class="mini-select" style="flex:1;min-width:160px;"><option value="">Pilih Divisi...</option></select>
+      </div>
+
+      <div id="msIsi" style="display:none;">
+        <!-- A. Pola Shift -->
+        <div class="panel-block" style="margin-bottom:14px;">
+          <p class="panel-block-title">Pola Shift</p>
+          <form class="inline-form" id="formShiftDetail" style="flex-direction:column;align-items:stretch;">
+            <select id="msdNomorShift" required><option value="1">Shift 1</option><option value="2">Shift 2</option></select>
+            <div style="display:flex;gap:8px;">
+              <input type="time" id="msdJamMasuk" required style="flex:1;" placeholder="Jam masuk">
+              <input type="time" id="msdJamPulang" style="flex:1;" placeholder="Jam pulang">
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;"><input type="checkbox" id="msdLintasTengahMalam" style="width:16px;height:16px;"> Jam pulang di tanggal berikutnya (lintas tengah malam)</label>
+            <select id="msdPolaRotasi"><option value="TETAP">Tetap (tidak bertukar)</option><option value="MINGGUAN">Bertukar tiap minggu (Kelompok A/B)</option></select>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="msdHariKhusus" placeholder="Hari khusus (mis. JUMAT, opsional)" style="flex:1;">
+            </div>
+            <div style="display:flex;gap:8px;">
+              <input type="time" id="msdJamMasukKhusus" style="flex:1;" placeholder="Jam masuk hari khusus">
+              <input type="time" id="msdJamPulangKhusus" style="flex:1;" placeholder="Jam pulang hari khusus">
+            </div>
+            <button type="submit" class="btn-mini primary">+ Simpan Pola Shift</button>
+          </form>
+          <div class="table-wrap" style="margin-top:12px;">
+            <table>
+              <thead><tr><th>Shift</th><th>Jam</th><th>Lintas Malam</th><th>Rotasi</th><th>Hari Khusus</th></tr></thead>
+              <tbody id="msTbodyDetail"><tr><td colspan="5"><div class="empty-state">Belum ada pola shift.</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- B. Kelompok Rotasi -->
+        <div class="panel-block" style="margin-bottom:14px;">
+          <p class="panel-block-title">Kelompok Rotasi Relawan</p>
+          <p style="font-size:12px;color:var(--color-text-muted);margin:-4px 0 10px;">Shift Minggu 1 yang dipilih di sini otomatis TERBALIK di Minggu 2 (kalau pola rotasi "Bertukar tiap minggu").</p>
+          <form class="inline-form" id="formKelompokRotasi" style="flex-direction:column;align-items:stretch;">
+            <select id="krRelawan" required><option value="">Pilih Relawan...</option></select>
+            <select id="krKelompok" required><option value="A">Kelompok A</option><option value="B">Kelompok B</option></select>
+            <select id="krShiftMinggu1" required><option value="1">Shift 1 di Minggu 1</option><option value="2">Shift 2 di Minggu 1</option></select>
+            <button type="submit" class="btn-mini primary">+ Simpan Kelompok</button>
+          </form>
+          <div class="table-wrap" style="margin-top:12px;">
+            <table>
+              <thead><tr><th>Relawan</th><th>Kelompok</th><th>Shift Minggu 1</th><th>Shift Minggu 2</th></tr></thead>
+              <tbody id="msTbodyKelompok"><tr><td colspan="4"><div class="empty-state">Belum ada relawan di-assign.</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- C. Override Tanggal -->
+        <div class="panel-block">
+          <p class="panel-block-title">Override Per Tanggal</p>
+          <p style="font-size:12px;color:var(--color-text-muted);margin:-4px 0 10px;">Untuk tanggal tertentu yang butuh shift tambahan di luar pola normal (mis. Persiapan jadi 2 shift di 1 tanggal saja).</p>
+          <form class="inline-form" id="formOverrideTanggal" style="flex-direction:column;align-items:stretch;">
+            <input type="date" id="ovtTanggal" required>
+            <select id="ovtNomorShift"><option value="1">Shift 1</option><option value="2">Shift 2</option></select>
+            <div style="display:flex;gap:8px;">
+              <input type="time" id="ovtJamMasuk" required style="flex:1;">
+              <input type="time" id="ovtJamPulang" style="flex:1;">
+            </div>
+            <input type="text" id="ovtKeterangan" placeholder="Keterangan (opsional)">
+            <button type="submit" class="btn-mini primary">+ Tambah Override</button>
+          </form>
+          <div class="table-wrap" style="margin-top:12px;">
+            <table>
+              <thead><tr><th>Tanggal</th><th>Shift</th><th>Jam</th><th>Keterangan</th></tr></thead>
+              <tbody id="msTbodyOverride"><tr><td colspan="4"><div class="empty-state">Belum ada override.</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- SHIFT DIVISI -->
@@ -1913,7 +2021,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261016f"></script>
+<script src="admin.js?v=20261018b"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>

@@ -86,6 +86,18 @@
         relawan.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.nama)}</option>`).join('');
       el.khususDivisi.innerHTML = '<option value="">Pilih Divisi...</option>' +
         divisi.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+      // Multi-Shift (18 Okt 2026, SIKOP) -- pakai ulang data periode/divisi/relawan yg SAMA, tidak ada panggilan API baru.
+      document.getElementById('msPeriode').innerHTML = '<option value="">Pilih Periode...</option>' +
+        periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
+      document.getElementById('msDivisi').innerHTML = '<option value="">Pilih Divisi...</option>' +
+        divisi.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+      document.getElementById('krRelawan').innerHTML = '<option value="">Pilih Relawan...</option>' +
+        relawan.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.nama)}</option>`).join('');
+      // Pemeriksaan & Penetapan -- dropdown periode/divisi, pakai ulang data yg sama.
+      document.getElementById('ptpPeriode').innerHTML = '<option value="">Pilih Periode...</option>' +
+        periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
+      document.getElementById('ptpDivisi').innerHTML = '<option value="">Pilih Divisi untuk Lihat Detail...</option>' +
+        divisi.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
       // PERUBAHAN: khususPeriode sekarang <input type="date"> (pilih 1 minggu,
       // bukan lagi dropdown Periode) -- tidak perlu diisi dari daftar periode lagi.
       el.koreksiRelawan.innerHTML = '<option value="">Pilih Relawan...</option>' +
@@ -419,5 +431,253 @@
         btnIsiMassal.disabled = false;
       }
     });
+  }
+
+  // ============================================================
+  // MULTI-SHIFT (18 Okt 2026, SIKOP) -- Security/Pengolahan/Persiapan
+  // ============================================================
+  const msPeriodeEl = document.getElementById('msPeriode');
+  const msDivisiEl = document.getElementById('msDivisi');
+  const msIsiEl = document.getElementById('msIsi');
+
+  async function muatMultiShift_() {
+    const idPeriode = msPeriodeEl.value, namaDivisi = msDivisiEl.value;
+    if (!idPeriode || !namaDivisi) { msIsiEl.style.display = 'none'; return; }
+    msIsiEl.style.display = 'block';
+    try {
+      const cfg = await apiPost('getKonfigurasiMultiShiftDivisi', { token: token(), idPeriode, namaDivisi });
+      renderMsDetail_(cfg.detail);
+      renderMsKelompok_(cfg.kelompok);
+      renderMsOverride_(cfg.override);
+    } catch (err) {
+      showError(err.message || 'Gagal memuat konfigurasi multi-shift.');
+    }
+  }
+  msPeriodeEl.addEventListener('change', muatMultiShift_);
+  msDivisiEl.addEventListener('change', muatMultiShift_);
+
+  function renderMsDetail_(list) {
+    const tbody = document.getElementById('msTbodyDetail');
+    if (!list.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Belum ada pola shift.</div></td></tr>'; return; }
+    tbody.innerHTML = list.map(d => `
+      <tr>
+        <td>Shift ${d.NOMOR_SHIFT}</td>
+        <td>${escapeHtml(d.JAM_MASUK)}${d.JAM_PULANG ? ' - ' + escapeHtml(d.JAM_PULANG) : ''}</td>
+        <td>${d.LINTAS_TENGAH_MALAM === true || d.LINTAS_TENGAH_MALAM === 'TRUE' ? 'Ya' : '-'}</td>
+        <td>${d.POLA_ROTASI === 'MINGGUAN' ? 'Bertukar/minggu' : 'Tetap'}</td>
+        <td>${d.HARI_KHUSUS ? escapeHtml(d.HARI_KHUSUS) + ' (' + escapeHtml(d.JAM_MASUK_HARI_KHUSUS || '-') + ')' : '-'}</td>
+      </tr>`).join('');
+  }
+
+  function renderMsKelompok_(list) {
+    const tbody = document.getElementById('msTbodyKelompok');
+    if (!list.length) { tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">Belum ada relawan di-assign.</div></td></tr>'; return; }
+    tbody.innerHTML = list.map(k => {
+      const relawanObj = (cache.relawan || []).find(r => r.id === k.ID_RELAWAN);
+      const shiftM1 = Number(k.SHIFT_MINGGU_1);
+      const shiftM2 = shiftM1 === 1 ? 2 : 1;
+      return `<tr>
+        <td>${escapeHtml(relawanObj ? relawanObj.nama : k.ID_RELAWAN)}</td>
+        <td>Kelompok ${escapeHtml(k.KELOMPOK)}</td>
+        <td>Shift ${shiftM1}</td>
+        <td>Shift ${shiftM2}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderMsOverride_(list) {
+    const tbody = document.getElementById('msTbodyOverride');
+    if (!list.length) { tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">Belum ada override.</div></td></tr>'; return; }
+    tbody.innerHTML = list.map(o => `
+      <tr>
+        <td>${escapeHtml(o.TANGGAL_DMY)}</td>
+        <td>Shift ${o.NOMOR_SHIFT}</td>
+        <td>${escapeHtml(o.JAM_MASUK)}${o.JAM_PULANG ? ' - ' + escapeHtml(o.JAM_PULANG) : ''}</td>
+        <td>${escapeHtml(o.KETERANGAN || '-')}</td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('formShiftDetail').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!msPeriodeEl.value || !msDivisiEl.value) { showError('Pilih periode dan divisi dulu.'); return; }
+    showLoading('Menyimpan pola shift...');
+    try {
+      await apiPost('simpanShiftDivisiDetail', {
+        token: token(), idPeriode: msPeriodeEl.value, namaDivisi: msDivisiEl.value,
+        nomorShift: document.getElementById('msdNomorShift').value,
+        jamMasuk: document.getElementById('msdJamMasuk').value,
+        jamPulang: document.getElementById('msdJamPulang').value,
+        lintasTengahMalam: document.getElementById('msdLintasTengahMalam').checked,
+        polaRotasi: document.getElementById('msdPolaRotasi').value,
+        hariKhusus: document.getElementById('msdHariKhusus').value.trim(),
+        jamMasukHariKhusus: document.getElementById('msdJamMasukKhusus').value,
+        jamPulangHariKhusus: document.getElementById('msdJamPulangKhusus').value
+      });
+      hideLoading();
+      showSuccess('Pola shift tersimpan.');
+      document.getElementById('formShiftDetail').reset();
+      muatMultiShift_();
+    } catch (err) {
+      hideLoading();
+      showError(err.message || 'Gagal menyimpan pola shift.');
+    }
+  });
+
+  document.getElementById('formKelompokRotasi').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!msPeriodeEl.value || !msDivisiEl.value) { showError('Pilih periode dan divisi dulu.'); return; }
+    showLoading('Menyimpan kelompok...');
+    try {
+      await apiPost('simpanKelompokRotasi', {
+        token: token(), idPeriode: msPeriodeEl.value, namaDivisi: msDivisiEl.value,
+        idRelawan: document.getElementById('krRelawan').value,
+        kelompok: document.getElementById('krKelompok').value,
+        shiftMinggu1: document.getElementById('krShiftMinggu1').value
+      });
+      hideLoading();
+      showSuccess('Kelompok tersimpan.');
+      document.getElementById('formKelompokRotasi').reset();
+      muatMultiShift_();
+    } catch (err) {
+      hideLoading();
+      showError(err.message || 'Gagal menyimpan kelompok.');
+    }
+  });
+
+  document.getElementById('formOverrideTanggal').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!msPeriodeEl.value || !msDivisiEl.value) { showError('Pilih periode dan divisi dulu.'); return; }
+    const tanggalIso = document.getElementById('ovtTanggal').value;
+    if (!tanggalIso) { showError('Tanggal wajib diisi.'); return; }
+    const bagian = tanggalIso.split('-');
+    const tanggalDMY = bagian[2] + '/' + bagian[1] + '/' + bagian[0];
+    showLoading('Menyimpan override...');
+    try {
+      await apiPost('simpanOverrideShiftTanggal', {
+        token: token(), idPeriode: msPeriodeEl.value, namaDivisi: msDivisiEl.value,
+        tanggalDMY: tanggalDMY,
+        nomorShift: document.getElementById('ovtNomorShift').value,
+        jamMasuk: document.getElementById('ovtJamMasuk').value,
+        jamPulang: document.getElementById('ovtJamPulang').value,
+        keterangan: document.getElementById('ovtKeterangan').value.trim()
+      });
+      hideLoading();
+      showSuccess('Override tersimpan.');
+      document.getElementById('formOverrideTanggal').reset();
+      muatMultiShift_();
+    } catch (err) {
+      hideLoading();
+      showError(err.message || 'Gagal menyimpan override.');
+    }
+  });
+
+  // ============================================================
+  // PEMERIKSAAN & PENETAPAN (18 Okt 2026, SIKOP)
+  // ============================================================
+  const ptpPeriodeEl = document.getElementById('ptpPeriode');
+  const ptpDivisiEl = document.getElementById('ptpDivisi');
+
+  async function muatRingkasanPemeriksaan_() {
+    const idPeriode = ptpPeriodeEl.value;
+    const el = document.getElementById('ptpRingkasan');
+    if (!idPeriode) { el.innerHTML = ''; return; }
+    el.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Memuat...</p>';
+    try {
+      const r = await apiPost('getRingkasanPemeriksaanPeriode', { token: token(), idPeriode });
+      el.innerHTML = `
+        <div class="admin-stat-grid" style="grid-template-columns:repeat(4,1fr);">
+          <div class="admin-stat-card"><div class="admin-stat-value">${r.totalDivisi}</div><div class="admin-stat-label">Total Divisi</div></div>
+          <div class="admin-stat-card accent-success"><div class="admin-stat-value">${r.divisiSiap}</div><div class="admin-stat-label">Divisi Siap</div></div>
+          <div class="admin-stat-card accent-warning"><div class="admin-stat-value">${r.divisiBermasalah}</div><div class="admin-stat-label">Divisi Bermasalah</div></div>
+          <div class="admin-stat-card accent-danger"><div class="admin-stat-value">${r.totalKesalahan}</div><div class="admin-stat-label">Total Kesalahan</div></div>
+        </div>
+        <p style="font-size:11px;color:var(--color-text-muted);margin-top:8px;">Mencakup kelengkapan shift wajib, kesesuaian rotasi mingguan, dan pola hari khusus (masuk bersama) untuk divisi Multi-Shift. Bentrok jam lintas-divisi belum tercakup.</p>`;
+    } catch (err) {
+      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+    }
+  }
+  ptpPeriodeEl.addEventListener('change', () => { muatRingkasanPemeriksaan_(); muatDetailPenetapan_(); });
+  ptpDivisiEl.addEventListener('change', muatDetailPenetapan_);
+
+  async function muatDetailPenetapan_() {
+    const idPeriode = ptpPeriodeEl.value, namaDivisi = ptpDivisiEl.value;
+    const el = document.getElementById('ptpDetail');
+    if (!idPeriode || !namaDivisi) { el.innerHTML = ''; return; }
+    el.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Memuat...</p>';
+    try {
+      const s = await apiPost('getStatusPenetapanAdmin', { token: token(), idPeriode, namaDivisi });
+      const warnaBadge = { DRAFT: 'nonaktif', PERLU_PERBAIKAN: 'tidak-hadir', SIAP_DITETAPKAN: 'aktif', DITETAPKAN: 'aktif' }[s.status] || 'nonaktif';
+      const labelStatus = { DRAFT: 'Draft', PERLU_PERBAIKAN: 'Perlu Perbaikan', SIAP_DITETAPKAN: 'Siap Ditetapkan', DITETAPKAN: 'Ditetapkan' }[s.status] || s.status;
+
+      let html = `
+        <div class="panel-block">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <div><b>${escapeHtml(namaDivisi)}</b> — <span class="badge ${warnaBadge}">${labelStatus}</span>${s.versiAktif ? ' · Versi ' + s.versiAktif : ''}</div>
+            ${s.statusSinkronisasi ? `<span style="font-size:12px;color:var(--color-text-muted);">Sinkronisasi: ${s.statusSinkronisasi === 'TERSINKRON' ? '✅ Tersinkron' : s.statusSinkronisasi === 'GAGAL' ? '⚠️ Gagal' : s.statusSinkronisasi}</span>` : ''}
+          </div>`;
+
+      if (s.validasi.jumlahKesalahan > 0) {
+        html += `<div style="background:#fdecea;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+          <p style="margin:0 0 6px;font-weight:700;color:#b3261e;">⚠ ${s.validasi.jumlahKesalahan} Kesalahan</p>
+          ${s.validasi.kesalahan.slice(0, 10).map(k => `<p style="margin:3px 0;font-size:12.5px;">${escapeHtml(k.penjelasan)}</p>`).join('')}
+          ${s.validasi.kesalahan.length > 10 ? `<p style="margin:4px 0 0;font-size:11px;color:var(--color-text-muted);">...dan ${s.validasi.kesalahan.length - 10} lainnya</p>` : ''}
+        </div>`;
+      }
+
+      html += `<div style="display:flex;gap:8px;flex-wrap:wrap;">`;
+      if (s.status === 'SIAP_DITETAPKAN' || (s.status === 'DITETAPKAN' && confirm)) {
+        html += `<button type="button" class="btn-mini primary" id="ptpBtnTetapkan" ${s.validasi.valid ? '' : 'disabled'}>${s.status === 'DITETAPKAN' ? 'Tetapkan Ulang (Revisi)' : 'Tetapkan Jadwal Divisi'}</button>`;
+      }
+      if (s.statusSinkronisasi === 'GAGAL') {
+        html += `<button type="button" class="btn-mini" id="ptpBtnSinkronUlang">🔄 Coba Sinkronisasi Ulang</button>`;
+      }
+      html += `</div><div id="ptpRiwayat" style="margin-top:14px;"></div></div>`;
+      el.innerHTML = html;
+
+      const btnTetapkan = document.getElementById('ptpBtnTetapkan');
+      if (btnTetapkan) btnTetapkan.addEventListener('click', async () => {
+        let alasan = '';
+        if (s.status === 'DITETAPKAN') {
+          alasan = prompt('Ini akan membuat versi resmi BARU (revisi). Alasan revisi:') || '';
+          if (!alasan) { showError('Alasan revisi wajib diisi untuk penetapan ulang.'); return; }
+        }
+        if (!confirm(`Tetapkan jadwal ${namaDivisi} untuk periode ini sebagai versi resmi?`)) return;
+        showLoading('Menetapkan jadwal...');
+        try {
+          const hasil = await apiPost('tetapkanJadwalDivisi', { token: token(), idPeriode, namaDivisi, alasanRevisi: alasan });
+          hideLoading();
+          showSuccess(`Jadwal ditetapkan sebagai Versi ${hasil.versi} (${hasil.jumlahBaris} baris). Sinkronisasi: ${hasil.statusSinkronisasi}.`);
+          muatDetailPenetapan_();
+          muatRingkasanPemeriksaan_();
+        } catch (err) {
+          hideLoading();
+          showError(err.message || 'Gagal menetapkan jadwal.');
+        }
+      });
+
+      const btnSinkronUlang = document.getElementById('ptpBtnSinkronUlang');
+      if (btnSinkronUlang) btnSinkronUlang.addEventListener('click', async () => {
+        showLoading('Mencoba sinkronisasi ulang...');
+        try {
+          const hasil = await apiPost('cobaSinkronisasiUlang', { token: token(), idPeriode, namaDivisi });
+          hideLoading();
+          showSuccess('Status sinkronisasi: ' + hasil.statusSinkronisasi);
+          muatDetailPenetapan_();
+        } catch (err) {
+          hideLoading();
+          showError(err.message || 'Gagal sinkronisasi ulang.');
+        }
+      });
+
+      // Riwayat
+      const riwayat = await apiPost('getRiwayatPenetapanDivisi', { token: token(), idPeriode, namaDivisi });
+      const elRiwayat = document.getElementById('ptpRiwayat');
+      if (riwayat.length) {
+        elRiwayat.innerHTML = '<p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 6px;">Riwayat</p>' +
+          riwayat.map(r => `<p style="font-size:12px;margin:3px 0;">${new Date(r.waktu).toLocaleString('id-ID')} — ${r.aksi === 'TETAPKAN_JADWAL_DIVISI' ? 'Ditetapkan Versi ' + r.detail.versi : 'Sinkronisasi ulang'} oleh ${escapeHtml(r.pelaku)}</p>`).join('');
+      }
+    } catch (err) {
+      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+    }
   }
 })();
