@@ -1173,20 +1173,51 @@
            yg TIDAK diisi di sini tetap pakai "Shift Divisi" biasa di
            atas, tidak terpengaruh sama sekali. -->
       <button type="button" class="btn-mini shift-subtab" data-sub="multiShift">Multi-Shift</button>
-      <button type="button" class="btn-mini shift-subtab" data-sub="penetapan">Pemeriksaan &amp; Penetapan</button>
+      <!-- Dipisah jadi 2 (18 Okt 2026, dikoreksi Admin -- dokumen SIKOP
+           §15.D & §15.E memang 2 halaman/wireframe terpisah, BUKAN
+           digabung spt sebelumnya). -->
+      <button type="button" class="btn-mini shift-subtab" data-sub="pemeriksaan">Pemeriksaan Jadwal</button>
+      <button type="button" class="btn-mini shift-subtab" data-sub="penetapan">Penetapan Jadwal</button>
     </div>
 
     <!-- PEMERIKSAAN & PENETAPAN (18 Okt 2026, SIKOP) -->
-    <div class="shift-sub" id="shiftSubPenetapan" style="display:none;">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-        <select id="ptpPeriode" class="mini-select" style="flex:1;min-width:160px;"><option value="">Pilih Periode...</option></select>
-      </div>
-      <div id="ptpRingkasan" style="margin-bottom:16px;"></div>
+    <!-- PEMERIKSAAN JADWAL — sesuai wireframe dokumen §15.D persis:
+         [Valid][Peringatan][Kesalahan] -> Filter -> Daftar Temuan ->
+         Buka Jadwal Terkait. -->
+    <div class="shift-sub" id="shiftSubPemeriksaan" style="display:none;">
+      <select id="pmrPeriode" class="mini-select" style="width:100%;margin-bottom:14px;"><option value="">Pilih Periode...</option></select>
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-        <select id="ptpDivisi" class="mini-select" style="flex:1;min-width:160px;"><option value="">Pilih Divisi untuk Lihat Detail...</option></select>
+      <div class="admin-stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;">
+        <div class="admin-stat-card accent-success"><div class="admin-stat-value" id="pmrValid">–</div><div class="admin-stat-label">Valid</div></div>
+        <div class="admin-stat-card accent-warning"><div class="admin-stat-value" id="pmrPeringatan">–</div><div class="admin-stat-label">Peringatan</div></div>
+        <div class="admin-stat-card accent-danger"><div class="admin-stat-value" id="pmrKesalahan">–</div><div class="admin-stat-label">Kesalahan</div></div>
       </div>
-      <div id="ptpDetail"></div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+        <select id="pmrFilterDivisi" class="mini-select" style="flex:1;min-width:140px;"><option value="">Semua Divisi</option></select>
+        <select id="pmrFilterTingkat" class="mini-select" style="flex:1;min-width:140px;">
+          <option value="">Semua Tingkat</option><option value="KESALAHAN">Kesalahan</option><option value="PERINGATAN">Peringatan</option>
+        </select>
+      </div>
+
+      <p class="section-title">Daftar Temuan</p>
+      <div id="pmrDaftarTemuan"><p style="font-size:13px;color:var(--color-text-muted);">Pilih periode untuk melihat hasil pemeriksaan.</p></div>
+    </div>
+
+    <!-- PENETAPAN JADWAL — sesuai wireframe dokumen §15.E persis:
+         tabel [Divisi|Status|Versi|Sinkronisasi] semua divisi
+         sekaligus -> klik baris -> Detail Jadwal + Riwayat + tombol. -->
+    <div class="shift-sub" id="shiftSubPenetapan" style="display:none;">
+      <select id="ptpPeriode" class="mini-select" style="width:100%;margin-bottom:14px;"><option value="">Pilih Periode...</option></select>
+
+      <div class="table-wrap">
+        <table class="tabel-jadi-kartu">
+          <thead><tr><th>Divisi</th><th>Status</th><th>Versi</th><th>Sinkronisasi</th><th>Aksi</th></tr></thead>
+          <tbody id="ptpTbodyDivisi"><tr><td colspan="5"><div class="empty-state">Pilih periode untuk melihat status penetapan.</div></td></tr></tbody>
+        </table>
+      </div>
+
+      <div id="ptpDetail" style="margin-top:16px;"></div>
     </div>
 
     <!-- MULTI-SHIFT (Security/Pengolahan/Persiapan) -->
@@ -2021,7 +2052,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261018b"></script>
+<script src="admin.js?v=20261018c"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>

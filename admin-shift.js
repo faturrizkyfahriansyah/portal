@@ -93,11 +93,12 @@
         divisi.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
       document.getElementById('krRelawan').innerHTML = '<option value="">Pilih Relawan...</option>' +
         relawan.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.nama)}</option>`).join('');
-      // Pemeriksaan & Penetapan -- dropdown periode/divisi, pakai ulang data yg sama.
+      // Pemeriksaan Jadwal & Penetapan Jadwal (2 halaman terpisah, sesuai
+      // wireframe) -- dropdown periode, pakai ulang data yg sama.
+      document.getElementById('pmrPeriode').innerHTML = '<option value="">Pilih Periode...</option>' +
+        periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
       document.getElementById('ptpPeriode').innerHTML = '<option value="">Pilih Periode...</option>' +
         periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
-      document.getElementById('ptpDivisi').innerHTML = '<option value="">Pilih Divisi untuk Lihat Detail...</option>' +
-        divisi.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
       // PERUBAHAN: khususPeriode sekarang <input type="date"> (pilih 1 minggu,
       // bukan lagi dropdown Periode) -- tidak perlu diisi dari daftar periode lagi.
       el.koreksiRelawan.innerHTML = '<option value="">Pilih Relawan...</option>' +
@@ -572,70 +573,137 @@
   });
 
   // ============================================================
-  // PEMERIKSAAN & PENETAPAN (18 Okt 2026, SIKOP)
+  // PEMERIKSAAN JADWAL (18 Okt 2026, SIKOP — sesuai wireframe §15.D
+  // DIKOREKSI 18 Okt: [Valid][Peringatan][Kesalahan] + Daftar Temuan
+  // lintas-divisi, bukan per-divisi spt versi sebelumnya.
   // ============================================================
-  const ptpPeriodeEl = document.getElementById('ptpPeriode');
-  const ptpDivisiEl = document.getElementById('ptpDivisi');
+  const pmrPeriodeEl = document.getElementById('pmrPeriode');
+  let pmrDataTerakhir = null;
 
-  async function muatRingkasanPemeriksaan_() {
-    const idPeriode = ptpPeriodeEl.value;
-    const el = document.getElementById('ptpRingkasan');
-    if (!idPeriode) { el.innerHTML = ''; return; }
-    el.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Memuat...</p>';
+  async function muatPemeriksaan_() {
+    const idPeriode = pmrPeriodeEl.value;
+    const elTemuan = document.getElementById('pmrDaftarTemuan');
+    if (!idPeriode) { elTemuan.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Pilih periode untuk melihat hasil pemeriksaan.</p>'; return; }
+    elTemuan.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Memeriksa...</p>';
     try {
       const r = await apiPost('getRingkasanPemeriksaanPeriode', { token: token(), idPeriode });
-      el.innerHTML = `
-        <div class="admin-stat-grid" style="grid-template-columns:repeat(4,1fr);">
-          <div class="admin-stat-card"><div class="admin-stat-value">${r.totalDivisi}</div><div class="admin-stat-label">Total Divisi</div></div>
-          <div class="admin-stat-card accent-success"><div class="admin-stat-value">${r.divisiSiap}</div><div class="admin-stat-label">Divisi Siap</div></div>
-          <div class="admin-stat-card accent-warning"><div class="admin-stat-value">${r.divisiBermasalah}</div><div class="admin-stat-label">Divisi Bermasalah</div></div>
-          <div class="admin-stat-card accent-danger"><div class="admin-stat-value">${r.totalKesalahan}</div><div class="admin-stat-label">Total Kesalahan</div></div>
-        </div>
-        <p style="font-size:11px;color:var(--color-text-muted);margin-top:8px;">Mencakup kelengkapan shift wajib, kesesuaian rotasi mingguan, dan pola hari khusus (masuk bersama) untuk divisi Multi-Shift. Bentrok jam lintas-divisi belum tercakup.</p>`;
+      pmrDataTerakhir = r;
+      document.getElementById('pmrValid').textContent = r.valid;
+      document.getElementById('pmrPeringatan').textContent = r.peringatan;
+      document.getElementById('pmrKesalahan').textContent = r.kesalahan;
+      document.getElementById('pmrFilterDivisi').innerHTML = '<option value="">Semua Divisi</option>' +
+        (cache.divisi || []).map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+      renderDaftarTemuan_();
     } catch (err) {
-      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      elTemuan.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
     }
   }
-  ptpPeriodeEl.addEventListener('change', () => { muatRingkasanPemeriksaan_(); muatDetailPenetapan_(); });
-  ptpDivisiEl.addEventListener('change', muatDetailPenetapan_);
+  pmrPeriodeEl.addEventListener('change', muatPemeriksaan_);
+  document.getElementById('pmrFilterDivisi').addEventListener('change', renderDaftarTemuan_);
+  document.getElementById('pmrFilterTingkat').addEventListener('change', renderDaftarTemuan_);
 
-  async function muatDetailPenetapan_() {
-    const idPeriode = ptpPeriodeEl.value, namaDivisi = ptpDivisiEl.value;
+  function renderDaftarTemuan_() {
+    const elTemuan = document.getElementById('pmrDaftarTemuan');
+    if (!pmrDataTerakhir) return;
+    const filterDivisi = document.getElementById('pmrFilterDivisi').value;
+    const filterTingkat = document.getElementById('pmrFilterTingkat').value;
+    let temuan = pmrDataTerakhir.daftarTemuan;
+    if (filterDivisi) temuan = temuan.filter(t => t.divisi === filterDivisi);
+    if (filterTingkat) temuan = temuan.filter(t => t.tingkat === filterTingkat);
+
+    if (!temuan.length) { elTemuan.innerHTML = '<div class="empty-state">✓ Tidak ada temuan yang cocok dengan filter -- jadwal bersih.</div>'; return; }
+
+    elTemuan.innerHTML = temuan.map(t => `
+      <div class="panel-block" style="margin-bottom:10px;border-left:4px solid ${t.tingkat === 'KESALAHAN' ? '#d32f2f' : '#ed6c02'};">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div>
+            <span class="badge ${t.tingkat === 'KESALAHAN' ? 'sakit' : 'terlambat'}" style="margin-bottom:4px;">${t.tingkat === 'KESALAHAN' ? 'Kesalahan' : 'Peringatan'}</span>
+            <p style="margin:4px 0 2px;font-weight:700;">${escapeHtml(t.judul)}</p>
+            <p style="margin:0;font-size:12.5px;color:var(--color-text-muted);">${escapeHtml(t.penjelasan)}</p>
+            <p style="margin:4px 0 0;font-size:11px;color:var(--color-text-muted);">${escapeHtml(t.divisi)}${t.tanggal ? ' · ' + escapeHtml(t.tanggal) : ''}</p>
+          </div>
+          <button type="button" class="btn-mini btn-buka-jadwal-terkait" data-divisi="${escapeHtml(t.divisi)}" data-id-relawan="${escapeHtml(t.idRelawan || '')}" style="flex-shrink:0;">Buka Jadwal Terkait</button>
+        </div>
+      </div>`).join('');
+
+    elTemuan.querySelectorAll('.btn-buka-jadwal-terkait').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tombolPanel = document.querySelector('[data-panel="panelJadwalIndividu"]');
+        if (tombolPanel) tombolPanel.click();
+        // Isi filter divisi di Pemeriksaan Jadwal Individu kalau elemennya ada (panel lama, sudah ada sebelumnya).
+        setTimeout(() => {
+          const filterDivisiLama = document.getElementById('jiFilterDivisi') || document.getElementById('filterDivisiJadwalIndividu');
+          if (filterDivisiLama) { filterDivisiLama.value = btn.dataset.divisi; filterDivisiLama.dispatchEvent(new Event('change')); }
+        }, 300);
+      });
+    });
+  }
+
+  // ============================================================
+  // PENETAPAN JADWAL (18 Okt 2026, SIKOP — sesuai wireframe §15.E
+  // DIKOREKSI 18 Okt: tabel [Divisi|Status|Versi|Sinkronisasi] SEMUA
+  // divisi sekaligus, bukan harus pilih 1 divisi dulu spt sebelumnya.
+  // ============================================================
+  const ptpPeriodeEl = document.getElementById('ptpPeriode');
+  const LABEL_STATUS_PTP = { DRAFT: 'Draft', PERLU_PERBAIKAN: 'Perlu Perbaikan', SIAP_DITETAPKAN: 'Siap Ditetapkan', DITETAPKAN: 'Ditetapkan' };
+  // Nama kelas 'sakit'/'terlambat' dipakai cuma utk WARNA (merah/oranye)
+  // yg SUDAH ADA di CSS -- bukan berarti "Perlu Perbaikan" itu sakit,
+  // tidak ada kelas badge merah netral terpisah saat ini.
+  const BADGE_STATUS_PTP = { DRAFT: 'nonaktif', PERLU_PERBAIKAN: 'sakit', SIAP_DITETAPKAN: 'aktif', DITETAPKAN: 'aktif' };
+
+  async function muatTabelPenetapan_() {
+    const idPeriode = ptpPeriodeEl.value;
+    const tbody = document.getElementById('ptpTbodyDivisi');
+    document.getElementById('ptpDetail').innerHTML = '';
+    if (!idPeriode) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Pilih periode untuk melihat status penetapan.</div></td></tr>'; return; }
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Memuat...</div></td></tr>';
+    try {
+      const daftar = await apiPost('getDaftarPenetapanPeriode', { token: token(), idPeriode });
+      if (!daftar.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Belum ada divisi terdaftar.</div></td></tr>'; return; }
+      tbody.innerHTML = daftar.map(d => `
+        <tr data-divisi="${escapeHtml(d.divisi)}">
+          <td data-label="Divisi"><b>${escapeHtml(d.divisi)}</b></td>
+          <td data-label="Status"><span class="badge ${BADGE_STATUS_PTP[d.status] || 'nonaktif'}">${LABEL_STATUS_PTP[d.status] || d.status}</span></td>
+          <td data-label="Versi">${d.versi || '-'}</td>
+          <td data-label="Sinkronisasi">${d.statusSinkronisasi === 'TERSINKRON' ? '✅ Tersinkron' : d.statusSinkronisasi === 'GAGAL' ? '⚠️ Gagal' : d.statusSinkronisasi === 'MENUNGGU' ? '⏳ Menunggu' : '-'}</td>
+          <td data-label="Aksi"><button type="button" class="btn-mini btn-lihat-detail-penetapan">Lihat Detail</button></td>
+        </tr>`).join('');
+
+      tbody.querySelectorAll('.btn-lihat-detail-penetapan').forEach(btn => {
+        btn.addEventListener('click', () => muatDetailPenetapan_(btn.closest('tr').dataset.divisi));
+      });
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
+    }
+  }
+  ptpPeriodeEl.addEventListener('change', muatTabelPenetapan_);
+
+  async function muatDetailPenetapan_(namaDivisi) {
+    const idPeriode = ptpPeriodeEl.value;
     const el = document.getElementById('ptpDetail');
-    if (!idPeriode || !namaDivisi) { el.innerHTML = ''; return; }
-    el.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Memuat...</p>';
+    el.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Memuat detail...</p>';
     try {
       const s = await apiPost('getStatusPenetapanAdmin', { token: token(), idPeriode, namaDivisi });
-      const warnaBadge = { DRAFT: 'nonaktif', PERLU_PERBAIKAN: 'tidak-hadir', SIAP_DITETAPKAN: 'aktif', DITETAPKAN: 'aktif' }[s.status] || 'nonaktif';
-      const labelStatus = { DRAFT: 'Draft', PERLU_PERBAIKAN: 'Perlu Perbaikan', SIAP_DITETAPKAN: 'Siap Ditetapkan', DITETAPKAN: 'Ditetapkan' }[s.status] || s.status;
 
-      let html = `
-        <div class="panel-block">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-            <div><b>${escapeHtml(namaDivisi)}</b> — <span class="badge ${warnaBadge}">${labelStatus}</span>${s.versiAktif ? ' · Versi ' + s.versiAktif : ''}</div>
-            ${s.statusSinkronisasi ? `<span style="font-size:12px;color:var(--color-text-muted);">Sinkronisasi: ${s.statusSinkronisasi === 'TERSINKRON' ? '✅ Tersinkron' : s.statusSinkronisasi === 'GAGAL' ? '⚠️ Gagal' : s.statusSinkronisasi}</span>` : ''}
-          </div>`;
+      let html = `<div class="panel-block">
+        <p class="panel-block-title">Detail Jadwal — ${escapeHtml(namaDivisi)}</p>`;
 
       if (s.validasi.jumlahKesalahan > 0) {
         html += `<div style="background:#fdecea;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
-          <p style="margin:0 0 6px;font-weight:700;color:#b3261e;">⚠ ${s.validasi.jumlahKesalahan} Kesalahan</p>
-          ${s.validasi.kesalahan.slice(0, 10).map(k => `<p style="margin:3px 0;font-size:12.5px;">${escapeHtml(k.penjelasan)}</p>`).join('')}
-          ${s.validasi.kesalahan.length > 10 ? `<p style="margin:4px 0 0;font-size:11px;color:var(--color-text-muted);">...dan ${s.validasi.kesalahan.length - 10} lainnya</p>` : ''}
+          <p style="margin:0 0 6px;font-weight:700;color:#b3261e;">⚠ ${s.validasi.jumlahKesalahan} Kesalahan menghambat penetapan</p>
+          ${s.validasi.kesalahan.slice(0, 8).map(k => `<p style="margin:3px 0;font-size:12.5px;">${escapeHtml(k.penjelasan)}</p>`).join('')}
         </div>`;
       }
 
-      html += `<div style="display:flex;gap:8px;flex-wrap:wrap;">`;
-      if (s.status === 'SIAP_DITETAPKAN' || (s.status === 'DITETAPKAN' && confirm)) {
-        html += `<button type="button" class="btn-mini primary" id="ptpBtnTetapkan" ${s.validasi.valid ? '' : 'disabled'}>${s.status === 'DITETAPKAN' ? 'Tetapkan Ulang (Revisi)' : 'Tetapkan Jadwal Divisi'}</button>`;
-      }
-      if (s.statusSinkronisasi === 'GAGAL') {
-        html += `<button type="button" class="btn-mini" id="ptpBtnSinkronUlang">🔄 Coba Sinkronisasi Ulang</button>`;
-      }
-      html += `</div><div id="ptpRiwayat" style="margin-top:14px;"></div></div>`;
+      html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">`;
+      html += `<button type="button" class="btn-mini primary" id="ptpBtnTetapkan" ${s.validasi.valid ? '' : 'disabled'}>${s.status === 'DITETAPKAN' ? 'Tetapkan Ulang (Revisi)' : 'Tetapkan Jadwal Divisi'}</button>`;
+      if (s.statusSinkronisasi === 'GAGAL') html += `<button type="button" class="btn-mini" id="ptpBtnSinkronUlang">🔄 Coba Sinkronisasi Kembali</button>`;
+      html += `</div>`;
+
+      html += `<p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 6px;">Riwayat Perubahan</p><div id="ptpRiwayat"></div></div>`;
       el.innerHTML = html;
 
-      const btnTetapkan = document.getElementById('ptpBtnTetapkan');
-      if (btnTetapkan) btnTetapkan.addEventListener('click', async () => {
+      document.getElementById('ptpBtnTetapkan').addEventListener('click', async () => {
         let alasan = '';
         if (s.status === 'DITETAPKAN') {
           alasan = prompt('Ini akan membuat versi resmi BARU (revisi). Alasan revisi:') || '';
@@ -647,8 +715,8 @@
           const hasil = await apiPost('tetapkanJadwalDivisi', { token: token(), idPeriode, namaDivisi, alasanRevisi: alasan });
           hideLoading();
           showSuccess(`Jadwal ditetapkan sebagai Versi ${hasil.versi} (${hasil.jumlahBaris} baris). Sinkronisasi: ${hasil.statusSinkronisasi}.`);
-          muatDetailPenetapan_();
-          muatRingkasanPemeriksaan_();
+          muatTabelPenetapan_();
+          muatDetailPenetapan_(namaDivisi);
         } catch (err) {
           hideLoading();
           showError(err.message || 'Gagal menetapkan jadwal.');
@@ -662,19 +730,20 @@
           const hasil = await apiPost('cobaSinkronisasiUlang', { token: token(), idPeriode, namaDivisi });
           hideLoading();
           showSuccess('Status sinkronisasi: ' + hasil.statusSinkronisasi);
-          muatDetailPenetapan_();
+          muatTabelPenetapan_();
+          muatDetailPenetapan_(namaDivisi);
         } catch (err) {
           hideLoading();
           showError(err.message || 'Gagal sinkronisasi ulang.');
         }
       });
 
-      // Riwayat
       const riwayat = await apiPost('getRiwayatPenetapanDivisi', { token: token(), idPeriode, namaDivisi });
       const elRiwayat = document.getElementById('ptpRiwayat');
       if (riwayat.length) {
-        elRiwayat.innerHTML = '<p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 6px;">Riwayat</p>' +
-          riwayat.map(r => `<p style="font-size:12px;margin:3px 0;">${new Date(r.waktu).toLocaleString('id-ID')} — ${r.aksi === 'TETAPKAN_JADWAL_DIVISI' ? 'Ditetapkan Versi ' + r.detail.versi : 'Sinkronisasi ulang'} oleh ${escapeHtml(r.pelaku)}</p>`).join('');
+        elRiwayat.innerHTML = riwayat.map(r => `<p style="font-size:12px;margin:3px 0;">${new Date(r.waktu).toLocaleString('id-ID')} — ${r.aksi === 'TETAPKAN_JADWAL_DIVISI' ? 'Ditetapkan Versi ' + r.detail.versi : 'Sinkronisasi ulang'} oleh ${escapeHtml(r.pelaku)}</p>`).join('');
+      } else {
+        elRiwayat.innerHTML = '<p style="font-size:12px;color:var(--color-text-muted);">Belum ada riwayat.</p>';
       }
     } catch (err) {
       el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
