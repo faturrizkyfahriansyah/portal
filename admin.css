@@ -106,7 +106,17 @@
 .btn-mini.primary { background: var(--color-primary); color: #fff; }
 
 /* ----- TABLE ----- */
-.table-wrap { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto; box-shadow: var(--shadow-card); margin-bottom: 22px; }
+/* overflow-y: visible DITULIS EKSPLISIT (18 Okt 2026, perbaikan bug
+   tumpang-tindih header Rekap Per Periode yg dilaporkan Admin) --
+   tanpa ini, overflow-x: auto saja membuat browser otomatis
+   memperlakukan overflow-y JUGA sbg 'auto' (bukan 'visible'), diam-diam
+   menciptakan konteks scroll vertikal baru di dalam div ini. Akibatnya
+   th dgn position:sticky di dalamnya nempel relatif ke DIV INI (yg
+   tingginya mengikuti konten, bukan viewport), bukan ke SCROLL HALAMAN
+   spt yg dimaksud (nempel tepat di bawah topbar) -- hasilnya baris
+   data lain terlihat menembus/tumpang tindih dgn header saat halaman
+   digeser. */
+.table-wrap { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto; overflow-y: visible; box-shadow: var(--shadow-card); margin-bottom: 22px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px; }
 thead th {
   text-align: left; background: var(--color-bg); color: var(--color-text-muted); font-weight: 700;

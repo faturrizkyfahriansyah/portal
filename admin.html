@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=20260903c">
 <link rel="stylesheet" href="portal.css?v=20261001g">
-<link rel="stylesheet" href="admin.css?v=20261018b">
+<link rel="stylesheet" href="admin.css?v=20261018c">
 <link rel="stylesheet" href="app-shell.css?v=20261015b">
 <link rel="stylesheet" href="rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
@@ -491,9 +491,12 @@
           <option value="">Semua Status</option><option value="AKTIF">Aktif</option><option value="NONAKTIF">Nonaktif</option>
         </select>
       </div>
-      <!-- PC: tabel. HP: kartu (via .tabel-jadi-kartu, CSS sudah ada) -->
+      <!-- Diganti 18 Okt 2026 (diminta Admin) dari kartu-bertumpuk
+           (tabel-jadi-kartu) ke tabel beneran yg digeser samping, kolom
+           Nama beku -- sama pola dgn Rekap Per Periode. Lebih ringkas
+           utk daftar panjang (tidak perlu scroll jauh per orang). -->
       <div class="table-wrap">
-        <table class="tabel-jadi-kartu">
+        <table class="tabel-kolom-beku-3">
           <thead><tr><th>Nama</th><th>ID</th><th>Jabatan</th><th>Role</th><th>Divisi</th><th>Status</th><th>Aksi</th></tr></thead>
           <tbody id="mhaTbodyPengguna"><tr><td colspan="7"><div class="empty-state">Memuat...</div></td></tr></tbody>
         </table>
@@ -505,17 +508,19 @@
       <div class="panel-block" style="margin-top:14px;">
         <p class="panel-block-title" style="color:#0B2D6B;">Konfigurasi Hak Akses</p>
         <p style="font-size:12.5px;color:var(--color-text-muted);margin:-6px 0 14px;">Atur izin berdasarkan role dan modul.</p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
-          <div style="flex:1;min-width:180px;">
-            <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">Pilih Role</label>
-            <select id="mhaKonfigRole" class="mini-select" style="width:100%;"></select>
-          </div>
-          <div style="flex:1;min-width:180px;">
-            <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">Pilih Modul</label>
-            <select id="mhaKonfigModul" class="mini-select" style="width:100%;"></select>
-          </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">Pilih Role</label>
+          <select id="mhaKonfigRole" class="mini-select" style="width:100%;"></select>
         </div>
-        <div id="mhaKonfigIsi"><p style="font-size:13px;color:var(--color-text-muted);">Pilih role dan modul untuk mulai mengatur izin.</p></div>
+        <!-- Diganti dari dropdown 1-pilih ke checkbox multi-pilih (18
+             Okt 2026, diminta Admin) -- supaya bisa atur izin yg SAMA
+             utk BEBERAPA modul sekaligus dalam 1 kali simpan, bukan
+             harus ulang satu-satu per modul. -->
+        <div style="margin-bottom:16px;">
+          <label style="font-size:11px;font-weight:600;display:block;margin-bottom:6px;">Pilih Modul (boleh lebih dari satu)</label>
+          <div id="mhaKonfigModulCheckbox" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+        <div id="mhaKonfigIsi"><p style="font-size:13px;color:var(--color-text-muted);">Pilih role dan minimal 1 modul untuk mulai mengatur izin.</p></div>
       </div>
     </div>
 
@@ -620,7 +625,7 @@
       <select id="filterPeriodeDuaMinggu"><option value="">Pilih periode...</option></select>
       <select id="filterDivisiDuaMinggu"><option value="">Semua Divisi</option></select>
       <button class="btn-mini primary" id="btnMuatDuaMinggu">Tampilkan</button>
-      <button class="btn-mini export" id="btnExportDuaMinggu">Export CSV</button>
+      <button class="btn-mini export" id="btnExportDuaMinggu">Export Excel</button>
       <!-- Diagnostik Duplikat Roster (15 Okt 2026) -- menjawab laporan
            Admin soal Total Hari Kerja tidak konsisten (13/14 vs 10).
            Murni baca, tidak mengubah apa pun -- Admin yg memutuskan &
@@ -2058,7 +2063,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261018d"></script>
+<script src="admin.js?v=20261019a"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>

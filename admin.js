@@ -370,7 +370,7 @@
     panelProfilRelawan: 'admin-profil-relawan.js?v=20261016a',
     panelMenuHariIni: 'admin-menu-hari-ini.js?v=20261016a',
     panelPenerimaManfaatOps: 'admin-penerima-manfaat-ops.js?v=20261015a',
-    panelManajemenHakAkses: 'admin-manajemen-hak-akses.js?v=20261018a',
+    panelManajemenHakAkses: 'admin-manajemen-hak-akses.js?v=20261019a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js',
     panelPengaturan: 'admin-pengaturan.js',
@@ -1017,16 +1017,18 @@
 
   el.btnExportDuaMinggu.addEventListener('click', () => {
     if (!cache.rekapDuaMinggu || !cache.rekapDuaMinggu.length) { showError('Tidak ada data untuk diexport.'); return; }
-    // Urutan kolom CSV SAMA PERSIS dengan tabel (sesuai spesifikasi §7).
-    const rows = [['Nama', 'Divisi', 'Nomor Rekening', 'Total Hari Kerja', 'Terlambat', 'Izin', 'Sakit', 'Alfa', 'Hadir', 'Tarif per Hari', 'Total Insentif']];
-    cache.rekapDuaMinggu.forEach(r => rows.push([
-      r.namaRelawan, r.divisi, r.nomorRekening || '', r.totalHariKerja, r.terlambat, r.izin, r.sakit, r.tidakHadir,
-      r.hadir + r.terlambat,
-      r.tarifLengkap ? r.tarifHarian : 'Tarif belum diatur',
-      r.tarifLengkap ? r.totalGaji : ''
-    ]));
+    // Diganti ke Excel berformat rapi (18 Okt 2026, diminta Admin --
+    // CSV polos tidak bawa format, terlihat berantakan saat dibuka).
+    // Urutan kolom SAMA PERSIS dengan tabel (sesuai spesifikasi §7).
+    const headers = ['Nama', 'Divisi', 'Nomor Rekening', 'Total Hari Kerja', 'Terlambat', 'Izin', 'Sakit', 'Alfa', 'Hadir', 'Tarif per Hari', 'Total Insentif'];
     const namaPeriode = (cache.periodeDuaMinggu.find(p => p.id === el.filterPeriodeDuaMinggu.value) || {}).nama || el.filterPeriodeDuaMinggu.value;
-    downloadCsv(rows, `rekap-per-periode-${namaPeriode}.csv`);
+    const rows = cache.rekapDuaMinggu.map(r => [
+      r.namaRelawan, r.divisi, r.nomorRekening || '-', r.totalHariKerja, r.terlambat, r.izin, r.sakit, r.tidakHadir,
+      r.hadir + r.terlambat,
+      r.tarifLengkap ? r.tarifHarian : 'Belum diatur',
+      r.tarifLengkap ? r.totalGaji : '-'
+    ]);
+    downloadExcelRapi('Rekap Per Periode — ' + namaPeriode, headers, rows, [9, 10], `rekap-per-periode-${namaPeriode}.xls`);
   });
 
   // ===== KELOLA RELAWAN =====
@@ -1231,6 +1233,43 @@
   function csvEscape(value) {
     const str = String(value === undefined || value === null ? '' : value);
     return /[",\n]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
+  }
+
+  /**
+   * Export Excel RAPI (18 Okt 2026, diminta Admin -- CSV polos tidak
+   * bawa format sama sekali, terlihat berantakan saat dibuka). Teknik:
+   * file .xls berisi HTML <table> dgn styling inline -- Excel MEMBUKA
+   * ini sbg spreadsheet asli (header tebal+warna, border), BUKAN cuma
+   * teks mentah spt CSV. Tidak perlu library eksternal. Angka TETAP
+   * numerik (bukan teks "Rp120.000") supaya masih bisa dijumlah/
+   * dihitung di Excel -- format Rupiah ditampilkan lewat mso-number-
+   * format (dikenali Excel), bukan dengan mengubah nilainya jadi string.
+   */
+  function downloadExcelRapi(judul, headers, rows, kolomRupiah, filename) {
+    const esc = (v) => String(v === undefined || v === null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    let html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8">';
+    html += '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
+    html += '<x:Name>Rekap</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>';
+    html += '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+    html += '<style>td,th{font-family:Calibri,Arial,sans-serif;font-size:11pt;border:1px solid #c6cdd6;padding:4px 8px;} th{background:#0B2D6B;color:#ffffff;font-weight:bold;text-align:center;} .judul{font-size:14pt;font-weight:bold;color:#0B2D6B;} .rp{mso-number-format:"Rp #,##0";text-align:right;} .num{mso-number-format:"0";text-align:center;}</style></head><body>';
+    html += '<table>';
+    if (judul) html += '<tr><td class="judul" colspan="' + headers.length + '" style="border:none;padding:6px 4px;">' + esc(judul) + '</td></tr><tr><td colspan="' + headers.length + '" style="border:none;"></td></tr>';
+    html += '<tr>' + headers.map(h => '<th>' + esc(h) + '</th>').join('') + '</tr>';
+    rows.forEach(r => {
+      html += '<tr>' + r.map((v, i) => {
+        const isRupiah = kolomRupiah.indexOf(i) !== -1;
+        const isAngka = typeof v === 'number' && !isRupiah;
+        const kelas = isRupiah ? 'rp' : (isAngka ? 'num' : '');
+        return '<td' + (kelas ? ' class="' + kelas + '"' : '') + '>' + esc(v) + '</td>';
+      }).join('') + '</tr>';
+    });
+    html += '</table></body></html>';
+    const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   // ===== AKUN RELAWAN (Tahap 2) =====

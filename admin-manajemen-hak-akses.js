@@ -36,7 +36,12 @@
     const opsi = daftarRoleCache.map(r => `<option value="${r.kode}">${escapeHtml(r.nama)}</option>`).join('');
     document.getElementById('mhaFilterRole').innerHTML = '<option value="">Semua Role</option>' + opsi;
     document.getElementById('mhaKonfigRole').innerHTML = opsi;
-    document.getElementById('mhaKonfigModul').innerHTML = daftarModulCache.map(m => `<option value="${m.kode}">${escapeHtml(m.nama)}</option>`).join('');
+    // Diganti dari <select> ke checkbox multi-pilih (18 Okt 2026, diminta Admin).
+    document.getElementById('mhaKonfigModulCheckbox').innerHTML = daftarModulCache.map(m => `
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 10px;border:1px solid var(--color-border);border-radius:8px;cursor:pointer;">
+        <input type="checkbox" class="mha-modul-checkbox" value="${m.kode}" style="width:16px;height:16px;"> ${escapeHtml(m.nama)}
+      </label>`).join('');
+    document.querySelectorAll('.mha-modul-checkbox').forEach(cb => cb.addEventListener('change', muatKonfigurasi_));
   }
 
   // ---------- TAB SWITCHING ----------
@@ -160,62 +165,90 @@
   });
 
   // ---------- TAB 2: KONFIGURASI HAK AKSES ----------
+  // Diperluas 18 Okt 2026 (diminta Admin): bisa centang BEBERAPA modul
+  // sekaligus. 1 modul dicentang -> tampilkan konfigurasi modul itu yg
+  // SUDAH tersimpan (spt sebelumnya). >1 modul dicentang -> form KOSONG
+  // (karena tiap modul bisa saja berbeda konfigurasinya saat ini, jadi
+  // tidak jujur menampilkan salah satu sbg "mewakili" semuanya) --
+  // simpan akan MENERAPKAN pengaturan yg sama ke SEMUA modul tercentang.
+  const IZIN_LABEL = { VIEW: 'Lihat data', CREATE: 'Tambah data', EDIT: 'Ubah data', DELETE: 'Hapus data', VALIDATE: 'Validasi', APPROVE: 'Setujui transaksi', EXPORT: 'Ekspor data' };
+
+  function modulTercentang_() {
+    return Array.from(document.querySelectorAll('.mha-modul-checkbox:checked')).map(cb => cb.value);
+  }
+
   async function muatKonfigurasi_() {
     const roleKode = document.getElementById('mhaKonfigRole').value;
-    const modulKode = document.getElementById('mhaKonfigModul').value;
-    if (!roleKode || !modulKode) return;
+    const modulTerpilih = modulTercentang_();
     const el = document.getElementById('mhaKonfigIsi');
-    el.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Memuat...</p>';
-    try {
-      const cfg = await apiPost('getKonfigurasiHakAksesSatu', { token: T, roleKode, modulKode });
-      const modul = daftarModulCache.find(m => m.kode === modulKode);
-      const IZIN_LABEL = { VIEW: 'Lihat data', CREATE: 'Tambah data', EDIT: 'Ubah data', DELETE: 'Hapus data', VALIDATE: 'Validasi', APPROVE: 'Setujui transaksi', EXPORT: 'Ekspor data' };
-      el.innerHTML = `
-        <p style="font-weight:700;color:#0B2D6B;margin:0 0 4px;">Modul: ${escapeHtml(modul ? modul.nama : modulKode)}</p>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;margin:12px 0 16px;cursor:pointer;">
-          <input type="checkbox" id="mhaCfgAksesModul" ${cfg.aksesModul ? 'checked' : ''} style="width:17px;height:17px;"> Akses modul
-        </label>
-        <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 8px;">Izin tindakan</p>
-        <div class="mha-izin-grid" id="mhaCfgIzinGrid">
-          ${Object.keys(IZIN_LABEL).map(k => `
-            <label class="mha-izin-item"><input type="checkbox" data-izin="${k}" ${cfg.izin[k] ? 'checked' : ''}> ${IZIN_LABEL[k]}</label>`).join('')}
-        </div>
-        <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:16px 0 6px;">Batas data</p>
-        <select id="mhaCfgScope" class="mini-select" style="width:100%;margin-bottom:16px;">
-          <option value="SEMUA" ${cfg.scope === 'SEMUA' ? 'selected' : ''}>Seluruh data operasional</option>
-          <option value="DIVISI" ${cfg.scope === 'DIVISI' ? 'selected' : ''}>Data sesuai divisi/penugasan</option>
-          <option value="SENDIRI" ${cfg.scope === 'SENDIRI' ? 'selected' : ''}>Data milik sendiri</option>
-        </select>
-        ${cfg.diubahOleh ? `<p style="font-size:11px;color:var(--color-text-muted);margin-bottom:12px;">Terakhir diubah oleh ${escapeHtml(cfg.diubahOleh)}</p>` : ''}
-        <div style="display:flex;gap:8px;justify-content:flex-end;">
-          <button type="button" class="btn-mini" id="mhaCfgBatal">Batal</button>
-          <button type="button" class="btn-mini primary" id="mhaCfgSimpan" style="background:#F58220;border-color:#F58220;">Simpan Konfigurasi</button>
-        </div>`;
-      document.getElementById('mhaCfgBatal').addEventListener('click', muatKonfigurasi_);
-      document.getElementById('mhaCfgSimpan').addEventListener('click', () => simpanKonfigurasi_(roleKode, modulKode));
-    } catch (err) {
-      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+    if (!roleKode || !modulTerpilih.length) { el.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Pilih role dan minimal 1 modul untuk mulai mengatur izin.</p>'; return; }
+
+    if (modulTerpilih.length === 1) {
+      // 1 modul -> tampilkan konfigurasi yg SUDAH ADA (spt sebelumnya).
+      const modulKode = modulTerpilih[0];
+      el.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Memuat...</p>';
+      try {
+        const cfg = await apiPost('getKonfigurasiHakAksesSatu', { token: T, roleKode, modulKode });
+        renderFormKonfigurasi_(el, modulTerpilih, cfg);
+      } catch (err) {
+        el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      }
+    } else {
+      // >1 modul -> form kosong, diterapkan ke SEMUA saat disimpan.
+      renderFormKonfigurasi_(el, modulTerpilih, null);
     }
   }
-  document.getElementById('mhaKonfigRole').addEventListener('change', muatKonfigurasi_);
-  document.getElementById('mhaKonfigModul').addEventListener('change', muatKonfigurasi_);
 
-  async function simpanKonfigurasi_(roleKode, modulKode) {
+  function renderFormKonfigurasi_(el, daftarModulKode, cfg) {
+    const namaModulGabung = daftarModulKode.map(k => { const m = daftarModulCache.find(x => x.kode === k); return m ? m.nama : k; }).join(', ');
+    el.innerHTML = `
+      <p style="font-weight:700;color:#0B2D6B;margin:0 0 4px;">Modul: ${escapeHtml(namaModulGabung)}</p>
+      ${daftarModulKode.length > 1 ? '<p style="font-size:11.5px;color:#8a5a12;margin:0 0 10px;">Pengaturan di bawah akan diterapkan SAMA ke semua modul yang dicentang.</p>' : ''}
+      <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;margin:12px 0 16px;cursor:pointer;">
+        <input type="checkbox" id="mhaCfgAksesModul" ${cfg && cfg.aksesModul ? 'checked' : ''} style="width:17px;height:17px;"> Akses modul
+      </label>
+      <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 8px;">Izin tindakan</p>
+      <div class="mha-izin-grid" id="mhaCfgIzinGrid">
+        ${Object.keys(IZIN_LABEL).map(k => `
+          <label class="mha-izin-item"><input type="checkbox" data-izin="${k}" ${cfg && cfg.izin[k] ? 'checked' : ''}> ${IZIN_LABEL[k]}</label>`).join('')}
+      </div>
+      <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:16px 0 6px;">Batas data</p>
+      <select id="mhaCfgScope" class="mini-select" style="width:100%;margin-bottom:16px;">
+        <option value="SEMUA" ${!cfg || cfg.scope === 'SEMUA' ? 'selected' : ''}>Seluruh data operasional</option>
+        <option value="DIVISI" ${cfg && cfg.scope === 'DIVISI' ? 'selected' : ''}>Data sesuai divisi/penugasan</option>
+        <option value="SENDIRI" ${cfg && cfg.scope === 'SENDIRI' ? 'selected' : ''}>Data milik sendiri</option>
+      </select>
+      ${cfg && cfg.diubahOleh ? `<p style="font-size:11px;color:var(--color-text-muted);margin-bottom:12px;">Terakhir diubah oleh ${escapeHtml(cfg.diubahOleh)}</p>` : ''}
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" class="btn-mini" id="mhaCfgBatal">Batal</button>
+        <button type="button" class="btn-mini primary" id="mhaCfgSimpan" style="background:#F58220;border-color:#F58220;">Simpan Konfigurasi${daftarModulKode.length > 1 ? ' (' + daftarModulKode.length + ' modul)' : ''}</button>
+      </div>`;
+    document.getElementById('mhaCfgBatal').addEventListener('click', muatKonfigurasi_);
+    document.getElementById('mhaCfgSimpan').addEventListener('click', () => simpanKonfigurasi_(document.getElementById('mhaKonfigRole').value, daftarModulKode));
+  }
+
+  document.getElementById('mhaKonfigRole').addEventListener('change', muatKonfigurasi_);
+
+  async function simpanKonfigurasi_(roleKode, daftarModulKode) {
     const btn = document.getElementById('mhaCfgSimpan');
     btn.disabled = true; btn.textContent = 'Menyimpan...';
     const izin = {};
     document.querySelectorAll('#mhaCfgIzinGrid input[data-izin]').forEach(c => { izin[c.dataset.izin] = c.checked; });
+    const aksesModul = document.getElementById('mhaCfgAksesModul').checked;
+    const scope = document.getElementById('mhaCfgScope').value;
     try {
-      await apiPost('simpanKonfigurasiHakAkses', {
-        token: T, roleKode, modulKode,
-        aksesModul: document.getElementById('mhaCfgAksesModul').checked,
-        izin: izin, scope: document.getElementById('mhaCfgScope').value
-      });
-      showSuccess('Konfigurasi hak akses disimpan.');
+      // Diterapkan ke SEMUA modul tercentang -- berurutan (bukan
+      // Promise.all) supaya kalau ada yg gagal di tengah, pesan error
+      // jelas menyebut modul mana, dan modul2 SEBELUMNYA yg sudah
+      // berhasil tidak batal/ganda kalau diulang.
+      for (const modulKode of daftarModulKode) {
+        await apiPost('simpanKonfigurasiHakAkses', { token: T, roleKode, modulKode, aksesModul, izin, scope });
+      }
+      showSuccess(daftarModulKode.length > 1 ? `Konfigurasi disimpan untuk ${daftarModulKode.length} modul.` : 'Konfigurasi hak akses disimpan.');
       muatKonfigurasi_();
     } catch (err) {
       showError(err.message || 'Gagal menyimpan konfigurasi.');
-      btn.disabled = false; btn.textContent = 'Simpan Konfigurasi';
+      btn.disabled = false; btn.textContent = 'Simpan Konfigurasi' + (daftarModulKode.length > 1 ? ' (' + daftarModulKode.length + ' modul)' : '');
     }
   }
 
