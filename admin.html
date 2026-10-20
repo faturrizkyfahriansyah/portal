@@ -119,6 +119,11 @@
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDuaMinggu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Rekap Per Periode</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelMonitoringPresensi"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></span><span>Monitoring Presensi</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPengajuanKetidakhadiranAdmin"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M12 9v6"/><circle cx="12" cy="12" r="9"/></svg></span><span>Pengajuan Ketidakhadiran</span></button>
+      <!-- Dipindah dari grup SIKOP ke sini + diganti nama (18 Okt 2026,
+           diminta Admin) -- ini soal MENGOREKSI DATA ABSENSI (SIPRES),
+           bukan soal menyusun jadwal/penugasan (SIKOP). Panel & fungsi
+           backend-nya TIDAK berubah, cuma lokasi menu & labelnya. -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelJadwalIndividu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><span>Koreksi Presensi</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelKartuQr"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M7 6V4h4v2"/><rect x="7" y="9.5" width="5" height="5"/><path d="M15 10h2M15 13h2"/></svg></span><span>Kartu QR</span></button>
 
       <p class="shell-nav-group-title">SIKOP</p>
@@ -127,7 +132,6 @@
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelKalender"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/><circle cx="8.5" cy="14.5" r="1.2"/><circle cx="12" cy="14.5" r="1.2"/><circle cx="15.5" cy="14.5" r="1.2"/></svg></span><span>Kalender Operasional</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelLokasi"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg></span><span>Master Lokasi SPPG</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelShift"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Jadwal &amp; Penugasan</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelJadwalIndividu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><span>Pemeriksaan Jadwal Individu</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelJadwal" style="display:none;"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Jadwal &amp; Penugasan (lama)</span></button>
 
       <p class="shell-nav-group-title">SIRAGA</p>
@@ -620,7 +624,7 @@
       <!-- Diagnostik Duplikat Roster (15 Okt 2026) -- menjawab laporan
            Admin soal Total Hari Kerja tidak konsisten (13/14 vs 10).
            Murni baca, tidak mengubah apa pun -- Admin yg memutuskan &
-           menghapus lewat Pemeriksaan Jadwal Individu kalau memang ada. -->
+           menghapus lewat Koreksi Presensi (SIPRES) kalau memang ada. -->
       <button class="btn-mini" id="btnCekDuplikatRoster" title="Cek baris presensi ganda yang mungkin membuat Total Hari Kerja tidak akurat">🔍 Cek Duplikat</button>
     </div>
     <div id="hasilCekDuplikat" style="display:none;margin-bottom:16px;"></div>
@@ -1160,13 +1164,15 @@
       <button type="button" class="btn-mini primary shift-subtab" data-sub="divisi">Shift Divisi</button>
       <button type="button" class="btn-mini shift-subtab" data-sub="khusus">Penugasan Khusus</button>
       <!-- PENYATUAN (Keputusan Final Implementasi #1): subtab "Koreksi
-           Tanggal" dipindah ke Pemeriksaan Jadwal Individu (sekarang
-           mendukung Edit/Tandai Hadir/Pindah Tanggal/Koreksi Absen/Hapus
-           sekaligus, per relawan). Kontennya (shiftSubKoreksi) SENGAJA
-           TIDAK dihapus -- backend lama (koreksiTanggalOperasionalAbsensi,
-           tandaiHadirManual) masih dipakai lewat pembungkus baru, belum
-           ada alasan menghapus markup lamanya juga. -->
-      <button type="button" class="btn-mini admin-tab-btn" data-panel="panelJadwalIndividu" title="Sekarang di Pemeriksaan Jadwal Individu">Koreksi Presensi →</button>
+           Tanggal" dipindah ke panel Koreksi Presensi (sekarang mendukung
+           Edit/Tandai Hadir/Pindah Tanggal/Koreksi Absen/Hapus sekaligus,
+           per relawan). Kontennya (shiftSubKoreksi) SENGAJA TIDAK dihapus
+           -- backend lama (koreksiTanggalOperasionalAbsensi, tandaiHadir
+           Manual) masih dipakai lewat pembungkus baru.
+           Tombol pintasan ke sana DIHAPUS 18 Okt 2026 (diminta Admin) --
+           panel itu sekarang menu sendiri di grup SIPRES (lebih relevan
+           di sana drpd di sini, krn soal DATA ABSENSI bukan JADWAL),
+           jadi pintasan khusus di sini jadi redundan. -->
       <button type="button" class="btn-mini shift-subtab" data-sub="isiMassal">Isi Absen Massal</button>
       <!-- Multi-Shift (18 Okt 2026, SIKOP) -- KHUSUS divisi yg butuh
            lebih dari 1 shift (Security, Pengolahan, Persiapan). Divisi
@@ -1382,7 +1388,7 @@
   <!-- PEMERIKSAAN JADWAL INDIVIDU (Pengembangan Portal, poin 4-5) -->
   <div class="admin-panel" id="panelJadwalIndividu">
     <div class="shell-page-head">
-      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Pemeriksaan Jadwal Individu</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Lihat, buat, dan ubah jadwal satu relawan dalam satu periode kerja.</p></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Koreksi Presensi</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">SIPRES — Lihat, buat, dan ubah jadwal/presensi satu relawan dalam satu periode kerja.</p></div>
     </div>
 
     <div class="filter-bar">
@@ -1533,7 +1539,7 @@
   <!-- LAPORAN (Keputusan Final Implementasi #2). Kategori "Koreksi
        Presensi" dibangun duluan -- SATU-SATUNYA dari 5 konsep yg tidak
        tumpang tindih dgn fitur yg sudah ada (Rekap Harian/Per Periode
-       sudah menjawab "Laporan Presensi"; Pemeriksaan Jadwal Individu
+       sudah menjawab "Laporan Presensi"; Koreksi Presensi
        sudah sebagian besar menjawab "Laporan Jadwal"), dan datanya
        sudah terkumpul sejak awal (24_AUDIT_LOG) tinggal dibuka. Kategori
        lain SENGAJA belum ditambahkan sbg pilihan dropdown -- lihat
@@ -1543,7 +1549,7 @@
     <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Laporan</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">SIPIKA — 3 kategori tersedia. Laporan Presensi & Laporan Operasional/Stok sengaja tidak dibuat terpisah (lihat catatan P3C) — sudah terjawab Rekap Harian/Per Periode dan dasbor SIRAGA.</p></div>
 
     <p class="section-title" style="margin-top:14px;">Koreksi Presensi</p>
-    <p style="font-size:12.5px;color:var(--color-text-muted);margin:-8px 0 10px;">Setiap perubahan jadwal, koreksi jam/status, dan penghapusan presensi — dari Pemeriksaan Jadwal Individu maupun Koreksi Tanggal.</p>
+    <p style="font-size:12.5px;color:var(--color-text-muted);margin:-8px 0 10px;">Setiap perubahan jadwal, koreksi jam/status, dan penghapusan presensi — dari panel Koreksi Presensi (SIPRES) maupun Koreksi Tanggal.</p>
     <div class="filter-bar">
       <input type="date" id="laporanKoreksiDari">
       <span style="align-self:center;font-size:13px;color:var(--color-text-muted);">s/d</span>
@@ -1573,7 +1579,7 @@
     </div>
 
     <p class="section-title" style="margin-top:28px;">Jadwal &amp; Penugasan</p>
-    <p style="font-size:12.5px;color:var(--color-text-muted);margin:-8px 0 10px;">Ringkasan Target vs Terjadwal SEMUA relawan dalam 1 periode. Untuk detail harian 1 relawan, pakai Pemeriksaan Jadwal Individu.</p>
+    <p style="font-size:12.5px;color:var(--color-text-muted);margin:-8px 0 10px;">Ringkasan Target vs Terjadwal SEMUA relawan dalam 1 periode. Untuk detail harian 1 relawan, pakai Koreksi Presensi (SIPRES).</p>
     <div class="filter-bar">
       <select id="laporanJadwalPeriode"></select>
       <select id="laporanJadwalDivisi"><option value="">Semua Divisi</option></select>
@@ -2052,7 +2058,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261018c"></script>
+<script src="admin.js?v=20261018d"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>

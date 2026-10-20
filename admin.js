@@ -364,7 +364,7 @@
   // bisa diuji langsung di browser).
   const MODUL_LAZY = {
     panelStok: 'admin-stok.js?v=20261011b',
-    panelShift: 'admin-shift.js?v=20261018b',
+    panelShift: 'admin-shift.js?v=20261018c',
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261018a',
     panelLaporan: 'admin-laporan.js?v=20261014a',
     panelProfilRelawan: 'admin-profil-relawan.js?v=20261016a',
@@ -875,7 +875,7 @@
               </ul>
               <button type="button" class="btn-mini" style="margin-top:8px;" data-lihat-profil="${escapeHtml(d.idRelawan)}">Buka Pemeriksaan Jadwal — Hapus Baris yang Salah</button>
             </div>`).join('')}
-          <p style="margin:10px 0 0;font-size:11.5px;color:var(--color-text-muted);">Hapus baris yang SALAH (biasanya yang statusnya "Belum Absen" atau tidak masuk akal) lewat tombol "Hapus" di Pemeriksaan Jadwal Individu -- pilih relawannya, cari tanggal yang sama, baris manapun yang keliru.</p>
+          <p style="margin:10px 0 0;font-size:11.5px;color:var(--color-text-muted);">Hapus baris yang SALAH (biasanya yang statusnya "Belum Absen" atau tidak masuk akal) lewat tombol "Hapus" di Koreksi Presensi (SIPRES) -- pilih relawannya, cari tanggal yang sama, baris manapun yang keliru.</p>
         </div>`;
       hasilBox.querySelectorAll('[data-lihat-profil]').forEach(btn => {
         btn.addEventListener('click', () => {

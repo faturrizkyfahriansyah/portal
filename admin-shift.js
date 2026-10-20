@@ -630,7 +630,7 @@
       btn.addEventListener('click', () => {
         const tombolPanel = document.querySelector('[data-panel="panelJadwalIndividu"]');
         if (tombolPanel) tombolPanel.click();
-        // Isi filter divisi di Pemeriksaan Jadwal Individu kalau elemennya ada (panel lama, sudah ada sebelumnya).
+        // Isi filter divisi di panel Koreksi Presensi kalau elemennya ada (panel lama, sudah ada sebelumnya).
         setTimeout(() => {
           const filterDivisiLama = document.getElementById('jiFilterDivisi') || document.getElementById('filterDivisiJadwalIndividu');
           if (filterDivisiLama) { filterDivisiLama.value = btn.dataset.divisi; filterDivisiLama.dispatchEvent(new Event('change')); }
