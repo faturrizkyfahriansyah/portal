@@ -1092,19 +1092,20 @@
       const status = r.status || 'AKTIF';
       const divisiOptions = cache.divisiList.map(d =>
         `<option value="${escapeHtml(d)}" ${d === r.divisi ? 'selected' : ''}>${escapeHtml(d)}</option>`).join('');
-      // data-label di tiap <td>: dipakai CSS (@media max-width di admin.css,
-      // ".tabel-jadi-kartu") utk menyusun ulang tabel SAMA PERSIS jadi
-      // kartu vertikal di HP lewat td::before -- BUKAN render terpisah,
-      // jadi datanya selalu sinkron antara tampilan desktop & HP.
+      // Diganti 19 Okt 2026 (diminta Admin) dari kartu-bertumpuk HP ke
+      // tabel beneran (digeser samping, kolom Nama beku) -- data-label
+      // di tiap <td> SENGAJA dibiarkan (tidak dipakai CSS lagi di sini,
+      // tapi tidak mengganggu & memudahkan kalau suatu saat perlu
+      // dikembalikan ke mode kartu).
       return `
       <tr data-id="${escapeHtml(r.id)}">
-        <td data-label="ID">${escapeHtml(r.id)}</td>
         <td data-label="Nama">
           <div class="editable-name">
             <span class="cell-nama">${escapeHtml(r.nama)}</span>
             <button type="button" class="btn-mini btn-edit-nama" title="Ubah nama">✎</button>
           </div>
         </td>
+        <td data-label="ID">${escapeHtml(r.id)}</td>
         <td data-label="Divisi"><select class="mini-select select-divisi-relawan">${divisiOptions}</select></td>
         <td data-label="Status"><span class="badge ${status === 'AKTIF' ? 'aktif' : 'nonaktif'}">${status}</span></td>
         <td data-label="Aksi" style="white-space:nowrap;">

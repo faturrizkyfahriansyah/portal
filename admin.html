@@ -358,8 +358,11 @@
     </div>
 
     <div class="table-wrap">
-      <table class="tabel-jadi-kartu" id="tabelRelawan">
-        <thead><tr><th>ID</th><th>Nama</th><th>Divisi</th><th>Status</th><th>Aksi</th></tr></thead>
+      <!-- Diganti 19 Okt 2026 (diminta Admin, sama spt Manajemen Hak
+           Akses) dari kartu-bertumpuk ke tabel beneran, kolom Nama
+           beku -- pola sama dgn Rekap Per Periode. -->
+      <table class="tabel-kolom-beku-3" id="tabelRelawan">
+        <thead><tr><th>Nama</th><th>ID</th><th>Divisi</th><th>Status</th><th>Aksi</th></tr></thead>
         <tbody id="tbodyRelawan"><tr><td colspan="5"><div class="empty-state">Memuat data...</div></td></tr></tbody>
       </table>
     </div>
@@ -2063,7 +2066,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261019a"></script>
+<script src="admin.js?v=20261019b"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>
