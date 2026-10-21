@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=20260903c">
 <link rel="stylesheet" href="portal.css?v=20261001g">
-<link rel="stylesheet" href="admin.css?v=20261018c">
+<link rel="stylesheet" href="admin.css?v=20261021a">
 <link rel="stylesheet" href="app-shell.css?v=20261015b">
 <link rel="stylesheet" href="rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
@@ -159,7 +159,7 @@
       <p class="shell-nav-group-title">SIPANDU</p>
       <p class="shell-nav-group-desc">Hak akses, menu harian, dan data penerima manfaat.</p>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelHakAksesSipandu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span><span>Operasional Produksi</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelMenuHariIni"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v20M18 2v7a3 3 0 0 1-3 3h-3M18 2v20"/></svg></span><span>Menu Hari Ini</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelMenuHariIni"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v20M18 2v7a3 3 0 0 1-3 3h-3M18 2v20"/></svg></span><span>Menu MBG</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPenerimaManfaatOps"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Penerima Manfaat</span></button>
 
       <p class="shell-nav-group-title">Aplikasi Terhubung</p>
@@ -362,8 +362,8 @@
            Akses) dari kartu-bertumpuk ke tabel beneran, kolom Nama
            beku -- pola sama dgn Rekap Per Periode. -->
       <table class="tabel-kolom-beku-3" id="tabelRelawan">
-        <thead><tr><th>Nama</th><th>ID</th><th>Divisi</th><th>Status</th><th>Aksi</th></tr></thead>
-        <tbody id="tbodyRelawan"><tr><td colspan="5"><div class="empty-state">Memuat data...</div></td></tr></tbody>
+        <thead><tr><th>Nama</th><th>ID</th><th>Divisi</th><th>Aksi</th></tr></thead>
+        <tbody id="tbodyRelawan"><tr><td colspan="4"><div class="empty-state">Memuat data...</div></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -877,10 +877,12 @@
            Libur/Tanggal Merah hanya tersirat (tidak ada entri = libur).
            Sekarang bisa disimpan eksplisit. Default tetap "Operasional"
            -- tidak mengubah kebiasaan yg sudah ada. -->
+      <!-- Dikoreksi 21 Okt 2026 (dokumen SIKOP terbaru): TEPAT 3
+           status, Tanggal Merah DIHAPUS sbg pilihan terpisah -- tanggal
+           merah kini otomatis masuk Libur (Admin tandai Libur spt biasa). -->
       <select id="selectStatusOperasional">
         <option value="AKTIF" selected>Operasional</option>
         <option value="LIBUR">Libur</option>
-        <option value="TANGGAL_MERAH">Tanggal Merah</option>
       </select>
       <input type="text" id="inputKeteranganOperasional" placeholder="Keterangan (opsional)">
       <details style="margin:2px 0;" id="detailsDivisiKhusus">
@@ -1186,7 +1188,14 @@
            lebih dari 1 shift (Security, Pengolahan, Persiapan). Divisi
            yg TIDAK diisi di sini tetap pakai "Shift Divisi" biasa di
            atas, tidak terpengaruh sama sekali. -->
-      <button type="button" class="btn-mini shift-subtab" data-sub="multiShift">Multi-Shift</button>
+      <!-- BARU (21 Okt 2026, dokumen Pembaruan SIKOP §E) -- alur
+           terpandu, DITARUH SEBELUM Multi-Shift krn ini jadi langkah
+           pertama (Pembuatan Jadwal) sesuai struktur 4-fitur dokumen. -->
+      <button type="button" class="btn-mini shift-subtab" data-sub="pembuatanJadwal">Pembuatan Jadwal</button>
+      <!-- Diganti nama 21 Okt 2026 (dokumen Pembaruan SIKOP §D) --
+           fungsi SAMA (Pola Kerja/Kelompok/Override), label & struktur
+           disesuaikan jadi "Pengaturan" dgn 4 bagian resmi. -->
+      <button type="button" class="btn-mini shift-subtab" data-sub="multiShift">Pengaturan</button>
       <!-- Dipisah jadi 2 (18 Okt 2026, dikoreksi Admin -- dokumen SIKOP
            §15.D & §15.E memang 2 halaman/wireframe terpisah, BUKAN
            digabung spt sebelumnya). -->
@@ -1235,6 +1244,22 @@
     </div>
 
     <!-- MULTI-SHIFT (Security/Pengolahan/Persiapan) -->
+    <!-- PEMBUATAN JADWAL (21 Okt 2026, dokumen Pembaruan SIKOP §E) --
+         alur terpandu: pilih periode+divisi -> pratinjau (TANPA
+         menulis) -> Bentuk Jadwal. Status kalender SELALU dibaca
+         otomatis dari Kalender Operasional -- TIDAK ADA kontrol manual
+         utk mengubah status tanggal di sini (sesuai larangan §E & §L). -->
+    <div class="shift-sub" id="shiftSubPembuatanJadwal" style="display:none;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <select id="pbjPeriode" class="mini-select" style="flex:1;min-width:160px;"><option value="">Pilih Periode...</option></select>
+      </div>
+      <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 8px;">Pilih Divisi (boleh lebih dari satu)</p>
+      <div id="pbjDivisiCheckbox" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
+      <button type="button" class="btn-mini primary" id="pbjBtnPratinjau">Lihat Pratinjau</button>
+
+      <div id="pbjHasil" style="margin-top:18px;"></div>
+    </div>
+
     <div class="shift-sub" id="shiftSubMultiShift" style="display:none;">
       <p style="font-size:12.5px;color:var(--color-text-muted);margin:-4px 0 14px;">Untuk divisi dengan lebih dari 1 shift (mis. Security, Pengolahan) atau shift tambahan di tanggal tertentu (mis. Persiapan). Divisi yang tidak diisi di sini tetap pakai "Shift Divisi" biasa.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
@@ -1245,7 +1270,7 @@
       <div id="msIsi" style="display:none;">
         <!-- A. Pola Shift -->
         <div class="panel-block" style="margin-bottom:14px;">
-          <p class="panel-block-title">Pola Shift</p>
+          <p class="panel-block-title">1. Pola Kerja per Divisi</p>
           <form class="inline-form" id="formShiftDetail" style="flex-direction:column;align-items:stretch;">
             <select id="msdNomorShift" required><option value="1">Shift 1</option><option value="2">Shift 2</option></select>
             <div style="display:flex;gap:8px;">
@@ -1273,7 +1298,7 @@
 
         <!-- B. Kelompok Rotasi -->
         <div class="panel-block" style="margin-bottom:14px;">
-          <p class="panel-block-title">Kelompok Rotasi Relawan</p>
+          <p class="panel-block-title">2. Kelompok dan Rotasi</p>
           <p style="font-size:12px;color:var(--color-text-muted);margin:-4px 0 10px;">Shift Minggu 1 yang dipilih di sini otomatis TERBALIK di Minggu 2 (kalau pola rotasi "Bertukar tiap minggu").</p>
           <form class="inline-form" id="formKelompokRotasi" style="flex-direction:column;align-items:stretch;">
             <select id="krRelawan" required><option value="">Pilih Relawan...</option></select>
@@ -1309,6 +1334,33 @@
               <tbody id="msTbodyOverride"><tr><td colspan="4"><div class="empty-state">Belum ada override.</div></td></tr></tbody>
             </table>
           </div>
+        </div>
+
+        <!-- 3. VALIDASI JADWAL (BARU, 21 Okt 2026, dokumen Pembaruan
+             SIKOP §D.4) -- aturan WAJIB ditandai & tidak bisa dimatikan
+             (ditegakkan di backend, bukan cuma UI). -->
+        <div class="panel-block" style="margin-bottom:14px;">
+          <p class="panel-block-title">3. Validasi Jadwal</p>
+          <p style="font-size:12px;color:var(--color-text-muted);margin:-4px 0 10px;">Aturan bertanda "Wajib" adalah validasi kritis dan tidak bisa dimatikan.</p>
+          <div id="vjDaftarAturan"><p style="font-size:13px;color:var(--color-text-muted);">Memuat...</p></div>
+        </div>
+
+        <!-- 4. TEMPLAT KETERANGAN PENUGASAN (BARU) -->
+        <div class="panel-block">
+          <p class="panel-block-title">4. Templat Keterangan Penugasan</p>
+          <p style="font-size:12px;color:var(--color-text-muted);margin:-4px 0 10px;">Templat teks yang bisa dipakai ulang saat mengisi keterangan jadwal reguler, rotasi, shift tambahan, atau penugasan khusus.</p>
+          <form class="inline-form" id="formTemplatKeterangan" style="flex-direction:column;align-items:stretch;">
+            <select id="tplKategori" required>
+              <option value="REGULER">Jadwal Reguler</option>
+              <option value="ROTASI">Rotasi</option>
+              <option value="SHIFT_TAMBAHAN">Shift Tambahan</option>
+              <option value="PENUGASAN_KHUSUS">Penugasan Khusus</option>
+            </select>
+            <input type="text" id="tplJudul" placeholder="Judul templat" required>
+            <textarea id="tplIsi" placeholder="Isi teks keterangan" rows="2" required style="padding:10px;border:1px solid var(--color-border);border-radius:8px;"></textarea>
+            <button type="submit" class="btn-mini primary">+ Tambah Templat</button>
+          </form>
+          <div id="tplDaftar" style="margin-top:12px;"></div>
         </div>
       </div>
     </div>
@@ -1677,7 +1729,9 @@
        permintaan Admin 15 Okt 2026). Memakai ulang aksi getMenuHariIniDashboard
        yg sudah ada, bukan logika baru. -->
   <div class="admin-panel" id="panelMenuHariIni">
-    <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Menu Hari Ini</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Rincian menu dari database siklus menu SPPG.</p></div>
+    <!-- Diganti nama jadi "Menu MBG" (21 Okt 2026, diminta Admin) --
+         fungsi & data SAMA PERSIS, cuma labelnya yg berubah. -->
+    <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Menu MBG</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Rincian menu dari database siklus menu SPPG — 1 periode penuh.</p></div>
     <div class="panel-block" style="margin-top:14px;" id="mhiKonten"><p style="margin:0;font-size:13px;color:var(--color-text-muted);">Memuat...</p></div>
   </div>
 
@@ -2066,7 +2120,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261019b"></script>
+<script src="admin.js?v=20261021e"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>

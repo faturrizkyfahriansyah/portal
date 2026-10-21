@@ -273,6 +273,21 @@ tbody tr:hover { background: var(--color-bg); }
 }
 .tabel-kolom-beku-3 th:first-child { z-index: 4; } /* pojok kiri-atas: menang dari th biasa (z-index 3) DAN td kolom beku (z-index 1) */
 
+/* Badge status MENGAMBANG di pojok kanan-atas sel Nama (21 Okt 2026,
+   diminta Admin) -- menggantikan kolom Status terpisah. Sel induknya
+   WAJIB position:relative (sudah diset inline di admin.js). */
+.status-mengambang {
+  position: absolute; top: 4px; right: 6px; font-size: 9.5px;
+  padding: 1px 6px; line-height: 1.6;
+}
+
+/* Perbaikan 21 Okt 2026: lebar select Divisi menyusut jadi sempit
+   (cuma kelihatan panahnya, teks terpotong) sejak tabel Relawan pindah
+   dari .tabel-jadi-kartu (yg py dulu py aturan width:100% utk select)
+   ke .tabel-kolom-beku-3 (tidak py aturan serupa). Diperbaiki di sini,
+   scoped ke tabel ini supaya tidak memengaruhi select lain. */
+#tabelRelawan .select-divisi-relawan { width: 100%; min-width: 150px; }
+
 /* ===== Manajemen Hak Akses (16-18 Okt 2026) =====
    Warna navy #0B2D6B & aksen oranye #F58220 KHUSUS di sini, sesuai
    permintaan eksplisit dokumen -- tidak memengaruhi warna Portal lain. */

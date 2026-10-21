@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<script src="terapkan-preferensi.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Monitoring Kehadiran — SPPG Jeungjing</title>
+<meta name="description" content="Monitoring Kehadiran — Portal SPPG Jeungjing">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20260903c">
+<link rel="stylesheet" href="preferensi-tampilan.css">
+<link rel="stylesheet" href="portal.css?v=20261001g">
+<link rel="stylesheet" href="app-shell.css?v=20261015b">
+<link rel="stylesheet" href="rebrand.css?v=20260903c">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#12294d">
+</head>
+<body>
+<div class="shell">
+  <div class="shell-body">
+  <div class="shell-overlay" id="shellOverlay"></div>
+  <aside class="shell-sidebar" id="shellSidebar">
+    <div class="shell-sidebar-head">
+      <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
+      <div class="shell-sidebar-head-text">
+        <strong>SPPG JEUNGJING</strong>
+        <span>PORTAL SPPG JEUNGJING</span>
+      </div>
+      <button type="button" class="shell-sidebar-close" id="shellSidebarClose" aria-label="Tutup menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
+    </div>
+    <div class="shell-sidebar-user" id="shellSidebarUser">
+      <div class="shell-sidebar-user-avatar" id="sidebarAvatar">–</div>
+      <div class="shell-sidebar-user-text">
+        <strong id="sidebarNama">Memuat...</strong>
+        <span class="shell-sidebar-user-status" id="sidebarStatus"></span>
+      </div>
+    </div>
+    <nav class="shell-nav" aria-label="Menu Portal SPPG Jeungjing">
+    <p class="shell-nav-group-title">Utama</p>
+    <a href="dashboard.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span><span>Dashboard</span></a>
+    <a href="profil.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></span><span>Profil Saya</span></a>
+
+    <!-- KHUSUS Koordinator Operasional (18 Okt 2026, SIKOP) -- link ini
+         SELALU tampil ke semua relawan, sama persis pola "Pengawasan
+         Pengelola SPPG" yg sudah ada (gerbang sungguhan di SERVER,
+         getJadwalAnggotaKoordinator menolak kalau bukan Koordinator --
+         bukan cuma disembunyikan di frontend). -->
+    <p class="shell-nav-group-title">KOORDINATOR</p>
+    <a href="jadwal-anggota.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span>Jadwal Relawan</span></a>
+    <a href="monitoring-kehadiran-koordinator.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></span><span>Monitoring Kehadiran</span></a>
+    <a href="pembagian-tugas-koordinator.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span>Pembagian Tugas Harian</span></a>
+    <a href="laporan-kendala-koordinator.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span><span>Laporan &amp; Kendala</span></a>
+    <a href="pengajuan-kebutuhan-koordinator.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg></span><span>Pengajuan Kebutuhan</span></a>
+    <a href="retur-barang-koordinator.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l6-6M3 12l6 6M3 12h18"/></svg></span><span>Retur Barang</span></a>
+
+    <p class="shell-nav-group-title">MONITORING</p>
+    <a href="monitoring.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></span><span>Pengawasan Pengelola SPPG</span></a>
+
+    <p class="shell-nav-group-title">Akun</p>
+    <a href="pengaturan.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></span><span>Pengaturan Akun</span></a>
+    </nav>
+    <button type="button" class="shell-nav-link shell-nav-link--danger" id="btnLogoutShell" style="margin:0 10px 8px;width:calc(100% - 20px);"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span>Keluar</span></button>
+    <button type="button" class="shell-sidebar-collapse-toggle" id="shellCollapseToggle"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg> Ciutkan Menu</button>
+    <div class="shell-sidebar-foot">PORTAL SPPG JEUNGJING<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730</div>
+  </aside>
+    <div class="shell-main">
+  <header class="shell-topbar">
+    <button type="button" class="shell-topbar-burger" aria-label="Buka menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
+    <div class="shell-topbar-brand shell-topbar-brand--portal">
+      <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional" class="shell-topbar-logo-bgn">
+      <img src="assets/logo.png" alt="Logo SPPG Jeungjing" class="shell-topbar-logo-sppg">
+      <div class="shell-topbar-brand-text">
+        <span class="shell-topbar-brand-label">PORTAL</span>
+        <strong>SPPG JEUNGJING</strong>
+      </div>
+    </div>
+    <div class="shell-topbar-right">
+      <a href="notifikasi.html" class="shell-topbar-bell" aria-label="Notifikasi" id="topbarBell">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21h4"/></svg>
+        <span class="shell-topbar-bell-count is-hidden" id="topbarBellCount">0</span>
+      </a>
+      <a href="profil.html" class="shell-topbar-avatar" id="topbarAvatar" aria-label="Profil Saya"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></a>
+    </div>
+  </header>
+      <main class="shell-content">
+<a href="dashboard.html" class="shell-back"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg> Kembali</a>
+  <div class="shell-page-head">
+    <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></div>
+    <div>
+      <h1 style="font-size:18px;margin:0;color:var(--color-navy);">Monitoring Kehadiran</h1>
+      <p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Kehadiran aktual anggota divisi Anda, dibandingkan jadwal resmi (khusus Koordinator Operasional).</p>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0;">
+    <input type="date" id="mkTanggal" class="form-field-input" style="max-width:220px;">
+    <button type="button" class="btn-mini primary" id="mkBtnHariIni">Hari Ini</button>
+    <button type="button" class="btn-mini" id="mkBtnRefresh">🔄 Segarkan</button>
+    <span id="mkWaktuMuat" style="font-size:11.5px;color:var(--color-text-muted);margin-left:auto;"></span>
+  </div>
+
+  <div id="mkIsi"><p style="font-size:13px;color:var(--color-text-muted);">Memuat...</p></div>
+
+  <footer class="shell-footer">
+    <p><strong>PORTAL SPPG JEUNGJING</strong></p>
+    <p>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730</p>
+    <p class="credit">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
+  </footer>
+    </div>
+  </div>
+</div>
+
+<script src="config.js?v=20260903c"></script>
+<script src="common.js?v=20261014a"></script>
+<script src="auth-relawan.js?v=20260903c"></script>
+<script src="app-shell.js?v=20260903c"></script>
+<script src="monitoring-kehadiran-koordinator.js?v=20261021a"></script>
+</body>
+</html>

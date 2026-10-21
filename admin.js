@@ -364,15 +364,15 @@
   // bisa diuji langsung di browser).
   const MODUL_LAZY = {
     panelStok: 'admin-stok.js?v=20261011b',
-    panelShift: 'admin-shift.js?v=20261018c',
-    panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261018a',
+    panelShift: 'admin-shift.js?v=20261021b',
+    panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261021b',
     panelLaporan: 'admin-laporan.js?v=20261014a',
     panelProfilRelawan: 'admin-profil-relawan.js?v=20261016a',
-    panelMenuHariIni: 'admin-menu-hari-ini.js?v=20261016a',
+    panelMenuHariIni: 'admin-menu-hari-ini.js?v=20261021a',
     panelPenerimaManfaatOps: 'admin-penerima-manfaat-ops.js?v=20261015a',
     panelManajemenHakAkses: 'admin-manajemen-hak-akses.js?v=20261019a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
-    panelPengelolaSppg: 'admin-pengelola-sppg.js',
+    panelPengelolaSppg: 'admin-pengelola-sppg.js?v=20261021a',
     panelPengaturan: 'admin-pengaturan.js',
     panelWebsitePublik: 'admin-website-publik.js',
     panelDuaMinggu: 'admin-export.js?v=20261011b',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
@@ -1078,7 +1078,7 @@
     if (status) rows = rows.filter(r => (r.status || 'AKTIF') === status);
 
     if (!rows.length) {
-      el.tbodyRelawan.innerHTML = emptyOrErrorRow('relawanList', 5, 'Tidak ada relawan yang cocok.');
+      el.tbodyRelawan.innerHTML = emptyOrErrorRow('relawanList', 4, 'Tidak ada relawan yang cocok.');
       return;
     }
 
@@ -1097,9 +1097,15 @@
       // di tiap <td> SENGAJA dibiarkan (tidak dipakai CSS lagi di sini,
       // tapi tidak mengganggu & memudahkan kalau suatu saat perlu
       // dikembalikan ke mode kartu).
+      // Diubah 21 Okt 2026 (diminta Admin): kolom Status TERPISAH
+      // dihapus -- statusnya sekarang badge KECIL MENGAMBANG di pojok
+      // kanan-atas sel Nama (sebelah tombol pensil), bukan kolom sendiri
+      // -- tabel jadi lebih ringkas. Posisi diatur via CSS
+      // .status-mengambang (lihat admin.css).
       return `
       <tr data-id="${escapeHtml(r.id)}">
-        <td data-label="Nama">
+        <td data-label="Nama" style="position:relative;">
+          <span class="badge status-mengambang ${status === 'AKTIF' ? 'aktif' : 'nonaktif'}">${status}</span>
           <div class="editable-name">
             <span class="cell-nama">${escapeHtml(r.nama)}</span>
             <button type="button" class="btn-mini btn-edit-nama" title="Ubah nama">✎</button>
@@ -1107,7 +1113,6 @@
         </td>
         <td data-label="ID">${escapeHtml(r.id)}</td>
         <td data-label="Divisi"><select class="mini-select select-divisi-relawan">${divisiOptions}</select></td>
-        <td data-label="Status"><span class="badge ${status === 'AKTIF' ? 'aktif' : 'nonaktif'}">${status}</span></td>
         <td data-label="Aksi" style="white-space:nowrap;">
           <button type="button" class="btn-mini primary btn-lihat-profil">Lihat Profil</button>
           <button type="button" class="btn-mini toggle-status" data-status="${status}">${status === 'AKTIF' ? 'Nonaktifkan' : 'Aktifkan'}</button>
@@ -1697,8 +1702,13 @@
 
   // BARU (18 Okt 2026, Kalender 4-status) -- label & warna yg layak utk
   // 4 status, bukan cuma AKTIF/nonaktif generik spt sebelumnya.
-  const LABEL_STATUS_KALENDER = { AKTIF: 'Operasional', DIBATALKAN: 'Dibatalkan', LIBUR: 'Libur', TANGGAL_MERAH: 'Tanggal Merah' };
-  const BADGE_STATUS_KALENDER = { AKTIF: 'aktif', DIBATALKAN: 'nonaktif', LIBUR: 'nonaktif', TANGGAL_MERAH: 'nonaktif' }; // semua "bukan operasional" pakai badge netral yg sama -- hindari pakai kosakata lain yg maknanya tidak cocok
+  // Dikoreksi 21 Okt 2026 (dokumen SIKOP terbaru): TEPAT 3 status --
+  // TANGGAL_MERAH dihapus dari peta (baris lama yg masih bertuliskan
+  // itu di sheet SUDAH ditangani di backend, getStatusOperasionalHariIni,
+  // jatuh ke Libur -- tapi utk tabel daftar admin yg baca STATUS mentah
+  // apa adanya, tetap disediakan fallback di bawah spy tidak nampilkan "undefined").
+  const LABEL_STATUS_KALENDER = { AKTIF: 'Operasional', DIBATALKAN: 'Dibatalkan', LIBUR: 'Libur', TANGGAL_MERAH: 'Libur' };
+  const BADGE_STATUS_KALENDER = { AKTIF: 'aktif', DIBATALKAN: 'nonaktif', LIBUR: 'nonaktif', TANGGAL_MERAH: 'nonaktif' };
 
   function renderKalenderTable() {
     if (!cache.kalenderList.length) {

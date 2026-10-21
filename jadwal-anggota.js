@@ -36,11 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <p style="font-size:13px;color:var(--color-text-muted);margin-bottom:12px;">Divisi: <b style="color:var(--color-navy);">${escapeHtml(hasil.divisi)}</b> · ${hasil.jumlahAnggota} anggota terjadwal · ${escapeHtml(hasil.tanggal)}</p>
         <div class="table-wrap">
           <table class="tabel-jadi-kartu">
-            <thead><tr><th>Nama</th><th>Shift</th><th>Jam Jadwal</th><th>Status</th><th>Jam Aktual</th></tr></thead>
+            <thead><tr><th>Nama</th><th>ID</th><th>Shift</th><th>Jam Jadwal</th><th>Status</th><th>Jam Aktual</th></tr></thead>
             <tbody>
               ${hasil.data.map(a => `
                 <tr>
                   <td data-label="Nama"><b>${escapeHtml(a.nama)}</b></td>
+                  <td data-label="ID">${escapeHtml(a.idRelawan || '-')}</td>
                   <td data-label="Shift">${escapeHtml(a.namaShift || '-')}</td>
                   <td data-label="Jam Jadwal">${escapeHtml(a.jamMasukJadwal)}${a.jamPulangJadwal ? ' - ' + escapeHtml(a.jamPulangJadwal) : ''}</td>
                   <td data-label="Status"><span class="badge ${a.status === 'BELUM ABSEN' ? 'nonaktif' : (a.status === 'HADIR' || a.status === 'TERLAMBAT' ? 'aktif' : 'nonaktif')}">${escapeHtml(a.status)}</span></td>
