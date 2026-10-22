@@ -408,38 +408,6 @@
     }
   });
 
-  // ---- Isi Absen Massal (BARU) ----
-  const btnIsiMassal = document.getElementById('btnIsiMassal');
-  const isiMassalTanggal = document.getElementById('isiMassalTanggal');
-  const isiMassalHasil = document.getElementById('isiMassalHasil');
-  if (btnIsiMassal) {
-    btnIsiMassal.addEventListener('click', async () => {
-      if (!isiMassalTanggal.value) { showError('Pilih tanggal dulu.'); return; }
-      const [y, m, d] = isiMassalTanggal.value.split('-');
-      const tanggalIndo = `${d}/${m}/${y}`;
-      if (!confirm(`Tandai SEMUA relawan aktif "Hadir" untuk tanggal ${tanggalIndo}?\n\nRelawan yang sudah punya data tidak akan ditimpa. Jam diambil otomatis dari shift masing-masing.`)) return;
-
-      btnIsiMassal.disabled = true;
-      isiMassalHasil.innerHTML = '<div class="empty-state">Memproses...</div>';
-      try {
-        const hasil = await apiPost('isiAbsensiHadirMassal', { token: token(), tanggal: tanggalIndo });
-        let html = `<p style="font-size:13px;color:#1a7a4c;font-weight:700;margin:0 0 8px;">✅ ${hasil.jumlahDitambahkan} relawan berhasil diisi Hadir.</p>`;
-        if (hasil.jumlahDilewatiSudahAda) {
-          html += `<p style="font-size:12.5px;color:var(--color-text-muted);margin:0 0 4px;">⏭️ ${hasil.jumlahDilewatiSudahAda} dilewati (sudah ada data): ${escapeHtml(hasil.dilewatiSudahAda.join(', '))}</p>`;
-        }
-        if (hasil.jumlahDilewatiTanpaShift) {
-          html += `<p style="font-size:12.5px;color:#b9852f;margin:0;">⚠️ ${hasil.jumlahDilewatiTanpaShift} dilewati (belum ada jadwal shift, perlu dicek manual): ${escapeHtml(hasil.dilewatiTanpaShift.join(', '))}</p>`;
-        }
-        isiMassalHasil.innerHTML = html;
-        showSuccess('Selesai mengisi absen massal.');
-      } catch (err) {
-        isiMassalHasil.innerHTML = '';
-        showError(err.message);
-      } finally {
-        btnIsiMassal.disabled = false;
-      }
-    });
-  }
 
   // ============================================================
   // MULTI-SHIFT (18 Okt 2026, SIKOP) -- Security/Pengolahan/Persiapan
@@ -606,6 +574,14 @@
     }
   }
   pmrPeriodeEl.addEventListener('change', muatPemeriksaan_);
+  // BARU (22 Okt 2026, dokumen UI/UX SIKOP): "Periksa Ulang" -- jalankan
+  // ulang pemeriksaan dgn data TERBARU (bukan cache lama), sesuai §F
+  // dokumen "pemeriksaan ulang harus menggunakan draf terbaru".
+  // "Kembali ke Draf" -- navigasi murni ke Pembuatan Jadwal.
+  document.getElementById('pmrBtnPeriksaUlang').addEventListener('click', muatPemeriksaan_);
+  document.getElementById('pmrBtnKembaliDraf').addEventListener('click', () => {
+    document.querySelector('[data-sub="pembuatanJadwal"]').click();
+  });
   document.getElementById('pmrFilterDivisi').addEventListener('change', renderDaftarTemuan_);
   document.getElementById('pmrFilterTingkat').addEventListener('change', renderDaftarTemuan_);
 
@@ -856,6 +832,15 @@
     return Array.from(document.querySelectorAll('.pbj-divisi-checkbox:checked')).map(cb => cb.value);
   }
 
+  // Link "Sumber Konfigurasi" (BARU, 22 Okt 2026) -- pindah ke sub-tab
+  // Pengaturan / panel Kalender Operasional, murni navigasi, TIDAK
+  // mengubah data apa pun.
+  document.querySelectorAll('.pbj-link-pengaturan').forEach(a => {
+    a.addEventListener('click', (e) => { e.preventDefault(); document.querySelector('[data-sub="multiShift"]').click(); });
+  });
+  const pbjLinkKalender = document.getElementById('pbjLinkKalender');
+  if (pbjLinkKalender) pbjLinkKalender.addEventListener('click', (e) => { e.preventDefault(); document.querySelector('[data-panel="panelKalender"]').click(); });
+
   document.getElementById('pbjBtnPratinjau').addEventListener('click', async () => {
     const idPeriode = document.getElementById('pbjPeriode').value;
     const daftarDivisi = divisiTercentangPbj_();
@@ -904,6 +889,7 @@
 
     html += `<div style="display:flex;gap:8px;margin-top:16px;">
       <button type="button" class="btn-mini primary" id="pbjBtnBentuk">Bentuk Jadwal</button>
+      <button type="button" class="btn-mini" id="pbjBtnPerbaruiDraf">Perbarui Draf</button>
       <button type="button" class="btn-mini" id="pbjBtnBentukUlang">Bentuk Ulang (baris belum absen saja)</button>
     </div>`;
     elHasil.innerHTML = html;
@@ -917,6 +903,24 @@
         showSuccess(`Jadwal dibentuk: ${r.totalDibuat} baris baru, ${r.totalSudahAda} sudah ada sebelumnya.`);
         document.getElementById('pbjBtnPratinjau').click();
       } catch (err) { hideLoading(); showError(err.message || 'Gagal membentuk jadwal.'); }
+    });
+
+    // "Perbarui Draf" (BARU, 22 Okt 2026, dokumen UI/UX SIKOP) -- SECARA
+    // FUNGSI sama persis dgn Bentuk Jadwal (bentukJadwal SUDAH idempotent
+    // -- cuma menambah yg BELUM ada, tidak pernah menimpa). Tombol
+    // terpisah disediakan krn dokumen eksplisit minta 3 aksi berbeda
+    // labelnya -- framing "perbarui" lebih pas dipakai kalau draf
+    // SUDAH ada & cuma mau menambah yg kurang (mis. anggota baru masuk
+    // divisi), drpd "Bentuk Jadwal" yg terkesan dari awal.
+    document.getElementById('pbjBtnPerbaruiDraf').addEventListener('click', async () => {
+      if (!confirm(`Perbarui draf untuk ${pbjDataTerakhir.daftarDivisi.length} divisi? Baris yang sudah ada TIDAK akan ditimpa -- hanya menambah yang belum ada.`)) return;
+      showLoading('Memperbarui draf...');
+      try {
+        const r = await apiPost('bentukJadwal', { token: token(), idPeriode: pbjDataTerakhir.idPeriode, daftarDivisi: pbjDataTerakhir.daftarDivisi });
+        hideLoading();
+        showSuccess(`Draf diperbarui: ${r.totalDibuat} baris baru ditambahkan, ${r.totalSudahAda} sudah ada sebelumnya.`);
+        document.getElementById('pbjBtnPratinjau').click();
+      } catch (err) { hideLoading(); showError(err.message || 'Gagal memperbarui draf.'); }
     });
 
     document.getElementById('pbjBtnBentukUlang').addEventListener('click', async () => {

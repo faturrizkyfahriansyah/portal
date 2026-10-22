@@ -106,13 +106,8 @@
     selectPeriodeGenerate: document.getElementById('selectPeriodeGenerate'),
     checkboxHariGrid: document.getElementById('checkboxHariGrid'),
     inputKeteranganGenerate: document.getElementById('inputKeteranganGenerate'),
-    formTambahOperasional: document.getElementById('formTambahOperasional'),
     selectPeriodeOperasional: document.getElementById('selectPeriodeOperasional'),
-    inputTanggalOperasional: document.getElementById('inputTanggalOperasional'),
-    inputKeteranganOperasional: document.getElementById('inputKeteranganOperasional'),
-    filterPeriodeKalender: document.getElementById('filterPeriodeKalender'),
     btnHapusSemuaKalender: document.getElementById('btnHapusSemuaKalender'),
-    tbodyKalender: document.getElementById('tbodyKalender'),
 
     formTambahLokasi: document.getElementById('formTambahLokasi'),
     btnPakaiLokasiSaya: document.getElementById('btnPakaiLokasiSaya'),
@@ -364,7 +359,7 @@
   // bisa diuji langsung di browser).
   const MODUL_LAZY = {
     panelStok: 'admin-stok.js?v=20261011b',
-    panelShift: 'admin-shift.js?v=20261021b',
+    panelShift: 'admin-shift.js?v=20261022a',
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261021b',
     panelLaporan: 'admin-laporan.js?v=20261014a',
     panelProfilRelawan: 'admin-profil-relawan.js?v=20261016a',
@@ -373,6 +368,8 @@
     panelManajemenHakAkses: 'admin-manajemen-hak-akses.js?v=20261019a',
     panelRoleAkses: 'admin-role.js?v=20260903c',
     panelPengelolaSppg: 'admin-pengelola-sppg.js?v=20261021a',
+    panelPengajuanKebutuhanAdmin: 'admin-pengajuan-kebutuhan.js?v=20261021a',
+    panelReturBarangAdmin: 'admin-retur-barang.js?v=20261021a',
     panelPengaturan: 'admin-pengaturan.js',
     panelWebsitePublik: 'admin-website-publik.js',
     panelDuaMinggu: 'admin-export.js?v=20261011b',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
@@ -1546,8 +1543,6 @@
       cache.periodeList.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)} (${escapeHtml(p.status)})</option>`).join('');
     el.selectPeriodeGenerate.innerHTML = opts;
     el.selectPeriodeOperasional.innerHTML = opts;
-    el.filterPeriodeKalender.innerHTML = '<option value="">Semua Periode</option>' +
-      cache.periodeList.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
   }
 
   async function muatUlangPeriode() {
@@ -1561,8 +1556,21 @@
       el.tbodyPeriode.innerHTML = emptyOrErrorRow('periodeList', 5, 'Belum ada periode kerja.');
       return;
     }
+    // Statistik + pencarian (22 Okt 2026, dokumen UI/UX SIKOP).
+    document.getElementById('prdStatTotal').textContent = cache.periodeList.length;
+    document.getElementById('prdStatAktif').textContent = cache.periodeList.filter(p => p.status === 'AKTIF').length;
+    document.getElementById('prdStatResmi').textContent = '–'; // dihitung butuh panggilan per-periode, lihat catatan laporan
+
+    const kataCari = (document.getElementById('prdCari').value || '').toLowerCase();
+    const daftarTampil = kataCari ? cache.periodeList.filter(p => p.nama.toLowerCase().includes(kataCari)) : cache.periodeList;
+
+    if (!daftarTampil.length) {
+      el.tbodyPeriode.innerHTML = '<tr><td colspan="5"><div class="empty-state">Tidak ada periode yang cocok.</div></td></tr>';
+      return;
+    }
+
     const opsiStatus = ['DRAFT', 'AKTIF', 'SELESAI', 'DITUTUP'];
-    el.tbodyPeriode.innerHTML = cache.periodeList.map(p => `
+    el.tbodyPeriode.innerHTML = daftarTampil.map(p => `
       <tr data-id="${escapeHtml(p.id)}">
         <td>${escapeHtml(p.nama)}${p.keterangan ? `<br><span style="font-size:11px;color:var(--color-text-muted);">${escapeHtml(p.keterangan)}</span>` : ''}</td>
         <td>${escapeHtml(p.tanggalMulai)}</td>
@@ -1602,8 +1610,8 @@
         e.preventDefault();
         const id = btn.dataset.id;
         document.querySelector('[data-panel="panelKalender"]').click();
-        el.filterPeriodeKalender.value = id;
-        muatUlangKalender();
+        el.selectPeriodeOperasional.value = id;
+        el.selectPeriodeOperasional.dispatchEvent(new Event('change'));
       });
     });
 
@@ -1640,24 +1648,39 @@
     return b[2] + '-' + b[1].padStart(2, '0') + '-' + b[0].padStart(2, '0');
   }
 
+  // Diubah 22 Okt 2026 (dokumen UI/UX SIKOP): form "Tambah/Edit Periode"
+  // sekarang di MODAL (dulu selalu kelihatan di halaman, memakan tempat).
+  const prdModalOverlay = document.getElementById('prdModalOverlay');
+  function bukaModalPeriode_(mode, data) {
+    idPeriodeSedangDiedit = mode === 'edit' ? data.id : null;
+    document.getElementById('prdModalJudul').textContent = mode === 'edit' ? 'Ubah Periode' : 'Tambah Periode';
+    document.getElementById('prdBtnSubmit').textContent = mode === 'edit' ? '💾 Simpan Perubahan' : '+ Tambah Periode';
+    el.formTambahPeriode.reset();
+    document.getElementById('prdModalPeringatanResmi').style.display = 'none';
+    if (mode === 'edit') {
+      el.inputNamaPeriode.value = data.nama;
+      el.inputMulaiPeriode.value = data.mulai;
+      el.inputSelesaiPeriode.value = data.selesai;
+      el.inputKeteranganPeriode.value = data.keterangan;
+      // Dokumen: "beri peringatan jika periode punya jadwal resmi" --
+      // cek via getDaftarPenetapanPeriode (SUDAH ADA, dipakai ulang).
+      apiPost('getDaftarPenetapanPeriode', { token: authToken, idPeriode: data.id }).then(daftar => {
+        if (daftar.some(d => d.status === 'DITETAPKAN')) document.getElementById('prdModalPeringatanResmi').style.display = 'block';
+      }).catch(() => {});
+    }
+    prdModalOverlay.style.display = 'flex';
+  }
+  function tutupModalPeriode_() { prdModalOverlay.style.display = 'none'; idPeriodeSedangDiedit = null; }
+
+  document.getElementById('prdBtnTambah').addEventListener('click', () => bukaModalPeriode_('tambah'));
+  document.getElementById('prdModalTutup').addEventListener('click', tutupModalPeriode_);
+  document.getElementById('btnBatalEditPeriode').addEventListener('click', tutupModalPeriode_);
+  document.getElementById('prdCari').addEventListener('input', renderPeriodeTable);
+
   el.tbodyPeriode.addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-edit-periode');
     if (!btn) return;
-    idPeriodeSedangDiedit = btn.dataset.id;
-    el.inputNamaPeriode.value = btn.dataset.nama;
-    el.inputMulaiPeriode.value = btn.dataset.mulai;
-    el.inputSelesaiPeriode.value = btn.dataset.selesai;
-    el.inputKeteranganPeriode.value = btn.dataset.keterangan;
-    el.formTambahPeriode.querySelector('button[type="submit"]').textContent = '💾 Simpan Perubahan';
-    document.getElementById('btnBatalEditPeriode').style.display = '';
-    el.formTambahPeriode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
-
-  document.getElementById('btnBatalEditPeriode').addEventListener('click', () => {
-    idPeriodeSedangDiedit = null;
-    el.formTambahPeriode.reset();
-    el.formTambahPeriode.querySelector('button[type="submit"]').textContent = '+ Tambah Periode';
-    document.getElementById('btnBatalEditPeriode').style.display = 'none';
+    bukaModalPeriode_('edit', { id: btn.dataset.id, nama: btn.dataset.nama, mulai: btn.dataset.mulai, selesai: btn.dataset.selesai, keterangan: btn.dataset.keterangan });
   });
 
   el.formTambahPeriode.addEventListener('submit', async (e) => {
@@ -1678,10 +1701,7 @@
       } else {
         await apiPost('addPeriode', payload);
       }
-      el.formTambahPeriode.reset();
-      idPeriodeSedangDiedit = null;
-      el.formTambahPeriode.querySelector('button[type="submit"]').textContent = '+ Tambah Periode';
-      document.getElementById('btnBatalEditPeriode').style.display = 'none';
+      tutupModalPeriode_();
       await muatUlangPeriode();
       showSuccess(sedangEdit ? 'Perubahan periode disimpan.' : 'Periode berhasil ditambahkan (status DRAFT).');
     } catch (err) {
@@ -1691,99 +1711,180 @@
     }
   });
 
-  // ===== KALENDER OPERASIONAL (Fase 3) =====
-  async function muatUlangKalender() {
-    cache.kalenderList = await apiGet('getKalenderListAdmin', {
-      token: authToken,
-      idPeriode: el.filterPeriodeKalender.value || undefined
-    });
-    renderKalenderTable();
-  }
+  // ===== KALENDER OPERASIONAL — KALENDER BULANAN VISUAL =====
+  // Dirombak total 22 Okt 2026 (dokumen UI/UX SIKOP) -- backend TIDAK
+  // berubah (getKalenderListAdmin/addOperasional/updateStatusOperasional/
+  // deleteOperasional/addOperasionalBulk/hapusSemuaOperasionalPeriode,
+  // SEMUA SUDAH ADA, dipakai ulang penuh). Hanya tampilan yg diganti
+  // dari tabel ke grid kalender.
+  let kalTanggalPeriodeIni = []; // array {dmy, hari} utk SELURUH periode terpilih, dihitung dari tanggalMulai..tanggalSelesai
+  let kalTanggalTerpilih = null;
+  const NAMA_HARI_SINGKAT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
-  // BARU (18 Okt 2026, Kalender 4-status) -- label & warna yg layak utk
-  // 4 status, bukan cuma AKTIF/nonaktif generik spt sebelumnya.
-  // Dikoreksi 21 Okt 2026 (dokumen SIKOP terbaru): TEPAT 3 status --
-  // TANGGAL_MERAH dihapus dari peta (baris lama yg masih bertuliskan
-  // itu di sheet SUDAH ditangani di backend, getStatusOperasionalHariIni,
-  // jatuh ke Libur -- tapi utk tabel daftar admin yg baca STATUS mentah
-  // apa adanya, tetap disediakan fallback di bawah spy tidak nampilkan "undefined").
-  const LABEL_STATUS_KALENDER = { AKTIF: 'Operasional', DIBATALKAN: 'Dibatalkan', LIBUR: 'Libur', TANGGAL_MERAH: 'Libur' };
-  const BADGE_STATUS_KALENDER = { AKTIF: 'aktif', DIBATALKAN: 'nonaktif', LIBUR: 'nonaktif', TANGGAL_MERAH: 'nonaktif' };
+  function kalDmyKeTanggalJs_(dmy) { const [d, m, y] = dmy.split('/').map(Number); return new Date(y, m - 1, d); }
+  function kalTanggalJsKeDmy_(dt) { return String(dt.getDate()).padStart(2, '0') + '/' + String(dt.getMonth() + 1).padStart(2, '0') + '/' + dt.getFullYear(); }
 
-  function renderKalenderTable() {
-    if (!cache.kalenderList.length) {
-      el.tbodyKalender.innerHTML = emptyOrErrorRow('kalenderList', 5, 'Belum ada tanggal operasional.');
-      return;
-    }
-    el.tbodyKalender.innerHTML = cache.kalenderList.map(k => `
-      <tr data-id="${escapeHtml(k.id)}">
-        <td>${escapeHtml(k.tanggal)}<br><span style="font-size:11px;color:var(--color-text-muted);">${escapeHtml(k.hari || '')}</span></td>
-        <td>${escapeHtml(k.namaPeriode)}</td>
-        <td><span class="badge ${BADGE_STATUS_KALENDER[k.status] || 'nonaktif'}">${escapeHtml(LABEL_STATUS_KALENDER[k.status] || k.status)}</span></td>
-        <td>${escapeHtml(k.keterangan || '-')}${(k.divisiKhusus && k.divisiKhusus.length) ? `<br><span style="display:inline-block;margin-top:4px;font-size:11px;padding:2px 8px;background:#fff4e5;color:#8a5a12;border-radius:6px;">🔒 Khusus: ${escapeHtml(k.divisiKhusus.join(', '))}</span>` : ''}</td>
-        <td>
-          <button type="button" class="btn-mini btn-toggle-operasional" data-status-baru="${k.status === 'AKTIF' ? 'DIBATALKAN' : 'AKTIF'}">${k.status === 'AKTIF' ? 'Batalkan' : 'Aktifkan'}</button>
-          <button type="button" class="btn-mini btn-hapus-operasional">Hapus</button>
-        </td>
-      </tr>`).join('');
-
-    el.tbodyKalender.querySelectorAll('.btn-toggle-operasional').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.closest('tr').dataset.id;
-        const statusBaru = btn.dataset.statusBaru;
-        showLoading('Mengubah status...');
-        try {
-          await apiPost('updateStatusOperasional', { token: authToken, id, status: statusBaru });
-          await muatUlangKalender();
-        } catch (err) {
-          showError(err.message || 'Gagal mengubah status.');
-        } finally {
-          hideLoading();
-        }
-      });
-    });
-
-    el.tbodyKalender.querySelectorAll('.btn-hapus-operasional').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.closest('tr').dataset.id;
-        if (!confirm('Hapus tanggal operasional ini? Tidak bisa dibatalkan.')) return;
-        showLoading('Menghapus...');
-        try {
-          await apiPost('deleteOperasional', { token: authToken, id });
-          await muatUlangKalender();
-        } catch (err) {
-          showError(err.message || 'Gagal menghapus.');
-        } finally {
-          hideLoading();
-        }
-      });
-    });
-  }
-
-  el.filterPeriodeKalender.addEventListener('change', () => {
-    muatUlangKalender().catch(err => showError(err.message || 'Gagal memuat kalender.'));
-  });
-
-  el.btnHapusSemuaKalender.addEventListener('click', async () => {
-    const idPeriode = el.filterPeriodeKalender.value;
-    if (!idPeriode) {
-      showError('Pilih satu periode dulu di dropdown sebelum menghapus semua tanggalnya.');
-      return;
-    }
-    const namaPeriode = el.filterPeriodeKalender.options[el.filterPeriodeKalender.selectedIndex].textContent;
-    if (!confirm(`Hapus SEMUA tanggal operasional pada "${namaPeriode}"? Tindakan ini tidak bisa dibatalkan.`)) return;
-    showLoading('Menghapus semua tanggal...');
+  el.selectPeriodeOperasional.addEventListener('change', async () => {
+    if (!el.selectPeriodeOperasional.value) { document.getElementById('kalWrap').style.display = 'none'; return; }
+    showLoading('Memuat kalender...');
     try {
-      const hasil = await apiPost('hapusSemuaOperasionalPeriode', { token: authToken, idPeriode });
-      await muatUlangKalender();
-      showSuccess(`${hasil.dihapus} tanggal operasional dihapus.`);
+      cache.kalenderList = await apiGet('getKalenderListAdmin', { token: authToken, idPeriode: el.selectPeriodeOperasional.value });
+      const periodeTerpilih = (cache.periodeList || []).find(p => p.id === el.selectPeriodeOperasional.value);
+
+      // Diperbaiki 22 Okt 2026 (diminta Admin): BUKAN kalender per-bulan
+      // -- hitung LANGSUNG seluruh tanggal periode (tanggalMulai..
+      // tanggalSelesai), BUKAN tergantung bulan kalender sedang apa.
+      // Periode yg melintasi 2 bulan tetap tampil UTUH dalam 1 layar.
+      kalTanggalPeriodeIni = [];
+      if (periodeTerpilih && periodeTerpilih.tanggalMulai && periodeTerpilih.tanggalSelesai) {
+        let dt = kalDmyKeTanggalJs_(periodeTerpilih.tanggalMulai);
+        const akhir = kalDmyKeTanggalJs_(periodeTerpilih.tanggalSelesai);
+        while (dt <= akhir) {
+          kalTanggalPeriodeIni.push({ dmy: kalTanggalJsKeDmy_(dt), hariIndeks: dt.getDay() });
+          dt.setDate(dt.getDate() + 1);
+        }
+      }
+      document.getElementById('kalJudulPeriode').textContent = periodeTerpilih
+        ? `${periodeTerpilih.nama} (${periodeTerpilih.tanggalMulai} – ${periodeTerpilih.tanggalSelesai})`
+        : '—';
+
+      kalTanggalTerpilih = null;
+      document.getElementById('kalWrap').style.display = 'block';
+      renderKalenderGrid_();
+      renderKalDetail_();
     } catch (err) {
-      showError(err.message || 'Gagal menghapus.');
+      showError(err.message || 'Gagal memuat kalender.');
     } finally {
       hideLoading();
     }
   });
 
+  function renderSatuGrid_(elId, daftarTanggal) {
+    const petaStatus = {};
+    (cache.kalenderList || []).forEach(k => { petaStatus[k.tanggal] = k; });
+    let html = NAMA_HARI_SINGKAT.map(h => `<div style="text-align:center;font-size:9.5px;font-weight:700;color:var(--color-text-muted);">${h}</div>`).join('');
+    // Sel kosong di depan baris pertama supaya hari pertama periode sejajar kolom hari-nya yg benar.
+    if (daftarTanggal.length) for (let i = 0; i < daftarTanggal[0].hariIndeks; i++) html += '<div></div>';
+    daftarTanggal.forEach(({ dmy, hariIndeks }) => {
+      const d = Number(dmy.split('/')[0]);
+      const entri = petaStatus[dmy];
+      let warna = '#fff', teksWarna = '#222';
+      if (entri) {
+        if (entri.status === 'AKTIF' && entri.divisiKhusus && entri.divisiKhusus.length) { warna = '#fff4e5'; teksWarna = '#8a5a12'; }
+        else if (entri.status === 'AKTIF') { warna = '#e8f6ee'; teksWarna = '#1a7a4c'; }
+        else { warna = '#f1f2f4'; teksWarna = '#6b7280'; }
+      }
+      const terpilih = kalTanggalTerpilih === dmy;
+      html += `<button type="button" class="kal-sel-tanggal" data-dmy="${dmy}" style="aspect-ratio:1;border:${terpilih ? '2px solid #0B2D6B' : '1px solid var(--color-border)'};border-radius:8px;background:${warna};color:${teksWarna};font-size:12.5px;font-weight:${terpilih ? '700' : '500'};cursor:pointer;">${d}</button>`;
+    });
+    document.getElementById(elId).innerHTML = html;
+  }
+
+  function renderKalenderGrid_() {
+    const minggu1 = kalTanggalPeriodeIni.slice(0, 7);
+    const minggu2 = kalTanggalPeriodeIni.slice(7);
+    renderSatuGrid_('kalGridMinggu1', minggu1);
+    renderSatuGrid_('kalGridMinggu2', minggu2);
+    document.querySelectorAll('.kal-sel-tanggal').forEach(btn => {
+      btn.addEventListener('click', () => { kalTanggalTerpilih = btn.dataset.dmy; renderKalenderGrid_(); renderKalDetail_(); });
+    });
+  }
+
+  function renderKalDetail_() {
+    const elDetail = document.getElementById('kalDetail');
+    if (!kalTanggalTerpilih) { elDetail.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);margin:0;">Klik salah satu tanggal pada kalender untuk melihat/mengubah statusnya.</p>'; return; }
+    const entri = (cache.kalenderList || []).find(k => k.tanggal === kalTanggalTerpilih);
+    const statusSaatIni = entri ? (entri.status === 'AKTIF' && entri.divisiKhusus && entri.divisiKhusus.length ? 'KHUSUS' : entri.status) : 'LIBUR';
+    const divisiTerpilihSaatIni = entri && entri.divisiKhusus ? entri.divisiKhusus : [];
+
+    elDetail.innerHTML = `
+      <p style="margin:0 0 10px;font-weight:700;color:var(--color-navy);">${escapeHtml(kalTanggalTerpilih)}</p>
+      <select id="kalDetailStatus" class="mini-select" style="width:100%;margin-bottom:10px;">
+        <option value="AKTIF" ${statusSaatIni === 'AKTIF' ? 'selected' : ''}>Operasional</option>
+        <option value="LIBUR" ${statusSaatIni === 'LIBUR' ? 'selected' : ''}>Libur</option>
+        <option value="KHUSUS" ${statusSaatIni === 'KHUSUS' ? 'selected' : ''}>Operasional Khusus</option>
+      </select>
+      <div id="kalDetailDivisiWrap" style="display:${statusSaatIni === 'KHUSUS' ? 'block' : 'none'};margin-bottom:10px;">
+        <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 6px;">Divisi yang Beroperasi</p>
+        <div id="kalDetailDivisiCheckbox" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        <p style="font-size:11.5px;color:var(--color-text-muted);margin:6px 0 0;">Divisi yang tidak dicentang tetap libur pada tanggal ini.</p>
+      </div>
+      <input type="text" id="kalDetailKeterangan" class="form-field-input" placeholder="Keterangan (opsional)" value="${escapeHtml(entri ? entri.keterangan || '' : '')}" style="width:100%;margin-bottom:12px;">
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn-mini primary" id="kalBtnSimpan">Simpan Perubahan</button>
+        ${entri ? '<button type="button" class="btn-mini" id="kalBtnHapus" style="color:var(--color-danger);">Hapus</button>' : ''}
+      </div>`;
+
+    document.getElementById('kalDetailDivisiCheckbox').innerHTML = (cache.divisiList || []).map(d => `
+      <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;padding:4px 8px;border:1px solid var(--color-border);border-radius:6px;cursor:pointer;">
+        <input type="checkbox" class="cb-divisi-khusus" value="${escapeHtml(d)}" ${divisiTerpilihSaatIni.indexOf(d) !== -1 ? 'checked' : ''} style="width:14px;height:14px;"> ${escapeHtml(d)}
+      </label>`).join('');
+
+    document.getElementById('kalDetailStatus').addEventListener('change', (e) => {
+      document.getElementById('kalDetailDivisiWrap').style.display = e.target.value === 'KHUSUS' ? 'block' : 'none';
+    });
+
+    document.getElementById('kalBtnSimpan').addEventListener('click', async () => {
+      const statusDipilih = document.getElementById('kalDetailStatus').value;
+      const divisiTerpilih = Array.from(document.querySelectorAll('.cb-divisi-khusus:checked')).map(c => c.value);
+      const keterangan = document.getElementById('kalDetailKeterangan').value.trim();
+      const statusKirim = statusDipilih === 'KHUSUS' ? 'AKTIF' : statusDipilih;
+
+      // Dampak: tanggal ini SUDAH ada jadwal (roster) tersimpan? (diminta
+      // dokumen UI/UX "tampilkan konfirmasi dampak jika tanggal sudah
+      // terkait jadwal"). Dicek via jumlah relawan di kalenderList entri
+      // ybs -- kalau belum ada entri sama sekali, tidak mungkin ada jadwal.
+      if (entri && statusKirim !== entri.status) {
+        if (!confirm(`Tanggal ${kalTanggalTerpilih} mengubah status dari ${LABEL_STATUS_KALENDER_SHORT[entri.status] || entri.status} -- kalau tanggal ini SUDAH dipakai Pembuatan Jadwal, jadwal yang sudah ada TIDAK akan otomatis dihapus/berubah. Periksa ulang di Pemeriksaan Jadwal setelah ini. Lanjutkan?`)) return;
+      }
+      if (statusDipilih === 'KHUSUS' && divisiTerpilih.length) {
+        if (!confirm(`Tanggal ini akan HANYA berlaku untuk: ${divisiTerpilih.join(', ')}. Divisi lain dianggap libur. Lanjutkan?`)) return;
+      }
+
+      showLoading('Menyimpan...');
+      try {
+        if (entri) {
+          await apiPost('updateStatusOperasional', { token: authToken, id: entri.id, status: statusKirim });
+          // updateStatusOperasional cuma ubah STATUS -- utk keterangan/divisiKhusus,
+          // cara teraman yg TIDAK mengubah kontrak API adalah hapus+buat ulang
+          // entri yg SAMA (idempotent, ID baru tapi tanggal/periode sama).
+          await apiPost('deleteOperasional', { token: authToken, id: entri.id });
+          await apiPost('addOperasional', { token: authToken, idPeriode: el.selectPeriodeOperasional.value, tanggal: kalDmyKeIso_(kalTanggalTerpilih), status: statusKirim, keterangan, divisiKhusus: statusDipilih === 'KHUSUS' ? divisiTerpilih : [] });
+        } else {
+          await apiPost('addOperasional', { token: authToken, idPeriode: el.selectPeriodeOperasional.value, tanggal: kalDmyKeIso_(kalTanggalTerpilih), status: statusKirim, keterangan, divisiKhusus: statusDipilih === 'KHUSUS' ? divisiTerpilih : [] });
+        }
+        cache.kalenderList = await apiGet('getKalenderListAdmin', { token: authToken, idPeriode: el.selectPeriodeOperasional.value });
+        renderKalenderGrid_(); renderKalDetail_();
+        showSuccess('Perubahan tersimpan.');
+      } catch (err) {
+        showError(err.message || 'Gagal menyimpan.');
+      } finally {
+        hideLoading();
+      }
+    });
+
+    const btnHapus = document.getElementById('kalBtnHapus');
+    if (btnHapus) btnHapus.addEventListener('click', async () => {
+      if (!confirm('Hapus status tanggal ini? Tanggal akan kembali ke status Libur (default).')) return;
+      showLoading('Menghapus...');
+      try {
+        await apiPost('deleteOperasional', { token: authToken, id: entri.id });
+        cache.kalenderList = await apiGet('getKalenderListAdmin', { token: authToken, idPeriode: el.selectPeriodeOperasional.value });
+        renderKalenderGrid_(); renderKalDetail_();
+        showSuccess('Tanggal dihapus.');
+      } catch (err) {
+        showError(err.message || 'Gagal menghapus.');
+      } finally {
+        hideLoading();
+      }
+    });
+  }
+  const LABEL_STATUS_KALENDER_SHORT = { AKTIF: 'Operasional', LIBUR: 'Libur', DIBATALKAN: 'Dibatalkan' };
+  function kalDmyKeIso_(dmy) { const [d, m, y] = dmy.split('/'); return y + '-' + m + '-' + d; }
+
+  // Alat bantu "Buat Massal" (fitur lama dipertahankan, lihat <details>
+  // sekunder di HTML) -- setelah berhasil, muat ulang grid kalau
+  // periode yg sama sedang ditampilkan.
   el.formGenerateKalender.addEventListener('submit', async (e) => {
     e.preventDefault();
     const hariAktif = Array.from(el.checkboxHariGrid.querySelectorAll('input:checked')).map(c => Number(c.value));
@@ -1799,9 +1900,11 @@
       });
       el.checkboxHariGrid.querySelectorAll('input:checked').forEach(c => { c.checked = false; });
       el.inputKeteranganGenerate.value = '';
-      el.filterPeriodeKalender.value = el.selectPeriodeGenerate.value;
-      await muatUlangKalender();
       showSuccess(`${hasil.ditambahkan} tanggal operasional dibuat` + (hasil.dilewati ? `, ${hasil.dilewati} dilewati (sudah ada).` : '.'));
+      if (el.selectPeriodeOperasional.value === el.selectPeriodeGenerate.value) {
+        cache.kalenderList = await apiGet('getKalenderListAdmin', { token: authToken, idPeriode: el.selectPeriodeOperasional.value });
+        renderKalenderGrid_(); renderKalDetail_();
+      }
     } catch (err) {
       showError(err.message || 'Gagal membuat tanggal operasional.');
     } finally {
@@ -1809,36 +1912,20 @@
     }
   });
 
-  // Sembunyikan opsi "divisi khusus" kalau status bukan Operasional --
-  // konsep DIVISI_KHUSUS cuma relevan utk hari operasional, bukan Libur/Tanggal Merah.
-  document.getElementById('selectStatusOperasional').addEventListener('change', (e) => {
-    document.getElementById('detailsDivisiKhusus').style.display = e.target.value === 'AKTIF' ? '' : 'none';
-  });
-
-  el.formTambahOperasional.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const divisiKhususTerpilih = Array.from(document.querySelectorAll('.cb-divisi-khusus:checked')).map(cb => cb.value);
-    if (divisiKhususTerpilih.length) {
-      const daftarNama = divisiKhususTerpilih.join(', ');
-      if (!confirm(`Tanggal ini akan HANYA berlaku untuk divisi: ${daftarNama}.\n\nDivisi LAIN akan dianggap tidak punya operasional (libur) pada tanggal ini. Lanjutkan?`)) return;
-    }
-    showLoading('Menambah tanggal operasional...');
+  el.btnHapusSemuaKalender.addEventListener('click', async () => {
+    const idPeriode = el.selectPeriodeOperasional.value;
+    if (!idPeriode) { showError('Pilih periode dulu di bagian atas halaman.'); return; }
+    const namaPeriode = el.selectPeriodeOperasional.options[el.selectPeriodeOperasional.selectedIndex].textContent;
+    if (!confirm(`Hapus SEMUA tanggal operasional pada "${namaPeriode}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+    showLoading('Menghapus semua tanggal...');
     try {
-      await apiPost('addOperasional', {
-        token: authToken,
-        idPeriode: el.selectPeriodeOperasional.value,
-        tanggal: el.inputTanggalOperasional.value,
-        status: document.getElementById('selectStatusOperasional').value, // BARU (18 Okt 2026, Kalender 4-status)
-        keterangan: el.inputKeteranganOperasional.value.trim(),
-        divisiKhusus: divisiKhususTerpilih
-      });
-      el.formTambahOperasional.reset();
-      document.querySelectorAll('.cb-divisi-khusus:checked').forEach(cb => { cb.checked = false; });
-      el.filterPeriodeKalender.value = el.selectPeriodeOperasional.value;
-      await muatUlangKalender();
-      showSuccess('Tanggal operasional ditambahkan.');
+      const hasil = await apiPost('hapusSemuaOperasionalPeriode', { token: authToken, idPeriode });
+      cache.kalenderList = await apiGet('getKalenderListAdmin', { token: authToken, idPeriode });
+      kalTanggalTerpilih = null;
+      renderKalenderGrid_(); renderKalDetail_();
+      showSuccess(`${hasil.dihapus} tanggal operasional dihapus.`);
     } catch (err) {
-      showError(err.message || 'Gagal menambah tanggal operasional.');
+      showError(err.message || 'Gagal menghapus.');
     } finally {
       hideLoading();
     }
