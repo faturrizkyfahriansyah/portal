@@ -12,13 +12,7 @@
     subtabs: document.querySelectorAll('.shift-subtab'),
     subs: document.querySelectorAll('.shift-sub'),
 
-    formShiftDivisi: document.getElementById('formShiftDivisi'),
-    shiftDivisiPeriode: document.getElementById('shiftDivisiPeriode'),
-    shiftDivisiNama: document.getElementById('shiftDivisiNama'),
-    shiftDivisiJamMasuk: document.getElementById('shiftDivisiJamMasuk'),
-    shiftDivisiJamPulang: document.getElementById('shiftDivisiJamPulang'),
-    shiftDivisiKeterangan: document.getElementById('shiftDivisiKeterangan'),
-    tbodyShiftDivisi: document.getElementById('tbodyShiftDivisi'),
+
 
     formPenugasanKhusus: document.getElementById('formPenugasanKhusus'),
     khususOperasional: document.getElementById('khususOperasional'),
@@ -78,16 +72,14 @@
       cache.relawan = relawan;
       cache.kalender = kalender;
 
-      el.shiftDivisiPeriode.innerHTML = '<option value="">Pilih Periode...</option>' +
-        periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
-      el.shiftDivisiNama.innerHTML = '<option value="">Pilih Divisi...</option>' +
-        divisi.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
       el.khususRelawan.innerHTML = '<option value="">Pilih Relawan...</option>' +
         relawan.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.nama)}</option>`).join('');
       el.khususDivisi.innerHTML = '<option value="">Pilih Divisi...</option>' +
         divisi.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
       // Multi-Shift (18 Okt 2026, SIKOP) -- pakai ulang data periode/divisi/relawan yg SAMA, tidak ada panggilan API baru.
-      document.getElementById('msPeriode').innerHTML = '<option value="">Pilih Periode...</option>' +
+      // Diperbaiki 22 Okt 2026: label diubah jadi "opsional" krn Pola
+      // Kerja/Kelompok Rotasi sudah tidak butuh periode lagi.
+      document.getElementById('msPeriode').innerHTML = '<option value="">(Opsional, utk Override Per Tanggal)</option>' +
         periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
       document.getElementById('msDivisi').innerHTML = '<option value="">Pilih Divisi...</option>' +
         divisi.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
@@ -165,62 +157,16 @@
     el.khususDivisi.style.display = '';
   });
 
-  // --------------------------------------------------------
-  // SHIFT DIVISI
-  // --------------------------------------------------------
-  el.shiftDivisiPeriode.addEventListener('change', muatShiftDivisi);
-
-  async function muatShiftDivisi() {
-    const idPeriode = el.shiftDivisiPeriode.value;
-    if (!idPeriode) { el.tbodyShiftDivisi.innerHTML = '<tr><td colspan="5"><div class="empty-state">Pilih periode di atas dulu.</div></td></tr>'; return; }
-    el.tbodyShiftDivisi.innerHTML = '<tr><td colspan="5"><div class="empty-state">Memuat data...</div></td></tr>';
-    try {
-      const list = await apiGet('getShiftDivisiListAdmin', { token: token(), idPeriode });
-      if (!list.length) { el.tbodyShiftDivisi.innerHTML = '<tr><td colspan="5"><div class="empty-state">Belum ada Shift Divisi untuk periode ini.</div></td></tr>'; return; }
-      const namaPeriode = (cache.periode.find(p => p.id === idPeriode) || {}).nama || idPeriode;
-      el.tbodyShiftDivisi.innerHTML = list.map(s => `
-        <tr>
-          <td>${escapeHtml(namaPeriode)}</td>
-          <td>${escapeHtml(s.namaDivisi)}</td>
-          <td>${escapeHtml(s.jamMasuk)}</td>
-          <td>${escapeHtml(s.jamPulang || '-')}</td>
-          <td><button type="button" class="btn-mini" data-hapus-shift="${escapeHtml(s.id)}">Hapus</button></td>
-        </tr>`).join('');
-      el.tbodyShiftDivisi.querySelectorAll('[data-hapus-shift]').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          try {
-            await apiPost('deleteShiftDivisi', { token: token(), id: btn.dataset.hapusShift });
-            showSuccess('Shift Divisi dihapus.');
-            muatShiftDivisi();
-          } catch (err) { showError(err.message); }
-        });
-      });
-    } catch (err) {
-      showError(err.message);
-    }
-  }
-
-  el.formShiftDivisi.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    try {
-      await apiPost('addShiftDivisi', {
-        token: token(),
-        idPeriode: el.shiftDivisiPeriode.value,
-        namaDivisi: el.shiftDivisiNama.value,
-        jamMasuk: el.shiftDivisiJamMasuk.value,
-        jamPulang: el.shiftDivisiJamPulang.value,
-        keterangan: el.shiftDivisiKeterangan.value.trim()
-      });
-      showSuccess('Shift Divisi tersimpan.');
-      el.shiftDivisiJamMasuk.value = ''; el.shiftDivisiJamPulang.value = ''; el.shiftDivisiKeterangan.value = '';
-      muatShiftDivisi();
-    } catch (err) {
-      showError(err.message);
-    }
-  });
+  // Dihapus 22 Okt 2026 (diminta Admin): seksi JS "SHIFT DIVISI" --
+  // HTML-nya sudah dihapus (fungsinya tercakup mode "Jam Tetap" di
+  // Pengaturan > Pola Kerja per Divisi), jadi kode yg memanggil
+  // elemen HTML itu (SEKARANG NULL) HARUS ikut dihapus -- kalau
+  // dibiarkan, baris addEventListener di bawah akan error saat file
+  // ini jalan dan mematikan SELURUH sisa script.
 
   // --------------------------------------------------------
-  // PENUGASAN KHUSUS
+  // PENUGASAN KHUSUS (sekarang bagian dari Pembuatan Jadwal, HTML-nya
+  // dipindah 22 Okt 2026 -- ID elemen & logika di bawah TIDAK berubah)
   // --------------------------------------------------------
   el.khususOperasional.addEventListener('change', muatPenugasanKhusus);
 
@@ -416,12 +362,17 @@
   const msDivisiEl = document.getElementById('msDivisi');
   const msIsiEl = document.getElementById('msIsi');
 
+  // Diperbaiki 22 Okt 2026 (diminta Admin -- bug desain nyata): Pola
+  // Kerja & Kelompok Rotasi sekarang STANDING per divisi, BUKAN per
+  // periode -- jadi cukup pilih DIVISI utk memuatnya. Periode jadi
+  // OPSIONAL, cuma dipakai menyaring daftar Override Per Tanggal yg
+  // ditampilkan (Override GENUINELY terikat tanggal/periode tertentu).
   async function muatMultiShift_() {
-    const idPeriode = msPeriodeEl.value, namaDivisi = msDivisiEl.value;
-    if (!idPeriode || !namaDivisi) { msIsiEl.style.display = 'none'; return; }
+    const namaDivisi = msDivisiEl.value;
+    if (!namaDivisi) { msIsiEl.style.display = 'none'; return; }
     msIsiEl.style.display = 'block';
     try {
-      const cfg = await apiPost('getKonfigurasiMultiShiftDivisi', { token: token(), idPeriode, namaDivisi });
+      const cfg = await apiPost('getKonfigurasiMultiShiftDivisi', { token: token(), idPeriode: msPeriodeEl.value || undefined, namaDivisi });
       renderMsDetail_(cfg.detail);
       renderMsKelompok_(cfg.kelompok);
       renderMsOverride_(cfg.override);
@@ -473,39 +424,73 @@
       </tr>`).join('');
   }
 
+  // Toggle tampilan field sesuai "Jenis Pola Jam Kerja" (BARU, 22 Okt
+  // 2026, dokumen Pembaruan Pengaturan SIKOP §C/§G). Skema backend
+  // TIDAK berubah -- 3 jenis ini cuma menentukan field mana yg
+  // ditampilkan & bagaimana payload disusun saat submit.
+  document.querySelectorAll('input[name="msdJenisPola"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const jenis = document.querySelector('input[name="msdJenisPola"]:checked').value;
+      document.getElementById('msdWrapHariBerbeda').style.display = jenis === 'HARI_BERBEDA' ? 'flex' : 'none';
+      document.getElementById('msdWrapShift').style.display = jenis === 'SHIFT' ? 'flex' : 'none';
+    });
+  });
+
   document.getElementById('formShiftDetail').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!msPeriodeEl.value || !msDivisiEl.value) { showError('Pilih periode dan divisi dulu.'); return; }
-    showLoading('Menyimpan pola shift...');
-    try {
-      await apiPost('simpanShiftDivisiDetail', {
-        token: token(), idPeriode: msPeriodeEl.value, namaDivisi: msDivisiEl.value,
-        nomorShift: document.getElementById('msdNomorShift').value,
-        jamMasuk: document.getElementById('msdJamMasuk').value,
-        jamPulang: document.getElementById('msdJamPulang').value,
-        lintasTengahMalam: document.getElementById('msdLintasTengahMalam').checked,
-        polaRotasi: document.getElementById('msdPolaRotasi').value,
-        hariKhusus: document.getElementById('msdHariKhusus').value.trim(),
+    if (!msDivisiEl.value) { showError('Pilih divisi dulu.'); return; }
+    const jenisPola = document.querySelector('input[name="msdJenisPola"]:checked').value;
+
+    // Susun payload sesuai jenis -- skema sheet SAMA utk ketiganya,
+    // cuma nilai yg diisi berbeda (lihat dokumentasi di HTML di atas).
+    let payload = {
+      token: token(), namaDivisi: msDivisiEl.value,
+      jamMasuk: document.getElementById('msdJamMasuk').value,
+      jamPulang: document.getElementById('msdJamPulang').value,
+      lintasTengahMalam: document.getElementById('msdLintasTengahMalam').checked
+    };
+    if (jenisPola === 'TETAP') {
+      payload = Object.assign(payload, { nomorShift: 1, polaRotasi: 'TETAP', hariKhusus: '', jamMasukHariKhusus: '', jamPulangHariKhusus: '' });
+    } else if (jenisPola === 'HARI_BERBEDA') {
+      if (!document.getElementById('msdHariKhusus').value.trim()) { showError('Isi hari yang jamnya berbeda.'); return; }
+      payload = Object.assign(payload, {
+        nomorShift: 1, polaRotasi: 'TETAP',
+        hariKhusus: document.getElementById('msdHariKhusus').value.trim().toUpperCase(),
         jamMasukHariKhusus: document.getElementById('msdJamMasukKhusus').value,
         jamPulangHariKhusus: document.getElementById('msdJamPulangKhusus').value
       });
+    } else { // SHIFT
+      payload = Object.assign(payload, {
+        nomorShift: document.getElementById('msdNomorShift').value,
+        polaRotasi: document.getElementById('msdPolaRotasi').value,
+        hariKhusus: document.getElementById('msdHariKhususShift').value.trim().toUpperCase(),
+        jamMasukHariKhusus: document.getElementById('msdJamMasukKhususShift').value,
+        jamPulangHariKhusus: document.getElementById('msdJamPulangKhususShift').value
+      });
+    }
+
+    showLoading('Menyimpan pola kerja...');
+    try {
+      await apiPost('simpanShiftDivisiDetail', payload);
       hideLoading();
-      showSuccess('Pola shift tersimpan.');
+      showSuccess('Pola kerja tersimpan.');
       document.getElementById('formShiftDetail').reset();
+      document.getElementById('msdWrapHariBerbeda').style.display = 'none';
+      document.getElementById('msdWrapShift').style.display = 'none';
       muatMultiShift_();
     } catch (err) {
       hideLoading();
-      showError(err.message || 'Gagal menyimpan pola shift.');
+      showError(err.message || 'Gagal menyimpan pola kerja.');
     }
   });
 
   document.getElementById('formKelompokRotasi').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!msPeriodeEl.value || !msDivisiEl.value) { showError('Pilih periode dan divisi dulu.'); return; }
+    if (!msDivisiEl.value) { showError('Pilih divisi dulu.'); return; }
     showLoading('Menyimpan kelompok...');
     try {
       await apiPost('simpanKelompokRotasi', {
-        token: token(), idPeriode: msPeriodeEl.value, namaDivisi: msDivisiEl.value,
+        token: token(), namaDivisi: msDivisiEl.value,
         idRelawan: document.getElementById('krRelawan').value,
         kelompok: document.getElementById('krKelompok').value,
         shiftMinggu1: document.getElementById('krShiftMinggu1').value
@@ -819,7 +804,28 @@
       muatValidasiJadwal_(); muatTemplatKeterangan_();
       document.getElementById('vjDaftarAturan').dataset.dimuat = '1';
     }
+    tampilkanLandingPengaturan_();
   }, { once: false });
+
+  // Navigasi kartu landing Pengaturan (BARU, 22 Okt 2026, dokumen
+  // Pembaruan Pengaturan SIKOP §G) -- "Pola Kerja" & "Kelompok" sama-
+  // sama menuju seksi gabungan (keduanya butuh pilih divisi yg sama);
+  // Validasi & Templat masing-masing seksi sendiri (global).
+  const PETA_KARTU_KE_SEKSI = { PolaKerja: 'pengSeksiPolaKerja', Kelompok: 'pengSeksiPolaKerja', Validasi: 'pengSeksiValidasi', Templat: 'pengSeksiTemplat' };
+  function tampilkanLandingPengaturan_() {
+    document.getElementById('pengLanding').style.display = 'grid';
+    document.getElementById('pengBtnKembali').style.display = 'none';
+    Object.values(PETA_KARTU_KE_SEKSI).forEach(id => { document.getElementById(id).style.display = 'none'; });
+  }
+  document.querySelectorAll('.peng-kartu').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('pengLanding').style.display = 'none';
+      document.getElementById('pengBtnKembali').style.display = 'block';
+      Object.values(PETA_KARTU_KE_SEKSI).forEach(id => { document.getElementById(id).style.display = 'none'; });
+      document.getElementById(PETA_KARTU_KE_SEKSI[btn.dataset.seksi]).style.display = 'block';
+    });
+  });
+  document.getElementById('pengBtnKembali').addEventListener('click', tampilkanLandingPengaturan_);
 
   // ============================================================
   // PEMBUATAN JADWAL (21 Okt 2026, dokumen Pembaruan SIKOP §E) --
