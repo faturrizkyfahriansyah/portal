@@ -258,7 +258,18 @@ tbody tr:hover { background: var(--color-bg); }
    SUDAH terbukti rapi di Pemeriksaan Jadwal Individu
    (#panelJadwalIndividu .table-wrap td:first-child), bukan lagi
    pola 3-kolom custom yg rawan tumpang-tindih. */
-.tabel-kolom-beku-3 { min-width: 900px; }
+/* Perbaikan AKAR MASALAH 22 Okt 2026 (dilaporkan berulang kali --
+   fix overflow-y sebelumnya BENAR tapi TIDAK CUKUP): `table` secara
+   global pakai border-collapse:collapse, dan ini SUDAH DIKENAL LUAS
+   membuat position:sticky pada <th> tidak bekerja benar di banyak
+   browser (containing block utk sticky jadi salah hitung dgn model
+   collapsed-border). Solusinya border-collapse:separate +
+   border-spacing:0 -- SECARA VISUAL hasilnya tetap sama (garis tabel
+   masih terlihat menyatu krn border tiap sel sudah setipis 1px), tapi
+   sticky jadi benar bekerja. DISKOPING khusus ke tabel ini (bukan
+   diubah di aturan `table` global) supaya tabel LAIN yg tidak pakai
+   sticky tidak ikut terpengaruh tampilannya. */
+.tabel-kolom-beku-3 { min-width: 900px; border-collapse: separate; border-spacing: 0; }
 .tabel-kolom-beku-3 th:first-child, .tabel-kolom-beku-3 td:first-child {
   position: sticky; left: 0; background: #fff; z-index: 1;
   box-shadow: 1px 0 0 var(--color-border); min-width: 140px;
