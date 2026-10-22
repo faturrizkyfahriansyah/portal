@@ -269,13 +269,12 @@ tbody tr:hover { background: var(--color-bg); }
    fix overflow-y sebelumnya BENAR tapi TIDAK CUKUP): `table` secara
    global pakai border-collapse:collapse, dan ini SUDAH DIKENAL LUAS
    membuat position:sticky pada <th> tidak bekerja benar di banyak
-   browser (containing block utk sticky jadi salah hitung dgn model
-   collapsed-border). Solusinya border-collapse:separate +
-   border-spacing:0 -- SECARA VISUAL hasilnya tetap sama (garis tabel
-   masih terlihat menyatu krn border tiap sel sudah setipis 1px), tapi
-   sticky jadi benar bekerja. DISKOPING khusus ke tabel ini (bukan
-   diubah di aturan `table` global) supaya tabel LAIN yg tidak pakai
-   sticky tidak ikut terpengaruh tampilannya. */
+   browser. DIPERBARUI 22 Okt 2026: fix border-collapse:separate
+   dipindah jadi GLOBAL (lihat aturan `table` di atas, baris ~127) --
+   bukan lagi cuma di sini -- krn bug yg sama dilaporkan di tabel LAIN
+   yg juga pakai header mengambang. Baris di bawah ini SENGAJA
+   dipertahankan (redundan dgn aturan global, tapi tidak salah/berbahaya)
+   sbg jaga-jaga eksplisit khusus tabel ini. */
 .tabel-kolom-beku-3 { min-width: 900px; border-collapse: separate; border-spacing: 0; }
 .tabel-kolom-beku-3 th:first-child, .tabel-kolom-beku-3 td:first-child {
   position: sticky; left: 0; background: #fff; z-index: 1;

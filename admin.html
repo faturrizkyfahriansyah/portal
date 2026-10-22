@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=20260903c">
 <link rel="stylesheet" href="portal.css?v=20261001g">
-<link rel="stylesheet" href="admin.css?v=20261021a">
+<link rel="stylesheet" href="admin.css?v=20261023a">
 <link rel="stylesheet" href="app-shell.css?v=20261015b">
 <link rel="stylesheet" href="rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
@@ -190,7 +190,12 @@
     </nav>
     <button type="button" class="shell-nav-link shell-nav-link--danger" id="btnLogout" style="margin:0 10px 8px;width:calc(100% - 20px);"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span>Keluar</span></button>
     <button type="button" class="shell-sidebar-collapse-toggle" id="shellCollapseToggle"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg> Ciutkan Menu</button>
-    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730</div>
+    <!-- BARU (23 Okt 2026, diminta Admin): penanda versi yg SELALU
+         terlihat di sidebar -- supaya Admin bisa langsung cek file mana
+         yg sesungguhnya jalan di browser, tanpa menebak lagi apakah
+         deploy sudah masuk atau belum. Diperbarui manual tiap kali
+         admin.html diubah -- lihat juga console.log di bawah. -->
+    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-10-23a</span></div>
   </aside>
     <div class="shell-main">
   <header class="shell-topbar">
@@ -2299,7 +2304,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261023b"></script>
+<script src="admin.js?v=20261023c"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>
