@@ -383,9 +383,11 @@
   msPeriodeEl.addEventListener('change', muatMultiShift_);
   msDivisiEl.addEventListener('change', muatMultiShift_);
 
+  // BARU (22 Okt 2026, diminta Admin: "setiap modul sediakan aksi
+  // Hapus") -- kolom Aksi + tombol Hapus ditambahkan ke 2 tabel ini.
   function renderMsDetail_(list) {
     const tbody = document.getElementById('msTbodyDetail');
-    if (!list.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Belum ada pola shift.</div></td></tr>'; return; }
+    if (!list.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">Belum ada pola shift.</div></td></tr>'; return; }
     tbody.innerHTML = list.map(d => `
       <tr>
         <td>Shift ${d.NOMOR_SHIFT}</td>
@@ -393,12 +395,23 @@
         <td>${d.LINTAS_TENGAH_MALAM === true || d.LINTAS_TENGAH_MALAM === 'TRUE' ? 'Ya' : '-'}</td>
         <td>${d.POLA_ROTASI === 'MINGGUAN' ? 'Bertukar/minggu' : 'Tetap'}</td>
         <td>${d.HARI_KHUSUS ? escapeHtml(d.HARI_KHUSUS) + ' (' + escapeHtml(d.JAM_MASUK_HARI_KHUSUS || '-') + ')' : '-'}</td>
+        <td><button type="button" class="btn-mini ms-hapus-detail" data-id="${escapeHtml(d.ID_DETAIL)}" style="color:var(--color-danger);">Hapus</button></td>
       </tr>`).join('');
+    tbody.querySelectorAll('.ms-hapus-detail').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Hapus pola shift ini?')) return;
+        try {
+          await apiPost('hapusShiftDivisiDetail', { token: token(), id: btn.dataset.id });
+          showSuccess('Pola shift dihapus.');
+          muatMultiShift_();
+        } catch (err) { showError(err.message || 'Gagal menghapus.'); }
+      });
+    });
   }
 
   function renderMsKelompok_(list) {
     const tbody = document.getElementById('msTbodyKelompok');
-    if (!list.length) { tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">Belum ada relawan di-assign.</div></td></tr>'; return; }
+    if (!list.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">Belum ada relawan di-assign.</div></td></tr>'; return; }
     tbody.innerHTML = list.map(k => {
       const relawanObj = (cache.relawan || []).find(r => r.id === k.ID_RELAWAN);
       const shiftM1 = Number(k.SHIFT_MINGGU_1);
@@ -408,8 +421,19 @@
         <td>Kelompok ${escapeHtml(k.KELOMPOK)}</td>
         <td>Shift ${shiftM1}</td>
         <td>Shift ${shiftM2}</td>
+        <td><button type="button" class="btn-mini ms-hapus-kelompok" data-id="${escapeHtml(k.ID_KELOMPOK)}" style="color:var(--color-danger);">Hapus</button></td>
       </tr>`;
     }).join('');
+    tbody.querySelectorAll('.ms-hapus-kelompok').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Keluarkan relawan ini dari kelompok?')) return;
+        try {
+          await apiPost('hapusKelompokRotasi', { token: token(), id: btn.dataset.id });
+          showSuccess('Relawan dikeluarkan dari kelompok.');
+          muatMultiShift_();
+        } catch (err) { showError(err.message || 'Gagal menghapus.'); }
+      });
+    });
   }
 
   function renderMsOverride_(list) {
