@@ -91,9 +91,8 @@
         periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
       document.getElementById('ptpPeriode').innerHTML = '<option value="">Pilih Periode...</option>' +
         periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
-      // Pembuatan Jadwal (21 Okt 2026, SIKOP) -- periode + checkbox divisi.
-      document.getElementById('pbjPeriode').innerHTML = '<option value="">Pilih Periode...</option>' +
-        periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
+      // Pembuatan Jadwal (disederhanakan 22 Okt 2026 -- TIDAK perlu
+      // Periode lagi) -- cuma checkbox divisi.
       document.getElementById('pbjDivisiCheckbox').innerHTML = divisi.map(d => `
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 10px;border:1px solid var(--color-border);border-radius:8px;cursor:pointer;">
           <input type="checkbox" class="pbj-divisi-checkbox" value="${escapeHtml(d)}" style="width:16px;height:16px;"> ${escapeHtml(d)}
@@ -392,7 +391,7 @@
       <tr>
         <td>Shift ${d.NOMOR_SHIFT}</td>
         <td>${escapeHtml(d.JAM_MASUK)}${d.JAM_PULANG ? ' - ' + escapeHtml(d.JAM_PULANG) : ''}</td>
-        <td>${d.LINTAS_TENGAH_MALAM === true || d.LINTAS_TENGAH_MALAM === 'TRUE' ? 'Ya' : '-'}</td>
+        <td>${d.LINTAS_TENGAH_MALAM === true || d.LINTAS_TENGAH_MALAM === 'TRUE' ? 'Ya' + (d.ATURAN_TANGGAL_ACUAN === 'HARI_BERIKUTNYA' ? ' (hadir: hari berikutnya)' : ' (hadir: hari mulai)') : '-'}</td>
         <td>${d.POLA_ROTASI === 'MINGGUAN' ? 'Bertukar/minggu' : 'Tetap'}</td>
         <td>${d.HARI_KHUSUS ? escapeHtml(d.HARI_KHUSUS) + ' (' + escapeHtml(d.JAM_MASUK_HARI_KHUSUS || '-') + ')' : '-'}</td>
         <td><button type="button" class="btn-mini ms-hapus-detail" data-id="${escapeHtml(d.ID_DETAIL)}" style="color:var(--color-danger);">Hapus</button></td>
@@ -460,6 +459,12 @@
     });
   });
 
+  // BARU (22 Okt 2026, diminta Admin) -- pilihan "Aturan Tanggal
+  // Acuan" hanya relevan & tampil kalau lintas tengah malam dicentang.
+  document.getElementById('msdLintasTengahMalam').addEventListener('change', (e) => {
+    document.getElementById('msdWrapAturanTanggal').style.display = e.target.checked ? 'flex' : 'none';
+  });
+
   document.getElementById('formShiftDetail').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!msDivisiEl.value) { showError('Pilih divisi dulu.'); return; }
@@ -471,7 +476,8 @@
       token: token(), namaDivisi: msDivisiEl.value,
       jamMasuk: document.getElementById('msdJamMasuk').value,
       jamPulang: document.getElementById('msdJamPulang').value,
-      lintasTengahMalam: document.getElementById('msdLintasTengahMalam').checked
+      lintasTengahMalam: document.getElementById('msdLintasTengahMalam').checked,
+      aturanTanggalAcuan: document.querySelector('input[name="msdAturanTanggal"]:checked').value
     };
     if (jenisPola === 'TETAP') {
       payload = Object.assign(payload, { nomorShift: 1, polaRotasi: 'TETAP', hariKhusus: '', jamMasukHariKhusus: '', jamPulangHariKhusus: '' });
@@ -862,26 +868,24 @@
     return Array.from(document.querySelectorAll('.pbj-divisi-checkbox:checked')).map(cb => cb.value);
   }
 
-  // Link "Sumber Konfigurasi" (BARU, 22 Okt 2026) -- pindah ke sub-tab
-  // Pengaturan / panel Kalender Operasional, murni navigasi, TIDAK
-  // mengubah data apa pun.
+  // Link "Pengaturan" dalam teks penjelasan (BARU, 22 Okt 2026) --
+  // murni navigasi ke sub-tab Pengaturan, TIDAK mengubah data apa pun.
   document.querySelectorAll('.pbj-link-pengaturan').forEach(a => {
     a.addEventListener('click', (e) => { e.preventDefault(); document.querySelector('[data-sub="multiShift"]').click(); });
   });
-  const pbjLinkKalender = document.getElementById('pbjLinkKalender');
-  if (pbjLinkKalender) pbjLinkKalender.addEventListener('click', (e) => { e.preventDefault(); document.querySelector('[data-panel="panelKalender"]').click(); });
 
+  // Disederhanakan 22 Okt 2026 (diminta Admin): TIDAK perlu pilih
+  // Periode lagi -- cukup (opsional) centang Divisi, tekan tombol.
+  // Backend otomatis memproses semua tanggal operasional dari hari
+  // ini dan seterusnya, lintas periode manapun.
   document.getElementById('pbjBtnPratinjau').addEventListener('click', async () => {
-    const idPeriode = document.getElementById('pbjPeriode').value;
-    const daftarDivisi = divisiTercentangPbj_();
+    const daftarDivisi = divisiTercentangPbj_(); // boleh kosong = semua divisi
     const elHasil = document.getElementById('pbjHasil');
-    if (!idPeriode) { showError('Pilih periode dulu.'); return; }
-    if (!daftarDivisi.length) { showError('Pilih minimal 1 divisi.'); return; }
 
     elHasil.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Menghitung pratinjau...</p>';
     try {
-      const hasil = await apiPost('pratinjauPembuatanJadwal', { token: token(), idPeriode, daftarDivisi });
-      pbjDataTerakhir = { idPeriode, daftarDivisi };
+      const hasil = await apiPost('pratinjauPembuatanJadwal', { token: token(), daftarDivisi });
+      pbjDataTerakhir = { daftarDivisi };
       renderPratinjauJadwal_(hasil);
     } catch (err) {
       elHasil.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
@@ -891,9 +895,8 @@
   function renderPratinjauJadwal_(hasil) {
     const elHasil = document.getElementById('pbjHasil');
     let html = `
-      <div class="admin-stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
-        <div class="admin-stat-card"><div class="admin-stat-value">${hasil.ringkasan.totalTanggal}</div><div class="admin-stat-label">Total Tanggal</div></div>
-        <div class="admin-stat-card"><div class="admin-stat-value">${hasil.ringkasan.totalTanggalLibur}</div><div class="admin-stat-label">Tanggal Libur</div></div>
+      <div class="admin-stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;">
+        <div class="admin-stat-card"><div class="admin-stat-value">${hasil.ringkasan.totalTanggal}</div><div class="admin-stat-label">Tanggal Diproses</div></div>
         <div class="admin-stat-card accent-success"><div class="admin-stat-value">${hasil.ringkasan.totalAkanDibuatBaru}</div><div class="admin-stat-label">Akan Dibuat Baru</div></div>
         <div class="admin-stat-card"><div class="admin-stat-value">${hasil.ringkasan.totalSudahTersimpanSebelumnya}</div><div class="admin-stat-label">Sudah Ada Sebelumnya</div></div>
       </div>`;
@@ -917,47 +920,35 @@
       if (!adaYgDijadwalkan) { /* semua divisi libur tanggal ini -- blok di atas sudah menjelaskan alasannya per divisi */ }
     });
 
-    html += `<div style="display:flex;gap:8px;margin-top:16px;">
-      <button type="button" class="btn-mini primary" id="pbjBtnBentuk">Bentuk Jadwal</button>
-      <button type="button" class="btn-mini" id="pbjBtnPerbaruiDraf">Perbarui Draf</button>
+    // Disederhanakan 22 Okt 2026 (diminta Admin) -- "Bentuk Jadwal" &
+    // "Perbarui Draf" DULU fungsinya identik (sama-sama idempotent,
+    // cuma label beda), sekarang digabung jadi SATU tombol supaya
+    // tidak membingungkan. "Bentuk Ulang" tetap terpisah krn
+    // perilakunya GENUINELY beda (hapus+buat ulang baris yg belum absen).
+    html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
+      <button type="button" class="btn-mini primary" id="pbjBtnTerapkan">✅ Terapkan ke Jadwal</button>
       <button type="button" class="btn-mini" id="pbjBtnBentukUlang">Bentuk Ulang (baris belum absen saja)</button>
     </div>`;
     elHasil.innerHTML = html;
 
-    document.getElementById('pbjBtnBentuk').addEventListener('click', async () => {
-      if (!confirm(`Bentuk jadwal untuk ${pbjDataTerakhir.daftarDivisi.length} divisi pada periode ini? ${hasil.ringkasan.totalAkanDibuatBaru} penugasan baru akan dibuat. Baris yang sudah ada tidak akan ditimpa.`)) return;
-      showLoading('Membentuk jadwal...');
+    document.getElementById('pbjBtnTerapkan').addEventListener('click', async () => {
+      if (!confirm(`Terapkan Pengaturan saat ini ke jadwal? ${hasil.ringkasan.totalAkanDibuatBaru} penugasan baru akan dibuat. Baris yang sudah ada tidak akan ditimpa.`)) return;
+      showLoading('Menerapkan jadwal...');
       try {
-        const r = await apiPost('bentukJadwal', { token: token(), idPeriode: pbjDataTerakhir.idPeriode, daftarDivisi: pbjDataTerakhir.daftarDivisi });
+        const r = await apiPost('bentukJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi });
         hideLoading();
-        showSuccess(`Jadwal dibentuk: ${r.totalDibuat} baris baru, ${r.totalSudahAda} sudah ada sebelumnya.`);
+        let pesan = `Jadwal diperbarui: ${r.totalDibuat} baris baru, ${r.totalSudahAda} sudah ada sebelumnya.`;
+        if (r.totalDilewatiResmi) pesan += ` (${r.totalDilewatiResmi} tanggal dilewati krn divisinya sudah Ditetapkan resmi.)`;
+        showSuccess(pesan);
         document.getElementById('pbjBtnPratinjau').click();
-      } catch (err) { hideLoading(); showError(err.message || 'Gagal membentuk jadwal.'); }
-    });
-
-    // "Perbarui Draf" (BARU, 22 Okt 2026, dokumen UI/UX SIKOP) -- SECARA
-    // FUNGSI sama persis dgn Bentuk Jadwal (bentukJadwal SUDAH idempotent
-    // -- cuma menambah yg BELUM ada, tidak pernah menimpa). Tombol
-    // terpisah disediakan krn dokumen eksplisit minta 3 aksi berbeda
-    // labelnya -- framing "perbarui" lebih pas dipakai kalau draf
-    // SUDAH ada & cuma mau menambah yg kurang (mis. anggota baru masuk
-    // divisi), drpd "Bentuk Jadwal" yg terkesan dari awal.
-    document.getElementById('pbjBtnPerbaruiDraf').addEventListener('click', async () => {
-      if (!confirm(`Perbarui draf untuk ${pbjDataTerakhir.daftarDivisi.length} divisi? Baris yang sudah ada TIDAK akan ditimpa -- hanya menambah yang belum ada.`)) return;
-      showLoading('Memperbarui draf...');
-      try {
-        const r = await apiPost('bentukJadwal', { token: token(), idPeriode: pbjDataTerakhir.idPeriode, daftarDivisi: pbjDataTerakhir.daftarDivisi });
-        hideLoading();
-        showSuccess(`Draf diperbarui: ${r.totalDibuat} baris baru ditambahkan, ${r.totalSudahAda} sudah ada sebelumnya.`);
-        document.getElementById('pbjBtnPratinjau').click();
-      } catch (err) { hideLoading(); showError(err.message || 'Gagal memperbarui draf.'); }
+      } catch (err) { hideLoading(); showError(err.message || 'Gagal menerapkan jadwal.'); }
     });
 
     document.getElementById('pbjBtnBentukUlang').addEventListener('click', async () => {
-      if (!confirm('Bentuk ULANG jadwal? Baris yang BELUM pernah absen akan dihapus dan dibuat ulang dengan pengaturan terbaru. Baris yang SUDAH ada aktivitas absensi TIDAK akan disentuh.')) return;
+      if (!confirm('Bentuk ULANG jadwal? Baris yang BELUM pernah absen akan dihapus dan dibuat ulang dengan Pengaturan terbaru. Baris yang SUDAH ada aktivitas absensi TIDAK akan disentuh.')) return;
       showLoading('Membentuk ulang jadwal...');
       try {
-        const r = await apiPost('bentukUlangJadwal', { token: token(), idPeriode: pbjDataTerakhir.idPeriode, daftarDivisi: pbjDataTerakhir.daftarDivisi });
+        const r = await apiPost('bentukUlangJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi });
         hideLoading();
         showSuccess(`Jadwal dibentuk ulang: ${r.totalDihapus} baris lama dihapus, ${r.totalDibuat} baris baru dibuat.`);
         document.getElementById('pbjBtnPratinjau').click();

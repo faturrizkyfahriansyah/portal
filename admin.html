@@ -1340,25 +1340,22 @@
     <!-- Jadi tab PERTAMA/default sekarang (22 Okt 2026, setelah "Shift
          Divisi" dihapus) -- TIDAK pakai display:none, sama spt pola
          tab pertama lainnya di portal ini (lihat el.subtabs[0] di JS). -->
+    <!-- Disederhanakan total 22 Okt 2026 (diminta Admin: "pembuatan
+         jadwal itu [ikuti] pengaturan... tanpa rentan waktu") -- TIDAK
+         ADA LAGI pilihan Periode di sini. Jadwal otomatis mengikuti
+         Pengaturan (Pola Kerja/Kelompok) yg SEDANG berlaku, untuk
+         SEMUA tanggal operasional dari hari ini dan seterusnya, lintas
+         periode manapun. -->
     <div class="shift-sub" id="shiftSubPembuatanJadwal">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-        <select id="pbjPeriode" class="mini-select" style="flex:1;min-width:160px;"><option value="">Pilih Periode...</option></select>
-      </div>
-      <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 8px;">Pilih Divisi (boleh lebih dari satu)</p>
-      <div id="pbjDivisiCheckbox" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
-
-      <!-- Sumber Konfigurasi (BARU, 22 Okt 2026, dokumen UI/UX SIKOP) --
-           murni INFORMASI dari mana aturan diambil, TIDAK ada kontrol
-           status kalender manual di sini (dilarang eksplisit dokumen). -->
       <div class="panel-block" style="margin-bottom:14px;">
-        <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 8px;">Sumber Konfigurasi</p>
-        <p style="font-size:12.5px;margin:0 0 4px;">📋 Pola kerja divisi — lihat/ubah di <a href="#" class="pbj-link-pengaturan">Pengaturan</a></p>
-        <p style="font-size:12.5px;margin:0 0 4px;">👥 Kelompok dan rotasi — lihat/ubah di <a href="#" class="pbj-link-pengaturan">Pengaturan</a></p>
-        <p style="font-size:12.5px;margin:0;">📅 Kalender operasional — status tanggal dibaca otomatis, <a href="#" id="pbjLinkKalender">lihat Kalender Operasional</a></p>
+        <p style="margin:0;font-size:13px;color:#334;">Jadwal relawan <b>otomatis mengikuti Pengaturan</b> (Pola Kerja & Kelompok Rotasi tiap divisi). Ubah jam atau anggota di <a href="#" class="pbj-link-pengaturan">Pengaturan</a>, lalu tekan tombol di bawah untuk menerapkannya ke jadwal yang akan datang.</p>
       </div>
+
+      <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 8px;">Divisi (opsional — kosongkan utk semua divisi)</p>
+      <div id="pbjDivisiCheckbox" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button type="button" class="btn-mini primary" id="pbjBtnPratinjau">Lihat Pratinjau</button>
+        <button type="button" class="btn-mini primary" id="pbjBtnPratinjau">🔄 Perbarui Jadwal Sekarang</button>
       </div>
 
       <div id="pbjHasil" style="margin-top:18px;"></div>
@@ -1472,6 +1469,15 @@
             </div>
             <label style="display:flex;align-items:center;gap:8px;font-size:13px;"><input type="checkbox" id="msdLintasTengahMalam" style="width:16px;height:16px;"> Jam pulang di tanggal berikutnya (lintas tengah malam)</label>
 
+            <!-- BARU (22 Okt 2026, diminta Admin): hanya relevan utk
+                 shift lintas tengah malam -- disembunyikan via JS
+                 kalau checkbox di atas tidak dicentang. -->
+            <div id="msdWrapAturanTanggal" style="display:none;flex-direction:column;gap:6px;padding:10px;background:#f9fafb;border-radius:8px;">
+              <p style="font-size:12px;margin:0 0 2px;color:var(--color-text-muted);">Hadir dihitung untuk tanggal:</p>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;"><input type="radio" name="msdAturanTanggal" value="MULAI_SHIFT" checked> Tanggal shift dimulai (mis. Security masuk Senin malam → terhitung Senin)</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;"><input type="radio" name="msdAturanTanggal" value="HARI_BERIKUTNYA"> Hari berikutnya (mis. masuk Senin malam → terhitung Selasa)</label>
+            </div>
+
             <!-- Khusus "Jam berbeda berdasarkan hari" -->
             <div id="msdWrapHariBerbeda" style="display:none;flex-direction:column;gap:8px;padding:10px;background:#f9fafb;border-radius:8px;">
               <p style="font-size:12px;margin:0;color:var(--color-text-muted);">Jam berbeda ini berlaku pada hari:</p>
@@ -1494,15 +1500,16 @@
               </div>
             </div>
 
-            <!-- BARU (22 Okt 2026, dokumen Pembaruan Pengaturan SIKOP
-                 §G "Prinsip konfigurasi") -- INFORMASI, bukan knob yg
-                 bisa diubah: aturan tanggal penugasan & acuan absensi
-                 sudah TETAP benar di backend (mengikuti tanggal shift
-                 dimulai, lintas tengah malam dihitung otomatis),
-                 ditampilkan di sini supaya Admin paham, bukan ditebak. -->
+            <!-- Diperbaiki 22 Okt 2026 (diminta Admin: ternyata INI
+                 juga perlu bisa dipilih per divisi, bukan tetap) --
+                 info box sekarang hanya jelaskan prinsip dasar
+                 (tanggal PENUGASAN selalu ikut shift dimulai, TIDAK
+                 bisa diubah -- ini beda dari "tanggal acuan absensi"
+                 yg BISA dipilih via radio button "Jam pulang di
+                 tanggal berikutnya" di atas). -->
             <div style="background:#eef2fb;border-radius:8px;padding:10px 12px;margin:4px 0;">
-              <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#0B2D6B;">ℹ️ Aturan tanggal (otomatis, tidak perlu diatur)</p>
-              <p style="margin:0;font-size:12px;color:#334;">Tanggal penugasan mengikuti tanggal shift dimulai. Waktu pulang boleh jatuh di hari berikutnya (lintas tengah malam) — tanggal penugasan dan tanggal acuan absensi tetap mengikuti aturan pola ini, bukan otomatis ikut tanggal pulang.</p>
+              <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#0B2D6B;">ℹ️ Tanggal penugasan</p>
+              <p style="margin:0;font-size:12px;color:#334;">Selalu mengikuti tanggal shift dimulai (tidak bisa diubah). Yang BISA dipilih per divisi adalah tanggal acuan absensi untuk shift lintas tengah malam — lihat pilihan di atas kalau "lintas tengah malam" dicentang.</p>
             </div>
 
             <button type="submit" class="btn-mini primary">+ Simpan Pola Kerja</button>
@@ -2292,7 +2299,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261022h"></script>
+<script src="admin.js?v=20261022i"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261001e"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>

@@ -359,7 +359,7 @@
   // bisa diuji langsung di browser).
   const MODUL_LAZY = {
     panelStok: 'admin-stok.js?v=20261011b',
-    panelShift: 'admin-shift.js?v=20261022f',
+    panelShift: 'admin-shift.js?v=20261022g',
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261021b',
     panelLaporan: 'admin-laporan.js?v=20261014a',
     panelProfilRelawan: 'admin-profil-relawan.js?v=20261016a',
