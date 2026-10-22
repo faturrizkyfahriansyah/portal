@@ -227,16 +227,16 @@
     // tidak bisa dipakai Staff, supaya tidak ada menu "mati" di UI.
     window.sppgAdminRole = role || 'ADMIN';
     terapkanBatasanRoleStaff_();
-    // Bug diperbaiki 23 Okt 2026 (dilaporkan Admin: dropdown Periode di
-    // Kalender Operasional kosong total) -- cache.periodeList SEBELUMNYA
-    // cuma dimuat saat panel "Periode Kerja" dibuka (lihat
-    // muatUlangPeriode, dipanggil dari dalam handler2 form di situ).
-    // Kalau Admin langsung buka Kalender Operasional tanpa pernah
-    // membuka Periode Kerja duluan di sesi itu, dropdownnya kosong --
-    // krn Kalender & "Buat Massal" SAMA-SAMA baca dari cache yg sama
-    // (fillPeriodeSelects). Dimuat di sini supaya SELALU tersedia sejak
-    // awal sesi, tidak bergantung urutan panel mana yg dibuka duluan.
-    muatUlangPeriode().catch(() => {}); // diam-diam gagal kalau API belum siap -- panel Periode Kerja tetap akan memuat ulang sendiri saat dibuka
+    // DIBALIK 23 Okt 2026: penambahan muatUlangPeriode() di sini (sesi
+    // sebelumnya) ternyata berdasarkan diagnosis yg KELIRU -- periodeList
+    // SUDAH dimuat dgn benar lewat initDashboard() (SUMBER_DASHBOARD,
+    // lihat di bawah), yg jalan paralel utk SEMUA sumber data termasuk
+    // Periode, DAN sudah py penanganan error yg rapi (render tetap
+    // jalan meski gagal, munculkan "Coba Lagi" -- bukan macet diam).
+    // Panggilan DUPLIKAT yg saya tambah kemarin kemungkinan besar
+    // menyebabkan race/bentrok dgn initDashboard() shg tabel malah
+    // macet di "Memuat data..." selamanya. Akar masalah SEBENARNYA dari
+    // laporan dropdown kosong kemungkinan beda (lihat diskusi berikutnya).
     window.dispatchEvent(new CustomEvent('sppg-admin-ready'));
     el.loginWrap.classList.add('is-hidden');
     el.dashboardWrap.classList.remove('is-hidden');
