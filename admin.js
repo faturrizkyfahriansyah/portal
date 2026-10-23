@@ -369,22 +369,38 @@
   // bisa diuji langsung di browser).
   const MODUL_LAZY = {
     panelStok: 'admin-stok.js?v=20261011b',
-    panelShift: 'admin-shift.js?v=20261022g',
-    panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261021b',
-    panelLaporan: 'admin-laporan.js?v=20261014a',
-    panelProfilRelawan: 'admin-profil-relawan.js?v=20261016a',
-    panelMenuHariIni: 'admin-menu-hari-ini.js?v=20261021a',
-    panelPenerimaManfaatOps: 'admin-penerima-manfaat-ops.js?v=20261015a',
-    panelManajemenHakAkses: 'admin-manajemen-hak-akses.js?v=20261019a',
-    panelRoleAkses: 'admin-role.js?v=20260903c',
-    panelPengelolaSppg: 'admin-pengelola-sppg.js?v=20261021a',
-    panelPengajuanKebutuhanAdmin: 'admin-pengajuan-kebutuhan.js?v=20261021a',
-    panelReturBarangAdmin: 'admin-retur-barang.js?v=20261021a',
-    panelPengaturan: 'admin-pengaturan.js',
-    panelWebsitePublik: 'admin-website-publik.js',
-    panelDuaMinggu: 'admin-export.js?v=20261011b',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
-    panelRelawan: 'admin-import.js',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
-    panelKartuQr: 'admin-kartu-qr.js?v=20261016a'
+    // Diperbaiki 23 Okt 2026 (ditemukan saat menelusuri laporan "sudah
+    // diperbaiki tapi tidak muncul" yg berulang): peta ini adalah
+    // SUMBER VERSI TERPISAH dari <script> statis di admin.html -- utk
+    // file yg lazy-load (dimuat saat panel dibuka, BUKAN saat halaman
+    // pertama kali load), versi DI SINI yg sebenarnya menentukan apakah
+    // browser pakai cache lama atau tidak, bukan tag <script> (yg
+    // kadang tidak ada sama sekali utk file2 ini). Saya sempat hanya
+    // menaikkan versi di SATU tempat (mis. tag <script> admin-kartu-qr.js
+    // di admin.html) sementara peta INI tetap versi lama -- akibatnya
+    // perubahan tidak pernah benar2 ter-refresh di browser Admin. SEMUA
+    // versi di bawah dinaikkan serentak ke 23 Okt sbg langkah aman,
+    // walau sebagian filenya sendiri belum tentu berubah isi -- supaya
+    // SEMUA panel dipastikan ambil salinan terbaru, bukan cache lama.
+    panelShift: 'admin-shift.js?v=20261023a',
+    panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261023a',
+    panelLaporan: 'admin-laporan.js?v=20261023a',
+    panelProfilRelawan: 'admin-profil-relawan.js?v=20261023a',
+    panelMenuHariIni: 'admin-menu-hari-ini.js?v=20261023a',
+    panelPenerimaManfaatOps: 'admin-penerima-manfaat-ops.js?v=20261023a',
+    panelManajemenHakAkses: 'admin-manajemen-hak-akses.js?v=20261023a',
+    panelRoleAkses: 'admin-role.js?v=20261023a',
+    panelPengelolaSppg: 'admin-pengelola-sppg.js?v=20261023a',
+    panelPengajuanKebutuhanAdmin: 'admin-pengajuan-kebutuhan.js?v=20261023a',
+    panelReturBarangAdmin: 'admin-retur-barang.js?v=20261023a',
+    // 2 baris di bawah SEBELUMNYA tidak py versi SAMA SEKALI -- berarti
+    // browser bisa menyimpan cache file ini TANPA BATAS WAKTU, tidak
+    // pernah tahu ada versi baru. Ditambahkan sekarang.
+    panelPengaturan: 'admin-pengaturan.js?v=20261023a',
+    panelWebsitePublik: 'admin-website-publik.js?v=20261023a',
+    panelDuaMinggu: 'admin-export.js?v=20261023a',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
+    panelRelawan: 'admin-import.js?v=20261023a',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
+    panelKartuQr: 'admin-kartu-qr.js?v=20261023a'
   };
   const modulTerpuat = new Set();
 
@@ -579,7 +595,7 @@
     divisiList: () => { fillDivisiSelects(); renderDivisiTable(); },
     akunList: renderAkunTable,
     informasiList: renderInformasiAdmin,
-    periodeList: () => { fillPeriodeSelects(); renderPeriodeTable(); },
+    periodeList: () => { fillPeriodeSelects(); renderPeriodeTable(); isiDropdownPeriodeDuaMinggu_(); },
     kalenderList: renderKalenderTable,
     lokasiList: renderLokasiTable,
     jadwalList: () => { fillRelawanJadwalSelect(); renderJadwalTable(); }, // tidak lagi dipicu (jadwalList dikeluarkan dari SUMBER_DASHBOARD) -- entri dipertahankan, tidak dihapus, sesuai instruksi jangan hapus sembarangan
@@ -617,7 +633,11 @@
     const now = new Date();
     el.filterTanggal.value = toDateInputValue(now);
     el.inputTanggalJadwal.value = toDateInputValue(now);
-    muatDaftarPeriodeDuaMinggu_(); // Rekap Per Periode -- isi dropdown + auto-pilih periode AKTIF (tidak perlu tunggu fetch lain)
+    // Diperbaiki 23 Okt 2026 -- DULU memanggil muatDaftarPeriodeDuaMinggu_()
+    // di sini, yg melakukan fetch SENDIRI bersamaan dgn SUMBER_DASHBOARD
+    // (lihat catatan lengkap di definisi fungsi itu). Dropdown Rekap Per
+    // Periode sekarang diisi lewat RENDER_UNTUK_KEY.periodeList, SETELAH
+    // cache.periodeList siap -- bukan fetch kedua yg bersamaan.
 
     // OPTIMASI: TIDAK ADA LAGI overlay full-screen di sini -- shell
     // Dashboard SUDAH tampil (dari alur login/pulihkanSesiAdmin_ sebelum
@@ -834,19 +854,37 @@
     return 'Rp' + Number(n).toLocaleString('id-ID');
   }
 
+  /**
+   * Diperbaiki 23 Okt 2026 (dilaporkan Admin: "Periode Kerja" macet
+   * selamanya di "Memuat data..."). AKAR MASALAH SESUNGGUHNYA: fungsi
+   * ini DULU melakukan fetch TERPISAHNYA SENDIRI ke getPeriodeListAdmin,
+   * dipanggil SERENTAK dgn SUMBER_DASHBOARD yg JUGA memanggil endpoint
+   * YANG SAMA PERSIS -- 2 panggilan bersamaan ke fungsi backend yg sama
+   * di Apps Script bisa saling tunda/bentrok, menyebabkan SALAH SATUNYA
+   * (dlm laporan ini: sumber 'periodeList' milik SUMBER_DASHBOARD, yg
+   * dipakai panel Periode Kerja) macet tanpa pernah selesai ATAU error.
+   * Diperbaiki dgn MEMAKAI ULANG cache.periodeList yg SUDAH diambil oleh
+   * SUMBER_DASHBOARD -- TIDAK ADA LAGI fetch kedua yg redundan.
+   */
+  function isiDropdownPeriodeDuaMinggu_() {
+    const daftar = cache.periodeList || [];
+    cache.periodeDuaMinggu = daftar;
+    const opsi = daftar.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
+    el.filterPeriodeDuaMinggu.innerHTML = '<option value="">Pilih periode...</option>' + opsi;
+    const aktif = daftar.find(p => String(p.status).toUpperCase() === 'AKTIF');
+    if (aktif) { el.filterPeriodeDuaMinggu.value = aktif.id; muatRekapDuaMinggu(); }
+  }
+
+  // Dipertahankan HANYA utk tombol "Muat" manual (el.btnMuatDuaMinggu) --
+  // retry eksplisit oleh Admin, BUKAN dipanggil otomatis saat initDashboard
+  // lagi (itu yg menyebabkan bentrok di atas). Fetch TERPISAH di sini aman
+  // krn tidak lagi berjalan BERSAMAAN dgn SUMBER_DASHBOARD (dipicu User,
+  // jauh setelah initDashboard selesai).
   async function muatDaftarPeriodeDuaMinggu_() {
     try {
       const daftar = await apiGet('getPeriodeListAdmin', { token: authToken });
-      cache.periodeDuaMinggu = daftar;
-      // Perbaikan C: cuma nama periode -- rentang tanggal TETAP ada di data
-      // (p.tanggalMulai/tanggalSelesai, dipakai internal utk hitung2), cuma
-      // tidak lagi ditulis di teks dropdown (terlalu lebar, khususnya di HP).
-      const opsi = daftar.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
-      el.filterPeriodeDuaMinggu.innerHTML = '<option value="">Pilih periode...</option>' + opsi;
-      // Periode aktif menjadi pilihan awal secara otomatis (sesuai spesifikasi) --
-      // kalau tidak ada yang berstatus AKTIF, biarkan kosong (Admin pilih manual).
-      const aktif = daftar.find(p => String(p.status).toUpperCase() === 'AKTIF');
-      if (aktif) { el.filterPeriodeDuaMinggu.value = aktif.id; muatRekapDuaMinggu(); }
+      cache.periodeList = daftar; // sinkronkan ulang supaya Periode Kerja JUGA ikut terbarui kalau Admin pakai tombol ini
+      isiDropdownPeriodeDuaMinggu_();
     } catch (err) {
       console.warn('Gagal memuat daftar periode utk Rekap Per Periode:', err);
     }
