@@ -509,7 +509,19 @@
     { key: 'akunList', label: 'Akun Relawan', fn: () => apiGet('getAkunRelawanList', { token: authToken }) },
     { key: 'informasiList', label: 'Informasi', fn: () => apiGet('getInformasiListAdmin', { token: authToken }) },
     { key: 'periodeList', label: 'Periode Kerja', fn: () => apiGet('getPeriodeListAdmin', { token: authToken }) },
-    { key: 'kalenderList', label: 'Kalender Operasional', fn: () => apiGet('getKalenderListAdmin', { token: authToken }) },
+    // Dihapus 23 Okt 2026 (BUG KRITIS, ditemukan via console: "Uncaught
+    // ReferenceError: renderKalenderTable is not defined" -- error ini
+    // terjadi SAAT INISIALISASI, menghentikan SELURUH script sebelum
+    // modul LAIN sempat jalan, menyebabkan Dashboard/Relawan/Divisi dkk
+    // semua kosong sekaligus). Entri 'kalenderList' di sini SELALU
+    // redundan sejak awal -- Kalender Operasional punya alur
+    // pemuatannya SENDIRI yg lengkap lewat event 'change' dropdown
+    // periode (lihat el.selectPeriodeOperasional.addEventListener di
+    // bawah, SELALU memanggil ulang apiGet('getKalenderListAdmin', ...)
+    // dgn idPeriode yg benar) -- fetch di sini (TANPA idPeriode) hasilnya
+    // tidak pernah benar2 dipakai, langsung ketimpa. RENDER_UNTUK_KEY.
+    // kalenderList (memanggil fungsi 'renderKalenderTable' yg TIDAK
+    // PERNAH ADA sama sekali di file ini) JUGA dihapus -- lihat di bawah.
     { key: 'lokasiList', label: 'Master Lokasi SPPG', fn: () => apiGet('getLokasiListAdmin', { token: authToken }) },
     // 'jadwalList' (getJadwalListAdmin) SENGAJA DIKELUARKAN dari batch ini --
     // sumbernya (10_JADWAL) sudah deprecated, panel UI-nya sudah
@@ -597,7 +609,8 @@
     akunList: renderAkunTable,
     informasiList: renderInformasiAdmin,
     periodeList: () => { fillPeriodeSelects(); renderPeriodeTable(); isiDropdownPeriodeDuaMinggu_(); },
-    kalenderList: renderKalenderTable,
+    // 'kalenderList' dihapus 23 Okt 2026 -- lihat catatan lengkap di
+    // SUMBER_DASHBOARD (atas) kenapa entri ini dihapus total, bukan cuma diperbaiki.
     lokasiList: renderLokasiTable,
     jadwalList: () => { fillRelawanJadwalSelect(); renderJadwalTable(); }, // tidak lagi dipicu (jadwalList dikeluarkan dari SUMBER_DASHBOARD) -- entri dipertahankan, tidak dihapus, sesuai instruksi jangan hapus sembarangan
     dokumenList: renderDokumenAdmin,
