@@ -400,7 +400,8 @@
     panelWebsitePublik: 'admin-website-publik.js?v=20261023a',
     panelDuaMinggu: 'admin-export.js?v=20261023a',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'admin-import.js?v=20261023a',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
-    panelKartuQr: 'admin-kartu-qr.js?v=20261023a'
+    panelKartuQr: 'admin-kartu-qr.js?v=20261023a',
+    panelMasterTarif: 'admin-master-tarif.js?v=20261023a'
   };
   const modulTerpuat = new Set();
 

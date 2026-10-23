@@ -122,6 +122,10 @@
       <p class="shell-nav-group-desc">Sistem Informasi Presensi — rekap kehadiran dan pemantauan absensi relawan.</p>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelHarian"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 12l2 2 4-4"/></svg></span><span>Rekap Harian</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDuaMinggu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Rekap Per Periode</span></button>
+      <!-- BARU (23 Okt 2026, diminta Admin) -- dulu "Atur Tarif per
+           Relawan" di dalam Rekap Per Periode, sekarang halaman mandiri
+           & standing (bukan per-periode lagi). -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelMasterTarif"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5a2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 0 1 0 5h-1a2.5 2.5 0 0 0 0 5h1a2.5 2.5 0 0 0 2.5-2.5"/></svg></span><span>Master Tarif</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelMonitoringPresensi"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></span><span>Monitoring Presensi</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPengajuanKetidakhadiranAdmin"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M12 9v6"/><circle cx="12" cy="12" r="9"/></svg></span><span>Pengajuan Ketidakhadiran</span></button>
       <!-- Dipindah dari grup SIKOP ke sini + diganti nama (18 Okt 2026,
@@ -684,6 +688,26 @@
              tanggal yang sudah lewat/hari ini, bukan ke depan. -->
         <thead><tr><th>Nama</th><th>Divisi</th><th>Nomor Rekening</th><th>Total Hari Kerja</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Alfa</th><th>Hadir</th><th>Tarif per Hari</th><th>Total Insentif</th></tr></thead>
         <tbody id="tbodyDuaMinggu"><tr><td colspan="11"><div class="empty-state">Pilih periode lalu klik Tampilkan.</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MASTER TARIF (BARU, 23 Okt 2026, diminta Admin) -- standing,
+       BUKAN per-periode. Nama/Divisi otomatis dari SIMSDM, Admin cuma
+       atur Jabatan + Tarif Harian. Simpan sekali, berlaku terus sampai
+       diubah lagi. -->
+  <div class="admin-panel" id="panelMasterTarif">
+    <div class="shell-page-head">
+      <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5a2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 0 1 0 5h-1a2.5 2.5 0 0 0 0 5h1a2.5 2.5 0 0 0 2.5-2.5"/></svg></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Master Tarif</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Aturan tarif harian tiap relawan -- berlaku terus sampai diubah, tidak terikat periode tertentu. Nama &amp; Divisi otomatis mengikuti data SIM SDM.</p></div>
+    </div>
+
+    <input type="text" id="mtCari" class="form-field-input" placeholder="🔍 Cari nama relawan..." style="width:100%;margin-bottom:14px;">
+
+    <div class="table-wrap">
+      <table class="tabel-kolom-beku-3">
+        <thead><tr><th>Nama</th><th>Divisi</th><th>Jabatan</th><th>Tarif Harian (Rp)</th><th>Aksi</th></tr></thead>
+        <tbody id="tbodyMasterTarif"><tr><td colspan="5"><div class="empty-state">Memuat data...</div></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -2313,7 +2337,7 @@
 <script src="app-shell.js?v=20260903c"></script>
 <script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261023c"></script>
+<script src="admin.js?v=20261023d"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="admin-kartu-qr.js?v=20261023a"></script>
 <script src="admin-sipres-monitoring.js?v=20260922a"></script>
