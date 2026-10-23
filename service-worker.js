@@ -87,9 +87,16 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(req)
         .then((resp) => {
-          if (resp && resp.status === 200 && resp.type === 'basic') {
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, resp.clone()));
-          }
+          // Diperbaiki 23 Okt 2026 (dilaporkan: "Failed to execute 'clone'
+          // on Response: Response body is already used"). SEBAB: .clone()
+          // SEBELUMNYA dipanggil DI DALAM caches.open().then(...) yg async
+          // -- browser bisa saja sudah mulai memakai body `resp` asli
+          // (utk merender halaman) SEBELUM clone() sempat jalan, krn
+          // caches.open() butuh waktu (walau singkat) utk selesai. Clone
+          // HARUS dipanggil SEKETIKA/SYNCHRONOUS di sini, sebelum operasi
+          // async apa pun -- baru hasil clone-nya yg dikirim ke dalam .then().
+          const salinanUtkCache = (resp && resp.status === 200 && resp.type === 'basic') ? resp.clone() : null;
+          if (salinanUtkCache) caches.open(CACHE_NAME).then((cache) => cache.put(req, salinanUtkCache));
           return resp;
         })
         .catch(() => caches.open(CACHE_NAME).then((cache) => cache.match(req)))
