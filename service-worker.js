@@ -17,7 +17,7 @@
 //   4. Versi cache baru otomatis membuang cache versi lama (lihat 'activate'),
 //      supaya update aplikasi tidak pernah "nyangkut" di versi basi.
 
-const CACHE_NAME = 'sppg-static-v1'; // NAIKKAN nomor ini kalau strategi cache di file ini diubah lagi nanti -- cache lama otomatis dibuang saat versi baru aktif.
+const CACHE_NAME = 'sppg-static-v2'; // NAIKKAN nomor ini kalau strategi cache di file ini diubah lagi nanti -- cache lama otomatis dibuang saat versi baru aktif.
 
 /** True kalau request ini menuju backend API (Apps Script) atau layanan pihak ketiga -- JANGAN PERNAH disentuh cache. */
 function permintaanApiAtauPihakKetiga_(url) {
@@ -63,25 +63,52 @@ self.addEventListener('fetch', (event) => {
   // Cuma tangani asset dari origin situs ini sendiri (HTML/CSS/JS/gambar/font).
   if (url.origin !== self.location.origin) return;
 
+  // Diperbaiki 23 Okt 2026 (dilaporkan Admin: tombol sudah diperbaiki &
+  // dideploy berkali-kali, tapi browser TETAP menampilkan pesan versi
+  // LAMA -- bahkan setelah hard refresh). SEBAB: strategi lama
+  // (stale-while-revalidate) SELALU mengembalikan versi CACHE LAMA
+  // secara instan kalau sudah pernah tersimpan, baru memperbarui cache
+  // utk kunjungan BERIKUTNYA -- utk situs yg sedang sering diubah
+  // (seperti proyek ini), ini berarti perubahan baru BISA butuh 2 kali
+  // reload utk benar2 terlihat, dan dalam kondisi tertentu (banyak tab
+  // terbuka, dsb) bisa terasa "nyangkut" lebih lama lagi.
+  //
+  // DIGANTI ke NETWORK-FIRST utk HTML/JS/CSS (file yg paling sering
+  // berubah selama pengembangan aktif): coba jaringan DULU setiap kali;
+  // cache HANYA dipakai sbg fallback kalau jaringan benar2 gagal
+  // (offline). Ini MENGHILANGKAN risiko "kode lama nyangkut" sepenuhnya
+  // selama ada koneksi internet -- pengorbanannya cuma sedikit lebih
+  // lambat drpd cache-first, which Not noticeable utk file JS/CSS
+  // berukuran kecil-menengah seperti ini.
+  const path = url.pathname;
+  const asetSeringBerubah = /\.(js|html|css)$/i.test(path) || path === '/' || path.endsWith('/');
+
+  if (asetSeringBerubah) {
+    event.respondWith(
+      fetch(req)
+        .then((resp) => {
+          if (resp && resp.status === 200 && resp.type === 'basic') {
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, resp.clone()));
+          }
+          return resp;
+        })
+        .catch(() => caches.open(CACHE_NAME).then((cache) => cache.match(req)))
+    );
+    return;
+  }
+
+  // Aset jarang berubah (gambar, font, ikon) -- TETAP cache-first demi
+  // kecepatan, aman krn file jenis ini praktis tidak pernah diedit ulang
+  // dgn nama yg sama.
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) =>
       cache.match(req).then((tersimpan) => {
-        // Selalu coba ambil versi terbaru di jaringan untuk kunjungan
-        // BERIKUTNYA (stale-while-revalidate) -- kalau sukses & valid,
-        // perbarui cache. Kalau jaringan gagal (offline), fallback ke
-        // yang tersimpan di cache (kalau ada).
         const dariJaringan = fetch(req)
           .then((resp) => {
-            if (resp && resp.status === 200 && resp.type === 'basic') {
-              cache.put(req, resp.clone());
-            }
+            if (resp && resp.status === 200 && resp.type === 'basic') cache.put(req, resp.clone());
             return resp;
           })
           .catch(() => tersimpan);
-
-        // Kalau sudah ada di cache: kembalikan LANGSUNG (cepat, termasuk
-        // saat offline), sambil tetap memperbarui cache di belakang layar.
-        // Kalau belum ada di cache sama sekali: tunggu jaringan.
         return tersimpan || dariJaringan;
       })
     )
