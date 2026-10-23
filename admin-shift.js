@@ -935,7 +935,18 @@
       if (!confirm(`Terapkan Pengaturan saat ini ke jadwal? ${hasil.ringkasan.totalAkanDibuatBaru} penugasan baru akan dibuat. Baris yang sudah ada tidak akan ditimpa.`)) return;
       showLoading('Menerapkan jadwal...');
       try {
-        const r = await apiPost('bentukJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi });
+        // Diperbaiki 23 Okt 2026 (dilaporkan Admin: "Server tidak
+        // merespons" saat tekan tombol ini). SEBAB: timeout default
+        // apiPost cuma 20 detik, padahal aksi ini bisa memproses SEMUA
+        // tanggal operasional lintas periode (lihat SikopPembuatanJadwal.gs
+        // bentukJadwal) -- utk data produksi dgn beberapa periode aktif +
+        // banyak divisi, ini wajar makan >20 detik. Timeout dinaikkan ke
+        // 2 menit + pesan kustom yg tidak menakutkan (proses backend TETAP
+        // bisa saja sudah berhasil meski frontend menyerah duluan --
+        // Admin disarankan cek dgn Pratinjau sebelum mengulang, bukan
+        // langsung asumsi gagal total).
+        const r = await apiPost('bentukJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi }, 120000,
+          'Proses masih berjalan di server (jadwal lintas periode bisa makan waktu). Jangan tekan tombol lagi -- tunggu sebentar lalu tekan "Pratinjau" utk cek apakah sudah selesai.');
         hideLoading();
         let pesan = `Jadwal diperbarui: ${r.totalDibuat} baris baru, ${r.totalSudahAda} sudah ada sebelumnya.`;
         if (r.totalDilewatiResmi) pesan += ` (${r.totalDilewatiResmi} tanggal dilewati krn divisinya sudah Ditetapkan resmi.)`;
@@ -948,7 +959,10 @@
       if (!confirm('Bentuk ULANG jadwal? Baris yang BELUM pernah absen akan dihapus dan dibuat ulang dengan Pengaturan terbaru. Baris yang SUDAH ada aktivitas absensi TIDAK akan disentuh.')) return;
       showLoading('Membentuk ulang jadwal...');
       try {
-        const r = await apiPost('bentukUlangJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi });
+        // Diperbaiki 23 Okt 2026 -- SAMA PERSIS alasannya dgn tombol
+        // "Terapkan" di atas, lihat catatan lengkap di situ.
+        const r = await apiPost('bentukUlangJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi }, 120000,
+          'Proses masih berjalan di server (jadwal lintas periode bisa makan waktu). Jangan tekan tombol lagi -- tunggu sebentar lalu tekan "Pratinjau" utk cek apakah sudah selesai.');
         hideLoading();
         showSuccess(`Jadwal dibentuk ulang: ${r.totalDihapus} baris lama dihapus, ${r.totalDibuat} baris baru dibuat.`);
         document.getElementById('pbjBtnPratinjau').click();
