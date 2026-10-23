@@ -115,7 +115,22 @@ async function tanganiAksiKartu_(aksi, id, status) {
  * Struktur HTML harus identik dengan kartu-id-relawan-template.html supaya
  * pratinjau Admin dan contoh standalone selalu sinkron satu sama lain.
  */
+/**
+ * Diperbarui 23 Okt 2026 (dokumen Kartu Identitas Relawan SPPG
+ * Jeungjing §D/§I) -- foto profil ditambahkan. SUMBER SAMA PERSIS dgn
+ * Profil Saya (data.fotoProfilUrl dari getDataKartuCetakAdmin/
+ * getDataKartuCetakRelawan, dibentuk via urlFotoReference_ yg SUDAH
+ * ADA). Placeholder ikon tampil kalau foto belum ada -- TIDAK ada
+ * unggahan/penyimpanan foto baru di sini, dan foto TIDAK memengaruhi
+ * tokenKartu/QR sama sekali (§D "perubahan foto tidak boleh memicu
+ * Generate/Regenerate").
+ */
 function htmlKartuQr_(data, idQrUnik) {
+  const fotoHtml = data.fotoProfilUrl
+    ? `<img class="foto-profil" src="${escapeHtmlKq_(data.fotoProfilUrl)}" alt="Foto ${escapeHtmlKq_(data.nama)}">`
+    : `<div class="foto-profil foto-profil-kosong" aria-label="Foto belum tersedia">
+         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+       </div>`;
   return `
     <div class="card front">
       <img class="batik watermark c1" src="assets/batik-ornamen.png" alt="">
@@ -132,7 +147,8 @@ function htmlKartuQr_(data, idQrUnik) {
         <div class="gold-line"></div>
       </div>
       <div class="body">
-        <div class="title"><span class="garis"></span><i class="diamond"></i><span class="title-teks">Kartu Absensi Relawan</span><i class="diamond"></i><span class="garis"></span></div>
+        <div class="title"><span class="garis"></span><i class="diamond"></i><span class="title-teks">Kartu Identitas Relawan</span><i class="diamond"></i><span class="garis"></span></div>
+        ${fotoHtml}
         <div class="name">${escapeHtmlKq_(data.nama).toUpperCase()}</div>
         <div class="meta">
           <div>ID: <strong>${escapeHtmlKq_(data.id)}</strong></div>
@@ -207,6 +223,9 @@ async function downloadPreviewSebagaiPng_() {
   const data = window._kqDataPreviewAktif;
   try {
     if (!_kqCssTeksCache) {
+      // Diperbarui 23 Okt 2026 -- .foto-profil kini TERINTEGRASI
+      // LANGSUNG ke portal.css (file kartu-identitas.css terpisah
+      // yg sempat dipakai sementara sudah dihapus), jadi cukup 1 fetch.
       const res = await fetch('portal.css');
       _kqCssTeksCache = await res.text();
     }

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<script src="terapkan-preferensi.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ID Card Saya — SPPG Jeungjing</title>
+<meta name="description" content="Kartu Identitas Relawan SPPG Jeungjing">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20260922a">
+<link rel="stylesheet" href="preferensi-tampilan.css">
+<!-- Diperbarui 23 Okt 2026 -- .foto-profil kini TERINTEGRASI LANGSUNG
+     ke portal.css (lihat catatan di admin.html). -->
+<link rel="stylesheet" href="portal.css?v=20261023a">
+<link rel="stylesheet" href="app-shell.css?v=20260922a">
+<link rel="stylesheet" href="rebrand.css?v=20260922a">
+<!-- jsPDF (23 Okt 2026, Kartu Identitas Relawan §F "Unduh PDF") --
+     library mapan via CDN, versi dikunci. Dipakai BERSAMA teknik
+     render kartu-ke-canvas yg SAMA dgn unduh PNG Admin (lihat
+     id-card-saya.js) -- bukan mekanisme baru dari nol, cuma langkah
+     terakhirnya (encode PDF alih-alih PNG). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="shell-body">
+  <div class="shell-overlay" id="shellOverlay"></div>
+  <aside class="shell-sidebar" id="shellSidebar">
+    <div class="shell-sidebar-head">
+      <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
+      <div class="shell-sidebar-head-text">
+        <strong>SPPG JEUNGJING</strong>
+        <span>PORTAL SPPG JEUNGJING</span>
+      </div>
+      <button type="button" class="shell-sidebar-close" id="shellSidebarClose" aria-label="Tutup menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
+    </div>
+    <div class="shell-sidebar-user" id="shellSidebarUser">
+      <div class="shell-sidebar-user-avatar" id="sidebarAvatar">–</div>
+      <div class="shell-sidebar-user-text">
+        <strong id="sidebarNama">Memuat...</strong>
+        <span class="shell-sidebar-user-status" id="sidebarStatus"></span>
+      </div>
+    </div>
+    <nav class="shell-nav" aria-label="Menu Portal SPPG Jeungjing">
+    <p class="shell-nav-group-title">Utama</p>
+    <a href="dashboard.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span><span>Dashboard</span></a>
+
+    <!-- BARU (23 Okt 2026, dokumen Kartu Identitas Relawan §C.2):
+         grup "SIM SDM" ditambahkan -- Profil Saya DIPINDAH ke sini
+         (dulu di grup "Utama"), ID Card Saya ditambahkan sebagai
+         submenu baru di sampingnya. -->
+    <p class="shell-nav-group-title">SIM SDM</p>
+    <a href="profil.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></span><span>Profil Saya</span></a>
+    <a href="id-card-saya.html" class="shell-nav-link active"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.8"/><path d="M5.5 16c.5-2 2-3 3-3s2.5 1 3 3"/><path d="M14 9h5M14 13h3"/></svg></span><span>ID Card Saya</span></a>
+
+    <p class="shell-nav-group-title">SIPRES</p>
+    <a href="absensi.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 12l2 2 4-4"/></svg></span><span>Presensi Kehadiran</span></a>
+    <a href="riwayat.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Riwayat Presensi</span></a>
+    <a href="pengajuan.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M12 9v6"/><circle cx="12" cy="12" r="9"/></svg></span><span>Pengajuan Ketidakhadiran</span></a>
+    </nav>
+    <button type="button" class="shell-nav-link shell-nav-link--danger" id="btnLogoutShell" style="margin:0 10px 8px;width:calc(100% - 20px);"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span>Keluar</span></button>
+    <button type="button" class="shell-sidebar-collapse-toggle" id="shellCollapseToggle"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg> Ciutkan Menu</button>
+    <div class="shell-sidebar-foot">PORTAL SPPG JEUNGJING<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730</div>
+  </aside>
+    <div class="shell-main">
+  <header class="shell-topbar">
+    <button type="button" class="shell-topbar-burger" aria-label="Buka menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
+    <div class="shell-topbar-brand shell-topbar-brand--portal">
+      <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional" class="shell-topbar-logo-bgn">
+      <img src="assets/logo.png" alt="Logo SPPG Jeungjing" class="shell-topbar-logo-sppg">
+      <div class="shell-topbar-brand-text">
+        <span class="shell-topbar-brand-label">PORTAL</span>
+        <strong>SPPG JEUNGJING</strong>
+      </div>
+    </div>
+    <div class="shell-topbar-right">
+      <a href="notifikasi.html" class="shell-topbar-bell" aria-label="Notifikasi" id="topbarBell">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21h4"/></svg>
+        <span class="shell-topbar-bell-count is-hidden" id="topbarBellCount">0</span>
+      </a>
+      <a href="profil.html" class="shell-topbar-avatar" id="topbarAvatar" aria-label="Profil Saya"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></a>
+    </div>
+  </header>
+
+  <div class="shell-page-head">
+    <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.8"/><path d="M5.5 16c.5-2 2-3 3-3s2.5 1 3 3"/></svg></div>
+    <div>
+      <h1>ID Card Saya</h1>
+      <p>Lihat, unduh, dan cetak kartu identitas relawan Anda.</p>
+    </div>
+  </div>
+
+  <div id="icsMuat" class="empty-state">Memuat data kartu...</div>
+
+  <!-- Kartu BELUM dibuat Admin (§F "Kartu belum tersedia") -->
+  <div id="icsBelumAda" style="display:none;" class="panel-block">
+    <p style="margin:0 0 8px;font-weight:700;color:var(--color-navy, #0B2D6B);">Kartu Anda belum dibuat</p>
+    <p style="margin:0;font-size:13.5px;color:var(--color-text-muted);">Kartu identitas Anda belum dibuat oleh pengelola. Silakan hubungi pengelola SPPG Jeungjing untuk membuatkan kartu Anda.</p>
+  </div>
+
+  <!-- Kartu TERSEDIA -->
+  <div id="icsIsi" style="display:none;">
+    <div id="icsFotoPeringatan" style="display:none;background:#fff4e5;border-radius:8px;padding:10px 12px;margin-bottom:14px;">
+      <p style="margin:0;font-size:12.5px;color:#8a5a12;">📷 Foto profil Anda belum dilengkapi. <a href="profil.html" style="color:#0B2D6B;font-weight:700;">Lengkapi di Profil Saya</a> supaya kartu menampilkan foto Anda.</p>
+    </div>
+
+    <div class="kartu-qr-preview-scale" id="icsKartuArea"></div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;justify-content:center;">
+      <button type="button" class="btn-mini primary" id="icsBtnPreview">🔍 Preview</button>
+      <button type="button" class="btn-mini" id="icsBtnUnduhPdf">⬇️ Unduh PDF</button>
+      <button type="button" class="btn-mini" id="icsBtnCetak">🖨️ Cetak</button>
+    </div>
+  </div>
+
+  <!-- Overlay Preview (proporsional, tidak terpotong -- §F) -->
+  <div class="overlay is-hidden" id="icsPreviewOverlay">
+    <div class="overlay-box" style="max-width:360px;">
+      <button type="button" class="overlay-close" id="icsBtnTutupPreview" aria-label="Tutup">&times;</button>
+      <div id="icsPreviewArea" style="display:flex;justify-content:center;"></div>
+    </div>
+  </div>
+
+  <!-- Area cetak -- SAMA PERSIS strukturnya dgn Admin (areaCetakKartuQr),
+       disembunyikan layar, cuma tampil saat @media print (lihat portal.css). -->
+  <div id="areaCetakKartuQr" class="cetak-only"></div>
+
+    </div>
+  </div>
+</div>
+
+<script src="terapkan-preferensi.js"></script>
+<script src="config.js?v=20260922a"></script>
+<script src="common.js?v=20260922a"></script>
+<script src="auth-relawan.js?v=20260922a"></script>
+<script src="app-shell.js?v=20260922a"></script>
+<!-- qrcodejs -- SAMA PERSIS library yg dipakai Admin (admin-kartu-qr.js)
+     & qr-label-ompreng.html, bukan library baru. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="id-card-saya.js?v=20261023a"></script>
+</body>
+</html>
