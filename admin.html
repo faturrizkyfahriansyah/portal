@@ -1389,6 +1389,15 @@
         <p style="margin:0;font-size:13px;color:#334;">Jadwal relawan <b>otomatis mengikuti Pengaturan</b> (Pola Kerja & Kelompok Rotasi tiap divisi). Ubah jam atau anggota di <a href="#" class="pbj-link-pengaturan">Pengaturan</a>, lalu tekan tombol di bawah untuk menerapkannya ke jadwal yang akan datang.</p>
       </div>
 
+      <!-- BARU 24 Okt 2026 (diminta Admin) -- Periode opsional, supaya
+           bisa proses 1 periode tertentu saja (lebih cepat & aman utk
+           data banyak) alih-alih selalu "semua periode aktif 60 hari
+           ke depan" sekaligus. Backend (bentukJadwal/bentukUlangJadwal)
+           SUDAH menerima idPeriode opsional -- TIDAK ada perubahan
+           backend sama sekali, cuma tambahan di tampilan ini. -->
+      <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 8px;">Periode (opsional — kosongkan utk semua periode aktif, 60 hari ke depan)</p>
+      <select id="pbjPeriode" style="width:100%;margin-bottom:16px;"><option value="">(Semua periode aktif)</option></select>
+
       <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 8px;">Divisi (opsional — kosongkan utk semua divisi)</p>
       <div id="pbjDivisiCheckbox" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
 

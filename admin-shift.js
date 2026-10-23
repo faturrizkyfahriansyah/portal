@@ -91,8 +91,10 @@
         periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
       document.getElementById('ptpPeriode').innerHTML = '<option value="">Pilih Periode...</option>' +
         periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
-      // Pembuatan Jadwal (disederhanakan 22 Okt 2026 -- TIDAK perlu
-      // Periode lagi) -- cuma checkbox divisi.
+      // Pembuatan Jadwal -- Periode BARU 24 Okt 2026 (opsional, lihat
+      // catatan lengkap di admin.html dekat #pbjPeriode).
+      document.getElementById('pbjPeriode').innerHTML = '<option value="">(Semua periode aktif)</option>' +
+        periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
       document.getElementById('pbjDivisiCheckbox').innerHTML = divisi.map(d => `
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 10px;border:1px solid var(--color-border);border-radius:8px;cursor:pointer;">
           <input type="checkbox" class="pbj-divisi-checkbox" value="${escapeHtml(d)}" style="width:16px;height:16px;"> ${escapeHtml(d)}
@@ -880,12 +882,13 @@
   // ini dan seterusnya, lintas periode manapun.
   document.getElementById('pbjBtnPratinjau').addEventListener('click', async () => {
     const daftarDivisi = divisiTercentangPbj_(); // boleh kosong = semua divisi
+    const idPeriode = document.getElementById('pbjPeriode').value; // BARU 24 Okt 2026, boleh kosong = semua periode aktif
     const elHasil = document.getElementById('pbjHasil');
 
     elHasil.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);">Menghitung pratinjau...</p>';
     try {
-      const hasil = await apiPost('pratinjauPembuatanJadwal', { token: token(), daftarDivisi });
-      pbjDataTerakhir = { daftarDivisi };
+      const hasil = await apiPost('pratinjauPembuatanJadwal', { token: token(), daftarDivisi, idPeriode });
+      pbjDataTerakhir = { daftarDivisi, idPeriode };
       renderPratinjauJadwal_(hasil);
     } catch (err) {
       elHasil.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
@@ -945,7 +948,7 @@
         // bisa saja sudah berhasil meski frontend menyerah duluan --
         // Admin disarankan cek dgn Pratinjau sebelum mengulang, bukan
         // langsung asumsi gagal total).
-        const r = await apiPost('bentukJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi }, 120000,
+        const r = await apiPost('bentukJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi, idPeriode: pbjDataTerakhir.idPeriode }, 120000,
           'Proses masih berjalan di server (jadwal lintas periode bisa makan waktu). Jangan tekan tombol lagi -- tunggu sebentar lalu tekan "Pratinjau" utk cek apakah sudah selesai.');
         hideLoading();
         let pesan = `Jadwal diperbarui: ${r.totalDibuat} baris baru, ${r.totalSudahAda} sudah ada sebelumnya.`;
@@ -961,7 +964,7 @@
       try {
         // Diperbaiki 23 Okt 2026 -- SAMA PERSIS alasannya dgn tombol
         // "Terapkan" di atas, lihat catatan lengkap di situ.
-        const r = await apiPost('bentukUlangJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi }, 120000,
+        const r = await apiPost('bentukUlangJadwal', { token: token(), daftarDivisi: pbjDataTerakhir.daftarDivisi, idPeriode: pbjDataTerakhir.idPeriode }, 120000,
           'Proses masih berjalan di server (jadwal lintas periode bisa makan waktu). Jangan tekan tombol lagi -- tunggu sebentar lalu tekan "Pratinjau" utk cek apakah sudah selesai.');
         hideLoading();
         showSuccess(`Jadwal dibentuk ulang: ${r.totalDihapus} baris lama dihapus, ${r.totalDibuat} baris baru dibuat.`);
