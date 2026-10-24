@@ -382,7 +382,7 @@
     // versi di bawah dinaikkan serentak ke 23 Okt sbg langkah aman,
     // walau sebagian filenya sendiri belum tentu berubah isi -- supaya
     // SEMUA panel dipastikan ambil salinan terbaru, bukan cache lama.
-    panelShift: 'admin-shift.js?v=20261024b',
+    panelShift: 'admin-shift.js?v=20261024c',
     panelJadwalIndividu: 'admin-jadwal-individu.js?v=20261023a',
     panelLaporan: 'admin-laporan.js?v=20261023a',
     panelProfilRelawan: 'admin-profil-relawan.js?v=20261023a',

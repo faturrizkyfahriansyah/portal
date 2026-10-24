@@ -143,15 +143,13 @@
   // itu, lalu picu event 'change' yg SUDAH ADA (hitung "Mencakup: ...")
   // supaya tidak perlu duplikasi logika. Field tanggal TETAP bisa
   // diedit manual sesudahnya kalau Admin mau geser beberapa hari.
+  let khususAkhirPeriodeDipilih = ''; // BARU 24 Okt 2026 -- tanggal selesai periode yg dipilih, dikirim ke backend spy cakupan 1 PERIODE PENUH (bukan dibatasi 7 hari), lihat Shift.gs
+  const dmyKeIsoInline_ = (dmy) => { const b = String(dmy || '').split('/'); return b.length === 3 ? (b[2] + '-' + b[1].padStart(2, '0') + '-' + b[0].padStart(2, '0')) : ''; };
   el.khususPilihPeriode.addEventListener('change', () => {
     const p = (cache.periodeList || []).find(x => x.id === el.khususPilihPeriode.value);
-    if (!p || !p.tanggalMulai) return;
-    // dd/mm/yyyy (format Portal) -> yyyy-mm-dd (format <input type="date">).
-    // Ditulis inline (bukan panggil fungsi dari admin.js) krn admin-shift.js
-    // file TERPISAH, tidak mau asumsi fungsi lintas-file bisa diakses.
-    const b = String(p.tanggalMulai).split('/');
-    if (b.length !== 3) return;
-    el.khususPeriode.value = b[2] + '-' + b[1].padStart(2, '0') + '-' + b[0].padStart(2, '0');
+    if (!p || !p.tanggalMulai) { khususAkhirPeriodeDipilih = ''; return; }
+    el.khususPeriode.value = dmyKeIsoInline_(p.tanggalMulai);
+    khususAkhirPeriodeDipilih = dmyKeIsoInline_(p.tanggalSelesai); // dikirim saat submit, lihat payload di bawah
     el.khususPeriode.dispatchEvent(new Event('change'));
   });
   // PERUBAHAN: dulu "Satu Periode Penuh" (bisa 2+ minggu sekaligus), sekarang
@@ -160,9 +158,13 @@
   el.khususPeriode.addEventListener('change', () => {
     if (!el.khususPeriode.value) { el.khususMingguKeterangan.textContent = ''; return; }
     const mulai = new Date(el.khususPeriode.value + 'T00:00:00');
-    const akhir = new Date(mulai.getTime() + 6 * 86400000);
+    // BARU 24 Okt 2026 -- kalau Periode dipilih dari dropdown, teks
+    // pratinjau ikut tampilkan cakupan PERIODE PENUH yg sesungguhnya
+    // dikirim ke backend (bukan selalu "7 hari"), supaya tidak menyesatkan.
+    const akhir = khususAkhirPeriodeDipilih ? new Date(khususAkhirPeriodeDipilih + 'T00:00:00') : new Date(mulai.getTime() + 6 * 86400000);
+    const jumlahHari = Math.round((akhir.getTime() - mulai.getTime()) / 86400000) + 1;
     const fmt = (d) => d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-    el.khususMingguKeterangan.textContent = `Mencakup: ${fmt(mulai)} s/d ${fmt(akhir)} (7 hari)`;
+    el.khususMingguKeterangan.textContent = `Mencakup: ${fmt(mulai)} s/d ${fmt(akhir)} (${jumlahHari} hari)`;
   });
   el.khususModeRelawanIndividu.addEventListener('click', () => {
     modeRelawan = 'individu';
@@ -234,6 +236,12 @@
     if (modeTanggal === 'periode') {
       if (!el.khususPeriode.value) { showError('Pilih tanggal mulai minggu dulu.'); return; }
       payload.tanggalMulaiMinggu = el.khususPeriode.value;
+      // BARU 24 Okt 2026 -- kalau Admin pilih Periode dari dropdown
+      // (bukan cuma isi tanggal manual), kirim tanggal akhir periode
+      // supaya backend pakai cakupan 1 PERIODE PENUH, bukan dibatasi
+      // 7 hari (lihat catatan lengkap di Shift.gs). Kosong = perilaku
+      // lama (7 hari), tidak berubah.
+      if (khususAkhirPeriodeDipilih) payload.tanggalAkhirMinggu = khususAkhirPeriodeDipilih;
     } else {
       if (!el.khususOperasional.value) { showError('Pilih Tanggal Operasional dulu.'); return; }
       payload.idOperasional = el.khususOperasional.value;
