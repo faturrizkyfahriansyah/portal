@@ -16,6 +16,7 @@
 
     formPenugasanKhusus: document.getElementById('formPenugasanKhusus'),
     khususOperasional: document.getElementById('khususOperasional'),
+    khususPilihPeriode: document.getElementById('khususPilihPeriode'), // BARU 24 Okt 2026
     khususPeriode: document.getElementById('khususPeriode'),
     khususMingguKeterangan: document.getElementById('khususMingguKeterangan'),
     khususModeTanggalHari: document.getElementById('khususModeTanggalHari'),
@@ -95,6 +96,9 @@
       // catatan lengkap di admin.html dekat #pbjPeriode).
       document.getElementById('pbjPeriode').innerHTML = '<option value="">(Semua periode aktif)</option>' +
         periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
+      // BARU 24 Okt 2026 -- dropdown Periode di Penugasan Khusus (mode Satu Minggu).
+      el.khususPilihPeriode.innerHTML = '<option value="">(Pilih periode utk isi tanggal otomatis...)</option>' +
+        periode.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
       document.getElementById('pbjDivisiCheckbox').innerHTML = divisi.map(d => `
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 10px;border:1px solid var(--color-border);border-radius:8px;cursor:pointer;">
           <input type="checkbox" class="pbj-divisi-checkbox" value="${escapeHtml(d)}" style="width:16px;height:16px;"> ${escapeHtml(d)}
@@ -129,9 +133,26 @@
     el.khususModeTanggalPeriode.classList.add('primary');
     el.khususModeTanggalHari.classList.remove('primary');
     el.khususOperasional.style.display = 'none';
+    el.khususPilihPeriode.style.display = ''; // BARU 24 Okt 2026
     el.khususPeriode.style.display = '';
     el.khususMingguKeterangan.style.display = '';
     el.tbodyPenugasanKhusus.innerHTML = '<tr><td colspan="5"><div class="empty-state">Daftar di bawah menampilkan penugasan per hari. Pilih "Satu Hari" untuk melihat daftarnya, atau lanjutkan di sini untuk membuat penugasan ke 1 minggu (7 hari) sekaligus.</div></td></tr>';
+  });
+  // BARU 24 Okt 2026 (diminta Admin) -- pilih Periode cukup isi
+  // tanggal mulai (#khususPeriode) otomatis dari TANGGAL_MULAI periode
+  // itu, lalu picu event 'change' yg SUDAH ADA (hitung "Mencakup: ...")
+  // supaya tidak perlu duplikasi logika. Field tanggal TETAP bisa
+  // diedit manual sesudahnya kalau Admin mau geser beberapa hari.
+  el.khususPilihPeriode.addEventListener('change', () => {
+    const p = (cache.periodeList || []).find(x => x.id === el.khususPilihPeriode.value);
+    if (!p || !p.tanggalMulai) return;
+    // dd/mm/yyyy (format Portal) -> yyyy-mm-dd (format <input type="date">).
+    // Ditulis inline (bukan panggil fungsi dari admin.js) krn admin-shift.js
+    // file TERPISAH, tidak mau asumsi fungsi lintas-file bisa diakses.
+    const b = String(p.tanggalMulai).split('/');
+    if (b.length !== 3) return;
+    el.khususPeriode.value = b[2] + '-' + b[1].padStart(2, '0') + '-' + b[0].padStart(2, '0');
+    el.khususPeriode.dispatchEvent(new Event('change'));
   });
   // PERUBAHAN: dulu "Satu Periode Penuh" (bisa 2+ minggu sekaligus), sekarang
   // dibatasi 1 minggu (7 hari) dari tanggal yang dipilih -- supaya cakupan
