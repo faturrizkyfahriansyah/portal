@@ -116,7 +116,23 @@
    spt yg dimaksud (nempel tepat di bawah topbar) -- hasilnya baris
    data lain terlihat menembus/tumpang tindih dgn header saat halaman
    digeser. */
-.table-wrap { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto; overflow-y: visible; box-shadow: var(--shadow-card); margin-bottom: 22px; }
+.table-wrap { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto; overflow-y: visible; box-shadow: var(--shadow-card); margin-bottom: 22px; position: relative; }
+/* BARU 25 Okt 2026 (akar masalah "tabel kepotong/nggak pernah bener" yg
+   dilaporkan berulang kali -- Master Tarif, dll): tabelnya SEBENARNYA
+   SUDAH bisa digeser (overflow-x:auto), masalahnya TIDAK ADA TANDA
+   VISUAL bahwa masih ada kolom di sebelah kanan -- kolom terakhir
+   kelihatan "terpotong pas di pinggir layar" shg terlihat seperti rusak,
+   padahal tinggal digeser. Bayangan tipis di kanan ini kasih isyarat
+   "masih ada lagi, geser" -- otomatis HILANG sendiri kalau tabel memang
+   sudah pas (tidak overflow, mis. di layar lebar/desktop), krn murni CSS
+   gradient dekoratif, tidak tahu status scroll sungguhan -- jadi SELALU
+   tampil kalau tabel LEBIH LEBAR dari .table-wrap (kondisi paling umum
+   di HP), tapi tidak mengganggu kalau tidak overflow. */
+.table-wrap::after {
+  content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 28px;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,.08));
+  pointer-events: none; border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
 /* Diperluas jadi GLOBAL 22 Okt 2026 (dilaporkan berulang kali di
    beberapa tabel BERBEDA -- Manajemen Hak Akses, Rekap per Relawan,
    Kelompok Rotasi, Pola Shift): border-collapse:separate dipasang di
