@@ -43,7 +43,10 @@ const P = {
   phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
   folder: '<path d="M3 6a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
   bolt: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
-  download: '<path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/>'
+  download: '<path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/>',
+  // BARU 23 Okt 2026 (dipakai pages/pm.js -- tombol Hapus & Nonaktifkan).
+  trash: '<path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/>',
+  slash: '<circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/>'
 };
 export function icon(name, size = 20) {
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');

@@ -11,13 +11,18 @@ const ROUTES = {
   pic: { title: 'PIC', icon: 'user', mod: () => import('./pages/pic.js') },
   penerimaan: { title: 'Penerimaan', icon: 'inbox', mod: () => import('./pages/penerimaan.js') },
   pagu: { title: 'Pagu & Perhitungan', icon: 'chart', mod: () => import('./pages/pagu.js') },
+  // BARU 25 Okt 2026 (dokumen Master Instruction SIPENDOK §M/§N).
+  insentif: { title: 'Rekap Biaya & Insentif', icon: 'chart', mod: () => import('./pages/insentif.js') },
   dokumen: { title: 'Dokumen Penerimaan', icon: 'file', mod: () => import('./pages/dokumen.js') },
+  // BARU 23 Okt 2026 (dokumen Pembaruan SIPENDOK §14) -- Generate BAST
+  // + Surat Jalan, TERPISAH dari "Dokumen Penerimaan" (dokumen.js) di atas.
+  bastsj: { title: 'Generate Dokumen', icon: 'bolt', mod: () => import('./pages/bastsj.js') },
   arsip: { title: 'Arsip', icon: 'archive', mod: () => import('./pages/arsip.js') },
   pengaturan: { title: 'Pengaturan', icon: 'settings', mod: () => import('./pages/pengaturan.js') }
 };
-const SIDE = ['dashboard', 'pm', 'pic', 'penerimaan', 'pagu', 'dokumen', 'arsip', 'pengaturan'];
-const BOTTOM = ['dashboard', 'penerimaan', 'dokumen', 'arsip'];
-const MORE = ['pm', 'pic', 'pagu', 'pengaturan'];
+const SIDE = ['dashboard', 'pm', 'pic', 'penerimaan', 'pagu', 'insentif', 'dokumen', 'bastsj', 'arsip', 'pengaturan'];
+const BOTTOM = ['dashboard', 'penerimaan', 'bastsj', 'arsip'];
+const MORE = ['pm', 'pic', 'pagu', 'insentif', 'dokumen', 'pengaturan'];
 
 const app = document.getElementById('app');
 let view = null, seq = 0, guard = null, current = 'dashboard', lastHash = '#/dashboard', ignoreHash = false;
