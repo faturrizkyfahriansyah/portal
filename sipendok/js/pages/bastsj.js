@@ -60,7 +60,11 @@ export async function render(root, ctx) {
       pre.items.length ? pre.items.map((it) => h('div', { class: 'row', style: { padding: '7px 0', borderBottom: '1px solid var(--line-2)' } },
         h('div', { class: 'grow' }, h('div', { style: { fontWeight: 700 } }, it.nama_pm), it.alasan ? h('div', { class: 'hint' }, it.alasan) : null),
         it.status === 'SIAP' || it.status === 'SUDAH_DIBUAT' ? h('b', { class: 'num' }, num(it.total)) : null,
-        chip(LABEL_STATUS[it.status], WARNA_STATUS[it.status]))) : emptyState('users', 'Belum ada PM aktif')));
+        chip(LABEL_STATUS[it.status], WARNA_STATUS[it.status]),
+        // BARU 28 Okt 2026 (diminta Admin -- bisa buka hasil LANGSUNG
+        // dari sini, tanpa perlu buka halaman Arsip terpisah).
+        it.fileDokumen ? h('a', { href: it.fileDokumen, target: '_blank', rel: 'noopener', class: 'btn-mini ghost', style: { marginLeft: '6px' } }, icon('file', 14), 'Buka') : null
+      )) : emptyState('users', 'Belum ada PM aktif')));
 
     nodes.push(h('button', { class: 'btn big gold block', disabled: !r.siapGenerate || busy, onclick: klikGenerate },
       icon('bolt', 20), 'GENERATE ' + r.siapGenerate + ' DOKUMEN'));
