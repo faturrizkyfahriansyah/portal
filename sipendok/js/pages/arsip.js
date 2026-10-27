@@ -33,14 +33,17 @@ export async function render(root, ctx) {
   }
 
   function draw(hari) {
+    hari.forEach((d) => { d.terpisah = new Set(d.dokumen.filter((x) => x.status === 'AKTIF' && x.fileDokumen).map((x) => x.fileDokumen)).size > 1; });
     if (!hari.length) { out.replaceChildren(emptyState('archive', 'Belum ada dokumen', 'Dokumen muncul di sini setelah Generate Dokumen dijalankan.')); return; }
     out.replaceChildren(...hari.map((d) => h('div', { class: 'item' },
       h('div', { class: 'row' }, h('div', { class: 'grow' }, h('div', { class: 'title' }, `${hariIndo(d.tanggal)}, ${tglIndo(d.tanggal)}`),
-        h('div', { class: 'sub num' }, `${num(d.jumlahPm)} PM · ${num(d.totalPaket)} paket`)), chip('P' + d.kodePeriode, 'info')),
+        h('div', { class: 'sub num' }, `${num(d.jumlahPm)} PM · ${num(d.totalPaket)} paket`)), d.fileHari ? linkBtn(d.fileWord ? 'PDF' : 'Buka', d.fileHari, 'gold sm', 'file') : null, d.fileWord ? linkBtn('Word', d.fileWord, 'ghost sm', 'file') : null, chip('P' + d.kodePeriode, 'info')),
       h('div', { class: 'stack', style: { marginTop: '10px', gap: '6px' } }, d.dokumen.map((doc) => h('div', { class: 'row', style: { fontSize: '13px', alignItems: 'center' } },
         h('div', { class: 'grow' }, h('div', {}, doc.namaPm), h('div', { class: 'hint' }, doc.nomorBast)),
         doc.status !== 'AKTIF' ? chip('Diganti', '') : null,
-        doc.fileDokumen ? linkBtn('Buka', doc.fileDokumen, 'ghost sm', 'file') : h('span', { class: 'hint' }, 'File tidak ada')))))));
+        // hari lama (format 1 file per PM) masih punya file terpisah -> tetap tampilkan tombol Buka per PM
+        d.terpisah && doc.fileDokumen ? linkBtn(doc.fileWord ? 'PDF' : 'Buka', doc.fileDokumen, 'ghost sm', 'file') : null,
+        d.terpisah && doc.fileWord ? linkBtn('Word', doc.fileWord, 'ghost sm', 'file') : null))))));
   }
   await load();
 }

@@ -4,7 +4,7 @@
 // bastSj.generate (BastSj.gs), BUKAN dokumen.validasi/dokumen.generate.
 import { h, icon, num, todayJakarta, tglIndo, hariIndo } from '../util.js';
 import { api } from '../api.js';
-import { toast, modal, confirmDialog, showBusy, hideBusy, chip, banner, skeleton, emptyState, errMsg, field } from '../ui.js';
+import { toast, modal, confirmDialog, showBusy, hideBusy, chip, banner, skeleton, emptyState, errMsg, field, linkBtn } from '../ui.js';
 
 const LABEL_STATUS = {
   SIAP: 'Siap generate', SUDAH_DIBUAT: 'Sudah dibuat',
@@ -18,7 +18,7 @@ export async function render(root, ctx) {
   const body = h('div', { class: 'stack' });
   const dateIn = h('input', { class: 'input', type: 'date', value: tgl, onchange: (e) => { if (e.target.value) { tgl = e.target.value; load(); } } });
   root.append(
-    h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, 'Generate Dokumen'), h('div', { class: 'sub' }, 'BAST + Surat Jalan — satu paket PDF per Penerima Manfaat'))),
+    h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, 'Generate Dokumen'), h('div', { class: 'sub' }, 'BAST + Surat Jalan — satu file PDF gabungan per hari'))),
     h('div', { class: 'card' }, field('Tanggal operasional', dateIn)), h('div', { style: { height: '12px' } }), body);
 
   async function load() {
@@ -55,6 +55,18 @@ export async function render(root, ctx) {
       baris('Sudah dibuat sebelumnya', r.sudahDibuat),
       r.belumAdaPenerimaan ? baris('Belum ada penerimaan', r.belumAdaPenerimaan) : null));
 
+    // BARU 28 Okt 2026 -- 1 file per hari: satu tombol Buka utk seluruh PM hari ini.
+    if (pre.fileHari && !pre.terpisah) {
+      nodes.push(h('div', { class: 'card' },
+        h('div', { class: 'row' },
+          h('div', { class: 'grow' }, h('div', { style: { fontWeight: 700 } }, 'Dokumen hari ini'), h('div', { class: 'hint' }, pre.fileHari.jumlahPm + ' PM dalam 1 file')),
+          h('div', { class: 'row', style: { gap: '6px' } },
+            linkBtn(pre.fileHari.urlWord ? 'PDF' : 'Buka', pre.fileHari.url, 'gold sm', 'file'),
+            pre.fileHari.urlWord ? linkBtn('Word', pre.fileHari.urlWord, 'ghost sm', 'file') : null))));
+    } else if (pre.terpisah) {
+      nodes.push(banner('warn', h('b', {}, 'Dokumen hari ini masih terpisah per PM. '), 'Tekan tombol di bawah untuk menggabungkannya jadi 1 file (nomor BAST/SJ tidak berubah).'));
+    }
+
     // Daftar PM per status
     nodes.push(h('div', { class: 'card' }, h('h2', {}, 'Rincian per PM'),
       pre.items.length ? pre.items.map((it) => h('div', { class: 'row', style: { padding: '7px 0', borderBottom: '1px solid var(--line-2)' } },
@@ -63,11 +75,15 @@ export async function render(root, ctx) {
         chip(LABEL_STATUS[it.status], WARNA_STATUS[it.status]),
         // BARU 28 Okt 2026 (diminta Admin -- bisa buka hasil LANGSUNG
         // dari sini, tanpa perlu buka halaman Arsip terpisah).
-        it.fileDokumen ? h('a', { href: it.fileDokumen, target: '_blank', rel: 'noopener', class: 'btn-mini ghost', style: { marginLeft: '6px' } }, icon('file', 14), 'Buka') : null
+        (pre.terpisah && it.fileDokumen) ? h('a', { href: it.fileDokumen, target: '_blank', rel: 'noopener', class: 'btn-mini ghost', style: { marginLeft: '6px' } }, icon('file', 14), 'Buka') : null
       )) : emptyState('users', 'Belum ada PM aktif')));
 
-    nodes.push(h('button', { class: 'btn big gold block', disabled: !r.siapGenerate || busy, onclick: klikGenerate },
-      icon('bolt', 20), 'GENERATE ' + r.siapGenerate + ' DOKUMEN'));
+    const gabungSaja = !r.siapGenerate && pre.terpisah;
+    const labelTombol = r.siapGenerate
+      ? 'GENERATE 1 FILE (' + r.siapGenerate + ' PM BARU' + (r.sudahDibuat ? ' + ' + r.sudahDibuat + ' LAMA' : '') + ')'
+      : gabungSaja ? 'GABUNG ' + r.sudahDibuat + ' PM JADI 1 FILE' : 'GENERATE FILE HARI INI';
+    nodes.push(h('button', { class: 'btn big gold block', disabled: (!r.siapGenerate && !gabungSaja) || busy, onclick: () => klikGenerate(gabungSaja) },
+      icon('bolt', 20), labelTombol));
 
     body.replaceChildren(...nodes);
   }
@@ -76,18 +92,20 @@ export async function render(root, ctx) {
     return h('div', { class: 'row', style: { padding: '4px 0' } }, h('span', { class: 'grow' }, label), h('b', { class: 'num' }, num(v)));
   }
 
-  async function klikGenerate() {
+  async function klikGenerate(gabungUlang) {
     const r = pre.ringkasan;
     const ok = await confirmDialog({
       title: 'Generate dokumen?',
       message: h('div', {}, h('p', { style: { margin: '0 0 8px' } }, hariIndo(tgl) + ', ' + tglIndo(tgl)),
-        h('p', { style: { margin: 0 } }, r.siapGenerate + ' PM akan dibuatkan BAST + Surat Jalan. PM yang sudah pernah dibuat atau libur/nonaktif dilewati otomatis.')),
+        h('p', { style: { margin: 0 } }, gabungUlang
+          ? r.sudahDibuat + ' PM yang sudah dibuat akan digabung jadi 1 file. Nomor BAST/SJ tidak berubah.'
+          : r.siapGenerate + ' PM baru akan dibuatkan BAST + Surat Jalan dan dimasukkan ke 1 file gabungan hari ini' + (r.sudahDibuat ? ' (bersama ' + r.sudahDibuat + ' PM yang sudah dibuat; file lama diganti, nomor tidak berubah)' : '') + '. PM libur/nonaktif dilewati otomatis.')),
       confirmText: 'Generate'
     });
     if (!ok) return;
     busy = true; showBusy('Membuat dokumen…', 'Mohon tunggu dan jangan tutup halaman. Untuk banyak PM, proses dapat memakan waktu 1–2 menit.');
     let hasil;
-    try { hasil = await api('bastSj.generate', { tanggal: tgl }, { timeout: 300000 }); }
+    try { hasil = await api('bastSj.generate', { tanggal: tgl, gabungUlang: gabungUlang === true }, { timeout: 300000 }); }
     catch (e) {
       hideBusy(); busy = false;
       modal({ title: 'Generate gagal', body: banner('err', errMsg(e)), actions: [{ label: 'Tutup', kind: 'ghost' }] });
@@ -103,7 +121,10 @@ export async function render(root, ctx) {
     modal({
       title: 'Generate selesai',
       body: h('div', { class: 'stack' },
-        banner(h2.gagal.length ? 'warn' : 'ok', h2.berhasil.length + ' berhasil' + (h2.gagal.length ? ', ' + h2.gagal.length + ' gagal' : '') + '.'),
+        banner(h2.gagal.length ? 'warn' : 'ok', h2.berhasil.length + ' PM masuk 1 file' + (h2.gagal.length ? ', ' + h2.gagal.length + ' gagal' : '') + '.'),
+        hasil.file ? h('div', { class: 'row', style: { gap: '8px' } },
+          linkBtn(hasil.file.urlWord ? 'Buka PDF' : 'Buka Dokumen', hasil.file.url, 'gold', 'file'),
+          hasil.file.urlWord ? linkBtn('Buka Word', hasil.file.urlWord, 'ghost', 'file') : null) : null,
         h2.berhasil.length ? h('div', { style: { maxHeight: '200px', overflow: 'auto', border: '1px solid var(--line)', borderRadius: '10px', padding: '4px 10px' } },
           h2.berhasil.map((b) => h('div', { class: 'row', style: { padding: '5px 0', fontSize: '13.5px' } },
             h('div', { class: 'grow' }, b.nama_pm), h('code', {}, b.nomorBast)))) : null,
