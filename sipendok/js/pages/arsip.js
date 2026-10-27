@@ -1,39 +1,46 @@
-import { h, icon, num, todayJakarta, tglIndo, hariIndo, waktuIndo, BULAN } from '../util.js';
+import { h, icon, num, tglIndo, hariIndo } from '../util.js';
 import { api } from '../api.js';
-import { S, tahunAktif } from '../store.js';
 import { chip, banner, skeleton, emptyState, linkBtn, errMsg } from '../ui.js';
 
+// Dirombak 27 Okt 2026 (DIMINTA Admin -- GAP ditemukan: Arsip
+// sebelumnya HANYA menampilkan dokumen Dokumen Penerimaan lama, yg
+// sekarang disembunyikan dari navigasi, jadi dokumen BAST+SJ baru
+// TIDAK PERNAH terlihat di mana pun). Sekarang: daftar dokumen BAST+SJ
+// (06_BAST), dikelompokkan per TANGGAL, disaring per PERIODE (dropdown
+// auto-pilih periode AKTIF, sesuai permintaan Admin). Fitur lama
+// (dokumen.list) TIDAK dihapus dari backend, cuma halaman ini tidak
+// lagi memanggilnya.
 export async function render(root, ctx) {
-  const st = { tahun: tahunAktif(), bulan: '' };
-  const years = []; for (let y = tahunAktif() + 1; y >= 2024; y--) years.push(y);
+  let periodeList = [];
+  try { periodeList = await api('periode.list'); } catch (e) { /* non-fatal */ }
+  if (!ctx.alive()) return;
+
+  const st = { kodePeriode: (periodeList.find((p) => p.status === 'AKTIF') || periodeList[0] || {}).kode || '' };
   const sel = (opts, v, on, label) => h('select', { class: 'select', 'aria-label': label, onchange: (e) => on(e.target.value) }, opts.map(([val, t]) => h('option', { value: val, selected: String(val) === String(v) }, t)));
   const out = h('div', { class: 'list', style: { marginTop: '12px' } });
   root.append(
-    h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, 'Arsip Dokumen'), h('div', { class: 'sub' }, 'Dokumen Penerimaan (Word & PDF) yang tersimpan di Google Drive')), h('div', { class: 'spacer' }),
-      S.folderRoot ? h('a', { class: 'btn ghost sm', href: S.folderRoot, target: '_blank', rel: 'noopener noreferrer' }, icon('folder', 16), 'Folder Drive') : null),
-    h('div', { class: 'card' }, h('div', { class: 'grid2' },
-      sel([['', 'Semua bulan'], ...BULAN.map((b, i) => [i + 1, b])], st.bulan, (v) => { st.bulan = v; load(); }, 'Bulan'),
-      sel(years.map((y) => [y, y]), st.tahun, (v) => { st.tahun = v; load(); }, 'Tahun'))), out);
+    h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, 'Arsip Dokumen'), h('div', { class: 'sub' }, 'BAST + Surat Jalan yang tersimpan di Google Drive, per tanggal operasional'))),
+    h('div', { class: 'card' },
+      sel(periodeList.length ? [['', 'Semua periode'], ...periodeList.map((p) => [p.kode, p.nama + (p.status === 'AKTIF' ? ' (aktif)' : '')])] : [['', 'Tidak ada periode']],
+        st.kodePeriode, (v) => { st.kodePeriode = v; load(); }, 'Periode')),
+    out);
 
   let req = 0;
   async function load() {
     const my = ++req; out.replaceChildren(skeleton(3));
-    try { const r = await api('dokumen.list', { tahun: st.tahun, bulan: st.bulan || undefined }); if (my === req && ctx.alive()) draw(r); }
+    try { const r = await api('bastSj.daftarArsip', { kodePeriode: st.kodePeriode || undefined }); if (my === req && ctx.alive()) draw(r); }
     catch (e) { if (my === req) out.replaceChildren(banner('err', errMsg(e))); }
   }
 
-  function status(d) {
-    if (!d.aktif) return chip('Diganti revisi', '');
-    if (d.perluRevisi) return chip('Perlu dibuat ulang', 'err');
-    if (/TANPA PDF/.test(d.STATUS)) return chip('Selesai · tanpa PDF', 'warn');
-    return chip('Selesai', 'ok');
-  }
-  function draw(rows) {
-    if (!rows.length) { out.replaceChildren(emptyState('archive', 'Belum ada dokumen', 'Dokumen muncul di sini setelah Anda menekan Generate Semua Dokumen.')); return; }
-    out.replaceChildren(...rows.map((d) => h('div', { class: 'item' + (d.aktif ? '' : ' off') },
-      h('div', { class: 'row' }, h('div', { class: 'grow' }, h('div', { class: 'title' }, `${hariIndo(d.TANGGAL)}, ${tglIndo(d.TANGGAL)}`), h('div', { class: 'sub num' }, `${num(d.JUMLAH_PM)} PM · ${num(d.TOTAL_PAKET)} paket`)), status(d)),
-      h('div', { class: 'row wrap', style: { marginTop: '10px' } }, linkBtn('Buka Word', d.FILE_WORD, 'ghost sm', 'file'), d.FILE_PDF ? linkBtn('Buka PDF', d.FILE_PDF, 'ghost sm', 'file') : null,
-        h('span', { class: 'hint', style: { marginLeft: 'auto' } }, `${d.ID_DOKUMEN} · ${waktuIndo(d.WAKTU_GENERATE)} · ${d.USER_GENERATE || '-'}`)))));
+  function draw(hari) {
+    if (!hari.length) { out.replaceChildren(emptyState('archive', 'Belum ada dokumen', 'Dokumen muncul di sini setelah Generate Dokumen dijalankan.')); return; }
+    out.replaceChildren(...hari.map((d) => h('div', { class: 'item' },
+      h('div', { class: 'row' }, h('div', { class: 'grow' }, h('div', { class: 'title' }, `${hariIndo(d.tanggal)}, ${tglIndo(d.tanggal)}`),
+        h('div', { class: 'sub num' }, `${num(d.jumlahPm)} PM · ${num(d.totalPaket)} paket`)), chip('P' + d.kodePeriode, 'info')),
+      h('div', { class: 'stack', style: { marginTop: '10px', gap: '6px' } }, d.dokumen.map((doc) => h('div', { class: 'row', style: { fontSize: '13px', alignItems: 'center' } },
+        h('div', { class: 'grow' }, h('div', {}, doc.namaPm), h('div', { class: 'hint' }, doc.nomorBast)),
+        doc.status !== 'AKTIF' ? chip('Diganti', '') : null,
+        doc.fileDokumen ? linkBtn('Buka', doc.fileDokumen, 'ghost sm', 'file') : h('span', { class: 'hint' }, 'File tidak ada')))))));
   }
   await load();
 }

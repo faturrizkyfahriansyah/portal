@@ -61,10 +61,18 @@ export async function render(root, ctx) {
         // info ini jadi MENYESATKAN Admin. Diperbaiki pakai nilai
         // SESUNGGUHNYA dari cfg, bukan teks tetap.
         field('Reset nomor BAST/SJ', ro(cfg.RESET_NOMOR_BAST || '-'), cfg.RESET_NOMOR_BAST === 'PER_PERIODE' ? 'Nomor dimulai dari 001 setiap Periode Operasional baru (dari Portal Pengelola), bukan per bulan.' : 'Nomor dimulai dari 001 setiap bulan.'))),
-      h('div', { class: 'card' }, h('h2', {}, 'Dokumen Penerimaan (fitur lama)'), h('div', { class: 'form-grid' },
-        field('Template dokumen (Drive File ID)', f.TEMPLATE_DOKUMEN, 'File .docx master berisi 2 lembar: SEKOLAH dan POSYANDU (BA + Surat Jalan satu lembar per PM). JANGAN diisi dengan template BAST+SJ baru — pakai kolom terpisah di bawah.'),
-        field('Folder dokumen (Drive Folder ID)', f.FOLDER_DOKUMEN, 'Folder root “SIPENDOK”; subfolder tahun/bulan/WORD|PDF dibuat otomatis.'),
-        field('Buat PDF otomatis', f.BUAT_PDF)),
+      // Disembunyikan 27 Okt 2026 (DIMINTA Admin -- fitur Dokumen
+      // Penerimaan sudah digantikan Generate Dokumen BAST+SJ). Dibungkus
+      // <details> TERTUTUP by default, bukan dihapus -- pengaturan &
+      // kemampuan cek template LAMA masih berfungsi penuh kalau Admin
+      // sengaja membukanya (klik judul), tapi TIDAK lagi langsung
+      // terlihat/mengganggu tampilan utama.
+      h('details', { class: 'card' },
+        h('summary', { style: { cursor: 'pointer', fontWeight: 700, fontSize: '15px' } }, 'Dokumen Penerimaan (fitur lama, disembunyikan) — klik utk buka'),
+        h('div', { class: 'form-grid', style: { marginTop: '14px' } },
+          field('Template dokumen (Drive File ID)', f.TEMPLATE_DOKUMEN, 'File .docx master berisi 2 lembar: SEKOLAH dan POSYANDU (BA + Surat Jalan satu lembar per PM). JANGAN diisi dengan template BAST+SJ baru — pakai kolom terpisah di bawah.'),
+          field('Folder dokumen (Drive Folder ID)', f.FOLDER_DOKUMEN, 'Folder root “SIPENDOK”; subfolder tahun/bulan/WORD|PDF dibuat otomatis.'),
+          field('Buat PDF otomatis', f.BUAT_PDF)),
         h('div', { class: 'row wrap', style: { marginTop: '14px' } }, btnSave, btnCek), h('div', { style: { marginTop: '12px' } }, result)),
       h('div', { class: 'card' }, h('h2', {}, 'Generate Dokumen — BAST + Surat Jalan (fitur baru)'), h('div', { class: 'form-grid' },
         field('Template BAST + Surat Jalan (Drive File ID)', f.TEMPLATE_BAST_SJ, 'Satu file .docx berisi BAST dan Surat Jalan dalam satu lembar per kegiatan distribusi — TERPISAH dari template Dokumen Penerimaan di atas.')),

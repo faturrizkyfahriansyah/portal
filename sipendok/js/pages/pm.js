@@ -3,13 +3,14 @@ import { api } from '../api.js';
 import { S, refreshMaster } from '../store.js';
 import { toast, modal, chip, emptyState, errMsg, field, banner } from '../ui.js';
 
-// Dirombak total 23 Okt 2026 (diminta Admin, dokumen Pembaruan SIPENDOK
-// §5) -- Data Acuan PM: Nama, PIC (dari tabel PIC terpisah, TIDAK
-// diubah di sini), Porsi Kecil/Besar/Total (otomatis), No. Kendaraan.
-// JENIS_PM (SEKOLAH/POSYANDU) SENGAJA TIDAK ditanyakan lagi di form --
-// backend default 'SEKOLAH' diam2 (field lama dipertahankan, lihat
-// Master.gs) supaya data Posyandu LAMA & 03_PENERIMAAN yg sudah ada
-// tidak rusak, tapi pengguna baru tidak perlu memikirkannya.
+// Dirombak 23 Okt 2026, DIKEMBALIKAN SEBAGIAN 27 Okt 2026 (DISETUJUI
+// Admin, membatalkan simplifikasi 23 Okt yg menghilangkan JENIS_PM dari
+// form). JENIS_PM (SEKOLAH/POSYANDU) SEKARANG DITANYAKAN LAGI --
+// Sekolah pakai Porsi Kecil/Besar, Posyandu pakai Balita/Bumil/Busui
+// (field TERPISAH, lihat Config.gs/Master.gs). Alasan: template BAST+SJ
+// baru 2 lembar BUTUH pembedaan ini utk pilih lembar yg benar.
+const JENIS_LABEL = { SEKOLAH: 'Sekolah', POSYANDU: 'Posyandu' };
+
 export async function render(root, ctx) {
   let q = '', showOff = false;
   const list = h('div', { class: 'list' });
@@ -30,21 +31,28 @@ export async function render(root, ctx) {
     list.replaceChildren(...rows.map((p) => kartuPm(p)));
   }
 
-  // Susunan kartu sesuai dokumen §5.A: Nama+Status atas, PIC di bawah
-  // nama, baris Porsi Kecil/Besar/Total, No. Kendaraan, lalu aksi.
+  const kosong = (v) => v === '' || v === undefined || v === null ? '—' : v;
+  const angka = (v) => v === '' || v === undefined || v === null ? 0 : Number(v);
+
+  // Kartu: Nama+Jenis+Status atas, PIC, lalu baris acuan SESUAI JENIS_PM
+  // (Porsi Kecil/Besar utk Sekolah, Balita/Bumil/Busui utk Posyandu).
   function kartuPm(p) {
     const pic = picUntukPm(p.ID_PM);
-    const porsiKecil = p.ACUAN_PORSI_KECIL === '' || p.ACUAN_PORSI_KECIL === undefined ? '—' : p.ACUAN_PORSI_KECIL;
-    const porsiBesar = p.ACUAN_PORSI_BESAR === '' || p.ACUAN_PORSI_BESAR === undefined ? '—' : p.ACUAN_PORSI_BESAR;
-    const totalAcuan = (porsiKecil === '—' && porsiBesar === '—') ? '—' : (Number(porsiKecil === '—' ? 0 : porsiKecil) + Number(porsiBesar === '—' ? 0 : porsiBesar));
+    const isPosyandu = p.JENIS_PM === 'POSYANDU';
+    const baris = isPosyandu
+      ? [['Balita', kosong(p.ACUAN_BALITA)], ['Bumil', kosong(p.ACUAN_BUMIL)], ['Busui', kosong(p.ACUAN_BUSUI)]]
+      : [['Porsi kecil', kosong(p.ACUAN_PORSI_KECIL)], ['Porsi besar', kosong(p.ACUAN_PORSI_BESAR)]];
+    const total = isPosyandu
+      ? angka(p.ACUAN_BALITA) + angka(p.ACUAN_BUMIL) + angka(p.ACUAN_BUSUI)
+      : angka(p.ACUAN_PORSI_KECIL) + angka(p.ACUAN_PORSI_BESAR);
+    baris.push(['Total acuan', total]);
 
     return h('div', { class: 'card' + (p.STATUS !== 'Aktif' ? ' off' : ''), style: { marginBottom: '10px' } },
-      h('div', { class: 'row' }, h('div', { class: 'grow' }, h('div', { class: 'title' }, p.NAMA_PM)), chip(p.STATUS, p.STATUS === 'Aktif' ? 'ok' : '')),
+      h('div', { class: 'row' }, h('div', { class: 'grow' }, h('div', { class: 'title' }, p.NAMA_PM)),
+        chip(JENIS_LABEL[p.JENIS_PM] || p.JENIS_PM, isPosyandu ? '' : 'info'), chip(p.STATUS, p.STATUS === 'Aktif' ? 'ok' : '')),
       h('div', { class: 'hint', style: { margin: '2px 0 10px' } }, pic ? 'PIC: ' + pic.NAMA_PIC : h('span', { style: { color: 'var(--err)' } }, 'PIC belum diisi')),
       h('div', { class: 'row', style: { gap: '18px', textAlign: 'center' } },
-        h('div', {}, h('div', { class: 'hint' }, 'Porsi kecil'), h('div', { class: 'title' }, porsiKecil)),
-        h('div', {}, h('div', { class: 'hint' }, 'Porsi besar'), h('div', { class: 'title' }, porsiBesar)),
-        h('div', {}, h('div', { class: 'hint' }, 'Total acuan'), h('div', { class: 'title' }, totalAcuan))),
+        baris.map(([label, val]) => h('div', {}, h('div', { class: 'hint' }, label), h('div', { class: 'title' }, val)))),
       h('div', { style: { marginTop: '10px' } }, h('div', { class: 'hint' }, 'Nomor kendaraan'), h('div', {}, p.ACUAN_NO_KENDARAAN || '—')),
       p.KETERANGAN ? h('div', { class: 'hint', style: { marginTop: '6px' } }, p.KETERANGAN) : null,
       h('div', { class: 'row', style: { gap: '8px', marginTop: '12px', flexWrap: 'wrap' } },
@@ -70,10 +78,13 @@ export async function render(root, ctx) {
         onClick: async (ev) => {
           ev.currentTarget.disabled = true;
           try {
+            // Kirim SEMUA field acuan apa adanya (tidak peduli jenis PM --
+            // backend yg validasi mana yg relevan) supaya tidak hilang saat ganti status.
             await api('pm.save', { ID_PM: p.ID_PM, NAMA_PM: p.NAMA_PM, JENIS_PM: p.JENIS_PM, ALAMAT: p.ALAMAT,
               STATUS: nonaktifkan ? 'Tidak Aktif' : 'Aktif',
               KETERANGAN: nonaktifkan && alasan.value.trim() ? alasan.value.trim() : p.KETERANGAN,
-              ACUAN_PORSI_KECIL: p.ACUAN_PORSI_KECIL, ACUAN_PORSI_BESAR: p.ACUAN_PORSI_BESAR, ACUAN_NO_KENDARAAN: p.ACUAN_NO_KENDARAAN });
+              ACUAN_PORSI_KECIL: p.ACUAN_PORSI_KECIL, ACUAN_PORSI_BESAR: p.ACUAN_PORSI_BESAR, ACUAN_NO_KENDARAAN: p.ACUAN_NO_KENDARAAN,
+              ACUAN_JUMLAH_SISWA: p.ACUAN_JUMLAH_SISWA, ACUAN_BALITA: p.ACUAN_BALITA, ACUAN_BUMIL: p.ACUAN_BUMIL, ACUAN_BUSUI: p.ACUAN_BUSUI });
             await refreshMaster(); draw();
             toast(p.NAMA_PM + (nonaktifkan ? ' dinonaktifkan.' : ' diaktifkan.'), 'ok');
           } catch (e) { toast(errMsg(e), 'err'); ev.currentTarget.disabled = false; return false; }
@@ -104,23 +115,50 @@ export async function render(root, ctx) {
   }
 
   function openForm(pm) {
+    let jenis = pm ? (pm.JENIS_PM || 'SEKOLAH') : 'SEKOLAH';
     const nama = h('input', { class: 'input', value: pm ? pm.NAMA_PM : '', maxlength: 120, autocomplete: 'off' });
+
+    // Sekolah
     const porsiKecil = h('input', { class: 'input', type: 'number', min: '0', step: '1', value: pm && pm.ACUAN_PORSI_KECIL !== '' && pm.ACUAN_PORSI_KECIL !== undefined ? pm.ACUAN_PORSI_KECIL : '' });
     const porsiBesar = h('input', { class: 'input', type: 'number', min: '0', step: '1', value: pm && pm.ACUAN_PORSI_BESAR !== '' && pm.ACUAN_PORSI_BESAR !== undefined ? pm.ACUAN_PORSI_BESAR : '' });
-    const totalTampil = h('div', { class: 'input', style: { background: 'var(--bg-2, #f4f6f9)', fontWeight: '700' } },
-      (pm && pm.ACUAN_PORSI_KECIL !== '' && pm.ACUAN_PORSI_BESAR !== '') ? (Number(pm.ACUAN_PORSI_KECIL || 0) + Number(pm.ACUAN_PORSI_BESAR || 0)) : '0');
-    const hitungTotal = () => { totalTampil.textContent = String((Number(porsiKecil.value) || 0) + (Number(porsiBesar.value) || 0)); };
-    porsiKecil.oninput = hitungTotal; porsiBesar.oninput = hitungTotal;
+    const jumlahSiswa = h('input', { class: 'input', type: 'number', min: '0', step: '1', value: pm && pm.ACUAN_JUMLAH_SISWA !== '' && pm.ACUAN_JUMLAH_SISWA !== undefined ? pm.ACUAN_JUMLAH_SISWA : '' });
+    // Posyandu
+    const balita = h('input', { class: 'input', type: 'number', min: '0', step: '1', value: pm && pm.ACUAN_BALITA !== '' && pm.ACUAN_BALITA !== undefined ? pm.ACUAN_BALITA : '' });
+    const bumil = h('input', { class: 'input', type: 'number', min: '0', step: '1', value: pm && pm.ACUAN_BUMIL !== '' && pm.ACUAN_BUMIL !== undefined ? pm.ACUAN_BUMIL : '' });
+    const busui = h('input', { class: 'input', type: 'number', min: '0', step: '1', value: pm && pm.ACUAN_BUSUI !== '' && pm.ACUAN_BUSUI !== undefined ? pm.ACUAN_BUSUI : '' });
+
+    const totalTampil = h('div', { class: 'input', style: { background: 'var(--bg-2, #f4f6f9)', fontWeight: '700' } }, '0');
+    const hitungTotal = () => {
+      totalTampil.textContent = String(jenis === 'POSYANDU'
+        ? (Number(balita.value) || 0) + (Number(bumil.value) || 0) + (Number(busui.value) || 0)
+        : (Number(porsiKecil.value) || 0) + (Number(porsiBesar.value) || 0));
+    };
+    [porsiKecil, porsiBesar, balita, bumil, busui].forEach((el) => { el.oninput = hitungTotal; });
+
     const kendaraan = h('input', { class: 'input', maxlength: 20, value: pm ? pm.ACUAN_NO_KENDARAAN || '' : '', placeholder: 'mis. B 1234 XYZ', style: { textTransform: 'uppercase' } });
     const alamat = h('textarea', { class: 'input', maxlength: 250 }, pm ? pm.ALAMAT : '');
     const ket = h('textarea', { class: 'input', maxlength: 250 }, pm ? pm.KETERANGAN : '');
     const err = h('div', {});
+
+    const blokSekolah = h('div', { class: 'form-grid' },
+      h('div', { class: 'row', style: { gap: '10px' } }, field('Porsi kecil', porsiKecil), field('Porsi besar', porsiBesar)),
+      field('Jumlah siswa acuan (opsional, utk Insentif PIC)', jumlahSiswa));
+    const blokPosyandu = h('div', { class: 'form-grid' },
+      h('div', { class: 'row', style: { gap: '10px' } }, field('Balita', balita), field('Bumil', bumil), field('Busui', busui)));
+    const blokJenis = h('div', {});
+    function gambarBlokJenis() { blokJenis.replaceChildren(jenis === 'POSYANDU' ? blokPosyandu : blokSekolah); hitungTotal(); }
+
+    const jenisSel = h('select', { class: 'input', onchange: (e) => { jenis = e.target.value; gambarBlokJenis(); } },
+      h('option', { value: 'SEKOLAH', selected: jenis === 'SEKOLAH' }, 'Sekolah'),
+      h('option', { value: 'POSYANDU', selected: jenis === 'POSYANDU' }, 'Posyandu'));
+
     modal({
       title: pm ? 'Ubah PM' : 'Tambah PM',
       body: h('div', { class: 'form-grid' },
-        field('Nama sekolah / PM', nama),
-        h('div', { class: 'row', style: { gap: '10px' } }, field('Porsi kecil', porsiKecil), field('Porsi besar', porsiBesar)),
-        field('Total porsi acuan — otomatis', totalTampil),
+        field('Nama sekolah / Posyandu', nama),
+        field('Jenis PM', jenisSel, pm ? 'Mengubah jenis PM tidak memindahkan data acuan lama -- isi ulang field di bawah sesuai jenis baru.' : null),
+        blokJenis,
+        field('Total acuan — otomatis', totalTampil),
         field('Nomor kendaraan', kendaraan, 'Opsional — digunakan sebagai nilai awal di Penerimaan Harian.'),
         field('Alamat', alamat),
         field('Keterangan', ket), err),
@@ -129,14 +167,18 @@ export async function render(root, ctx) {
           const btn = ev.currentTarget; btn.disabled = true; err.replaceChildren();
           try {
             await api('pm.save', {
-              ID_PM: pm ? pm.ID_PM : undefined, NAMA_PM: nama.value, JENIS_PM: pm ? pm.JENIS_PM : undefined,
+              ID_PM: pm ? pm.ID_PM : undefined, NAMA_PM: nama.value, JENIS_PM: jenis,
               ALAMAT: alamat.value, STATUS: pm ? pm.STATUS : 'Aktif', KETERANGAN: ket.value,
-              ACUAN_PORSI_KECIL: porsiKecil.value, ACUAN_PORSI_BESAR: porsiBesar.value, ACUAN_NO_KENDARAAN: kendaraan.value
+              ACUAN_PORSI_KECIL: jenis === 'SEKOLAH' ? porsiKecil.value : '', ACUAN_PORSI_BESAR: jenis === 'SEKOLAH' ? porsiBesar.value : '',
+              ACUAN_JUMLAH_SISWA: jenis === 'SEKOLAH' ? jumlahSiswa.value : '',
+              ACUAN_BALITA: jenis === 'POSYANDU' ? balita.value : '', ACUAN_BUMIL: jenis === 'POSYANDU' ? bumil.value : '', ACUAN_BUSUI: jenis === 'POSYANDU' ? busui.value : '',
+              ACUAN_NO_KENDARAAN: kendaraan.value
             });
             await refreshMaster(); draw(); toast(pm ? 'PM diperbarui.' : 'PM ditambahkan.', 'ok');
           } catch (e) { err.replaceChildren(banner('err', errMsg(e))); btn.disabled = false; return false; }
         } }]
     });
+    gambarBlokJenis();
   }
   draw();
 }
