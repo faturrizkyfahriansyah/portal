@@ -1110,7 +1110,20 @@
   });
 
   async function muatUlangRelawan() {
-    cache.relawanList = await apiGet('getRelawan', { semua: '1', token: authToken });
+    // Diperbaiki 27 Okt 2026 (dilaporkan Admin -- dropdown Divisi di
+    // tabel Relawan tampil KOSONG). Akar masalah: renderRelawanTable()
+    // (dipanggil di bawah) BERGANTUNG pada cache.divisiList sudah
+    // terisi (lihat divisiOptions = cache.divisiList.map(...)), tapi
+    // fungsi ini SEBELUMNYA cuma mengambil cache.relawanList -- kalau
+    // dipanggil SEBELUM divisiList sempat termuat dari pemuat lain
+    // (race condition), tabel tergambar dgn dropdown kosong permanen
+    // (tidak pernah digambar ulang otomatis setelah itu). Sekarang:
+    // pastikan divisiList ADA (ambil kalau belum) SEBELUM render.
+    const [relawanList] = await Promise.all([
+      apiGet('getRelawan', { semua: '1', token: authToken }),
+      cache.divisiList && cache.divisiList.length ? Promise.resolve() : apiGetCached('getDivisi', { token: authToken }, 600000).then(d => { cache.divisiList = d; })
+    ]);
+    cache.relawanList = relawanList;
     renderRelawanTable();
     renderDivisiTable();
   }

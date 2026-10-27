@@ -374,9 +374,7 @@
 /* Diperkecil 25 Okt 2026 (diminta Admin -- "kartu periode & stat di
    Riwayat Presensi kebesaran, samakan konsep dgn kartu lain" spt
    .divisi-card di admin.js/admin.css: kotak putih rapi, teks kecil,
-   TANPA angka besar). Dulu .periode-card gradient navy besar +
-   .stat-tile angka 26-30px -- sekarang jauh lebih ringkas, HANYA
-   dipakai riwayat.html (dicek dulu, aman diubah langsung). */
+   TANPA angka besar). HANYA dipakai riwayat.html. */
 .periode-card {
   background: #fff;
   border: 1px solid var(--color-border);
@@ -848,9 +846,20 @@ button.riwayat-item {
    tinggi .body. Dihitung presisi dari anggaran tinggi yg tersisa,
    BUKAN perkiraan kasar -- lihat rincian perhitungan di komentar
    .foto-profil di bawah. */
-.card.front .name { margin-top: 1mm; margin-left: 2mm; margin-right: 2mm; color: var(--navy); font-weight: 900; font-size: 3.3mm; line-height: 1.12; text-transform: uppercase; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-shrink: 0; }
-.card.front .meta { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: .6mm; margin-top: 1mm; font-size: 1.95mm; color: #5d6b7d; flex-shrink: 0; }
-.card.front .meta div { min-width: 28mm; max-width: 42mm; padding: .35mm 2.2mm; border-radius: 5mm; background: #f4f6f9; line-height: 1.25; }
+/* Diperbaiki 27 Okt 2026 (dilaporkan Admin -- QR code terpotong di
+   bawah kartu utk relawan dgn nama 2-baris, mis. "FATUR RIZKY
+   FAHRIANSYAH" + divisi panjang "ASISTEN LAPANGAN"). Akar masalah:
+   anggaran tinggi .body (lihat komentar .foto-profil) SENGAJA pas-
+   pasan ("toleransi tipis"), dan pil Divisi max-width:42mm sebelumnya
+   kemungkinan membuat teks divisi panjang BUNGKUS JADI 2 BARIS di
+   dalam pilnya sendiri -- menambah tinggi melebihi anggaran yg
+   dihitung. Diperbaiki: margin-top name dikurangi (1mm->0.6mm) & pil
+   meta max-width diperbesar (42mm->48mm, msh muat dlm lebar kartu
+   54mm) supaya divisi 1-2 kata panjang tetap 1 baris -- total
+   mengembalikan toleransi aman tanpa mengubah ukuran font/foto/QR. */
+.card.front .name { margin-top: 0.6mm; margin-left: 2mm; margin-right: 2mm; color: var(--navy); font-weight: 900; font-size: 3.3mm; line-height: 1.12; text-transform: uppercase; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-shrink: 0; }
+.card.front .meta { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: .5mm; margin-top: 0.7mm; font-size: 1.85mm; color: #5d6b7d; flex-shrink: 0; }
+.card.front .meta div { min-width: 28mm; max-width: 48mm; padding: .3mm 2mm; border-radius: 5mm; background: #f4f6f9; line-height: 1.2; white-space: nowrap; }
 .card.front .meta strong { color: #17365f; font-weight: 800; }
 
 /* Area foto profil -- BARU 23 Okt 2026 (dokumen Kartu Identitas
@@ -911,19 +920,12 @@ button.riwayat-item {
    Saya" meluber ke samping di HP, cuma kelihatan separuh kiri). Akar
    masalah: scale(2.7) di atas dirancang utk preview ADMIN di desktop
    (layar lebar) -- di viewport HP (~380-430px) kartu 54mm hasil
-   di-scale 2.7x jadi ~146mm, jauh lebih lebar dari layar, dan
-   margin-bottom besar itu (kompensasi tinggi scale utk desktop) ikut
-   bikin halaman jadi aneh di HP. TIDAK mengubah .kartu-qr-preview-scale
-   dasar (admin-kartu-qr.js di desktop MASIH pakai scale 2.7 spt
-   sebelumnya) -- override KHUSUS #icsKartuArea (cuma dipakai
-   id-card-saya.html, halaman relawan, SELALU dibuka di HP) via media
-   query, scale jauh lebih kecil & center rapi, margin-bottom
-   disesuaikan (bukan dihapus total -- tetap perlu sedikit ruang krn
-   transform:scale TIDAK mengubah tinggi yg direservasi di document flow). */
+   di-scale 2.7x jadi ~146mm, jauh lebih lebar dari layar. TIDAK
+   mengubah .kartu-qr-preview-scale dasar (admin-kartu-qr.js di desktop
+   MASIH pakai scale 2.7 spt sebelumnya) -- override KHUSUS
+   #icsKartuArea (cuma dipakai id-card-saya.html, halaman relawan,
+   SELALU dibuka di HP) via media query. */
 @media (max-width: 640px) {
-  /* #icsKartuArea sendiri full-width (tidak punya width tetap) --
-     yang DIPUSATKAN harus .card.front di dalamnya (punya width:54mm
-     tetap, lihat definisi .card.front di atas), via margin:auto. */
   #icsKartuArea.kartu-qr-preview-scale { transform: scale(1.35); transform-origin: top center; margin-bottom: 58mm; }
   #icsKartuArea.kartu-qr-preview-scale .card.front { margin-left: auto; margin-right: auto; }
 }

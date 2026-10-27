@@ -120,14 +120,9 @@
 /* BARU 25 Okt 2026 (akar masalah "tabel kepotong/nggak pernah bener" yg
    dilaporkan berulang kali -- Master Tarif, dll): tabelnya SEBENARNYA
    SUDAH bisa digeser (overflow-x:auto), masalahnya TIDAK ADA TANDA
-   VISUAL bahwa masih ada kolom di sebelah kanan -- kolom terakhir
-   kelihatan "terpotong pas di pinggir layar" shg terlihat seperti rusak,
-   padahal tinggal digeser. Bayangan tipis di kanan ini kasih isyarat
-   "masih ada lagi, geser" -- otomatis HILANG sendiri kalau tabel memang
-   sudah pas (tidak overflow, mis. di layar lebar/desktop), krn murni CSS
-   gradient dekoratif, tidak tahu status scroll sungguhan -- jadi SELALU
-   tampil kalau tabel LEBIH LEBAR dari .table-wrap (kondisi paling umum
-   di HP), tapi tidak mengganggu kalau tidak overflow. */
+   VISUAL bahwa masih ada kolom di sebelah kanan. Bayangan tipis ini
+   kasih isyarat "masih ada lagi, geser" -- SELALU tampil kalau tabel
+   LEBIH LEBAR dari .table-wrap, tidak mengganggu kalau tidak overflow. */
 .table-wrap::after {
   content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 28px;
   background: linear-gradient(90deg, transparent, rgba(0,0,0,.08));
@@ -293,18 +288,26 @@ tbody tr:hover { background: var(--color-bg); }
    sbg jaga-jaga eksplisit khusus tabel ini. */
 .tabel-kolom-beku-3 { min-width: 900px; border-collapse: separate; border-spacing: 0; }
 .tabel-kolom-beku-3 th:first-child, .tabel-kolom-beku-3 td:first-child {
-  position: sticky; left: 0; background: #fff; z-index: 1;
-  box-shadow: 1px 0 0 var(--color-border); min-width: 140px;
+  position: sticky; left: 0; background-color: #fff; z-index: 1;
+  box-shadow: 1px 0 0 var(--color-border); min-width: 180px; /* diperbesar 27 Okt 2026 dari 140px -- ID relawan spt "R-PERSIAPAN-005" kepotong di kolom beku kiri (dilaporkan Admin, bbrp screenshot) */
 }
 
 /* Vertikal (16 Okt 2026, diminta Admin): SELURUH baris header beku
    saat digeser ke BAWAH -- top mengikuti tinggi topbar yg SUDAH
-   sticky (--shell-topbar-h, app-shell.css). */
+   sticky (--shell-topbar-h, app-shell.css).
+   Diperkuat 27 Okt 2026 (dilaporkan Admin -- di 5+ halaman berbeda yg
+   pakai class ini, konten baris SEBELUMNYA tampak "tembus" dari
+   belakang header mengambang): background-color EKSPLISIT (bukan
+   shorthand `background`, utk pastikan tidak ada properti background-*
+   lain yg diwariskan jadi transparan/gradient dari parent) + isolation
+   supaya stacking context-nya PASTI terpisah dari konten di bawahnya,
+   bukan cuma andalkan z-index yg bisa kalah kalau ada elemen lain py
+   stacking context sendiri (mis. dari transform/opacity di parent). */
 .tabel-kolom-beku-3 th {
   position: sticky; top: calc(var(--shell-topbar-h) + env(safe-area-inset-top, 0px));
-  background: var(--color-bg-muted, #f5f7fa); z-index: 3;
+  background-color: var(--color-bg-muted, #f5f7fa); z-index: 3; isolation: isolate;
 }
-.tabel-kolom-beku-3 th:first-child { z-index: 4; } /* pojok kiri-atas: menang dari th biasa (z-index 3) DAN td kolom beku (z-index 1) */
+.tabel-kolom-beku-3 th:first-child { z-index: 4; background-color: var(--color-bg-muted, #f5f7fa); } /* pojok kiri-atas: menang dari th biasa (z-index 3) DAN td kolom beku (z-index 1); background DISAMAKAN dgn th biasa (sebelumnya warisan #fff dari aturan td:first-child shared selector, beda dari th lain -- bisa jadi sumber "tembus" visual kalau th lain #f5f7fa) */
 
 /* Badge status MENGAMBANG di pojok kanan-atas sel Nama (21 Okt 2026,
    diminta Admin) -- menggantikan kolom Status terpisah. Sel induknya
