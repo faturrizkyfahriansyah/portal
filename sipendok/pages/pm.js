@@ -39,6 +39,11 @@ export async function render(root, ctx) {
   function kartuPm(p) {
     const pic = picUntukPm(p.ID_PM);
     const isPosyandu = p.JENIS_PM === 'POSYANDU';
+    // DIAGNOSTIK SEMENTARA 28 Okt 2026 -- HAPUS baris ini setelah masalah
+    // ketemu. Menampilkan nilai JENIS_PM MENTAH apa adanya yang diterima
+    // dari server, supaya kelihatan persis kalau ada tanda kutip, spasi,
+    // atau beda apa pun yang tidak kelihatan dari tampilan biasa.
+    console.log('DEBUG', p.NAMA_PM, 'JENIS_PM=', JSON.stringify(p.JENIS_PM));
     const baris = isPosyandu
       ? [['Balita', kosong(p.ACUAN_BALITA)], ['Bumil', kosong(p.ACUAN_BUMIL)], ['Busui', kosong(p.ACUAN_BUSUI)]]
       : [['Porsi kecil', kosong(p.ACUAN_PORSI_KECIL)], ['Porsi besar', kosong(p.ACUAN_PORSI_BESAR)]];
@@ -51,6 +56,7 @@ export async function render(root, ctx) {
       h('div', { class: 'row' }, h('div', { class: 'grow' }, h('div', { class: 'title' }, p.NAMA_PM)),
         chip(JENIS_LABEL[p.JENIS_PM] || p.JENIS_PM, isPosyandu ? '' : 'info'), chip(p.STATUS, p.STATUS === 'Aktif' ? 'ok' : '')),
       h('div', { class: 'hint', style: { margin: '2px 0 10px' } }, pic ? 'PIC: ' + pic.NAMA_PIC : h('span', { style: { color: 'var(--err)' } }, 'PIC belum diisi')),
+      h('div', { style: { fontSize: '11px', color: 'red', fontFamily: 'monospace' } }, 'DEBUG JENIS_PM=' + JSON.stringify(p.JENIS_PM)), // DIAGNOSTIK SEMENTARA -- hapus setelah ketemu masalahnya
       h('div', { class: 'row', style: { gap: '18px', textAlign: 'center' } },
         baris.map(([label, val]) => h('div', {}, h('div', { class: 'hint' }, label), h('div', { class: 'title' }, val)))),
       h('div', { style: { marginTop: '10px' } }, h('div', { class: 'hint' }, 'Nomor kendaraan'), h('div', {}, p.ACUAN_NO_KENDARAAN || '—')),
