@@ -32,18 +32,28 @@ export async function render(root, ctx) {
     catch (e) { if (my === req) out.replaceChildren(banner('err', errMsg(e))); }
   }
 
+  // DIROMBAK 28 Okt 2026 (ikuti Master Prompt §8.1 & §9.2: "satu entri
+  // utama per hari... jangan tampilkan satu entri utama per PM jika
+  // seluruh PM sudah digabungkan menjadi satu file harian"). SEBELUMNYA:
+  // tombol "Buka" PER-PM (d.dokumen.map(...)) -- sejak digabung jadi 1
+  // file/hari, SEMUA tombol itu menuju URL yg SAMA PERSIS (mubazir, dan
+  // bertentangan dgn Master Prompt). SEKARANG: SATU tombol Buka + Cetak
+  // di level HARI, daftar PM di bawahnya HANYA informatif (nama+nomor
+  // BAST, tanpa tombol per-item).
   function draw(hari) {
-    hari.forEach((d) => { d.terpisah = new Set(d.dokumen.filter((x) => x.status === 'AKTIF' && x.fileDokumen).map((x) => x.fileDokumen)).size > 1; });
     if (!hari.length) { out.replaceChildren(emptyState('archive', 'Belum ada dokumen', 'Dokumen muncul di sini setelah Generate Dokumen dijalankan.')); return; }
-    out.replaceChildren(...hari.map((d) => h('div', { class: 'item' },
-      h('div', { class: 'row' }, h('div', { class: 'grow' }, h('div', { class: 'title' }, `${hariIndo(d.tanggal)}, ${tglIndo(d.tanggal)}`),
-        h('div', { class: 'sub num' }, `${num(d.jumlahPm)} PM · ${num(d.totalPaket)} paket`)), d.fileHari ? linkBtn(d.fileWord ? 'PDF' : 'Buka', d.fileHari, 'gold sm', 'file') : null, d.fileWord ? linkBtn('Word', d.fileWord, 'ghost sm', 'file') : null, chip('P' + d.kodePeriode, 'info')),
-      h('div', { class: 'stack', style: { marginTop: '10px', gap: '6px' } }, d.dokumen.map((doc) => h('div', { class: 'row', style: { fontSize: '13px', alignItems: 'center' } },
-        h('div', { class: 'grow' }, h('div', {}, doc.namaPm), h('div', { class: 'hint' }, doc.nomorBast)),
-        doc.status !== 'AKTIF' ? chip('Diganti', '') : null,
-        // hari lama (format 1 file per PM) masih punya file terpisah -> tetap tampilkan tombol Buka per PM
-        d.terpisah && doc.fileDokumen ? linkBtn(doc.fileWord ? 'PDF' : 'Buka', doc.fileDokumen, 'ghost sm', 'file') : null,
-        d.terpisah && doc.fileWord ? linkBtn('Word', doc.fileWord, 'ghost sm', 'file') : null))))));
+    out.replaceChildren(...hari.map((d) => {
+      const fileHariIni = (d.dokumen.find((doc) => doc.status === 'AKTIF' && doc.fileDokumen) || {}).fileDokumen || '';
+      return h('div', { class: 'item' },
+        h('div', { class: 'row' }, h('div', { class: 'grow' }, h('div', { class: 'title' }, `${hariIndo(d.tanggal)}, ${tglIndo(d.tanggal)}`),
+          h('div', { class: 'sub num' }, `${num(d.jumlahPm)} PM · ${num(d.totalPaket)} paket`)), chip('P' + d.kodePeriode, 'info')),
+        fileHariIni ? h('div', { class: 'row', style: { marginTop: '8px', gap: '6px' } },
+          h('a', { href: fileHariIni, target: '_blank', rel: 'noopener', class: 'btn-mini ghost' }, icon('file', 14), 'Buka'),
+          h('a', { href: fileHariIni, target: '_blank', rel: 'noopener', class: 'btn-mini primary' }, icon('printer', 14), 'Cetak')) : null,
+        h('div', { class: 'stack', style: { marginTop: '10px', gap: '4px' } }, d.dokumen.map((doc) => h('div', { class: 'row', style: { fontSize: '12.5px', color: 'var(--text-muted)' } },
+          h('div', { class: 'grow' }, doc.namaPm + ' — ' + doc.nomorBast),
+          doc.status !== 'AKTIF' ? chip('Diganti', '') : null))));
+    }));
   }
   await load();
 }
