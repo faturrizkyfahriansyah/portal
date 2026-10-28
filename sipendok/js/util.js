@@ -46,7 +46,9 @@ const P = {
   download: '<path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/>',
   // BARU 23 Okt 2026 (dipakai pages/pm.js -- tombol Hapus & Nonaktifkan).
   trash: '<path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6M14 11v6"/>',
-  slash: '<circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/>'
+  slash: '<circle cx="12" cy="12" r="9"/><path d="M5.5 5.5l13 13"/>',
+  // BARU 28 Okt 2026 (tombol Cetak, BastSj.gs/bastsj.js)
+  printer: '<path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><path d="M6 14h12v7H6z"/>'
 };
 export function icon(name, size = 20) {
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
