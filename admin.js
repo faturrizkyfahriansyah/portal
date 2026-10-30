@@ -7,6 +7,22 @@
   'use strict';
 
   let authToken = null;
+  // BARU 30 Okt 2026 (INSIDEN KRITIS: "Sesi tidak valid" muncul acak di
+  // beberapa widget dashboard, PADAHAL baru saja berhasil login). Akar
+  // masalah: pulihkanSesiAdmin_() (akhir file) jalan OTOMATIS setiap
+  // halaman dimuat, TANPA tahu apakah user JUGA sedang/sudah login
+  // manual scr paralel. Kalau pemeriksaan sesi LAMA tersimpan itu
+  // selesai BELAKANGAN (perlu waktu extra: retry jaringan, dll) dan
+  // ternyata (atau terlihat) masih valid, ia memanggil
+  // masukKeDashboard_(token_LAMA, ...) -- yg MENIMPA authToken yg baru
+  // saja benar dari login manual, balik ke token lama/usang. Widget yg
+  // kebetulan baru nembak API setelah momen itu (Gelombang 2 krn
+  // sengaja ditunda, lihat SUMBER_DASHBOARD_GELOMBANG_2) jadi memakai
+  // token usang itu -> requireAuth menolak -> "Sesi tidak valid".
+  // Flag ini dicek pulihkanSesiAdmin_ SEBELUM memanggil
+  // masukKeDashboard_: kalau login manual SUDAH lebih dulu berhasil,
+  // proses pemulihan sesi lama dibatalkan diam-diam (tidak relevan lagi).
+  let loginManualSudahBerhasil = false;
 
   const cache = {
     divisiList: [],
@@ -265,6 +281,7 @@
       // TIDAK perlu login ulang selama sesi di server masih berlaku
       // (lihat pulihkanSesiAdmin_ di akhir file).
       simpanSesiAdmin({ token: data.token, username: data.username, role: data.role || 'ADMIN' });
+      loginManualSudahBerhasil = true; // lihat catatan di deklarasi flag ini (atas file)
       masukKeDashboard_(data.token, data.username, data.role);
       // Overlay "Memeriksa akun..." berhenti DI SINI -- begitu auth
       // berhasil dan shell Dashboard sudah ditampilkan. TIDAK menunggu
@@ -2726,6 +2743,15 @@
         return;
       }
     }
+
+    // BARU 30 Okt 2026: kalau login MANUAL sudah lebih dulu berhasil
+    // (user sempat mengetik username/password sendiri SEBELUM pemeriksaan
+    // sesi lama ini selesai), proses pemulihan sesi lama ini SUDAH TIDAK
+    // RELEVAN -- batalkan diam-diam, JANGAN panggil masukKeDashboard_
+    // dgn token lama (itu yg menimpa authToken yg sudah benar, akar
+    // masalah "Sesi tidak valid" acak di sebagian widget). Dashboard
+    // dari login manual TETAP seperti apa adanya, tidak diganggu.
+    if (loginManualSudahBerhasil) { hideLoading(); return; }
 
     // Sesi valid -- lanjutkan PERSIS seperti alur setelah login manual berhasil.
     try {
