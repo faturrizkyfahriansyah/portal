@@ -533,7 +533,19 @@
     // "jangan hapus sembarangan sebelum pasti tidak ada pemakainya".
     { key: 'dokumenList', label: 'Dokumen', fn: () => apiGet('getDokumenListAdmin', { token: authToken }) },
     { key: 'notifikasiList', label: 'Notifikasi', fn: () => apiGet('getNotifikasiListAdmin', { token: authToken }) },
-    { key: 'pengumumanList', label: 'Pengumuman', fn: () => apiGet('getPengumumanListAdmin', { token: authToken }) },
+    { key: 'pengumumanList', label: 'Pengumuman', fn: () => apiGet('getPengumumanListAdmin', { token: authToken }) }
+  ];
+  // DIPISAH 29 Okt 2026 (dilaporkan Admin -- "Tidak dapat terhubung ke
+  // server" muncul SETELAH 7 widget baru ini ditambahkan ke
+  // SUMBER_DASHBOARD di atas). Akar masalah: SEMUA 16 sumber (9 lama +
+  // 7 baru) ditembak BERSAMAAN lewat Promise.all (lihat di bawah) --
+  // terlalu banyak eksekusi Apps Script simultan ke spreadsheet yg
+  // sama, kemungkinan besar melebihi batas konkurensi shg SEBAGIAN
+  // request gagal terhubung sama sekali (bukan error aksi, tapi gagal
+  // koneksi). Dipisah jadi GELOMBANG KEDUA, ditembak SETELAH gelombang
+  // pertama (9 sumber lama) selesai -- bukan dihapus, cuma TIDAK LAGI
+  // bersamaan, supaya beban puncak ke server berkurang jadi separuhnya.
+  const SUMBER_DASHBOARD_GELOMBANG_2 = [
     // BARU: menggantikan 'dashboardPengelola' (getDashboardPengelola, endpoint
     // lama yang menggabungkan 6 bagian tak berkaitan jadi 1 response berat).
     // Key CACHE-nya SENGAJA dipertahankan sama ('dashboardPengelola') supaya
@@ -663,24 +675,31 @@
     // 'dashboardPengelola', sekarang endpoint RINGAN P1-P3 saja) bisa
     // tampil begitu siap, tidak lagi terhalang SIRAGA/Rekap/SIPANDU yang
     // sekarang sudah jadi endpoint terpisah sendiri-sendiri.
-    const semuaPromise = SUMBER_DASHBOARD.map(s =>
-      s.fn()
-        .then(hasil => {
-          cache[s.key] = hasil;
-          cache.errors[s.key] = false;
-          (RENDER_UNTUK_KEY[s.key] || function () {})();
-        })
-        .catch(err => {
-          cache[s.key] = cache[s.key] || [];
-          cache.errors[s.key] = true;
-          (RENDER_UNTUK_KEY[s.key] || function () {})(); // tetap render -- supaya empty-state + tombol "Coba Lagi" muncul, bukan diam kosong
-          return { gagal: true, label: s.label, pesan: (err && err.message) ? err.message : 'gagal dimuat' };
-        })
-    );
+    // DIPISAH 2 gelombang (lihat catatan SUMBER_DASHBOARD_GELOMBANG_2 di
+    // atas) -- fungsi kecil dipakai utk KEDUA gelombang, bukan ditulis
+    // ulang 2x.
+    function tembakGelombang_(daftarSumber) {
+      return Promise.all(daftarSumber.map(s =>
+        s.fn()
+          .then(hasil => {
+            cache[s.key] = hasil;
+            cache.errors[s.key] = false;
+            (RENDER_UNTUK_KEY[s.key] || function () {})();
+          })
+          .catch(err => {
+            cache[s.key] = cache[s.key] || [];
+            cache.errors[s.key] = true;
+            (RENDER_UNTUK_KEY[s.key] || function () {})(); // tetap render -- supaya empty-state + tombol "Coba Lagi" muncul, bukan diam kosong
+            return { gagal: true, label: s.label, pesan: (err && err.message) ? err.message : 'gagal dimuat' };
+          })
+      ));
+    }
 
     // Promise.all AMAN dipakai di sini (tidak akan reject) -- setiap
     // promise di atas SUDAH menangani error-nya sendiri lewat .catch.
-    const hasilSemua = await Promise.all(semuaPromise);
+    const hasilGel1 = await tembakGelombang_(SUMBER_DASHBOARD);
+    const hasilGel2 = await tembakGelombang_(SUMBER_DASHBOARD_GELOMBANG_2);
+    const hasilSemua = hasilGel1.concat(hasilGel2);
     const gagalDimuat = hasilSemua.filter(h => h && h.gagal).map(h => h.label + ' (' + h.pesan + ')');
 
     // Rekap Harian TIDAK LAGI menentukan "Dashboard siap" -- dijalankan
