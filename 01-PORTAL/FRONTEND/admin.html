@@ -8,16 +8,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles/style.css?v=20260903c">
+<link rel="stylesheet" href="style.css?v=20260903c">
 <!-- Diperbarui 23 Okt 2026 (Kartu Identitas Relawan) -- versi dinaikkan
-     krn style .foto-profil kini TERINTEGRASI LANGSUNG ke styles/portal.css
+     krn style .foto-profil kini TERINTEGRASI LANGSUNG ke portal.css
      (file kartu-identitas.css terpisah sempat dipakai sementara saat
-     styles/portal.css belum tersedia, sekarang sudah dihapus -- jangan
+     portal.css belum tersedia, sekarang sudah dihapus -- jangan
      tambahkan <link> ke file itu lagi kalau terlihat di versi lama). -->
-<link rel="stylesheet" href="styles/portal.css?v=20261023a">
-<link rel="stylesheet" href="styles/admin.css?v=20261023a">
-<link rel="stylesheet" href="styles/app-shell.css?v=20261015b">
-<link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
+<link rel="stylesheet" href="portal.css?v=20261023a">
+<link rel="stylesheet" href="admin.css?v=20261023a">
+<link rel="stylesheet" href="app-shell.css?v=20261015b">
+<link rel="stylesheet" href="rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#12294d">
 </head>
@@ -86,7 +86,7 @@
       <!-- Pencarian Global Relawan DIPINDAH ke sidebar (permintaan Admin,
            15 Okt 2026) -- sebelumnya di topbar, mendesak ikon lonceng &
            pengaturan turun ke baris kedua di layar sempit. Logika JS
-           (modules/admin/admin.js) TIDAK berubah -- cuma ID elemen yg dirujuk, posisi
+           (admin.js) TIDAK berubah -- cuma ID elemen yg dirujuk, posisi
            DOM-nya saja yang pindah. -->
       <div class="shell-sidebar-search" style="position:relative;padding:0 14px 14px;">
         <input type="text" id="pencarianGlobalRelawan" placeholder="🔍 Cari relawan..." autocomplete="off"
@@ -177,9 +177,9 @@
       <p class="shell-nav-group-title">Aplikasi Terhubung</p>
       <p class="shell-nav-group-desc">Aplikasi terpisah dengan backend &amp; database sendiri.</p>
       <!-- SIPENDOK & SIPOGIM: aplikasi terpisah (frontend+backend sendiri), BUKAN panel internal -- <a> biasa, bukan admin-tab-btn/data-panel, dibuka tab baru supaya sesi Portal Admin tetap aktif. Dipisah dari SIPIKA (sebelumnya tercampur di sana) sesuai audit navigasi. -->
-      <a href="../02-SIPENDOK/index.html" target="_blank" rel="noopener" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h2"/><path d="M5 4h10l4 4v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/></svg></span><span>SIPENDOK ↗</span></a>
+      <a href="sipendok/index.html" target="_blank" rel="noopener" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h2"/><path d="M5 4h10l4 4v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/></svg></span><span>SIPENDOK ↗</span></a>
       <p class="shell-nav-group-desc" style="margin-top:-6px;">Sistem Informasi Penerimaan Dokumen</p>
-      <a href="../03-SIPOGIM/beranda.html" target="_blank" rel="noopener" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 22v-6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M22 12h-6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/></svg></span><span>SIPOGIM ↗</span></a>
+      <a href="sipogim/beranda.html" target="_blank" rel="noopener" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 22v-6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M22 12h-6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/></svg></span><span>SIPOGIM ↗</span></a>
       <p class="shell-nav-group-desc" style="margin-top:-6px;">Sistem Informasi Gizi &amp; Menu</p>
       <!-- SIPRES QR (Perbaikan G): BEDA dari SIPENDOK/SIPOGIM -- ini BUKAN
            backend/database terpisah, halaman kios yg SAMA (absensi-qr.html,
@@ -389,7 +389,7 @@
        tombol "Lihat Profil" di panel Relawan / hasil Pencarian Global,
        BUKAN tombol nav tersendiri di sidebar (makanya tidak ada
        admin-tab-btn utk ini di sidebar -- dibuka programatik, lihat
-       modules/admin/admin-profil-relawan.js & fungsi bukaProfilRelawan di modules/admin/admin.js). -->
+       admin-profil-relawan.js & fungsi bukaProfilRelawan di admin.js). -->
   <div class="admin-panel" id="panelProfilRelawan">
     <div id="prKontenUtama">
       <div class="empty-state">Memuat profil...</div>
@@ -1732,7 +1732,7 @@
 
       <!-- Perbaikan E: field tanggal tujuan, tampil hanya kalau status =
            Pindah Tanggal. Diisi dinamis dari daftarTanggal periode yg sama
-           (lihat modules/admin/admin-jadwal-individu.js) -- bukan status kehadiran
+           (lihat admin-jadwal-individu.js) -- bukan status kehadiran
            permanen, ini perubahan JADWAL (sesuai catatan prompt: jangan
            perlakukan Pindah Tanggal sbg status kehadiran). -->
       <div id="jiBlokPindahTanggal" style="display:none;margin-bottom:10px;">
@@ -2348,27 +2348,27 @@
 
 </div>
 
-<script src="core/config.js?v=20260903c"></script>
-<script src="core/common.js?v=20261014a"></script>
-<script src="core/NavigasiTerpusat.js"></script>
-<script src="core/app-shell.js?v=20260903c"></script>
-<script src="core/auth-admin.js?v=20260918a"></script>
+<script src="config.js?v=20260903c"></script>
+<script src="common.js?v=20261014a"></script>
+<script src="NavigasiTerpusat.js"></script>
+<script src="app-shell.js?v=20260903c"></script>
+<script src="auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="modules/admin/admin.js?v=20261023e"></script>
+<script src="admin.js?v=20261023e"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
-<script src="modules/admin/admin-kartu-qr.js?v=20261023a"></script>
-<script src="modules/admin/admin-sipres-monitoring.js?v=20260922a"></script>
-<script src="modules/admin/admin-migrasi-roster-v2.js"></script>
-<script src="modules/admin/admin-rekap-mingguan.js"></script>
+<script src="admin-kartu-qr.js?v=20261023a"></script>
+<script src="admin-sipres-monitoring.js?v=20260922a"></script>
+<script src="admin-migrasi-roster-v2.js"></script>
+<script src="admin-rekap-mingguan.js"></script>
 <!-- FASE 2: admin-stok.js, admin-shift.js, admin-role.js, admin-export.js,
      admin-import.js, admin-pengelola-sppg.js, admin-pengaturan.js, dan
-     modules/admin/admin-website-publik.js SEKARANG dimuat lazy oleh modules/admin/admin.js sendiri
-     (lihat MODUL_LAZY di modules/admin/admin.js) -- baru diambil saat tab terkait
+     admin-website-publik.js SEKARANG dimuat lazy oleh admin.js sendiri
+     (lihat MODUL_LAZY di admin.js) -- baru diambil saat tab terkait
      pertama kali dibuka, bukan semua dimuat di sini di awal. Jangan
      tambahkan lagi <script> untuk 8 file itu di sini. -->
-<script src="modules/admin/admin-charts.js"></script>
-<script src="modules/admin/admin-target-widget.js"></script>
-<script src="modules/admin/admin-sipandu-akses.js"></script>
+<script src="admin-charts.js"></script>
+<script src="admin-target-widget.js"></script>
+<script src="admin-sipandu-akses.js"></script>
 <script>document.addEventListener('DOMContentLoaded', function () { initShell({ storageKey: 'sppgSidebarCollapsedAdmin' }); });</script>
 </body>
 </html>
