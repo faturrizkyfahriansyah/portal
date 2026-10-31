@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPPG Jeungjing — PORTAL SPPG JEUNGJING</title>
+<meta name="description" content="PORTAL SPPG JEUNGJING — Satuan Pelayanan Pemenuhan Gizi, Kp. Kecok, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang, Banten">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/style.css?v=20260903b">
+<link rel="stylesheet" href="styles/portal.css?v=20261001g">
+<link rel="stylesheet" href="styles/app-shell.css?v=20260903b">
+<link rel="stylesheet" href="styles/rebrand.css?v=20260903b">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#12294d">
+</head>
+<body>
+<div class="sppg-page-bg" id="landingRoot" style="display:none;">
+
+  <section class="sppg-hero">
+    <div class="sppg-motif" aria-hidden="true"></div>
+    <div class="sppg-hero-inner">
+      <div class="sppg-hero-logos">
+        <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional">
+        <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
+      </div>
+      <h1>Melayani dengan Gizi,<br>Mengabdi dengan Hati.</h1>
+      <p>Portal digital sebagai pusat akses informasi dan layanan operasional dalam mendukung kelancaran pengelolaan SPPG JEUNGJING.</p>
+      <div class="sppg-hero-rule"></div>
+    </div>
+  </section>
+
+  <div class="sppg-action-card" style="text-align:center;">
+    <h2>Masuk ke Portal</h2>
+    <a href="login.html" class="btn-submit" style="display:block;text-decoration:none;box-sizing:border-box;margin-top:16px;">Masuk ke Portal</a>
+    <p style="font-size:12.5px;color:#6b7280;margin:16px 0 0;line-height:1.6;">
+      Belum punya akun? <a href="https://wa.me/6285694765370" target="_blank" rel="noopener" style="color:var(--sppg-navy);font-weight:700;text-decoration:underline;">Hubungi Admin</a><br>
+      <span style="font-size:11.5px;">WhatsApp Admin: 085694765370</span>
+    </p>
+  </div>
+
+  <footer class="sppg-foot">
+    <p><strong>SPPG JEUNGJING</strong> · Kp. Kecok, RT 004/RW 001, Desa Jeungjing, Kecamatan Cisoka, Kabupaten Tangerang – Banten 15730</p>
+    <p style="margin-top:14px;"><a href="admin.html" style="color:#9ca3af;font-size:12px;">Admin → Masuk ke Portal Admin</a></p>
+    <p style="margin-top:6px;font-size:11.5px;">© 2026 SPPG Jeungjing · Dikembangkan oleh Fatur Rizky Fahriansyah</p>
+  </footer>
+</div>
+
+<script src="core/config.js?v=20260903b"></script>
+<script src="core/common.js?v=20260903b"></script>
+<script src="core/auth-relawan.js?v=20260903b"></script>
+<script>
+  // Kondisi belum login (Bagian 7): tampilkan hero + tombol Masuk saja,
+  // TANPA data pribadi apa pun. Kalau sesi relawan masih berlaku, langsung
+  // arahkan ke Dashboard supaya tidak perlu login ulang.
+  (function () {
+    var sesi = ambilSesiRelawan();
+    if (sesi && sesi.token) {
+      window.location.href = 'dashboard.html';
+      return;
+    }
+    document.getElementById('landingRoot').style.display = '';
+  })();
+</script>
+</body>
+</html>

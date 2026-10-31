@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ID Card Relawan SPPG Jeungjing v2</title>
+<style>
+:root{--navy:#0B2A52;--navy2:#071D3A;--gold:#D9A62E;--gold2:#F2C75C;--ink:#17365F;--paper:#fff}
+*{box-sizing:border-box}html,body{margin:0}body{min-height:100vh;padding:28px;background:#e9edf2;font-family:Arial,"Segoe UI",sans-serif;color:var(--ink)}
+.toolbar{max-width:900px;margin:0 auto 22px;text-align:center}.toolbar h1{margin:0;color:var(--navy);font-size:22px}.toolbar p{margin:6px 0;color:#667085;font-size:13px}
+.preview{display:flex;justify-content:center;align-items:flex-start;gap:70px;flex-wrap:wrap}.side-label{text-align:center;font-weight:800;color:var(--navy);margin:0 0 10px;font-size:13px;letter-spacing:.5px}
+.card{width:54mm;height:86mm;position:relative;overflow:hidden;border-radius:3.2mm;background:#fff;box-shadow:0 12px 35px rgba(7,29,58,.24);font-family:Arial,"Segoe UI",sans-serif;isolation:isolate}
+.card::after{content:"";position:absolute;inset:0;border:.35mm solid rgba(11,42,82,.18);border-radius:3.2mm;pointer-events:none;z-index:30}
+.batik{position:absolute;width:18mm;height:18mm;object-fit:contain;pointer-events:none;z-index:0}.watermark{opacity:.055}
+.front .c1{top:18mm;left:-7mm}.front .c2{top:18mm;right:-7mm;transform:scaleX(-1)}.front .c3{bottom:10mm;left:-7mm;transform:scaleY(-1)}.front .c4{bottom:10mm;right:-7mm;transform:scale(-1,-1)}
+/* PENTING: watermark datang SEBELUM .top/.body di DOM dgn background opaque -- tanpa z-index eksplisit, .top/.body akan menimpa watermark sepenuhnya. */
+.front .top{height:20mm;background:linear-gradient(145deg,var(--navy),var(--navy2));color:#fff;position:relative;z-index:1;overflow:hidden}
+.logos{position:relative;z-index:2;display:flex;justify-content:center;align-items:center;gap:2.4mm;padding-top:3mm}.logo{width:10mm;height:10mm;object-fit:contain;border-radius:50%;background:#fff;display:block}.logo.sppg{width:10.5mm;height:10.5mm}.logo-divider{height:7.2mm;width:.25mm;background:rgba(255,255,255,.7)}
+.brand{position:relative;z-index:2;text-align:center;margin-top:1.8mm;font-weight:900;letter-spacing:.55mm;font-size:3.65mm}.gold-line{position:absolute;left:5mm;right:5mm;bottom:0;height:.7mm;background:linear-gradient(90deg,transparent,var(--gold2),var(--gold),transparent)}
+/* body 60mm (naik dari 56mm): ruang didapat dari .top dikecilkan (subtitle dihapus) + .bottom disederhanakan tanpa overlap. Dihitung ulang: aman utk skenario terburuk nama+divisi 2 baris. */
+.front .body{position:relative;z-index:1;height:60mm;padding:3.2mm 4mm 2.2mm;background:#fff;text-align:center;display:flex;flex-direction:column;align-items:center}.title{color:var(--gold);font-size:2.65mm;font-weight:800;letter-spacing:.28mm;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:1.4mm}.title .garis{display:block;width:7mm;height:.3mm;background:var(--gold);flex-shrink:0}.title .title-teks{white-space:nowrap}.diamond{width:1.25mm;height:1.25mm;background:var(--navy);transform:rotate(45deg);display:block}
+.name{margin-top:2mm;margin-left:2mm;margin-right:2mm;color:var(--navy);font-weight:900;font-size:4.15mm;line-height:1.12;text-transform:uppercase;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex-shrink:0}.meta{position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;gap:.8mm;margin-top:1.6mm;font-size:2.3mm;color:#5d6b7d;flex-shrink:0}.meta div{min-width:30mm;max-width:44mm;padding:.5mm 2.5mm;border-radius:5mm;background:#f4f6f9;line-height:1.3}.meta strong{color:#17365f;font-weight:800}
+.qr-wrap{position:relative;flex-shrink:0;margin-top:auto;width:25.8mm;height:25.8mm;padding:1.15mm;background:#fff;border:.42mm solid var(--navy);box-shadow:0 0 0 .35mm var(--gold);border-radius:1.8mm;display:flex;align-items:center;justify-content:center}#qrCode{width:23.2mm;height:23.2mm;display:flex;align-items:center;justify-content:center}#qrCode img,#qrCode canvas{width:100%!important;height:100%!important;display:block}
+/* Footer disederhanakan: dulu overlap 3mm ke .body DAN ornamen diposisikan bottom:-5mm (lebih besar dari tinggi footernya sendiri) -- gabungan keduanya membuat ornamen terpotong overflow:hidden kartu, muncul sebagai "gambar kosong" saat dicetak. Sekarang: strip bersih tanpa overlap, ornamen 5mm 100% di dalam batas footer. */
+.front .bottom{position:relative;z-index:1;flex-shrink:0;height:6mm;overflow:hidden;background:linear-gradient(180deg,#173c6c 0%,#0b2a52 100%)}.front .bottom::before{content:"";position:absolute;left:0;right:0;top:0;height:.5mm;background:linear-gradient(90deg,transparent 0%,#d9a62e 16%,#f2c75c 50%,#d9a62e 84%,transparent 100%)}
+
+.note{max-width:900px;margin:24px auto 0;padding:12px 16px;background:#fff;border-left:4px solid var(--gold);color:#475467;font-size:12px;line-height:1.5}
+@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}body{padding:0;background:#fff}.toolbar,.side-label,.note{display:none}.preview{display:block}.preview>section{page-break-after:always}.preview>section:last-child{page-break-after:auto}.card{box-shadow:none;width:54mm;height:86mm}@page{size:54mm 86mm;margin:0}}
+</style>
+
+</head><body>
+<div class="toolbar"><h1>Template ID Card Relawan — SPPG Jeungjing</h1><p>Front + Back • 54 × 86 mm • portrait • ornamen memakai motif Batik MBG/BGN dari referensi asli</p></div>
+<div class="preview">
+<section><div class="side-label">DEPAN — KARTU ABSENSI RELAWAN</div><div class="card front" id="idCardFront">
+<img class="batik watermark c1" src="assets/batik-ornamen.png" alt=""><img class="batik watermark c2" src="assets/batik-ornamen.png" alt=""><img class="batik watermark c3" src="assets/batik-ornamen.png" alt=""><img class="batik watermark c4" src="assets/batik-ornamen.png" alt="">
+<div class="top"><div class="logos"><img class="logo" src="assets/logo-bgn.png" alt="Logo BGN"><div class="logo-divider"></div><img class="logo sppg" src="assets/logo.png" alt="Logo SPPG Jeungjing"></div><div class="brand">SPPG JEUNGJING</div><div class="gold-line"></div></div>
+<div class="body"><div class="title"><span class="garis"></span><i class="diamond"></i><span class="title-teks">Kartu Absensi Relawan</span><i class="diamond"></i><span class="garis"></span></div><div class="name" id="volunteerName">FATUR RIZKY FAHRIANSYAH</div><div class="meta"><div>ID: <strong id="volunteerId">R-ASL-001</strong></div><div>Divisi: <strong id="volunteerDivision">ASISTEN LAPANGAN</strong></div></div><div class="qr-wrap"><div id="qrCode"></div></div></div>
+<div class="bottom"></div></div></section>
+</div>
+<div class="note"><strong>Catatan integrasi:</strong> template depan mempertahankan ID <code>volunteerName</code>, <code>volunteerId</code>, <code>volunteerDivision</code>, dan <code>qrCode</code> agar mudah menggantikan template lama. Tidak ada teks “SIPRES”. QR tetap diisi dengan TOKEN_KARTU dari backend.</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script>
+function isiKartuIdRelawan(data){document.getElementById('volunteerName').textContent=String(data.nama||'').toUpperCase();document.getElementById('volunteerId').textContent=data.id||'';document.getElementById('volunteerDivision').textContent=String(data.divisi||'').toUpperCase();const el=document.getElementById('qrCode');el.innerHTML='';new QRCode(el,{text:data.qrTeks||'',width:300,height:300,correctLevel:QRCode.CorrectLevel.M})}
+isiKartuIdRelawan({nama:'FATUR RIZKY FAHRIANSYAH',id:'R-ASL-001',divisi:'ASISTEN LAPANGAN',qrTeks:'550e8400-e29b-41d4-a716-446655440000'});
+</script></body></html>

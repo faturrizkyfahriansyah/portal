@@ -1,0 +1,48 @@
+/* ============================================================
+   styles/preferensi-tampilan.css — Pengaturan Akun: Tema, Ukuran Teks,
+   Kepadatan Tampilan. Reuse CSS variable yang SUDAH ADA di styles/style.css
+   (--color-bg, --color-surface, dst) -- BUKAN palet warna baru, cuma
+   OVERRIDE nilainya untuk mode gelap. Diterapkan lewat atribut di
+   <html>, dibaca sebelum render (lihat cegah-flash-tema.js).
+   ============================================================ */
+
+/* ---- Radio pill (dipakai untuk Ukuran Teks/Tema/Kepadatan) ---- */
+.settings-radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.settings-radio-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 20px; border: 1.5px solid var(--color-border);
+  font-size: 13px; cursor: pointer; user-select: none; transition: all .15s ease;
+}
+.settings-radio-pill:has(input:checked) {
+  background: var(--color-sky-soft); border-color: var(--color-sky); color: var(--color-sky-deep); font-weight: 700;
+}
+.settings-radio-pill input { accent-color: var(--color-sky); }
+
+/* ---- TEMA GELAP -- override variable warna dasar, TIDAK redesign ---- */
+html[data-tema="gelap"] {
+  --color-bg: #12181f;
+  --color-surface: #1b232c;
+  --color-text: #e8edf2;
+  --color-text-muted: #98a4b0;
+  --color-border: #2a3440;
+  --color-muted-bg: #232d38;
+  --color-sky-soft: #16344a;
+}
+html[data-tema="gelap"] .shell-topbar,
+html[data-tema="gelap"] .shell-sidebar { background: var(--color-navy-deep); }
+html[data-tema="gelap"] input,
+html[data-tema="gelap"] select,
+html[data-tema="gelap"] textarea {
+  background: var(--color-surface); color: var(--color-text); border-color: var(--color-border);
+}
+
+/* ---- UKURAN TEKS BESAR -- scale global moderat, tidak ekstrem ---- */
+html[data-ukuran-teks="besar"] { font-size: 108%; }
+
+/* ---- KEPADATAN RINGKAS -- kurangi sedikit padding/jarak, tidak sampai rusak ---- */
+html[data-kepadatan="ringkas"] .panel-block,
+html[data-kepadatan="ringkas"] .card-item,
+html[data-kepadatan="ringkas"] .admin-panel { padding: 12px 14px !important; }
+html[data-kepadatan="ringkas"] .settings-menu-item { padding: 10px 14px !important; }
+html[data-kepadatan="ringkas"] .form-group,
+html[data-kepadatan="ringkas"] .form-card { margin-bottom: 10px !important; }

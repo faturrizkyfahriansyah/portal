@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<script src="core/terapkan-preferensi.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pengaturan Akun — SPPG Jeungjing</title>
+<meta name="description" content="Pengaturan Akun Relawan SPPG Jeungjing">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/style.css?v=20260903c">
+<link rel="stylesheet" href="styles/preferensi-tampilan.css">
+<link rel="stylesheet" href="styles/portal.css?v=20261001g">
+<link rel="stylesheet" href="styles/app-shell.css?v=20260903c">
+<link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
+</head>
+<body>
+<div class="shell">
+  <div class="shell-body">
+  <div class="shell-overlay" id="shellOverlay"></div>
+  <aside class="shell-sidebar" id="shellSidebar">
+    <div class="shell-sidebar-head">
+      <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
+      <div class="shell-sidebar-head-text">
+        <strong>SPPG JEUNGJING</strong>
+        <span>PORTAL SPPG JEUNGJING</span>
+      </div>
+      <button type="button" class="shell-sidebar-close" id="shellSidebarClose" aria-label="Tutup menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
+    </div>
+    <div class="shell-sidebar-user" id="shellSidebarUser">
+      <div class="shell-sidebar-user-avatar" id="sidebarAvatar">–</div>
+      <div class="shell-sidebar-user-text">
+        <strong id="sidebarNama">Memuat...</strong>
+        <span class="shell-sidebar-user-status" id="sidebarStatus"></span>
+      </div>
+    </div>
+    <nav class="shell-nav" aria-label="Menu Portal SPPG Jeungjing">
+    <p class="shell-nav-group-title">Utama</p>
+    <a href="dashboard.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span><span>Dashboard</span></a>
+    <a href="profil.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></span><span>Profil Saya</span></a>
+
+    <p class="shell-nav-group-title">SIPRES</p>
+    <a href="absensi.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 12l2 2 4-4"/></svg></span><span>Presensi Kehadiran</span></a>
+    <a href="riwayat.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Riwayat Presensi</span></a>
+    <a href="pengajuan.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M12 9v6"/><circle cx="12" cy="12" r="9"/></svg></span><span>Pengajuan Ketidakhadiran</span></a>
+
+    <p class="shell-nav-group-title">SIPANDU</p>
+    <a href="sipandu.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span><span>Produksi &amp; Data Operasional</span></a>
+
+    <p class="shell-nav-group-title">SIRAGA</p>
+    <a href="stok-relawan.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span><span>Stok &amp; Persediaan</span></a>
+
+    <p class="shell-nav-group-title">SIKOP</p>
+    <a href="jadwal.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Jadwal &amp; Penugasan</span></a>
+
+    <p class="shell-nav-group-title">MONITORING</p>
+    <a href="monitoring.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></span><span>Pengawasan Pengelola SPPG</span></a>
+
+    <p class="shell-nav-group-title">SIPIKA</p>
+    <a href="notifikasi.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21h4"/></svg></span><span>Notifikasi</span></a>
+    <a href="informasi.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.01"/></svg></span><span>Informasi</span></a>
+    <a href="penerimaan-pat.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Penerima Manfaat</span></a>
+    <a href="dokumen.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span><span>Dokumen</span></a>
+    <a href="bantuan.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1.5 1-1.5 2.2"/><path d="M12 17v.01"/></svg></span><span>Bantuan</span></a>
+
+    <p class="shell-nav-group-title">Akun</p>
+    <a href="pengaturan.html" class="shell-nav-link active"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></span><span>Pengaturan Akun</span></a>
+    </nav>
+    <button type="button" class="shell-nav-link shell-nav-link--danger" id="btnLogoutShell" style="margin:0 10px 8px;width:calc(100% - 20px);"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span>Keluar</span></button>
+    <button type="button" class="shell-sidebar-collapse-toggle" id="shellCollapseToggle"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg> Ciutkan Menu</button>
+    <div class="shell-sidebar-foot">PORTAL SPPG JEUNGJING<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730</div>
+  </aside>
+    <div class="shell-main">
+  <header class="shell-topbar">
+    <button type="button" class="shell-topbar-burger" aria-label="Buka menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
+    <div class="shell-topbar-brand shell-topbar-brand--portal">
+      <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional" class="shell-topbar-logo-bgn">
+      <img src="assets/logo.png" alt="Logo SPPG Jeungjing" class="shell-topbar-logo-sppg">
+      <div class="shell-topbar-brand-text">
+        <span class="shell-topbar-brand-label">PORTAL</span>
+        <strong>SPPG JEUNGJING</strong>
+      </div>
+    </div>
+    <div class="shell-topbar-right">
+      <a href="notifikasi.html" class="shell-topbar-bell" aria-label="Notifikasi" id="topbarBell">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21h4"/></svg>
+        <span class="shell-topbar-bell-count is-hidden" id="topbarBellCount">0</span>
+      </a>
+      <a href="profil.html" class="shell-topbar-avatar" id="topbarAvatar" aria-label="Profil Saya"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></a>
+    </div>
+  </header>
+      <main class="shell-content">
+<a href="profil.html" class="shell-back"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg> Kembali</a>
+  <div class="shell-page-head">
+    <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></div>
+    <div>
+      <h1>Pengaturan Akun</h1>
+      <p>Status akun, keamanan, dan preferensi.</p>
+    </div>
+  </div>
+
+        <div id="pengaturanMain" style="display:none;">
+
+          <p class="settings-section-title">🔐 Keamanan Akun</p>
+          <nav class="settings-menu-list" aria-label="Keamanan Akun">
+            <a href="ganti-password.html" class="settings-menu-item">
+              <span class="settings-menu-item-icon">🔑</span>
+              <span class="settings-menu-item-text">
+                <p class="settings-menu-item-title">Ganti Password</p>
+                <p class="settings-menu-item-desc">Ubah password akun Anda</p>
+              </span>
+              <span class="settings-menu-item-arrow">→</span>
+            </a>
+          </nav>
+          <section class="panel-block" style="margin-bottom:14px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:var(--color-navy);">Username</p>
+            <div class="profile-identity-list">
+              <div class="profile-identity-row"><span>Username saat ini</span><span id="usernameSaatIni">—</span></div>
+            </div>
+            <div class="form-group" style="margin-top:10px;">
+              <input type="text" id="inputUsernameBaru" class="form-input" placeholder="Username baru (huruf kecil, angka, titik, garis bawah)" autocomplete="off">
+              <p id="infoGantiUsername" style="font-size:12px;color:var(--color-text-muted);margin:6px 0 0;"></p>
+              <button type="button" id="btnGantiUsername" class="btn-outline" style="width:100%;margin-top:8px;">Ubah Username</button>
+            </div>
+          </section>
+          <section class="panel-block" style="margin-bottom:14px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:var(--color-navy);">Aktivitas Login</p>
+            <div class="profile-identity-list">
+              <div class="profile-identity-row"><span>Login Terakhir</span><span id="loginTerakhir">—</span></div>
+            </div>
+            <button type="button" id="btnKeluarSemuaPerangkat" class="btn-outline" style="width:100%;margin-top:12px;">Keluar dari Semua Perangkat</button>
+          </section>
+
+          <p class="settings-section-title">🔔 Notifikasi</p>
+          <section class="panel-block" style="margin-bottom:14px;">
+            <div>
+              <p style="margin:0;font-size:13.5px;font-weight:600;color:var(--color-navy);">Notifikasi Portal</p>
+              <p style="margin:3px 0 10px;font-size:12.5px;color:var(--color-text-muted);">Dapat pemberitahuan langsung ke HP (belum absen, penugasan baru, pengumuman, dll) walau aplikasi sedang tertutup.</p>
+              <p id="statusNotifHp" style="font-size:12.5px;color:var(--color-text-muted);margin:0 0 10px;">Memeriksa status...</p>
+              <button type="button" class="btn-outline" id="btnAktifkanNotifHp" style="width:100%;">🔔 Aktifkan Notifikasi HP</button>
+            </div>
+          </section>
+
+          <p class="settings-section-title">🖥️ Tampilan</p>
+          <section class="panel-block" style="margin-bottom:14px;">
+            <p style="margin:0 0 8px;font-size:13.5px;font-weight:600;color:var(--color-navy);">Ukuran Teks</p>
+            <div class="settings-radio-group" role="radiogroup">
+              <label class="settings-radio-pill"><input type="radio" name="ukuranTeks" value="normal" checked> Normal</label>
+              <label class="settings-radio-pill"><input type="radio" name="ukuranTeks" value="besar"> Besar</label>
+            </div>
+
+            <p style="margin:18px 0 8px;font-size:13.5px;font-weight:600;color:var(--color-navy);">Tema</p>
+            <div class="settings-radio-group" role="radiogroup">
+              <label class="settings-radio-pill"><input type="radio" name="tema" value="terang" checked> Terang</label>
+              <label class="settings-radio-pill"><input type="radio" name="tema" value="gelap"> Gelap</label>
+              <label class="settings-radio-pill"><input type="radio" name="tema" value="sistem"> Ikuti Sistem</label>
+            </div>
+
+            <p style="margin:18px 0 8px;font-size:13.5px;font-weight:600;color:var(--color-navy);">Kepadatan Tampilan</p>
+            <div class="settings-radio-group" role="radiogroup">
+              <label class="settings-radio-pill"><input type="radio" name="kepadatan" value="nyaman" checked> Nyaman</label>
+              <label class="settings-radio-pill"><input type="radio" name="kepadatan" value="ringkas"> Ringkas</label>
+            </div>
+          </section>
+
+          <p class="settings-section-title">📥 Data Saya</p>
+          <section class="panel-block" style="margin-bottom:14px;">
+            <button type="button" id="btnUnduhAbsensi" class="btn-outline" style="width:100%;">⬇️ Unduh Riwayat Presensi Saya (CSV)</button>
+            <p style="font-size:12px;color:var(--color-text-muted);margin:8px 0 0;line-height:1.6;">Berisi riwayat pada periode yang sedang aktif.</p>
+          </section>
+
+          <p class="settings-section-title">❓ Bantuan &amp; Kontak Admin</p>
+          <nav class="settings-menu-list" aria-label="Bantuan dan Kontak Admin">
+            <a href="bantuan.html" class="settings-menu-item">
+              <span class="settings-menu-item-icon">📖</span>
+              <span class="settings-menu-item-text">
+                <p class="settings-menu-item-title">Panduan Penggunaan</p>
+                <p class="settings-menu-item-desc">FAQ &amp; cara menggunakan Portal</p>
+              </span>
+              <span class="settings-menu-item-arrow">→</span>
+            </a>
+            <a href="bantuan.html#hubungi-admin" class="settings-menu-item">
+              <span class="settings-menu-item-icon">💬</span>
+              <span class="settings-menu-item-text">
+                <p class="settings-menu-item-title">Hubungi Admin</p>
+                <p class="settings-menu-item-desc">Kontak langsung lewat WhatsApp</p>
+              </span>
+              <span class="settings-menu-item-arrow">→</span>
+            </a>
+            <a href="bantuan.html#hubungi-admin" class="settings-menu-item">
+              <span class="settings-menu-item-icon">⚠️</span>
+              <span class="settings-menu-item-text">
+                <p class="settings-menu-item-title">Laporkan Masalah</p>
+                <p class="settings-menu-item-desc">Sampaikan kendala teknis ke Admin</p>
+              </span>
+              <span class="settings-menu-item-arrow">→</span>
+            </a>
+          </nav>
+          <section class="panel-block">
+            <p style="margin:0;font-size:12.5px;color:var(--color-text-muted);text-align:center;">Portal SPPG Jeungjing · Versi 1.0</p>
+          </section>
+
+          <section class="panel-block" style="margin-top:14px;">
+            <button type="button" id="btnKeluar" class="btn-danger-outline">Keluar</button>
+          </section>
+        </div>
+
+        <div class="toast is-hidden" id="errorToast" role="alert"></div>
+        <div class="loading-overlay is-hidden" id="loadingOverlay">
+          <div class="spinner"></div>
+          <p id="loadingText">Memuat pengaturan...</p>
+        </div>
+      </main>
+  <footer class="shell-footer">
+    <p><strong>PORTAL SPPG JEUNGJING</strong></p>
+    <p>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730</p>
+    <p class="credit">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
+  </footer>
+    </div>
+  </div>
+</div>
+
+<script src="core/config.js?v=20260903c"></script>
+<script src="core/common.js?v=20260903c"></script>
+<script src="core/auth-relawan.js?v=20260903c"></script>
+<script src="core/NavigasiTerpusat.js"></script>
+<script src="core/app-shell.js?v=20260903c"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
+<script src="services/firebase/firebase-config.js"></script>
+<script src="modules/notifikasi-informasi/push-notif.js"></script>
+<script src="modules/pengaturan/pengaturan.js?v=20260903c"></script>
+</body>
+</html>

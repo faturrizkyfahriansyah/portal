@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penerima Manfaat — SPPG Jeungjing</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="styles/public.css">
+</head>
+<body class="pub-body">
+
+  <header class="pub-header">
+    <div class="pub-header-inner">
+      <a href="index.html" class="pub-header-brand">
+        <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional">
+        <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
+        <span>SPPG Jeungjing</span>
+      </a>
+      <button type="button" class="pub-menu-btn" aria-label="Buka menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="pub-overlay"></div>
+  <aside class="pub-sidebar">
+    <button type="button" class="pub-sidebar-close" aria-label="Tutup menu">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <nav>
+      <a href="index.html">Beranda</a>
+      <a href="profil-sppg.html">Profil SPPG</a>
+      <a href="penerima-manfaat.html">Penerima Manfaat</a>
+      <a href="menu-hari-ini.html">Menu Hari Ini</a>
+      <a href="informasi-publik.html">Informasi</a>
+      <a href="kontak.html">Kontak</a>
+      <a href="portal.html" class="pub-sidebar-cta">Portal SPPG Jeungjing →</a>
+    </nav>
+  </aside>
+
+  <section class="pub-hero" style="padding:44px 0 40px;">
+    <div class="pub-wrap">
+      <div class="pub-hero-inner">
+        <p class="pub-eyebrow-plain">Dampak</p>
+        <h1 style="font-size:clamp(28px,5vw,42px);">Penerima Manfaat</h1>
+        <p class="lede">Kelompok masyarakat yang menerima manfaat langsung dari layanan makanan bergizi SPPG Jeungjing.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pub-section alt">
+    <div class="pub-wrap">
+      <!-- Ringkasan total -- diisi dari database, TIDAK ada angka hard-code -->
+      <div id="pmTotalWrap" style="text-align:center;margin-bottom:28px;">
+        <p style="font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--pub-ink-soft);margin:0 0 6px;">Total Penerima Manfaat</p>
+        <p id="pmTotalAngka" style="font-size:clamp(32px,7vw,52px);font-weight:800;color:var(--pub-navy);margin:0;">—</p>
+        <div id="pmSubtotalWrap" style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-top:14px;font-size:13.5px;color:var(--pub-ink-soft);"></div>
+      </div>
+
+      <!-- Fallback lama (4 kartu) -- tetap ada sbg cadangan kalau data rinci belum tersedia sama sekali -->
+      <div class="pub-benef-grid" id="pubBenefGrid" data-fallback-rendered="1" style="display:none;">
+        <div class="pub-benef-card"><b>—</b><span>Peserta Didik</span></div>
+        <div class="pub-benef-card"><b>—</b><span>Ibu Hamil</span></div>
+        <div class="pub-benef-card"><b>—</b><span>Ibu Menyusui</span></div>
+        <div class="pub-benef-card"><b>—</b><span>Balita</span></div>
+      </div>
+
+      <!-- Tabel rinci -- SATU tabel gabungan (bukan 2 tabel terpisah), scroll horizontal di layar sempit -->
+      <div id="pmTabelWrap" style="overflow-x:auto;border:1px solid var(--pub-line);border-radius:12px;">
+        <table style="width:100%;border-collapse:collapse;min-width:640px;font-size:13.5px;">
+          <thead>
+            <tr style="background:var(--pub-cream-soft);">
+              <th style="text-align:left;padding:12px 14px;">Orientasi</th>
+              <th style="text-align:left;padding:12px 14px;">Nama</th>
+              <th style="text-align:right;padding:12px 10px;">PK</th>
+              <th style="text-align:right;padding:12px 10px;">PB</th>
+              <th style="text-align:right;padding:12px 10px;">Bumil</th>
+              <th style="text-align:right;padding:12px 10px;">Busui</th>
+              <th style="text-align:right;padding:12px 10px;">Balita</th>
+              <th style="text-align:right;padding:12px 14px;">Jumlah</th>
+            </tr>
+          </thead>
+          <tbody id="pmTabelBody">
+            <tr><td colspan="8" style="padding:20px;text-align:center;color:var(--pub-ink-soft);">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="color:var(--pub-ink-soft);margin-top:28px;max-width:620px;font-size:13.5px;">
+        Data jumlah penerima manfaat akan diperbarui secara berkala. Data pribadi penerima manfaat tidak dipublikasikan — informasi di halaman ini bersifat ringkasan/agregat.
+      </p>
+    </div>
+  </section>
+
+  <footer class="pub-footer">
+    <div class="pub-wrap">
+      <strong>SPPG JEUNGJING</strong>
+      <p style="margin:10px 0 0;">Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang – Banten, 15730</p>
+      <hr class="rule">
+      <p class="fine">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
+    </div>
+  </footer>
+
+  <script src="modules/website-publik/public-nav.js"></script>
+  <script src="core/config.js"></script>
+  <script>
+    (async function () {
+      const totalAngka = document.getElementById('pmTotalAngka');
+      const subtotalWrap = document.getElementById('pmSubtotalWrap');
+      const tabelWrap = document.getElementById('pmTabelWrap');
+      const tabelBody = document.getElementById('pmTabelBody');
+      const grid = document.getElementById('pubBenefGrid');
+
+      function formatRibuan(n) { return Number(n || 0).toLocaleString('id-ID'); }
+
+      try {
+        const url = GOOGLE_APPS_SCRIPT_WEB_APP_URL + '?action=getPenerimaManfaatPublik';
+        const res = await fetch(url);
+        const json = await res.json();
+        if (!json.success || !json.data || !json.data.data || !json.data.data.length) {
+          // Belum ada data rinci sama sekali -- coba tampilkan fallback lama (4 kartu ringkasan kategori),
+          // supaya halaman tidak kosong total selama masa transisi.
+          tabelWrap.style.display = 'none';
+          totalAngka.parentElement.style.display = 'none';
+          try {
+            const urlLama = GOOGLE_APPS_SCRIPT_WEB_APP_URL + '?action=getDataPenerimaanPublik';
+            const resLama = await fetch(urlLama);
+            const jsonLama = await resLama.json();
+            if (jsonLama.success && jsonLama.data && jsonLama.data.length) {
+              grid.style.display = 'grid';
+              grid.innerHTML = jsonLama.data.map(d => `<div class="pub-benef-card"><b>${d.jumlah || '—'}</b><span>${d.kategori}</span></div>`).join('');
+            } else {
+              grid.style.display = 'grid'; // 4 kartu asli (dash) tetap tampil sbg fallback paling akhir
+            }
+          } catch (e2) { grid.style.display = 'grid'; }
+          return;
+        }
+
+        const { data, ringkasan } = json.data;
+        totalAngka.textContent = formatRibuan(ringkasan.total);
+        subtotalWrap.innerHTML = `
+          <span><strong>${formatRibuan(ringkasan.totalPesertaDidik)}</strong> Peserta Didik</span>
+          <span><strong>${formatRibuan(ringkasan.totalB3)}</strong> 3B (Bumil/Busui/Balita)</span>`;
+
+        tabelBody.innerHTML = data.map(d => `
+          <tr style="border-top:1px solid var(--pub-line);">
+            <td style="padding:11px 14px;">${d.kategori === 'PESERTA_DIDIK' ? 'Peserta Didik' : (d.kategori === '3B' ? '3B' : '(tidak dikenal)')}</td>
+            <td style="padding:11px 14px;">${d.instansi}</td>
+            <td style="text-align:right;padding:11px 10px;">${d.kategori === 'PESERTA_DIDIK' ? formatRibuan(d.pk) : '—'}</td>
+            <td style="text-align:right;padding:11px 10px;">${d.kategori === 'PESERTA_DIDIK' ? formatRibuan(d.pb) : '—'}</td>
+            <td style="text-align:right;padding:11px 10px;">${d.kategori === '3B' ? formatRibuan(d.bumil) : '—'}</td>
+            <td style="text-align:right;padding:11px 10px;">${d.kategori === '3B' ? formatRibuan(d.busui) : '—'}</td>
+            <td style="text-align:right;padding:11px 10px;">${d.kategori === '3B' ? formatRibuan(d.balita) : '—'}</td>
+            <td style="text-align:right;padding:11px 14px;font-weight:700;">${formatRibuan(d.jumlah)}</td>
+          </tr>`).join('');
+      } catch (e) {
+        // Gagal ambil data -- tampilkan fallback 4 kartu asli (dash), jangan biarkan halaman blank.
+        tabelWrap.style.display = 'none';
+        totalAngka.parentElement.style.display = 'none';
+        grid.style.display = 'grid';
+      }
+    })();
+  </script>
+</body>
+</html>

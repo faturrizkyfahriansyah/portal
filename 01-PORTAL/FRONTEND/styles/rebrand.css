@@ -1,0 +1,342 @@
+/* ================================================================
+   SPPG JEUNGJING — SISTEM DESAIN (v2)
+   Dimuat PALING AKHIR di tiap halaman supaya bisa menimpa style lama
+   tanpa perlu mengedit styles/style.css / styles/portal.css / app-shell.css.
+
+   Arah desain: portal layanan gizi pemerintah -- kokoh, terpercaya,
+   hangat; bukan gaya "startup SaaS". Aksen emas diambil dari warna
+   Garuda pada lambang BGN (bukan warna asal pilih). Latar off-white
+   hangat supaya tidak terasa steril seperti dashboard admin generik.
+   ================================================================ */
+
+:root {
+  --sppg-navy: #12294d;
+  --sppg-gold: #c9962c;
+  --sppg-gold-soft: #e8c46a;
+  --sppg-paper: #f7f5f0;
+  --sppg-line: #e3ded3;
+}
+
+/* ----------------------------------------------------------------
+   MOTIF lengkung "mangkuk/piring" -- benang merah visual antar
+   halaman. Sengaja BUKAN gradient-blob yang muncul di mana-mana.
+   ---------------------------------------------------------------- */
+.sppg-motif { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.sppg-motif::before,
+.sppg-motif::after {
+  content: ""; position: absolute; border-radius: 50%;
+  border: 1.5px solid rgba(232, 196, 106, .18);
+}
+.sppg-motif::before { width: 620px; height: 620px; right: -180px; top: -220px; }
+.sppg-motif::after  { width: 900px; height: 900px; right: -320px; top: -360px; border-color: rgba(232, 196, 106, .1); }
+
+/* ----------------------------------------------------------------
+   HEADER -- satu lockup rapat, bukan 3 elemen terpisah jauh.
+   Label "PORTAL" kecil yang menggantung sendirian dihapus.
+   ---------------------------------------------------------------- */
+.shell-topbar-brand--portal,
+.site-header .header-inner {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.shell-topbar-brand--portal .shell-topbar-brand-label { display: none; }
+.site-header .header-text p { display: none; }
+
+.shell-topbar-brand--portal strong,
+.site-header .header-text h1 {
+  font-size: 16px; font-weight: 800; letter-spacing: .06em;
+  color: #fff; margin: 0; line-height: 1.1;
+}
+.site-header { background: var(--sppg-navy); border-bottom: 3px solid var(--sppg-gold); }
+
+.shell-topbar-brand--portal .shell-topbar-logo-bgn,
+.shell-topbar-brand--portal .shell-topbar-logo-sppg,
+.site-header .header-logo { height: 34px; width: auto; flex-shrink: 0; }
+
+/* ----------------------------------------------------------------
+   HERO (landing & login) -- latar navy bermotif, satu pesan saja
+   ---------------------------------------------------------------- */
+.sppg-page-bg { background: var(--sppg-paper); min-height: 100vh; }
+
+.sppg-hero {
+  position: relative; background: var(--sppg-navy);
+  color: #fff; padding: 56px 22px 64px; text-align: center; overflow: hidden;
+}
+.sppg-hero-inner { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; }
+.sppg-hero-logos { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 22px; }
+.sppg-hero-logos img { height: 64px; width: auto; }
+
+.sppg-hero h1 {
+  font-size: clamp(26px, 6vw, 38px); font-weight: 800; line-height: 1.15;
+  margin: 0 0 14px; letter-spacing: -.01em; color: #fff;
+}
+.sppg-hero p {
+  font-size: 15px; line-height: 1.65; color: rgba(255,255,255,.82);
+  margin: 0 auto; max-width: 44ch;
+}
+.sppg-hero-rule { width: 56px; height: 3px; background: var(--sppg-gold); margin: 20px auto 0; border-radius: 2px; }
+
+/* Kartu aksi duduk MENIMPA batas hero -- halaman terasa satu kesatuan,
+   bukan kartu mengambang di ruang kosong. */
+.sppg-action-card {
+  position: relative; z-index: 2; max-width: 400px; margin: -34px auto 0;
+  background: #fff; border-radius: 16px; padding: 26px 22px;
+  box-shadow: 0 12px 40px rgba(12, 28, 54, .16);
+  border: 1px solid var(--sppg-line);
+}
+.sppg-action-card h2 { font-size: 19px; font-weight: 800; color: var(--sppg-navy); margin: 0 0 6px; }
+.sppg-action-card .sub { font-size: 13.5px; color: #5b6472; line-height: 1.6; margin: 0 0 20px; }
+
+.sppg-points {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px;
+  max-width: 640px; margin: 26px auto 0; padding: 0; list-style: none;
+}
+.sppg-points li { font-size: 13px; color: #55606f; display: flex; align-items: center; gap: 7px; }
+.sppg-points li::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sppg-gold); flex-shrink: 0;
+}
+
+.sppg-foot {
+  text-align: center; padding: 34px 20px 28px; color: #6b7280; font-size: 12.5px; line-height: 1.7;
+}
+.sppg-foot strong { color: var(--sppg-navy); }
+
+/* ----------------------------------------------------------------
+   HALAMAN DALAM -- baris data diberi bobot visual, tidak lagi "polos"
+   ---------------------------------------------------------------- */
+.riwayat-item {
+  border-left: 4px solid var(--sppg-line);
+  background: #fff; border-radius: 10px;
+  padding: 13px 15px; margin-bottom: 9px;
+  box-shadow: 0 1px 2px rgba(12, 28, 54, .05);
+}
+.riwayat-item.is-hadir { border-left-color: #1a7a4c; }
+.riwayat-item.is-terlambat { border-left-color: var(--sppg-gold); }
+.riwayat-item.is-izin, .riwayat-item.is-sakit { border-left-color: #3b7dd8; }
+.riwayat-item.is-tidak-hadir { border-left-color: #b23a3a; }
+.riwayat-item.is-tidak-ada-jadwal { border-left-color: #cfd4db; }
+
+/* Judul bagian: garis emas pendek di kiri -- bukan label huruf besar
+   menggantung yang jadi ciri khas tampilan template. */
+.section-title {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 13.5px; font-weight: 800; color: var(--sppg-navy);
+  margin: 26px 0 12px; text-transform: none; letter-spacing: 0;
+}
+.section-title::before {
+  content: ""; width: 18px; height: 2.5px; background: var(--sppg-gold); border-radius: 2px;
+}
+
+.empty-state {
+  text-align: center; padding: 30px 18px; color: #6b7280; font-size: 13.5px;
+  background: #fff; border: 1px dashed var(--sppg-line); border-radius: 12px;
+}
+
+/* Badge status Riwayat (dipertahankan dari versi sebelumnya) */
+.riwayat-badge.tidak-ada-jadwal {
+  background: #eef0f3; color: #5b6472; border: 1px solid #d7dbe1;
+}
+
+@media (max-width: 640px) {
+  .sppg-hero { padding: 40px 18px 52px; }
+  .sppg-hero-logos img { height: 52px; }
+  .sppg-action-card { margin: -28px 16px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ================================================================
+   TAMBAHAN v2.1 — perbaikan dari uji coba di laptop
+   ================================================================ */
+
+/* Kembalikan sebutan "Portal Relawan" di bawah nama, dalam satu lockup
+   (sebelumnya sempat hilang total karena label lama disembunyikan). */
+.shell-topbar-brand--portal .shell-topbar-brand-label {
+  display: block !important;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .1em;
+  color: rgba(255,255,255,.62); text-transform: uppercase; margin-top: 2px;
+}
+.shell-topbar-brand--portal .shell-topbar-brand-text {
+  display: flex; flex-direction: column-reverse; line-height: 1.15;
+}
+
+/* Pengaman ukuran logo: kalau CSS lain gagal termuat, logo tidak lagi
+   tampil sebesar layar seperti yang sempat terjadi di laptop. */
+.sppg-hero-logos img,
+.header-logo, .shell-topbar-logo-bgn, .shell-topbar-logo-sppg {
+  max-height: 64px; max-width: 90px; object-fit: contain;
+}
+
+/* ---- Halaman dalam yang sebelumnya terasa kosong ---- */
+
+/* Kartu daftar umum (Jadwal, Informasi, Dokumen, Notifikasi) */
+.info-card, .jadwal-card, .dokumen-card, .notif-card, .card-item {
+  background: #fff; border: 1px solid var(--sppg-line);
+  border-left: 4px solid var(--sppg-gold);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+  box-shadow: 0 1px 2px rgba(12,28,54,.05);
+}
+
+/* Kartu angka ringkasan — beri warna sesuai makna, bukan abu-abu semua */
+.stat-card, .stok-summary-card {
+  background: #fff; border: 1px solid var(--sppg-line);
+  border-radius: 12px; padding: 16px 14px; text-align: left;
+}
+.stat-card span, .stok-summary-card span {
+  display: block; font-size: 26px; font-weight: 800; color: var(--sppg-navy); line-height: 1.1;
+}
+.stat-card p, .stok-summary-card p {
+  margin: 4px 0 0; font-size: 12.5px; color: #6b7280;
+}
+.stok-summary-card.stok-card-aman span { color: #1a7a4c; }
+.stok-summary-card.stok-card-menipis span { color: var(--sppg-gold); }
+.stok-summary-card.stok-card-habis span { color: #b23a3a; }
+
+/* Baris identitas (Profil, Detail) — beri garis pemisah supaya terbaca */
+.profile-identity-row {
+  display: flex; justify-content: space-between; gap: 14px;
+  padding: 11px 0; border-bottom: 1px solid var(--sppg-line);
+  font-size: 13.5px;
+}
+.profile-identity-row:last-child { border-bottom: none; }
+.profile-identity-row > span:first-child { color: #6b7280; }
+.profile-identity-row > span:last-child { color: var(--sppg-navy); font-weight: 600; text-align: right; }
+
+/* Tabel admin: kepala tabel diberi bobot, baris ganjil diberi warna tipis */
+.table-wrap table thead th {
+  background: #f2f4f7; color: var(--sppg-navy); font-weight: 700;
+  font-size: 12.5px; text-align: left; padding: 11px 12px;
+  border-bottom: 2px solid var(--sppg-line);
+}
+.table-wrap table tbody td { padding: 11px 12px; font-size: 13px; border-bottom: 1px solid #eef0f3; }
+.table-wrap table tbody tr:nth-child(even) { background: #fafbfc; }
+
+/* ================================================================
+   v2.2 — header "PORTAL / SPPG JEUNGJING", grup menu, isi halaman
+   ================================================================ */
+
+/* Urutan header: "PORTAL" DI ATAS, nama di bawah (bukan sebaliknya) */
+.shell-topbar-brand--portal .shell-topbar-brand-text { flex-direction: column !important; }
+.shell-topbar-brand--portal .shell-topbar-brand-label {
+  display: block !important; margin: 0 0 1px !important;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .16em;
+  color: rgba(255,255,255,.6); text-transform: uppercase;
+}
+
+/* Judul kelompok kartu menu di Dashboard relawan */
+.dash-group-title {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 12.5px; font-weight: 800; color: var(--sppg-navy);
+  margin: 22px 0 10px; letter-spacing: .01em;
+}
+.dash-group-title::before {
+  content: ""; width: 16px; height: 2.5px; background: var(--sppg-gold); border-radius: 2px;
+}
+
+/* ---- Halaman dalam: hilangkan kesan "putih polos" ---- */
+.shell-content { background: var(--sppg-paper); }
+
+/* Kepala halaman diberi kartu sendiri supaya ada titik awal yang jelas */
+.shell-page-head {
+  background: #fff; border: 1px solid var(--sppg-line);
+  border-left: 4px solid var(--sppg-gold);
+  border-radius: 12px; padding: 16px 18px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 14px;
+}
+.shell-page-head-icon {
+  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+  background: #eef2f8; color: var(--sppg-navy);
+  display: flex; align-items: center; justify-content: center;
+}
+.shell-page-head h1 { font-size: 18px; font-weight: 800; color: var(--sppg-navy); margin: 0; }
+.shell-page-head p { font-size: 13px; color: #6b7280; margin: 3px 0 0; line-height: 1.5; }
+
+/* Kartu isi & keadaan kosong pada halaman Informasi/Jadwal/Dokumen/Notifikasi */
+.info-card, .jadwal-card, .dokumen-card, .notif-card, .notifikasi-item, .dokumen-item {
+  background: #fff; border: 1px solid var(--sppg-line);
+  border-left: 4px solid var(--sppg-gold);
+  border-radius: 11px; padding: 15px 17px; margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(12,28,54,.06);
+}
+.info-card-body, .jadwal-card-ket { margin: 0; font-size: 13.5px; color: #55606f; line-height: 1.6; }
+
+/* Kartu tunggal berisi "Belum ada ..." -- jadikan ajakan, bukan sekadar teks */
+.info-card:only-child, .jadwal-card:only-child {
+  border-left-color: var(--sppg-line); border-style: dashed;
+  text-align: center; padding: 30px 18px; color: #6b7280;
+}
+
+/* ================================================================
+   v2.3 — FIX FINAL: "PORTAL" & "SPPG JEUNGJING" ukuran sama persis,
+   dan BENAR-BENAR di tengah HALAMAN (bukan cuma tengah ruang sisa
+   antara burger & avatar, yang lebarnya beda sehingga sebelumnya
+   sedikit bergeser). Ditulis di akhir file supaya menang di cascade
+   atas 3 aturan lama yang saling tumpang tindih (v1/v2.1/v2.2 di atas).
+   ================================================================ */
+/* ================================================================
+   v2.4 — FIX FINAL YANG BENAR: CSS Grid 3-kolom, bukan flex+absolute.
+   Kenapa ini lebih baik dari v2.3 (di atas): dengan grid-template-columns
+   "1fr auto 1fr", kolom kiri (burger) dan kolom kanan (lonceng+avatar)
+   SAMA-SAMA dapat porsi 1fr yang SIMETRIS -- sehingga kolom tengah
+   (brand/logo+teks) otomatis PRESIS di tengah HALAMAN, TIDAK PEDULI
+   burger dan lonceng+avatar punya lebar yang beda. Beda dari
+   position:absolute (v2.3) yang precise tapi bisa menimpa elemen lain
+   di layar sempit -- grid TIDAK PERNAH overlap karena tiap kolom punya
+   ruang sendiri yang terpisah.
+   ================================================================ */
+.shell-topbar:has(.shell-topbar-brand--portal) {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.shell-topbar:has(.shell-topbar-brand--portal) .shell-topbar-burger {
+  justify-self: start;
+}
+.shell-topbar-brand--portal {
+  position: static !important;
+  transform: none !important;
+  flex: none; width: max-content;
+  justify-self: center;
+}
+/* Header Portal PENGELOLA khusus: logo sedikit lebih ke kiri dari center
+   (beda dari Header Relawan yang center penuh) -- sesuai spesifikasi.
+   PERBAIKAN: sebelumnya pakai margin-left:12% (persentase dari lebar
+   kolom kontennya sendiri) + justify-self:start -- ini membuat kolom
+   tengah pada grid melebar tak terduga dan "memakan" jatah ruang kolom
+   kanan (lonceng + ikon pengaturan), beda-beda besarnya di tiap ukuran
+   layar HP sehingga kadang bertabrakan/terlihat kecil. Diganti dengan
+   rasio kolom grid (1fr auto 1.25fr) -- proporsional terhadap lebar
+   layar yang tersedia, jadi selalu aman di HP kecil maupun besar dan
+   TIDAK PERNAH mengambil ruang kolom kanan. */
+body.shell-pengelola .shell-topbar:has(.shell-topbar-brand--portal) {
+  grid-template-columns: 1fr auto 1.25fr;
+}
+body.shell-pengelola .shell-topbar-brand--portal { justify-self: center; margin-left: 0; }
+
+/* Lonceng Notifikasi & tombol Pengaturan di topbar admin memakai class
+   .admin-tab-btn (dipakai JS untuk switch panel) yang secara default
+   punya padding besar (9px 16px) untuk tombol tab pill -- di lingkaran
+   38px/34px ini padding tsb menyita nyaris semua ruang (box-sizing:
+   border-box) sehingga ikon di dalamnya tampil kecil/bergeser. Kembalikan
+   padding & font-size supaya lingkarannya bersih seperti di header relawan. */
+.shell-topbar-bell.admin-tab-btn,
+.shell-topbar-avatar.admin-tab-btn {
+  padding: 0;
+  font-size: inherit;
+}
+.shell-topbar:has(.shell-topbar-brand--portal) .shell-topbar-right {
+  justify-self: end;
+}
+
+.shell-topbar-brand--portal .shell-topbar-brand-text {
+  display: flex !important; flex-direction: column !important;
+  align-items: center; line-height: 1.15;
+}
+.shell-topbar-brand--portal .shell-topbar-brand-label,
+.shell-topbar-brand--portal strong {
+  display: block !important; margin: 0 !important;
+  font-size: 13.5px; font-weight: 800; letter-spacing: .08em;
+  color: #fff; text-transform: uppercase; text-align: center;
+}

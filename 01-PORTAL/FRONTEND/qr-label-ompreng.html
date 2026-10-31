@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Label Ompreng — SPPG Jeungjing</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="styles/public.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="pub-body">
+  <header class="pub-header">
+    <div class="pub-header-inner">
+      <a href="index.html" class="pub-header-brand">
+        <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional">
+        <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
+        <span>SPPG Jeungjing</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="pub-section" style="padding-top:36px;">
+    <div class="pub-wrap" style="max-width:640px;">
+      <h1 style="font-size:22px;color:var(--pub-navy);margin:0 0 6px;">QR Code Label Ompreng</h1>
+      <p style="font-size:13.5px;color:var(--pub-ink-soft);margin:0 0 24px;">
+        Halaman ini HANYA untuk Admin/Pengelola mencetak label — bukan halaman publik. QR ini PERMANEN: satu URL yang sama untuk setiap hari, langsung membuka Menu Hari Ini (isinya otomatis mengikuti tanggal saat di-scan).
+      </p>
+
+      <div style="background:#fff;border:1.5px solid var(--pub-line);border-radius:12px;padding:24px;text-align:center;">
+        <div id="qrWrap" style="display:inline-block;padding:16px;background:#fff;"></div>
+        <p style="font-size:13px;font-weight:700;color:var(--pub-navy);margin:14px 0 2px;">SCAN UNTUK LIHAT MENU HARI INI</p>
+        <p id="urlTampil" style="font-size:11.5px;color:var(--pub-ink-soft);word-break:break-all;margin:0;"></p>
+      </div>
+
+      <div style="margin-top:20px;padding:14px 16px;background:var(--pub-cream-soft);border-radius:10px;">
+        <label style="font-size:12.5px;font-weight:700;color:var(--pub-navy);display:block;margin-bottom:6px;">URL tujuan (ubah kalau domain Anda berbeda, lalu klik Perbarui):</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="inputUrlQr" style="flex:1;min-width:220px;padding:8px 10px;border-radius:6px;border:1px solid var(--pub-line);font-size:12.5px;">
+          <button type="button" id="btnPerbaruiQr" class="pub-btn pub-btn-primary" style="cursor:pointer;padding:8px 16px;font-size:12.5px;">Perbarui</button>
+        </div>
+        <p style="font-size:11px;color:var(--pub-ink-soft);margin:8px 0 0;">
+          ⚠️ Dugaan awal domain diisi otomatis di bawah berdasarkan domain proyek ini — <strong>wajib dicek dulu</strong> sebelum dicetak massal (buka URL itu langsung di browser, pastikan menuju halaman Menu Hari Ini yang benar).
+        </p>
+      </div>
+
+      <button type="button" onclick="window.print()" class="pub-btn pub-btn-outline" style="cursor:pointer;margin-top:16px;">🖨️ Cetak Halaman Ini</button>
+    </div>
+  </section>
+
+  <script>
+    // Dugaan URL default: domain saat halaman INI dibuka + menu-hari-ini.html
+    // (menu-hari-ini.html ada di folder yang sama dengan file ini). Kalau
+    // domain publik Anda ternyata berbeda dari domain Portal/Admin, ubah
+    // manual di kotak di atas.
+    const urlDefault = window.location.origin + window.location.pathname.replace(/qr-label-ompreng\.html$/, 'menu-hari-ini.html');
+    const inputUrl = document.getElementById('inputUrlQr');
+    const urlTampil = document.getElementById('urlTampil');
+    const qrWrap = document.getElementById('qrWrap');
+    let qrObjek = null;
+
+    function gambarUlangQr_(url) {
+      qrWrap.innerHTML = '';
+      qrObjek = new QRCode(qrWrap, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+      urlTampil.textContent = url;
+    }
+
+    inputUrl.value = urlDefault;
+    gambarUlangQr_(urlDefault);
+
+    document.getElementById('btnPerbaruiQr').addEventListener('click', () => {
+      const url = inputUrl.value.trim();
+      if (!url) return;
+      gambarUlangQr_(url);
+    });
+  </script>
+</body>
+</html>
