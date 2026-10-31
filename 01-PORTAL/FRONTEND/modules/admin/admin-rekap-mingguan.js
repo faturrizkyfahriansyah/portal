@@ -1,8 +1,8 @@
 // SPPG JEUNGJING — ADMIN: Rekap Per Minggu (SIPRES)
-// BARU 30 Okt 2026. File TERPISAH dari modules/admin/admin.js -- pola ADITIF yang
-// SAMA dgn modules/admin/admin-sipres-monitoring.js & admin-migrasi-roster-v2.js:
+// BARU 30 Okt 2026. File TERPISAH dari admin.js -- pola ADITIF yang
+// SAMA dgn admin-sipres-monitoring.js & admin-migrasi-roster-v2.js:
 // suntik HTML lewat JS ke #panelDuaMinggu yang SUDAH ADA (tidak
-// mengubah admin.html), tidak sentuh modules/admin/admin.js sama sekali.
+// mengubah admin.html), tidak sentuh admin.js sama sekali.
 //
 // Konsep & rumus SAMA PERSIS dgn "Rekap Per Periode" (panel yang sama,
 // kartu baru di bawahnya) -- bedanya rentang tanggal dipilih bebas
