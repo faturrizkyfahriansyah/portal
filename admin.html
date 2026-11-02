@@ -8,16 +8,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20260903c">
+<link rel="stylesheet" href="styles/style.css?v=20260903c">
 <!-- Diperbarui 23 Okt 2026 (Kartu Identitas Relawan) -- versi dinaikkan
      krn style .foto-profil kini TERINTEGRASI LANGSUNG ke portal.css
      (file kartu-identitas.css terpisah sempat dipakai sementara saat
      portal.css belum tersedia, sekarang sudah dihapus -- jangan
      tambahkan <link> ke file itu lagi kalau terlihat di versi lama). -->
-<link rel="stylesheet" href="portal.css?v=20261023a">
-<link rel="stylesheet" href="admin.css?v=20261023a">
-<link rel="stylesheet" href="app-shell.css?v=20261015b">
-<link rel="stylesheet" href="rebrand.css?v=20260903c">
+<link rel="stylesheet" href="styles/portal.css?v=20261023a">
+<link rel="stylesheet" href="styles/admin.css?v=20261023a">
+<link rel="stylesheet" href="styles/app-shell.css?v=20261015b">
+<link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#12294d">
 </head>
@@ -2348,24 +2348,27 @@
 
 </div>
 
-<script src="config.js?v=20260903c"></script>
-<script src="common.js?v=20261014a"></script>
-<script src="app-shell.js?v=20260903c"></script>
-<script src="auth-admin.js?v=20260918a"></script>
+<script src="core/config.js?v=20260903c"></script>
+<script src="core/common.js?v=20261014a"></script>
+<script src="core/NavigasiTerpusat.js"></script>
+<script src="core/app-shell.js?v=20260903c"></script>
+<script src="core/auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="admin.js?v=20261023e"></script>
+<script src="modules/admin/admin.js?v=20261023e"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
-<script src="admin-kartu-qr.js?v=20261023a"></script>
-<script src="admin-sipres-monitoring.js?v=20260922a"></script>
+<script src="modules/admin/admin-kartu-qr.js?v=20261023a"></script>
+<script src="modules/admin/admin-sipres-monitoring.js?v=20260922a"></script>
+<script src="modules/admin/admin-migrasi-roster-v2.js"></script>
+<script src="modules/admin/admin-rekap-mingguan.js"></script>
 <!-- FASE 2: admin-stok.js, admin-shift.js, admin-role.js, admin-export.js,
      admin-import.js, admin-pengelola-sppg.js, admin-pengaturan.js, dan
      admin-website-publik.js SEKARANG dimuat lazy oleh admin.js sendiri
      (lihat MODUL_LAZY di admin.js) -- baru diambil saat tab terkait
      pertama kali dibuka, bukan semua dimuat di sini di awal. Jangan
      tambahkan lagi <script> untuk 8 file itu di sini. -->
-<script src="admin-charts.js"></script>
-<script src="admin-target-widget.js"></script>
-<script src="admin-sipandu-akses.js"></script>
+<script src="modules/admin/admin-charts.js"></script>
+<script src="modules/admin/admin-target-widget.js"></script>
+<script src="modules/admin/admin-sipandu-akses.js"></script>
 <script>document.addEventListener('DOMContentLoaded', function () { initShell({ storageKey: 'sppgSidebarCollapsedAdmin' }); });</script>
 </body>
 </html>

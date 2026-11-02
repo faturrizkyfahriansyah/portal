@@ -1,18 +1,18 @@
-# SIPRES SPPG Jeungjing — Source Final (Gabungan)
+# SPPG Jeungjing — Portal, SIPENDOK, SIPOGIM
 
-Paket ini berisi source code LENGKAP Portal SPPG Jeungjing, dengan 3 penambahan
-yang berjalan PARALEL dengan sistem lama (tidak ada yang dihapus/ditimpa):
+Situs dilayani GitHub Pages **dari root repo** (`portal.sppgjeungjing.my.id`).
+Rincian lengkap: `dokumentasi/STRUKTUR-REPOSITORY.md`.
 
-1. **Roster-First Attendance** (`03_DATA_ABSENSI_V2`)
-2. **Master Tarif & Fondasi Penggajian** (`31_MASTER_TARIF`) — backend saja, TANPA UI
-3. **Pengajuan Ketidakhadiran** (`32_PENGAJUAN_KETIDAKHADIRAN`) — alur persetujuan baru
-
-**Baca dulu**: `SIPRES_SPPG_JEUNGJING_AUDIT_TEST_DEPLOY.md` — audit, testing,
-deploy, migrasi, dan rollback plan LENGKAP untuk ketiganya.
-
-## Struktur
 ```
-source/
-├── 1-APPS-SCRIPT/   Backend Google Apps Script (44 file .gs)
-└── 2-GITHUB/         Frontend (GitHub Pages) — TIDAK diubah sesi ini
+/                      halaman HTML Portal (alamat web tidak berubah), CNAME, manifest, service worker
+├── core/              kode bersama (common, config, auth, app-shell, navigasi)
+├── modules/           JavaScript per fitur (admin, absensi, jadwal, sipandu, siraga, ...)
+├── services/firebase/ konfigurasi Firebase
+├── styles/            semua CSS
+├── assets/            gambar & ikon
+├── sipendok/          aplikasi SIPENDOK (frontend, modular sendiri)
+├── sipogim/           aplikasi SIPOGIM (frontend; js/ dan css/ di dalamnya)
+├── backend/           kode Google Apps Script per proyek: portal/, sipendok/, sipogim/
+└── dokumentasi/       master prompt, audit, arsip penataan
 ```
+Backend (`backend/`) TIDAK dijalankan oleh GitHub Pages; ditempel/di-push ke proyek Apps Script masing-masing.
