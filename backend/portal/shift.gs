@@ -77,14 +77,22 @@ function _invalidasiCacheShiftDivisi_() { _cacheShiftDivisiRows = null; }
  * @param {string} idRelawan
  * @param {string} idOperasional  ID_OPERASIONAL dari 15_KALENDER_OPERASIONAL
  */
-function resolveShiftUntukRelawan_(idRelawan, idOperasional) {
+function resolveShiftUntukRelawan_(idRelawan, idOperasional, abaikanSakelar) {
   try {
     // 1) Penugasan Khusus (paling prioritas)
     const khusus = getPenugasanKhususRows_()
       .find(p => p.ID_OPERASIONAL === idOperasional && p.ID_RELAWAN === idRelawan);
     if (khusus && khusus.JAM_MASUK) {
-      return { jamMasuk: String(khusus.JAM_MASUK), jamPulang: khusus.JAM_PULANG ? String(khusus.JAM_PULANG) : null, sumber: 'KHUSUS' };
+      const hasilKhusus = { jamMasuk: String(khusus.JAM_MASUK), jamPulang: khusus.JAM_PULANG ? String(khusus.JAM_PULANG) : null, sumber: 'KHUSUS' };
+      // 4 Nov 2026: baris hasil migrasi jadwal otomatis membawa shift malam & aturan tanggal (dibaca Roster.gs); baris lama tidak punya kolomnya -> perilaku lama.
+      if (String(khusus.LINTAS_TENGAH_MALAM || '').toUpperCase() === 'YA') hasilKhusus.lintasTengahMalam = true;
+      if (khusus.ATURAN_TANGGAL_ACUAN) hasilKhusus.aturanTanggalAcuan = String(khusus.ATURAN_TANGGAL_ACUAN);
+      return hasilKhusus;
     }
+
+    // 4 Nov 2026 (keputusan Admin): jadwal OTOMATIS per divisi dimatikan -- hanya penugasan per relawan (langkah 1) yang menentukan jadwal.
+    // Sakelar JADWAL_OTOMATIS='TIDAK' diset oleh matikanJadwalOtomatis (MigrasiJadwal.gs) SETELAH semua jadwal otomatis dijadikan penugasan.
+    if (!abaikanSakelar && jadwalOtomatisMati_()) return null;
 
     // 1.5) Multi-shift (Security/Pengolahan/Persiapan -- 18 Okt 2026,
     // lihat SikopMultiShift.gs). HANYA aktif utk divisi yg memang

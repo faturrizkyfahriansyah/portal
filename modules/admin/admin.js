@@ -407,7 +407,7 @@
     panelPenerimaManfaatOps: 'modules/admin/admin-penerima-manfaat-ops.js?v=20261023a',
     panelManajemenHakAkses: 'modules/admin/admin-manajemen-hak-akses.js?v=20261023a',
     panelRoleAkses: 'modules/admin/admin-role.js?v=20261023a',
-    panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261023a',
+    panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261104a',
     panelPengajuanKebutuhanAdmin: 'modules/admin/admin-pengajuan-kebutuhan.js?v=20261023a',
     panelReturBarangAdmin: 'modules/admin/admin-retur-barang.js?v=20261023a',
     // 2 baris di bawah SEBELUMNYA tidak py versi SAMA SEKALI -- berarti
@@ -418,7 +418,7 @@
     panelDuaMinggu: 'modules/admin/admin-export.js?v=20261023a',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'modules/admin/admin-import.js?v=20261023a',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
     panelKartuQr: 'modules/admin/admin-kartu-qr.js?v=20261023a',
-    panelMasterTarif: 'modules/admin/admin-master-tarif.js?v=20261023a'
+    panelMasterTarif: 'modules/admin/admin-master-tarif.js?v=20261104a'
   };
   const modulTerpuat = new Set();
 
@@ -625,6 +625,8 @@
     const el = document.getElementById('ovPmIsi');
     if (cache.errors.ringkasanPmDash) { document.getElementById('ovPmWrap').style.display = 'none'; return; }
     if (!pm) { el.innerHTML = '<p style="margin:0;font-size:12.5px;color:var(--color-text-muted);">Data Penerima Manfaat belum tersedia.</p>'; return; }
+    // 2 Nov 2026: tampilan baru bersama dgn Dashboard Relawan (core/ringkasan-pm.js); kode di bawah = cadangan.
+    if (typeof isiRingkasanPm === 'function') { isiRingkasanPm(el, pm); return; }
     const totalPorsi = pm.totalPK + pm.totalPB + pm.total3B;
     el.innerHTML = `
       <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
@@ -647,7 +649,9 @@
   const RENDER_UNTUK_KEY = {
     menuHariIniDash: renderMenuHariIniOverview_,
     ringkasanPmDash: renderRingkasanPmOverview_,
-    relawanList: renderRelawanTable,
+    // 4 Nov 2026: tabel Divisi memakai cache.relawanList; dimuat paralel dgn divisiList, jadi bila relawan tiba SESUDAH divisi, tabel Divisi
+    // harus digambar ulang (sebelumnya tetap 0 sampai ada aksi lain).
+    relawanList: () => { renderRelawanTable(); renderDivisiTable(); },
     divisiList: () => { fillDivisiSelects(); renderDivisiTable(); },
     akunList: renderAkunTable,
     informasiList: renderInformasiAdmin,
@@ -1336,13 +1340,26 @@
 
   function renderDivisiTable() {
     if (!cache.divisiList.length) {
-      el.tbodyDivisi.innerHTML = emptyOrErrorRow('divisiList', 2, 'Belum ada data divisi.');
+      el.tbodyDivisi.innerHTML = emptyOrErrorRow('divisiList', 3, 'Belum ada data divisi.');
       return;
     }
-    el.tbodyDivisi.innerHTML = cache.divisiList.map(d => {
-      const jumlah = cache.relawanList.filter(r => r.divisi === d && (r.status || 'AKTIF') === 'AKTIF').length;
-      return `<tr><td>${escapeHtml(d)}</td><td>${jumlah}</td></tr>`;
+    // 4 Nov 2026: pencocokan TANPA membedakan huruf besar/kecil -- daftar divisi berhuruf judul ("Security") sedangkan data relawan
+    // berhuruf kapital ("SECURITY"), sehingga pencocokan persis lama selalu menghasilkan 0. Klik baris = lihat daftar nama.
+    const norm = (s) => String(s || '').trim().toUpperCase();
+    let totalAktif = 0, totalSemua = 0;
+    const baris = cache.divisiList.map(d => {
+      const anggota = cache.relawanList.filter(r => norm(r.divisi) === norm(d));
+      const aktif = anggota.filter(r => norm(r.status || 'AKTIF') === 'AKTIF');
+      totalAktif += aktif.length; totalSemua += anggota.length;
+      const nama = aktif.map(r => escapeHtml(r.nama)).sort((a, b) => a.localeCompare(b)).join(', ') || '<i>belum ada relawan aktif</i>';
+      return `<tr class="divisi-baris" style="cursor:pointer;" title="Klik untuk melihat daftar relawan"><td>${escapeHtml(d)}</td><td><b>${aktif.length}</b></td><td>${anggota.length}</td></tr>` +
+        `<tr class="divisi-detail" hidden><td colspan="3" style="font-size:12.5px;background:var(--color-surface,#f6f8fb);">${nama}</td></tr>`;
     }).join('');
+    el.tbodyDivisi.innerHTML = baris + `<tr style="font-weight:700;background:var(--color-surface,#f6f8fb);"><td>TOTAL</td><td>${totalAktif}</td><td>${totalSemua}</td></tr>`;
+    if (!el.tbodyDivisi.dataset.terikat) {
+      el.tbodyDivisi.dataset.terikat = '1';
+      el.tbodyDivisi.addEventListener('click', (e) => { const tr = e.target.closest('tr.divisi-baris'); if (tr && tr.nextElementSibling) tr.nextElementSibling.hidden = !tr.nextElementSibling.hidden; });
+    }
   }
 
   // ===== EXPORT CSV =====
@@ -1913,6 +1930,8 @@
     document.querySelectorAll('.kal-sel-tanggal').forEach(btn => {
       btn.addEventListener('click', () => { kalTanggalTerpilih = btn.dataset.dmy; renderKalenderGrid_(); renderKalDetail_(); });
     });
+    // 4 Nov 2026: total PM per tanggal dari PM HARIAN (admin-kalender-pm.js); aman bila modul/SIPANDU belum ada.
+    if (window.sppgKalenderIsiTotalPm) window.sppgKalenderIsiTotalPm(kalTanggalPeriodeIni.map(x => x.dmy));
   }
 
   function renderKalDetail_() {
@@ -1939,6 +1958,9 @@
         <button type="button" class="btn-mini primary" id="kalBtnSimpan">Simpan Perubahan</button>
         ${entri ? '<button type="button" class="btn-mini" id="kalBtnHapus" style="color:var(--color-danger);">Hapus</button>' : ''}
       </div>`;
+
+    // 4 Nov 2026: rincian PM harian + menu tanggal ini (admin-kalender-pm.js).
+    if (window.sppgKalenderTambahPm) window.sppgKalenderTambahPm(kalTanggalTerpilih, elDetail);
 
     document.getElementById('kalDetailDivisiCheckbox').innerHTML = (cache.divisiList || []).map(d => `
       <label style="display:flex;align-items:center;gap:4px;font-size:12.5px;padding:4px 8px;border:1px solid var(--color-border);border-radius:6px;cursor:pointer;">

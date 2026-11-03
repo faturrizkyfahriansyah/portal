@@ -32,7 +32,7 @@ export async function api(action, data = {}, opts = {}) {
   let json;
   try { json = await res.json(); } catch { throw new ApiError('Respons server tidak dapat dibaca. Pastikan Web App sudah di-deploy (akses: Anyone).', 'RESPON'); }
   if (!json.ok) {
-    if (json.code === 'SESI_HABIS') { session.clear(); authLost(); }
+    if (json.code === 'SESI_HABIS' || json.code === 'AKSES_DITOLAK') { session.clear(); authLost(); }   // AKSES_DITOLAK: pemberian akses dicabut -> tukar ulang token (akan ditolak dgn pesan jelas)
     throw new ApiError(json.error, json.code, json.details);
   }
   return json.data;

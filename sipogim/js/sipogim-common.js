@@ -29,7 +29,7 @@ async function apiPostSipogim(action, payload) {
   try { json = JSON.parse(await res.text()); }
   catch (err) { throw new Error('Server memberi respons yang tidak terbaca.'); }
   if (!json.success) {
-    if (/sesi (tidak valid|berakhir)/i.test(json.message || '')) {
+    if (/sesi (tidak valid|berakhir)|akses anda ke sipogim/i.test(json.message || '')) {   // 4 Nov 2026: akses dicabut -> halaman masuk otomatis (menampilkan penolakan)
       sessionStorage.removeItem('sipogim_token');
       if (!location.pathname.endsWith('login.html')) location.href = 'login.html';
     }

@@ -215,7 +215,7 @@ function panggilSipendok_(action) {
   const resp = UrlFetchApp.fetch(SIPENDOK_WEB_APP_URL, {
     method: 'post',
     contentType: 'text/plain', // SENGAJA text/plain -- SIPENDOK (Api.gs) baca begini utk hindari preflight CORS, bukan application/json
-    payload: JSON.stringify({ action: action, data: {} }),
+    payload: JSON.stringify({ action: action, data: {}, token: buatTokenAplikasi_('PORTAL', 'Portal', 'SISTEM', 'SISTEM', 'SIPENDOK', 5) }),   // 4 Nov 2026: SIPENDOK kini mewajibkan token
     muteHttpExceptions: true
   });
   let json;

@@ -99,6 +99,7 @@ function getPeriodeById_(id) {
 
 /** Periode dgn STATUS='AKTIF' -- dipakai Riwayat Presensi relawan & Monitoring Pengelola (§B/§I dokumen SIPRES UI: "otomatis pakai periode aktif"). Kalau ada >1 AKTIF (seharusnya tidak), ambil yang paling baru dibuat. */
 function getPeriodeAktif_() {
+  sinkronStatusPeriodeOtomatis_();   // 4 Nov 2026: status periode mengikuti tanggal (menu Periode disembunyikan)
   const semua = getPeriodeRows_().filter(p => String(p.STATUS).toUpperCase() === 'AKTIF');
   if (!semua.length) return null;
   const p = semua[semua.length - 1];

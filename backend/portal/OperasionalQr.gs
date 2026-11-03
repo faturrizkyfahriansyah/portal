@@ -35,7 +35,7 @@
  */
 function getMenuHariIniDashboard() {
   try {
-    return getMenuHariIniSiklus_();
+    return getMenuHariIniTerpadu_();   // 4 Nov 2026: menu disetujui di SIPANDU baru lebih dulu, lalu Siklus Menu (cara lama)
   } catch (e) {
     return null; // spreadsheet/tab tidak bisa diakses -- frontend sudah menangani dgn baik
   }

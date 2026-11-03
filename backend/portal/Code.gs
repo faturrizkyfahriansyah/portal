@@ -393,11 +393,118 @@ function doPost(e) {
       case 'getDataKartuCetakRelawan':
         data = getDataKartuCetakRelawan(body);
         break;
+      // ===== 4 Nov 2026 -- tarif dengan TANGGAL BERLAKU (MasterTarif.gs). Aksi lama (getMasterTarifStandingAdmin, updateTarifRelawanAdmin) TETAP ada. =====
+      case 'getMasterTarifAdmin':
+        data = getMasterTarifAdmin(body);
+        break;
+      case 'simpanTarifBerlakuAdmin':
+        data = simpanTarifBerlakuAdmin(body);
+        break;
+      case 'getRiwayatTarifAdmin':
+        data = getRiwayatTarifAdmin(body);
+        break;
       case 'getMasterTarifStandingAdmin':
         data = getMasterTarifStandingAdmin(body.token);
         break;
       case 'updateTarifRelawanAdmin':
         data = updateTarifRelawanAdmin(body);
+        break;
+      // ===== BARU 3 Nov 2026 -- SIPANDU database baru (SipanduV2.gs). Semua POST, token di body. =====
+      case 'getStatusSipanduV2':
+        data = getStatusSipanduV2(body);
+        break;
+      case 'getInstansiV2':
+        data = getInstansiV2(body);
+        break;
+      case 'simpanInstansiV2':
+        data = simpanInstansiV2(body);
+        break;
+      case 'simpanPicV2':
+        data = simpanPicV2(body);
+        break;
+      case 'tugaskanPicV2':
+        data = tugaskanPicV2(body);
+        break;
+      case 'getPmHarianV2':
+        data = getPmHarianV2(body);
+        break;
+      case 'simpanPmHarianV2':
+        data = simpanPmHarianV2(body);
+        break;
+      case 'getRiwayatPmV2':
+        data = getRiwayatPmV2(body);
+        break;
+      case 'getDaftarTanggalPmV2':
+        data = getDaftarTanggalPmV2(body);
+        break;
+      case 'getRingkasanPmV2':
+        data = getRingkasanPmV2(body);
+        break;
+      case 'getMenuHarianV2':
+        data = getMenuHarianV2(body);
+        break;
+      case 'getMenuMingguV2':
+        data = getMenuMingguV2(body);
+        break;
+      case 'simpanMenuHarianV2':
+        data = simpanMenuHarianV2(body);
+        break;
+      case 'getSaranMenuV2':
+        data = getSaranMenuV2(body);
+        break;
+      case 'getMasterTarifLainV2':
+        data = getMasterTarifLainV2(body);
+        break;
+      case 'simpanTarifLainV2':
+        data = simpanTarifLainV2(body);
+        break;
+      case 'getRiwayatTarifLainV2':
+        data = getRiwayatTarifLainV2(body);
+        break;
+      case 'getRekapPaguV2':
+        data = getRekapPaguV2(body);
+        break;
+      case 'getKalenderRentangV2':
+        data = getKalenderRentangV2(body);
+        break;
+      case 'simpanKalenderTanggalV2':
+        data = simpanKalenderTanggalV2(body);
+        break;
+      case 'hapusKalenderTanggalV2':
+        data = hapusKalenderTanggalV2(body);
+        break;
+      case 'simpanKalenderMassalV2':
+        data = simpanKalenderMassalV2(body);
+        break;
+      case 'getRekapInsentifPicV2':
+        data = getRekapInsentifPicV2(body);
+        break;
+      case 'getRekapBiayaV2':
+        data = getRekapBiayaV2(body);
+        break;
+      case 'getAksesRelawanModul':
+        data = getAksesRelawanModul(body);
+        break;
+      case 'simpanAksesRelawanModul':
+        data = simpanAksesRelawanModul(body);
+        break;
+      case 'terbitkanTokenAplikasi':
+        data = terbitkanTokenAplikasi(body);
+        break;
+      case 'getStatusJadwalOtomatis':
+        data = getStatusJadwalOtomatis(body);
+        break;
+      case 'matikanJadwalOtomatis':
+        data = matikanJadwalOtomatis(body);
+        break;
+      case 'hidupkanJadwalOtomatis':
+        data = hidupkanJadwalOtomatis(body);
+        break;
+      case 'getRencanaImporRiwayatV2':
+        data = getRencanaImporRiwayatV2(body);
+        break;
+      case 'jalankanImporRiwayatV2':
+        data = jalankanImporRiwayatV2(body);
         break;
       case 'getRekapMingguanAdmin':
         // BARU 30 Okt 2026 -- "Rekap Per Minggu" (lihat MasterTarif.gs).

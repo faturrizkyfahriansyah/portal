@@ -56,7 +56,7 @@ var Pm = {
     };
     if (self) {
       if (self.JENIS_PM !== jenis) {
-        var dipakai = Db.readAll('PENERIMAAN').some(function (t) { return t.ID_PM === self.ID_PM; });
+        var dipakai = SipanduPm.terpadu().some(function (t) { return t.ID_PM === self.ID_PM; });
         if (dipakai) throw new AppError('Jenis PM tidak dapat diubah karena sudah memiliki riwayat penerimaan. Buat PM baru bila perlu.', 'JENIS_TERKUNCI');
       }
       Db.updateRow('PM', self._row, obj);
@@ -82,7 +82,7 @@ var Pm = {
     rows.forEach(function (r) { if (r.ID_PM === idPm) self = r; });
     if (!self) throw new AppError('PM tidak ditemukan.', 'TIDAK_ADA');
 
-    var dipakai = Db.readAll('PENERIMAAN').some(function (t) { return t.ID_PM === idPm; });
+    var dipakai = SipanduPm.terpadu().some(function (t) { return t.ID_PM === idPm; });
     if (dipakai) {
       throw new AppError('PM "' + self.NAMA_PM + '" sudah memiliki riwayat penerimaan/dokumen -- tidak bisa dihapus permanen. Gunakan "Nonaktifkan" supaya riwayat tetap aman.', 'PUNYA_RIWAYAT');
     }
@@ -103,23 +103,41 @@ var Pm = {
    * @param {boolean} sertakanPic true utk jalur Relawan (boleh lihat
    *   nama PIC), false utk Publik (TIDAK PERNAH menyertakan PIC).
    */
+  /** 'yyyy-MM-dd' -> '5 November 2026' ('' bila kosong). */
+  tglIndo_: function (iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+    if (!m) return '';
+    var bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return Number(m[3]) + ' ' + bulan[Number(m[2]) - 1] + ' ' + m[1];
+  },
+
   ringkasUmum_: function (sertakanPic) {
+    // REVISI 4 Nov 2026 (Admin): ringkasan membaca PM HARIAN (penerimaan terpadu: SIPANDU baru + 03_PENERIMAAN lama), BUKAN acuan.
+    // Tanggal = data PM harian TERBARU yang <= hari ini (TANGGAL_DATA). Instansi tanpa data pada tanggal itu = 0.
     var pms = Db.readAll('PM').filter(function (p) { return p.STATUS === 'Aktif'; });
     var pics = sertakanPic ? Db.readAll('PIC') : null;
-    return pms.map(function (pm) {
-      var pk = pm.JENIS_PM === 'SEKOLAH' ? U.num(pm.ACUAN_PORSI_KECIL) : 0;
-      var pb = pm.JENIS_PM === 'SEKOLAH' ? U.num(pm.ACUAN_PORSI_BESAR) : 0;
-      var bumil = pm.JENIS_PM === 'POSYANDU' ? U.num(pm.ACUAN_BUMIL) : 0;
-      var busui = pm.JENIS_PM === 'POSYANDU' ? U.num(pm.ACUAN_BUSUI) : 0;
-      var balita = pm.JENIS_PM === 'POSYANDU' ? U.num(pm.ACUAN_BALITA) : 0;
+    var hariIni = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    var trx = SipanduPm.terpadu().filter(function (r) { return r.TANGGAL <= hariIni; });
+    var tanggal = ''; trx.forEach(function (r) { if (r.TANGGAL > tanggal) tanggal = r.TANGGAL; });
+    var perPm = {}; trx.forEach(function (r) { if (r.TANGGAL === tanggal) perPm[r.ID_PM] = r; });
+    var daftar = pms.map(function (pm) { return { ID_PM: pm.ID_PM, JENIS_PM: pm.JENIS_PM, NAMA_PM: pm.NAMA_PM }; });
+    var dikenal = {}; daftar.forEach(function (d) { dikenal[d.ID_PM] = true; });
+    Object.keys(perPm).forEach(function (id) {   // instansi baru di SIPANDU yang belum ada di 01_PM tetap ikut tampil
+      var r = perPm[id];
+      if (!dikenal[id] && r._sumber === 'SIPANDU_V2') daftar.push({ ID_PM: id, JENIS_PM: r._JENIS_PM, NAMA_PM: r.NAMA_PM });
+    });
+    return daftar.map(function (pm) {
+      var t = perPm[pm.ID_PM];
+      var pk = t ? U.num(t.PORSI_KECIL) : 0, pb = t ? U.num(t.PORSI_BESAR) + U.num(t.TENAGA_PENDIDIK) : 0;
+      var bumil = t ? U.num(t.BUMIL) : 0, busui = t ? U.num(t.BUSUI) : 0, balita = t ? U.num(t.BALITA) : 0;
       var out = {
         ID_PM: pm.ID_PM, JENIS_PM: pm.JENIS_PM, NAMA_PM: pm.NAMA_PM,
         PK: pk, PB: pb, BUMIL: bumil, BUSUI: busui, BALITA: balita,
-        JUMLAH: pk + pb + bumil + busui + balita
+        JUMLAH: pk + pb + bumil + busui + balita, TANGGAL_DATA: tanggal, tanggalDataIndo: Pm.tglIndo_(tanggal)
       };
       if (sertakanPic) {
         var p = Pic.untukPm(pm.ID_PM, pics, null);
-        out.namaPic = p ? p.NAMA_PIC : '';
+        out.namaPic = t && t.NAMA_PIC ? t.NAMA_PIC : (p ? p.NAMA_PIC : '');
       }
       return out;
     });
@@ -138,7 +156,7 @@ var Pm = {
   ringkasHariIniAsn_: function () {
     var hariIni = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
     var pmAktif = Db.readAll('PM').filter(function (p) { return p.STATUS === 'Aktif'; });
-    var trxHariIni = Db.readAll('PENERIMAAN').filter(function (r) { return r.TANGGAL === hariIni; });
+    var trxHariIni = SipanduPm.terpadu().filter(function (r) { return r.TANGGAL === hariIni; });
     var bastHariIni = Db.readAll('BAST').filter(function (b) { return b.TANGGAL === hariIni && String(b.STATUS).toUpperCase() === 'AKTIF'; });
     return {
       tanggal: hariIni,

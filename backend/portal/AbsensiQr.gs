@@ -82,7 +82,7 @@ function setupKolomKartuQr() {
 const KIOSK_API_KEY = 'GANTI_DENGAN_KUNCI_RAHASIA_ANDA_SENDIRI_YANG_PANJANG';
 
 function getDaftarRingkasKiosk(body) {
-  if (String(body.kioskKey || '') !== KIOSK_API_KEY) throw new Error('Akses kios tidak sah.');
+  periksaAksesKiosk_(body);   // 4 Nov 2026: kioskKey statis DIGANTI token aplikasi + pemberian akses per relawan (AksesAplikasi.gs)
   const sheet = getSheet(NAMA_SHEET.RELAWAN);
   const idx = akunHeaderIndex_(sheet);
   const lastRow = sheet.getLastRow();
@@ -139,7 +139,7 @@ function submitAbsensiQr(body) {
   // bocor (kartu fisik hilang/difoto), bisa dipakai submit absensi dari
   // MANA SAJA tanpa perlu berada di kios. Sekarang WAJIB kioskKey jg --
   // pertahanan berlapis (token SAJA tidak lagi cukup).
-  if (String(body.kioskKey || '') !== KIOSK_API_KEY) throw new Error('Akses kios tidak sah.');
+  periksaAksesKiosk_(body);   // 4 Nov 2026: kioskKey statis DIGANTI token aplikasi + pemberian akses per relawan (AksesAplikasi.gs)
   const tokenKartu = sanitize(body.tokenKartu);
   const mode = String(body.mode || 'AUTO').trim().toUpperCase();
   if (!tokenKartu) throw new Error('Kode kartu tidak terbaca. Silakan scan ulang.');

@@ -54,6 +54,14 @@ function getKalenderRows_() {
   if (_cacheKalenderRows) return _cacheKalenderRows;
   const rows = sheetToObjects(getKalenderSheet());
   rows.forEach(r => { if (r.TANGGAL_OPERASIONAL) r.TANGGAL_OPERASIONAL = bacaTanggalDMY_(r.TANGGAL_OPERASIONAL); });
+  // 4 Nov 2026 (Kalender per tanggal, KalenderTanggal.gs): baris yang dibuat TANPA periode (ID_PERIODE kosong) dicocokkan ke
+  // periode yang memuat tanggalnya, supaya 13 berkas lama yang menyaring menurut ID_PERIODE tetap melihatnya -- termasuk bila
+  // periodenya baru dibuat BELAKANGAN. Tanggal di luar semua periode tetap kosong (tidak ada jadwal yang memerlukannya).
+  const tanpaPeriode = rows.filter(r => !r.ID_PERIODE && r.TANGGAL_OPERASIONAL);
+  if (tanpaPeriode.length) {
+    const daftarPeriode = getPeriodeRows_();
+    tanpaPeriode.forEach(r => { const p = kal2PeriodeMemuat_(daftarPeriode, tanggalSheetKeIso_(r.TANGGAL_OPERASIONAL)); if (p) r.ID_PERIODE = p.ID_PERIODE; });
+  }
   _cacheKalenderRows = rows;
   return rows;
 }

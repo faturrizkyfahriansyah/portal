@@ -3,7 +3,7 @@ import { h, icon } from './util.js';
 import { api, session, onAuthLost, apiConfigured } from './api.js';
 import { S, loadBootstrap } from './store.js';
 import { toast, modal, confirmDialog, skeleton, banner, errMsg } from './ui.js';
-import { renderLogin } from './pages/login.js';
+import { masukLewatPortal, kembaliKePortal } from './sso.js';   // 4 Nov 2026: tanpa login sendiri; masuk lewat Portal
 
 const ROUTES = {
   dashboard: { title: 'Dashboard', icon: 'home', mod: () => import('./pages/dashboard.js') },
@@ -47,6 +47,7 @@ export function go(path) { location.hash = '#/' + path; }
 
 function logout() {
   session.clear(); S.pm = []; S.pic = [];
+  kembaliKePortal();   // sesi Portal tetap ada; "Keluar" = kembali ke Portal (login ulang otomatis tidak ada artinya)
   location.hash = ''; start();
 }
 
@@ -124,7 +125,7 @@ async function route() {
 async function start() {
   guard = null;
   if (!session.token) {
-    renderLogin(app, async () => { await start(); });
+    await masukLewatPortal(app, start);
     return;
   }
   app.replaceChildren(h('div', { class: 'main' }, skeleton(4)));

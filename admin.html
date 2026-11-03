@@ -20,6 +20,8 @@
 <link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#12294d">
+<style>/* 4 Nov 2026: menu lama disembunyikan (bukan dihapus) -- Role ASN & Kepala SPPG (diganti jabatan di Pengelola SPPG), Periode Kerja dan Kalender per Periode (kendali kini di Kalender Operasional). */
+.menu-disembunyikan{display:none!important}</style>
 </head>
 <body class="admin-body shell-pengelola">
 <div class="page-shell">
@@ -108,8 +110,11 @@
            dari bukaProfilRelawan() di bawah. -->
       <button type="button" class="admin-tab-btn" data-panel="panelProfilRelawan" style="display:none;" aria-hidden="true"></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelAkun"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></span><span>Akun Relawan</span></button>
+      <!-- 3 Nov 2026 (diminta Admin): dipindah dari SIPRES ke SIMSDM, label "Kartu QR" -> "Kartu Identitas Relawan".
+           ID internal panelKartuQr SENGAJA tidak diubah (loader lazy, tautan #panelKartuQr, pemetaan modul). -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelKartuQr"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M7 6V4h4v2"/><rect x="7" y="9.5" width="5" height="5"/><path d="M15 10h2M15 13h2"/></svg></span><span>Kartu Identitas Relawan</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDivisi"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span><span>Kelola Divisi</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelRoleAkses"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 8-7 9-4-1-7-4.5-7-9V7l7-4z"/></svg></span><span>Role ASN &amp; Kepala SPPG</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn menu-disembunyikan" data-panel="panelRoleAkses"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 8-7 9-4-1-7-4.5-7-9V7l7-4z"/></svg></span><span>Role ASN &amp; Kepala SPPG</span></button>
       <!-- Manajemen Hak Akses Terpadu (16 Okt 2026, diminta Admin) --
            SATU tabel Role+Petugas Stok sekaligus, utk semua relawan.
            TIDAK menggantikan panel di atas (itu tetap ada) -- ini
@@ -121,7 +126,8 @@
       <p class="shell-nav-group-title">SIPRES</p>
       <p class="shell-nav-group-desc">Sistem Informasi Presensi — rekap kehadiran dan pemantauan absensi relawan.</p>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelHarian"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 12l2 2 4-4"/></svg></span><span>Rekap Harian</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDuaMinggu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Rekap Per Periode</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelRekapMingguan"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h3"/></svg></span><span>Rekap Mingguan</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDuaMinggu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Rekap Per Periode (lama)</span></button>
       <!-- BARU (23 Okt 2026, diminta Admin) -- dulu "Atur Tarif per
            Relawan" di dalam Rekap Per Periode, sekarang halaman mandiri
            & standing (bukan per-periode lagi). -->
@@ -133,12 +139,12 @@
            bukan soal menyusun jadwal/penugasan (SIKOP). Panel & fungsi
            backend-nya TIDAK berubah, cuma lokasi menu & labelnya. -->
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelJadwalIndividu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><span>Koreksi Presensi</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelKartuQr"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M7 6V4h4v2"/><rect x="7" y="9.5" width="5" height="5"/><path d="M15 10h2M15 13h2"/></svg></span><span>Kartu QR</span></button>
 
       <p class="shell-nav-group-title">SIKOP</p>
       <p class="shell-nav-group-desc">Sistem Informasi Koordinasi Penugasan — periode kerja, kalender, dan jadwal.</p>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPeriode"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Periode Kerja</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelKalender"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/><circle cx="8.5" cy="14.5" r="1.2"/><circle cx="12" cy="14.5" r="1.2"/><circle cx="15.5" cy="14.5" r="1.2"/></svg></span><span>Kalender Operasional</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn menu-disembunyikan" data-panel="panelPeriode"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Periode Kerja</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelKalenderOperasional"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/><circle cx="8.5" cy="14.5" r="1.2"/><circle cx="12" cy="14.5" r="1.2"/><circle cx="15.5" cy="14.5" r="1.2"/></svg></span><span>Kalender Operasional</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn menu-disembunyikan" data-panel="panelKalender"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/><circle cx="8.5" cy="14.5" r="1.2"/><circle cx="12" cy="14.5" r="1.2"/><circle cx="15.5" cy="14.5" r="1.2"/></svg></span><span>Kalender per Periode (lama)</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelLokasi"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg></span><span>Master Lokasi SPPG</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelShift"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Jadwal &amp; Penugasan</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelJadwal" style="display:none;"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Jadwal &amp; Penugasan (lama)</span></button>
@@ -170,9 +176,15 @@
            sekarang bertuliskan "Operasional Produksi". -->
       <p class="shell-nav-group-title">SIPANDU</p>
       <p class="shell-nav-group-desc">Hak akses, menu harian, dan data penerima manfaat.</p>
+      <!-- 3 Nov 2026: SIPANDU memakai DATABASE BARU (SipanduV2.gs). Dua menu di bawah menggantikan "Penerima Manfaat (lama)" setelah peralihan. -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduMaster"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg></span><span>Master Instansi &amp; PIC</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduPm"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21v-1a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v1"/><path d="M17 11a3 3 0 1 0 0-6M22 21v-1a5 5 0 0 0-4-4.9"/></svg></span><span>Manajemen PM</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduMenu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v8a3 3 0 0 0 3 3v7M7 3v8M10 3v8a3 3 0 0 1-3 3"/><path d="M17 3c-2 2-3 5-3 8s1 4 3 4v6"/></svg></span><span>Manajemen Menu</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduPagu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></span><span>Pagu &amp; Perhitungan</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduBiaya"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></span><span>Rekap Biaya &amp; Insentif</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelHakAksesSipandu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span><span>Operasional Produksi</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelMenuHariIni"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v20M18 2v7a3 3 0 0 1-3 3h-3M18 2v20"/></svg></span><span>Menu MBG</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPenerimaManfaatOps"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Penerima Manfaat</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelMenuHariIni"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v20M18 2v7a3 3 0 0 1-3 3h-3M18 2v20"/></svg></span><span>Menu MBG (lama)</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPenerimaManfaatOps"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Penerima Manfaat (lama)</span></button>
 
       <p class="shell-nav-group-title">Aplikasi Terhubung</p>
       <p class="shell-nav-group-desc">Aplikasi terpisah dengan backend &amp; database sendiri.</p>
@@ -446,8 +458,8 @@
     </form>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Nama Divisi</th><th>Jumlah Relawan Aktif</th></tr></thead>
-        <tbody id="tbodyDivisi"><tr><td colspan="2"><div class="empty-state">Memuat data...</div></td></tr></tbody>
+        <thead><tr><th>Nama Divisi</th><th>Relawan Aktif</th><th>Total Terdaftar</th></tr></thead>
+        <tbody id="tbodyDivisi"><tr><td colspan="3"><div class="empty-state">Memuat data...</div></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -636,6 +648,45 @@
   </div>
 
   <!-- REKAP 2 MINGGU -->
+  <!-- 4 Nov 2026: Rekap Mingguan (SIPRES) sesuai Blueprint §7 & §13: mulai + 7 hari / 14 hari / bulan kalender / kustom. Isi: modules/admin/admin-rekap-mingguan.js -->
+  <div class="admin-panel" id="panelRekapMingguan">
+    <div class="shell-page-head">
+      <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h3"/></svg></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Rekap Mingguan</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Kehadiran dan insentif relawan per rentang tanggal — dasar penggajian mingguan (tarif harian × hari hadir).</p></div>
+    </div>
+    <div class="filter-bar">
+      <select id="rmgMode" aria-label="Rentang">
+        <option value="mingguan">Mingguan (7 hari)</option><option value="duaminggu">Dua Minggu (14 hari)</option><option value="bulanan">Bulanan</option><option value="kustom">Kustom</option>
+      </select>
+      <button class="btn-mini" id="rmgMundur" type="button" aria-label="Rentang sebelumnya">◀</button>
+      <label style="font-size:12px;">Mulai <input type="date" id="rmgAwal"></label>
+      <label style="font-size:12px;">Sampai <input type="date" id="rmgAkhir" disabled></label>
+      <button class="btn-mini" id="rmgMaju" type="button" aria-label="Rentang berikutnya">▶</button>
+    </div>
+    <div class="filter-bar">
+      <input type="text" id="rmgCari" placeholder="🔍 Cari nama relawan..." style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;min-width:190px;">
+      <select id="rmgDivisi"><option value="">Semua Divisi</option></select>
+      <button class="btn-mini primary" id="btnMuatRekapMingguan" type="button">Tampilkan</button>
+      <button class="btn-mini export" id="btnExportRekapMingguan" type="button">Export CSV</button>
+      <span id="rmgRentang" style="font-size:12px;color:var(--color-text-muted);"></span>
+    </div>
+    <p class="section-title">Ringkasan</p>
+    <div class="admin-stat-grid">
+      <div class="admin-stat-card"><div class="admin-stat-value" id="rmgTotalInsentif">–</div><div class="admin-stat-label">Total Insentif</div></div>
+      <div class="admin-stat-card accent-success"><div class="admin-stat-value" id="rmgTotalHadir">–</div><div class="admin-stat-label">Total Hari Hadir</div></div>
+      <div class="admin-stat-card accent-info"><div class="admin-stat-value" id="rmgJumlahRelawan">–</div><div class="admin-stat-label">Relawan</div></div>
+      <div class="admin-stat-card accent-warning"><div class="admin-stat-value" id="rmgBelumLengkap">–</div><div class="admin-stat-label">Tarif Belum Diatur</div></div>
+    </div>
+    <p id="rmgCatatan" style="font-size:12.5px;color:var(--color-text-muted);margin:8px 0 0;"></p>
+    <p class="section-title">Rekap per Relawan</p>
+    <div class="table-wrap">
+      <table class="tabel-kolom-beku-3">
+        <thead><tr><th>Nama</th><th>Divisi</th><th>Nomor Rekening</th><th>Hadir</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Alfa</th><th>Total Hari Kerja</th><th>Tarif per Hari</th><th>Total Insentif</th></tr></thead>
+        <tbody id="tbodyRekapMingguan"><tr><td colspan="11"><div class="empty-state">Pilih rentang lalu klik Tampilkan.</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="admin-panel" id="panelDuaMinggu">
     <div class="shell-page-head">
       <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>
@@ -699,17 +750,10 @@
   <div class="admin-panel" id="panelMasterTarif">
     <div class="shell-page-head">
       <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5a2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 0 1 0 5h-1a2.5 2.5 0 0 0 0 5h1a2.5 2.5 0 0 0 2.5-2.5"/></svg></div>
-      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Master Tarif</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Aturan tarif harian tiap relawan -- berlaku terus sampai diubah, tidak terikat periode tertentu. Nama &amp; Divisi otomatis mengikuti data SIM SDM.</p></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Master Tarif</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Tarif harian relawan dengan tanggal berlaku. Dipakai Rekap Mingguan (tarif × hari hadir).</p></div>
     </div>
 
-    <input type="text" id="mtCari" class="form-field-input" placeholder="🔍 Cari nama relawan..." style="width:100%;margin-bottom:14px;">
-
-    <div class="table-wrap">
-      <table class="tabel-kolom-beku-3">
-        <thead><tr><th>Nama</th><th>Divisi</th><th>Jabatan</th><th>Tarif Harian (Rp)</th><th>Aksi</th></tr></thead>
-        <tbody id="tbodyMasterTarif"><tr><td colspan="5"><div class="empty-state">Memuat data...</div></td></tr></tbody>
-      </table>
-    </div>
+    <div id="mtRoot"><div class="empty-state">Memuat data...</div></div>
   </div>
 
   <!-- MONITORING PRESENSI (roster-first, §I-§M) -->
@@ -790,8 +834,8 @@
     <div class="shell-page-head">
       <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><rect x="7" y="9.5" width="5" height="5"/></svg></div>
       <!-- Nama & deskripsi diperbarui 23 Okt 2026 (dokumen Kartu
-           Identitas Relawan §C.1) -- menu TETAP "Kartu QR" di sidebar
-           (tidak diganti/diduplikasi), cuma judul halaman yg diperluas
+           Identitas Relawan §C.1) -- (menu sidebar sudah diganti jadi "Kartu Identitas Relawan" dan
+           dipindah ke SIMSDM pada 3 Nov 2026), judul halaman diperluas
            krn sekarang kartu ini juga fungsi sbg identitas, bukan cuma QR absensi. -->
       <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Kartu Identitas Relawan</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Kelola kartu identitas dan QR absensi relawan. Kartu terintegrasi dengan profil relawan dan digunakan untuk proses absensi melalui SIPRES.</p></div>
     </div>
@@ -1893,7 +1937,7 @@
     <div class="inline-form" style="margin-top:14px;flex-wrap:wrap;">
       <input type="text" id="inputUsernamePengelola" placeholder="Username baru">
       <input type="text" id="inputNamaPengelola" placeholder="Nama">
-      <input type="password" id="inputPasswordPengelola" placeholder="Password (min. 6 karakter)">
+      <input type="password" id="inputPasswordPengelola" placeholder="Password (min. 8 karakter)">
       <select id="inputRolePengelola">
         <option value="ADMIN">Admin (akses penuh)</option>
         <option value="STAFF">Staff</option>
@@ -1903,10 +1947,60 @@
     <p style="font-size:11.5px;color:var(--color-text-muted);margin:6px 0 0;">Staff = akses monitoring (Dashboard, Rekap Harian, Rekap Per Periode, Bantuan) — tidak bisa mengelola Relawan/Akun/Divisi/Pengaturan/Website Publik dkk. Admin = akses penuh. Pembatasan ini ditegakkan di server, bukan cuma tampilan.</p>
     <div class="table-wrap" style="margin-top:14px;">
       <table>
-        <thead><tr><th>Username</th><th>Nama</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
-        <tbody id="tbodyPengelolaSppg"><tr><td colspan="5"><div class="empty-state">Memuat data...</div></td></tr></tbody>
+        <thead><tr><th>Username</th><th>Nama</th><th>Jabatan</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
+        <tbody id="tbodyPengelolaSppg"><tr><td colspan="6"><div class="empty-state">Memuat data...</div></td></tr></tbody>
       </table>
     </div>
+  </div>
+
+  <!-- BARU 3 Nov 2026: SIPANDU › Master Instansi & PIC. Isi dibangun oleh modules/admin/admin-sipandu-master.js -->
+  <div class="admin-panel" id="panelSipanduMaster">
+    <div class="shell-page-head">
+      <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Master Instansi &amp; PIC</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Identitas instansi penerima manfaat dan PIC-nya. Penggantian PIC menyimpan riwayat.</p></div>
+    </div>
+    <div id="spmRoot"><div class="empty-state">Memuat…</div></div>
+  </div>
+
+  <!-- BARU 3 Nov 2026: SIPANDU › Manajemen PM (PM harian). Isi dibangun oleh modules/admin/admin-sipandu-pm.js -->
+  <div class="admin-panel" id="panelSipanduPm">
+    <div class="shell-page-head">
+      <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21v-1a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v1"/><path d="M17 11a3 3 0 1 0 0-6M22 21v-1a5 5 0 0 0-4-4.9"/></svg></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Manajemen PM</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Jumlah penerima manfaat per tanggal. Satu konfirmasi untuk seluruh daftar; koreksi wajib beralasan dan tercatat.</p></div>
+    </div>
+    <div id="spmPmRoot"><div class="empty-state">Memuat…</div></div>
+  </div>
+
+  <!-- BARU 4 Nov 2026: SIPANDU › Manajemen Menu. Isi dibangun oleh modules/admin/admin-sipandu-menu.js -->
+  <div class="admin-panel" id="panelSipanduMenu">
+    <div class="shell-page-head">
+      <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v8a3 3 0 0 0 3 3v7M7 3v8M10 3v8a3 3 0 0 1-3 3"/><path d="M17 3c-2 2-3 5-3 8s1 4 3 4v6"/></svg></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Manajemen Menu</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Menu harian per tanggal dan tampilan satu minggu. Hanya menu yang disetujui tampil di dashboard dan website.</p></div>
+    </div>
+    <div id="smmRoot"><div class="empty-state">Memuat…</div></div>
+  </div>
+
+  <!-- BARU 4 Nov 2026: SIPANDU › Pagu & Perhitungan. Isi dibangun oleh modules/admin/admin-sipandu-pagu.js -->
+  <div class="admin-panel" id="panelSipanduPagu">
+    <div class="shell-page-head">
+      <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Pagu &amp; Perhitungan</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Pagu per tanggal = PM Harian × tarif yang berlaku (Master Tarif).</p></div>
+    </div>
+    <div id="spgRoot"><div class="empty-state">Memuat…</div></div>
+  </div>
+
+  <!-- BARU 4 Nov 2026: SIKOP › Kalender Operasional PER TANGGAL (tanpa pilih periode). Isi dibangun oleh modules/admin/admin-kalender-operasional.js -->
+  <div class="admin-panel" id="panelKalenderOperasional">
+    <div class="shell-page-head"><div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/><circle cx="8.5" cy="14.5" r="1.2"/><circle cx="12" cy="14.5" r="1.2"/><circle cx="15.5" cy="14.5" r="1.2"/></svg></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Kalender Operasional</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Status operasional tiap tanggal, total PM harian, dan menu. Klik tanggal untuk melihat atau mengubah.</p></div></div>
+    <div id="kcRoot"><div class="empty-state">Memuat…</div></div>
+  </div>
+
+  <!-- BARU 4 Nov 2026: SIPANDU › Rekap Biaya & Insentif. Isi dibangun oleh modules/admin/admin-sipandu-biaya.js -->
+  <div class="admin-panel" id="panelSipanduBiaya">
+    <div class="shell-page-head"><div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Rekap Biaya &amp; Insentif</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Pagu dan insentif PIC, keduanya dihitung dari PM Harian dan Master Tarif.</p></div></div>
+    <div id="sbiRoot"><div class="empty-state">Memuat…</div></div>
   </div>
 
   <div class="admin-panel" id="panelHakAksesSipandu">
@@ -2354,12 +2448,23 @@
 <script src="core/app-shell.js?v=20260903c"></script>
 <script src="core/auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="modules/admin/admin.js?v=20261023e"></script>
+<script src="core/ringkasan-pm.js?v=20261102a"></script>
+<script src="modules/admin/admin.js?v=20261104a"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="modules/admin/admin-kartu-qr.js?v=20261023a"></script>
 <script src="modules/admin/admin-sipres-monitoring.js?v=20260922a"></script>
 <script src="modules/admin/admin-migrasi-roster-v2.js"></script>
 <script src="modules/admin/admin-rekap-mingguan.js"></script>
+<script src="modules/admin/admin-sipandu-master.js?v=20261104a"></script>
+<script src="modules/admin/admin-sipandu-pm.js?v=20261104a"></script>
+<script src="modules/admin/admin-sipandu-impor.js?v=20261104a"></script>
+<script src="modules/admin/admin-sipandu-menu.js?v=20261104a"></script>
+<script src="modules/admin/admin-sipandu-pagu.js?v=20261104a"></script>
+<script src="modules/admin/admin-sipandu-biaya.js?v=20261104a"></script>
+<script src="modules/admin/admin-kalender-operasional.js?v=20261104a"></script>
+<script src="modules/admin/admin-akses-relawan.js?v=20261104a"></script>
+<script src="modules/admin/admin-jadwal-penugasan.js?v=20261104a"></script>
+<script src="modules/admin/admin-kalender-pm.js?v=20261104a"></script>
 <!-- FASE 2: admin-stok.js, admin-shift.js, admin-role.js, admin-export.js,
      admin-import.js, admin-pengelola-sppg.js, admin-pengaturan.js, dan
      admin-website-publik.js SEKARANG dimuat lazy oleh admin.js sendiri

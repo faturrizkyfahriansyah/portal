@@ -33,7 +33,7 @@ var Pagu = {
 
   /** Tulis ulang 05_PERHITUNGAN_HARIAN (data turunan; selalu konsisten dengan 03 & 04). */
   bangunUlang: function () {
-    var tarif = Db.tarif(), agg = Pagu.perTanggal(Db.readAll('PENERIMAAN'));
+    var tarif = Db.tarif(), agg = Pagu.perTanggal(SipanduPm.terpadu());
     var rows = Object.keys(agg).sort().map(function (t) {
       var h = Pagu.hitung(agg[t].kecil, agg[t].besar, tarif);
       return { TANGGAL: t, PORSI_KECIL: h.porsiKecil, PORSI_BESAR: h.porsiBesar, BAHAN_BAKU: h.bahanBaku,
@@ -52,7 +52,7 @@ var Pagu = {
    * JANGAN ditulis ulang dari ingatan.
    */
   rekap: function (d) {
-    var mode = d.mode, tarif = Db.tarif(), trx = Db.readAll('PENERIMAAN');
+    var mode = d.mode, tarif = Db.tarif(), trx = SipanduPm.terpadu();
     var groups = {}, order = [];
     function add(key, label, r) {
       if (!groups[key]) { groups[key] = { periode: key, label: label, kecil: 0, besar: 0, hari: {} }; order.push(key); }
@@ -96,7 +96,7 @@ var Pagu = {
 
   dashboard: function (tgl) {
     U.mustDate(tgl);
-    var tarif = Db.tarif(), trx = Db.readAll('PENERIMAAN').filter(function (r) { return r.TANGGAL === tgl; });
+    var tarif = Db.tarif(), trx = SipanduPm.terpadu().filter(function (r) { return r.TANGGAL === tgl; });
     var pmAktif = Db.readAll('PM').filter(function (p) { return p.STATUS === 'Aktif'; });
     var kecil = 0, besar = 0, terisi = 0, kat = {};
     Cfg.KATEGORI_SEMUA.forEach(function (k) { kat[k] = 0; });

@@ -107,7 +107,7 @@ function getDashboardPengelola(token) {
       // ID_OPERASIONAL biasanya memuat tanggal -- cek kecocokan longgar dengan hari ini.
       return String(p.ID_OPERASIONAL || '').indexOf(hariIni) !== -1;
     }).length;
-    jadwal.sudahDiatur = jadwal.jumlahShiftDivisi > 0 || jadwal.jumlahPenugasanKhusus > 0;
+    jadwal.sudahDiatur = (!jadwalOtomatisMati_() && jadwal.jumlahShiftDivisi > 0) || jadwal.jumlahPenugasanKhusus > 0;   // 4 Nov 2026: jadwal otomatis mati -> hanya penugasan yang dihitung
   } catch (e) { /* biarkan default kalau sheet Shift belum ada/kosong */ }
 
   Logger.log('[DASHBOARD] setelah bagian 2 (Jadwal): ' + (Date.now()-_t0) + 'ms');
@@ -145,6 +145,7 @@ function getDashboardPengelola(token) {
   let periodeAktif = null;
   let kalenderPeriodeAktif = [];
   try {
+    sinkronStatusPeriodeOtomatis_();   // 4 Nov 2026: status periode mengikuti tanggal (menu Periode disembunyikan)
     const semuaPeriode = sheetToObjects(getPeriodeSheet());
     const aktif = semuaPeriode.find(p => String(p.STATUS).toUpperCase() === 'AKTIF');
     if (aktif) {
@@ -246,7 +247,7 @@ function getDashboardPengelolaRingan(token) {
     const penugasanKhusus = getPenugasanKhususRows_();
     jadwal.jumlahShiftDivisi = shiftDivisi.length;
     jadwal.jumlahPenugasanKhusus = penugasanKhusus.filter(p => String(p.ID_OPERASIONAL || '').indexOf(hariIni) !== -1).length;
-    jadwal.sudahDiatur = jadwal.jumlahShiftDivisi > 0 || jadwal.jumlahPenugasanKhusus > 0;
+    jadwal.sudahDiatur = (!jadwalOtomatisMati_() && jadwal.jumlahShiftDivisi > 0) || jadwal.jumlahPenugasanKhusus > 0;   // 4 Nov 2026: jadwal otomatis mati -> hanya penugasan yang dihitung
   } catch (e) { /* biarkan default */ }
 
   // ---- P3: PERIODE AKTIF + KALENDER OPERASIONAL ----

@@ -30,7 +30,8 @@ var Api = {
   },
 
   routes: {
-    'login': { pub: true, fn: function (d) { return Auth.login(d.username, d.pin); } },
+    // 4 Nov 2026: login SIPENDOK DIMATIKAN (keputusan Admin) -- masuk hanya lewat Portal dengan akses per relawan.
+    'login': { pub: true, fn: function () { throw new AppError('Login SIPENDOK sudah dinonaktifkan. Buka SIPENDOK dari Portal; akun Anda harus diberi akses oleh Pengelola.', 'LOGIN_DINONAKTIFKAN'); } },
 
     'bootstrap': { fn: function (d, u) {
       var s = Db.settings();
@@ -124,6 +125,13 @@ var Api = {
     try { return fn(); } finally { lock.releaseLock(); }
   },
 
+  /** Pintu tunggal: token aplikasi dari Portal (modul SIPENDOK) + pemeriksaan ulang pemberian akses. Auth.verify (login lama) TIDAK dipakai lagi. */
+  verifikasiPengguna_: function (token) {
+    var p = verifikasiTokenAplikasi_(token, 'SIPENDOK');
+    cekAksesPortalSheet_(p, 'SIPENDOK');
+    return { username: p.idRelawan, nama: p.nama, role: p.role, jenis: p.jenis };
+  },
+
   handle: function (e) {
     try {
       var raw = e && e.postData ? e.postData.contents : '';
@@ -132,7 +140,7 @@ var Api = {
       try { req = JSON.parse(raw); } catch (x) { throw new AppError('Permintaan tidak valid.', 'REQUEST'); }
       var route = Api.routes[req.action];
       if (!route) throw new AppError('Aksi tidak dikenal.', 'REQUEST');
-      var user = route.pub ? null : Auth.verify(req.token);
+      var user = route.pub ? null : Api.verifikasiPengguna_(req.token);   // 4 Nov 2026: hanya token Portal + akses per relawan
       var data = req.data || {};
       var result = route.write
         ? Api._kunci(function () { return route.fn(data, user); })

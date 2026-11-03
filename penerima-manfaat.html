@@ -140,7 +140,8 @@
         totalAngka.textContent = formatRibuan(ringkasan.total);
         subtotalWrap.innerHTML = `
           <span><strong>${formatRibuan(ringkasan.totalPesertaDidik)}</strong> Peserta Didik</span>
-          <span><strong>${formatRibuan(ringkasan.totalB3)}</strong> 3B (Bumil/Busui/Balita)</span>`;
+          <span><strong>${formatRibuan(ringkasan.totalB3)}</strong> 3B (Bumil/Busui/Balita)</span>`
+          + (data[0] && data[0].tanggalData ? `<span style="opacity:.8;">Data PM harian per ${data[0].tanggalData}</span>` : '');
 
         tabelBody.innerHTML = data.map(d => `
           <tr style="border-top:1px solid var(--pub-line);">

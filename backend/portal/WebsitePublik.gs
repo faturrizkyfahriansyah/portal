@@ -649,7 +649,7 @@ function getMenuHarianTerbaruPublik() {
 function getMenuHariIniPublik() {
   let m;
   try {
-    m = getMenuHariIniSiklus_();
+    m = getMenuHariIniTerpadu_();   // 4 Nov 2026: menu disetujui di SIPANDU baru lebih dulu, lalu Siklus Menu (cara lama)
   } catch (e) {
     return null; // sheet Siklus Menu tidak bisa diakses -- jangan error ke publik, tampilkan kosong
   }

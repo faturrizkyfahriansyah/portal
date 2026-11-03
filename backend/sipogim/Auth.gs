@@ -17,57 +17,15 @@ const BATAS_GAGAL_LOGIN = 5;
 const JENDELA_GAGAL_LOGIN_MENIT = 15;
 
 function login(body) {
-  const username = sanitizeSipogim_(body.username);
-  const kataSandi = sanitizeSipogim_(body.kataSandi);
-  if (!username || !kataSandi) throw new Error('Username dan kata sandi wajib diisi.');
-
-  periksaKuncGagalLogin_();
-
-  const usernameTersimpan = getPengaturan_('USERNAME', 'sipogim');
-  const hashTersimpan = getPengaturan_('HASH_KATA_SANDI', '');
-  if (!hashTersimpan) throw new Error('Kata sandi belum diset. Hubungi pengelola untuk menjalankan setup awal.');
-
-  // Pesan galat SENGAJA sama (umum) utk username salah maupun kata sandi
-  // salah -- spesifikasi: "tanpa membocorkan mana yang salah".
-  if (username !== usernameTersimpan || hashRahasia_(kataSandi) !== hashTersimpan) {
-    catatGagalLogin_();
-    throw new Error('Kata sandi salah.'); // pesan umum, sesuai spesifikasi (tidak membocorkan detail)
-  }
-
-  resetGagalLogin_();
-  const token = Utilities.getUuid();
-  const versiSesi = String(getPengaturan_('VERSI_SESI', '1'));
-  const kedaluwarsaDetik = SESI_MAKS_HARI * 24 * 60 * 60;
-  CacheService.getScriptCache().put('sesi_' + token, versiSesi, Math.min(kedaluwarsaDetik, 21600)); // cache GAS maks 6 jam per put, lihat perpanjangSesi_
-  PropertiesService.getScriptProperties().setProperty('sesi_mulai_' + token, String(Date.now()));
-  return { token: token };
+  // 4 Nov 2026: login SIPOGIM DIMATIKAN (keputusan Admin) -- masuk hanya lewat Portal dengan akses per relawan.
+  throw new Error('Login SIPOGIM sudah dinonaktifkan. Buka SIPOGIM dari Portal; akun Anda harus diberi akses oleh Pengelola.');
 }
 
-/**
- * CacheService maksimal 6 jam per entri -- utk sesi 30 hari, token juga
- * dicatat di ScriptProperties (tanpa batas waktu) sbg cadangan; setiap
- * permintaan yang valid memperpanjang cache 6-jam berikutnya SELAMA
- * masih dalam batas 30 hari sejak mulai. Ini yg membuat "30 hari sejak
- * aktivitas terakhir" (spesifikasi) bisa tercapai walau batas teknis
- * CacheService cuma 6 jam.
- */
 function periksaSesi_(token) {
-  if (!token) throw new Error('Sesi tidak valid. Silakan login kembali.');
-  const versiSesiSekarang = String(getPengaturan_('VERSI_SESI', '1'));
-  const cache = CacheService.getScriptCache();
-  let versiTersimpan = cache.get('sesi_' + token);
-
-  if (!versiTersimpan) {
-    // Cache 6 jam sudah habis -- cek ScriptProperties, perpanjang kalau masih dalam 30 hari.
-    const mulai = Number(PropertiesService.getScriptProperties().getProperty('sesi_mulai_' + token) || 0);
-    if (!mulai) throw new Error('Sesi berakhir. Silakan login kembali.');
-    const umurHari = (Date.now() - mulai) / 86400000;
-    if (umurHari > SESI_MAKS_HARI) throw new Error('Sesi berakhir. Silakan login kembali.');
-    versiTersimpan = versiSesiSekarang; // sesi lama dianggap valid, diperpanjang di bawah
-  }
-
-  if (versiTersimpan !== versiSesiSekarang) throw new Error('Sesi berakhir (kata sandi pernah diganti). Silakan login kembali.');
-  cache.put('sesi_' + token, versiSesiSekarang, 21600); // perpanjang 6 jam lagi
+  // 4 Nov 2026: sesi SIPOGIM sendiri DIGANTI token aplikasi dari Portal + pemeriksaan ulang akses per relawan (AksesPortal.gs).
+  if (!token) throw new Error('Sesi tidak valid. Buka SIPOGIM dari Portal.');
+  const p = verifikasiTokenAplikasi_(token, 'SIPOGIM');
+  cekAksesPortalSheet_(p, 'SIPOGIM');
   return true;
 }
 

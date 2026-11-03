@@ -32,7 +32,7 @@ var Dok = {
     });
     var perlu = false;
     if (aktif) {
-      var rows = trxRows || Db.readAll('PENERIMAAN').filter(function (r) { return r.TANGGAL === tgl; });
+      var rows = trxRows || SipanduPm.terpadu().filter(function (r) { return r.TANGGAL === tgl; });
       // '>=' disengaja: resolusi waktu hanya detik; lebih aman menandai 'perlu revisi' daripada melewatkan dokumen basi.
       perlu = rows.some(function (r) { return r.WAKTU_INPUT >= aktif.WAKTU_GENERATE; });
     }
@@ -85,7 +85,7 @@ var Dok = {
   validasi: function (tgl) {
     U.mustDate(tgl);
     var settings = Db.settings(), pms = Db.readAll('PM'), pics = Db.readAll('PIC'), bast = Db.readAll('BAST');
-    var trx = Db.readAll('PENERIMAAN').filter(function (r) { return r.TANGGAL === tgl; });
+    var trx = SipanduPm.terpadu().filter(function (r) { return r.TANGGAL === tgl; });
     var trxByPm = {}, trxCount = {};
     trx.forEach(function (r) { trxByPm[r.ID_PM] = r; trxCount[r.ID_PM] = (trxCount[r.ID_PM] || 0) + 1; });
     var bastByPm = {};
@@ -224,7 +224,7 @@ var Dok = {
     var pmMap = {};
     Db.readAll('PM').forEach(function (p) { pmMap[p.ID_PM] = p; });
     var trxByPm = {};
-    Db.readAll('PENERIMAAN').forEach(function (r) { if (r.TANGGAL === tgl) trxByPm[r.ID_PM] = r; });
+    SipanduPm.terpadu().forEach(function (r) { if (r.TANGGAL === tgl) trxByPm[r.ID_PM] = r; });
 
     var sertakan = v.items.filter(function (i) { return i.sertakan; });         // urutan = urutan master PM
     var bastRows = Db.readAll('BAST');
@@ -363,7 +363,7 @@ var Dok = {
       if (a.TANGGAL !== b.TANGGAL) return a.TANGGAL < b.TANGGAL ? 1 : -1;
       return a.WAKTU_GENERATE < b.WAKTU_GENERATE ? 1 : -1;
     });
-    var trxAll = Db.readAll('PENERIMAAN'), lastInput = {};
+    var trxAll = SipanduPm.terpadu(), lastInput = {};
     trxAll.forEach(function (r) { if (!lastInput[r.TANGGAL] || r.WAKTU_INPUT > lastInput[r.TANGGAL]) lastInput[r.TANGGAL] = r.WAKTU_INPUT; });
     return rows.map(function (r) {
       var o = Dok.keluar(r);

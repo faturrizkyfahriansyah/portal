@@ -43,7 +43,21 @@ async function apiPostDiagnostik_(action, payload, timeoutMs) {
 // "view source" halaman). Harus SAMA PERSIS dengan KIOSK_API_KEY di
 // AbsensiQr.gs. GANTI nilainya, jangan pakai contoh ini apa adanya.
 // ============================================================
-const KIOSK_KEY = 'GANTI_DENGAN_KUNCI_RAHASIA_ANDA_SENDIRI_YANG_PANJANG';
+// 4 Nov 2026 (keputusan Admin): kunci statis kios DIHAPUS. Kios kini memakai token aplikasi SIPRES_QR yang diterbitkan Portal HANYA untuk akun
+// yang diberi akses (Manajemen Hak Akses > Akses Per Relawan). Perangkat kios harus login Portal dengan akun yang diberi akses itu.
+let tokenKios_ = '', tokenKiosSampai_ = 0;
+function sesiPortalKios_() {
+  for (const k of ['sppgRelawanSession', 'sppgAdminSession']) { try { const x = JSON.parse(localStorage.getItem(k) || 'null'); if (x && x.token) return x.token; } catch (e) { /* abaikan */ } }
+  return '';
+}
+async function ambilTokenKios_() {
+  if (tokenKios_ && Date.now() < tokenKiosSampai_) return tokenKios_;
+  const sesi = sesiPortalKios_();
+  if (!sesi) throw new Error('Belum masuk Portal. Buka halaman ini dari Portal dengan akun yang diberi akses SIPRES QR.');
+  const d = await apiPostDiagnostik_('terbitkanTokenAplikasi', { token: sesi, kodeModul: 'SIPRES_QR' }, 15000);
+  tokenKios_ = d.token; tokenKiosSampai_ = Date.now() + 5.5 * 3600 * 1000;
+  return tokenKios_;
+}
 const KUNCI_CACHE_RELAWAN = 'sipres_qr_cache_relawan_v1';
 const KUNCI_WAKTU_CACHE_RELAWAN = 'sipres_qr_cache_relawan_waktu_v1';
 const INTERVAL_REFRESH_CACHE_MS = 5 * 60 * 1000;
@@ -61,7 +75,7 @@ function muatCacheRelawanDariLocalStorage_() {
 
 async function segarkanCacheRelawan_() {
   try {
-    const daftar = await apiPostDiagnostik_('getDaftarRingkasKiosk', { kioskKey: KIOSK_KEY }, 20000);
+    const daftar = await apiPostDiagnostik_('getDaftarRingkasKiosk', { tokenAplikasi: await ambilTokenKios_() }, 20000);
     if (Array.isArray(daftar)) {
       _petaRelawan = new Map(daftar.map((r) => [r.token, r]));
       localStorage.setItem(KUNCI_CACHE_RELAWAN, JSON.stringify(daftar));
@@ -109,7 +123,7 @@ async function prosesAntrean_() {
     while (antrean.length > 0) {
       const item = antrean[0];
       try {
-        await apiPostDiagnostik_('submitAbsensiQr', { kioskKey: KIOSK_KEY, tokenKartu: item.tokenKartu, mode: item.mode, idScan: item.idScan }, 15000);
+        await apiPostDiagnostik_('submitAbsensiQr', { tokenAplikasi: await ambilTokenKios_(), tokenKartu: item.tokenKartu, mode: item.mode, idScan: item.idScan }, 15000);
         antrean.shift();
         simpanAntrean_(antrean);
       } catch (e) {
@@ -384,7 +398,7 @@ async function prosesHasilScan_(tokenKartu) {
   else tampilkanStatusSiap_(false);
 
   try {
-    const hasil = await apiPostDiagnostik_('submitAbsensiQr', { kioskKey: KIOSK_KEY, tokenKartu, mode: modeAbsensi, idScan }, 15000);
+    const hasil = await apiPostDiagnostik_('submitAbsensiQr', { tokenAplikasi: await ambilTokenKios_(), tokenKartu, mode: modeAbsensi, idScan }, 15000);
     tampilkanHasil_(hasil);
   } catch (err) {
     // Gagal terkirim (jaringan/timeout) -- SIMPAN ke antrean utk dicoba lagi

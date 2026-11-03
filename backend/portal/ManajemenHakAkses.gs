@@ -506,13 +506,21 @@ function cekIzinModul_(idRelawanAtauUsername, modulKode, izin) {
 }
 
 /**
- * BARU 30 Okt 2026 (Tahap 4 -- Penataan Navigasi PORTAL). Status AKSES_MODUL
- * (ya/tidak) utk SEMUA modul sekaligus, bagi pengguna yg sedang login --
- * dipakai sidebar terpusat (lihat NavigasiTerpusat.js) supaya TIDAK perlu
- * 10 panggilan API terpisah (1 per modul) cuma utk gambar status kunci di
- * sidebar. Pakai ULANG persis logika cekIzinModul_ (roleBaru + baris
- * konfigurasi), bukan logika baru.
- * @return {Object} { "SIMSDM": true, "SIRAGA": false, ... } -- key = KODE_MODUL persis dari 33_MODUL_PORTAL
+ * Status buka/kunci tiap modul utk SIDEBAR (Tahap 4). DIPERBAIKI 2 Nov 2026.
+ *
+ * Versi sebelumnya memanggil cekIzinModul_ (aturan "tidak ada baris konfigurasi
+ * = DITOLAK", benar utk PENEGAKAN di backend) utk menentukan gembok di TAMPILAN.
+ * Akibatnya modul yg baru didaftarkan (SIMSDM, SIKOP, SIPENDOK, SIPOGIM, SIPIKA)
+ * -- yg belum punya baris izin dan TIDAK dijaga backend sama sekali -- terkunci
+ * utk semua orang, termasuk Super Admin, dan menu relawan (Notifikasi, Informasi,
+ * Dokumen) ikut terkunci. Aturan TAMPILAN sekarang:
+ *   1. SUPER_ADMIN (dan akun Admin lama tanpa ROLE_BARU) TIDAK PERNAH terkunci.
+ *   2. Modul tanpa baris konfigurasi utk role ybs = BELUM DIATUR -> terbuka.
+ *   3. Ada baris: terbuka bila AKSES_MODUL hidup ATAU ada izin tindakan yg hidup
+ *      (baris dgn izin CRUD hidup tapi AKSES_MODUL mati = konfigurasi janggal,
+ *      jangan dihukum sbg "terkunci"). Terkunci HANYA bila semuanya mati.
+ * cekIzinModul_/requireIzinModulBaru_ (penegakan backend) TIDAK diubah sama sekali.
+ * @return {Object} { "SIMSDM": true, "SIRAGA": false, ... } key = KODE_MODUL
  */
 function getAksesModulSaya(token) {
   let idPengguna;
@@ -521,7 +529,31 @@ function getAksesModulSaya(token) {
 
   const semuaModul = sheetToObjects(getModulPortalSheet_());
   const hasil = {};
-  semuaModul.forEach(m => { hasil[m.KODE_MODUL] = cekIzinModul_(idPengguna, m.KODE_MODUL, 'AKSES_MODUL'); });
+  const bukaSemua = function () { semuaModul.forEach(function (m) { hasil[m.KODE_MODUL] = true; }); return hasil; };
+
+  // Cari ROLE_BARU: Admin dulu, baru Relawan (urutan & default SAMA dgn cekIzinModul_).
+  let roleBaru = null;
+  const admin = sheetToObjects(getSheet(NAMA_SHEET.ADMIN)).find(function (a) { return a.USERNAME === idPengguna; });
+  if (admin) roleBaru = admin.ROLE_BARU || 'SUPER_ADMIN';
+  else {
+    const relawan = getRelawanById(idPengguna);
+    if (relawan) roleBaru = relawan.roleBaru || 'RELAWAN';
+  }
+  if (!roleBaru || roleBaru === 'SUPER_ADMIN') return bukaSemua();   // tak dikenali: jangan hukum tampilan; Super Admin: selalu penuh
+
+  const konfigurasi = sheetToObjects(getKonfigurasiHakAksesSheet_());
+  const IZIN = ['VIEW', 'CREATE', 'EDIT', 'DELETE', 'VALIDATE', 'APPROVE', 'EXPORT'];
+  semuaModul.forEach(function (m) {
+    const baris = konfigurasi.find(function (r) { return r.KODE_ROLE === roleBaru && r.KODE_MODUL === m.KODE_MODUL; });
+    if (!baris) { hasil[m.KODE_MODUL] = true; return; }               // belum diatur -> terbuka
+    hasil[m.KODE_MODUL] = !!baris.AKSES_MODUL || IZIN.some(function (k) { return !!baris[k]; });
+  });
+  // 4 Nov 2026: SIPENDOK, SIPOGIM, SIPRES QR (tanpa login) diatur PER RELAWAN (35_AKSES_RELAWAN_MODUL, lihat AksesRelawanModul.gs):
+  // relawan hanya terbuka bila diberi akses; selainnya terkunci. Akun Admin mengikuti aturan role seperti sebelumnya.
+  if (!admin) {
+    const grant = aksesRelawanSet_(idPengguna);
+    MODUL_AKSES_RELAWAN.forEach(function (m) { hasil[m.kode] = !!grant[m.kode]; });
+  }
   return hasil;
 }
 

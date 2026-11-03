@@ -204,7 +204,7 @@ var BastSj = (function () {
     var tpl = muatTemplate_(settings);
     var pms = Db.readAll('PM'), bast = Db.readAll('BAST');
     var trxByPm = {};
-    Db.readAll('PENERIMAAN').forEach(function (r) { if (r.TANGGAL === tgl) trxByPm[r.ID_PM] = r; });
+    SipanduPm.terpadu().forEach(function (r) { if (r.TANGGAL === tgl) trxByPm[r.ID_PM] = r; });
     var bastByPm = {};
     bast.forEach(function (b) { if (b.TANGGAL === tgl && b.STATUS === 'AKTIF') bastByPm[b.ID_PM] = b; });
 
@@ -283,7 +283,7 @@ var BastSj = (function () {
     if (tpl.error) throw new AppError(tpl.error, 'TEMPLATE');
 
     var pmMap = {}; Db.readAll('PM').forEach(function (p) { pmMap[p.ID_PM] = p; });
-    var trxByPm = {}; Db.readAll('PENERIMAAN').forEach(function (r) { if (r.TANGGAL === tgl) trxByPm[r.ID_PM] = r; });
+    var trxByPm = {}; SipanduPm.terpadu().forEach(function (r) { if (r.TANGGAL === tgl) trxByPm[r.ID_PM] = r; });
 
     var bastRows = Db.readAll('BAST');
     var alok = Bast.alokasi(tgl, siap.map(function (i) { return i.id_pm; }), bastRows, pre.periode.kode, kode);

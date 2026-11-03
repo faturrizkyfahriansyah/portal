@@ -42,13 +42,14 @@ const PETA_HREF_KE_MODUL_ = {
   // terbuka (fail-open, bukan dikunci asal-asalan).
   'informasi.html': 'SIPIKA', 'notifikasi.html': 'SIPIKA', 'penerimaan-pat.html': 'SIPIKA', 'dokumen.html': 'SIPIKA',
   'sipendok/index.html': 'SIPENDOK',
-  'sipogim/beranda.html': 'SIPOGIM'
+  'sipogim/beranda.html': 'SIPOGIM',
+  'absensi-qr.html': 'SIPRES_QR'   // 4 Nov 2026: SIPRES QR (tanpa login) diatur per relawan di Manajemen Hak Akses
 };
 const PETA_PANEL_KE_MODUL_ = {
   // -- Sisi Admin (data-panel, lihat admin.html) --
   panelRelawan: 'SIMSDM', panelAkun: 'SIMSDM', panelDivisi: 'SIMSDM', panelRoleAkses: 'SIMSDM', panelManajemenHakAkses: 'SIMSDM', panelPengelolaSppg: 'SIMSDM', panelProfilRelawan: 'SIMSDM',
-  panelHarian: 'SIPRES', panelDuaMinggu: 'SIPRES', panelMasterTarif: 'SIPRES', panelMonitoringPresensi: 'SIPRES', panelPengajuanKetidakhadiranAdmin: 'SIPRES', panelJadwalIndividu: 'SIPRES', panelKartuQr: 'SIPRES', panelLaporan: 'SIPRES',
-  panelPeriode: 'SIKOP', panelKalender: 'SIKOP', panelLokasi: 'SIKOP', panelJadwal: 'SIKOP', panelShift: 'SIKOP',
+  panelHarian: 'SIPRES', panelRekapMingguan: 'SIPRES', panelSipanduMaster: 'SIPANDU', panelSipanduPm: 'SIPANDU', panelSipanduMenu: 'SIPANDU', panelSipanduPagu: 'SIPANDU', panelSipanduBiaya: 'SIPANDU', panelDuaMinggu: 'SIPRES', panelMasterTarif: 'SIPRES', panelMonitoringPresensi: 'SIPRES', panelPengajuanKetidakhadiranAdmin: 'SIPRES', panelJadwalIndividu: 'SIPRES', panelKartuQr: 'SIMSDM', panelLaporan: 'SIPRES',
+  panelPeriode: 'SIKOP', panelKalender: 'SIKOP', panelKalenderOperasional: 'SIKOP', panelLokasi: 'SIKOP', panelJadwal: 'SIKOP', panelShift: 'SIKOP',
   panelStok: 'SIRAGA', panelPengajuanKebutuhanAdmin: 'SIRAGA', panelReturBarangAdmin: 'SIRAGA',
   panelHakAksesSipandu: 'SIPANDU',
   panelInformasi: 'SIPIKA', panelPengumuman: 'SIPIKA', panelNotifikasiAdmin: 'SIPIKA', panelDokumen: 'SIPIKA', panelPenerimaManfaatOps: 'SIPIKA',
@@ -96,6 +97,29 @@ function mulaiTerapkanStatusAksesNavigasi_() {
  * Aman dipanggil di halaman MANAPUN -- kalau elemen relevan tidak
  * ditemukan (mis. halaman tanpa sidebar), tidak melakukan apa-apa.
  */
+/**
+ * 4 Nov 2026: SIPENDOK, SIPOGIM, SIPRES QR (dibuka tanpa login) TAMPIL di sidebar SEMUA relawan, tetapi terkunci bagi yang belum diberi akses
+ * (Manajemen Hak Akses > Akses Per Relawan). Disisipkan SEKALI di sini (bukan diedit di 23 halaman). Hanya di sisi relawan, dan hanya setelah
+ * status akses berhasil diambil (bila gagal: tidak ditampilkan, bukan terbuka).
+ */
+function sisipkanAplikasiTanpaLogin_() {
+  const nav = document.querySelector('nav.shell-nav');
+  if (!nav || document.querySelector('button.admin-tab-btn[data-panel]') || nav.querySelector('[data-aplikasi-tanpa-login]')) return;
+  const ikon = function (d) { return '<span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg></span>'; };
+  const daftar = [
+    { href: 'sipendok/index.html', nama: 'SIPENDOK', ikon: '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>' },
+    { href: 'sipogim/beranda.html', nama: 'SIPOGIM', ikon: '<path d="M4 3v8a3 3 0 0 0 3 3v7M7 3v8M10 3v8a3 3 0 0 1-3 3"/><path d="M17 3c-2 2-3 5-3 8s1 4 3 4v6"/>' },
+    { href: 'absensi-qr.html', nama: 'SIPRES QR', ikon: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/>' }
+  ];
+  const judul = document.createElement('p'); judul.className = 'shell-nav-group-title'; judul.textContent = 'Aplikasi Lain'; judul.setAttribute('data-aplikasi-tanpa-login', '1');
+  nav.appendChild(judul);
+  daftar.forEach(function (x) {
+    if (nav.querySelector('a[href="' + x.href + '"]')) return;
+    const a = document.createElement('a'); a.href = x.href; a.className = 'shell-nav-link'; a.setAttribute('data-aplikasi-tanpa-login', '1');
+    a.innerHTML = ikon(x.ikon) + '<span>' + x.nama + '</span>'; nav.appendChild(a);
+  });
+}
+
 async function terapkanStatusAksesNavigasi_(opsi) {
   const linkRelawan = document.querySelectorAll('a.shell-nav-link[href]');
   const tombolAdmin = document.querySelectorAll('button.admin-tab-btn[data-panel]');
@@ -109,6 +133,8 @@ async function terapkanStatusAksesNavigasi_(opsi) {
     return; // fail-open -- JANGAN kunci apa pun kalau statusnya sendiri gagal diambil
   }
 
+  try { sisipkanAplikasiTanpaLogin_(); } catch (e) { console.warn('NavigasiTerpusat: gagal menyisipkan aplikasi lain', e.message); }
+
   function kunciElemen_(el, kodeModul) {
     el.classList.add('shell-nav-link--terkunci');
     el.insertAdjacentHTML('beforeend', '<span class="shell-nav-gembok" aria-hidden="true" style="margin-left:auto;opacity:.6;">🔒</span>');
@@ -119,7 +145,7 @@ async function terapkanStatusAksesNavigasi_(opsi) {
     }, true); // capture:true -- pastikan tertangkap LEBIH DULU drpd listener lain yg sudah ada di elemen ini (mis. tab-switch admin.html)
   }
 
-  linkRelawan.forEach(a => {
+  document.querySelectorAll('a.shell-nav-link[href]').forEach(a => {
     const href = (a.getAttribute('href') || '').split('#')[0].split('?')[0];
     const kodeModul = PETA_HREF_KE_MODUL_[href];
     if (kodeModul && aksesModul[kodeModul] === false) kunciElemen_(a, kodeModul);

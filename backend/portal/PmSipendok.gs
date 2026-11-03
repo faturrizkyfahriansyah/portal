@@ -42,6 +42,8 @@ function tanggalIndoPm_(d) {
  * Aktif), bukan dari ada-tidaknya transaksi hari ini.
  */
 function getRingkasanPmDashboard() {
+  // 4 Nov 2026: bila PM harian SIPANDU baru hari ini sudah TERVERIFIKASI -> pakai itu; bila tidak (belum tersambung/belum diisi/galat) -> cara lama (kolom acuan).
+  try { var v2 = v2RingkasanPmDashboard_(v2HariIniIso_()); if (v2) return v2; } catch (e) { /* SipanduV2.gs belum ada: lanjut cara lama */ }
   var ss;
   try {
     ss = SpreadsheetApp.openById(SIPENDOK_SPREADSHEET_ID);
@@ -64,7 +66,7 @@ function getRingkasanPmDashboard() {
   var num_ = function (v) { return (v === '' || v === undefined || v === null || isNaN(v)) ? 0 : Number(v); };
 
   var pmHariIni = [], pmLibur = [];
-  var totalPK = 0, totalPB = 0, total3B = 0;
+  var totalPK = 0, totalPB = 0, total3B = 0, totalBalita = 0, totalBusui = 0, totalBumil = 0;
   for (var i = 1; i < dataPm.length; i++) {
     var r = dataPm[i];
     var idPm = String(r[idxPm.ID_PM] || '');
@@ -77,10 +79,14 @@ function getRingkasanPmDashboard() {
 
     var pk = num_(r[idxPm.ACUAN_PORSI_KECIL]);
     var pb = num_(r[idxPm.ACUAN_PORSI_BESAR]);
-    var tb = num_(r[idxPm.ACUAN_BALITA]) + num_(r[idxPm.ACUAN_BUMIL]) + num_(r[idxPm.ACUAN_BUSUI]);
+    // 2 Nov 2026: rincian 3B (Balita/Busui/Bumil) dipisah, spt tampilan website publik. Field lama
+    // (TIGA_B, total3B, dst) TETAP ADA & tidak berubah -- konsumen lama (admin-penerima-manfaat-ops.js) aman.
+    var balita = num_(r[idxPm.ACUAN_BALITA]), bumil = num_(r[idxPm.ACUAN_BUMIL]), busui = num_(r[idxPm.ACUAN_BUSUI]);
+    var tb = balita + bumil + busui;
     var jumlah = pk + pb + tb;
     totalPK += pk; totalPB += pb; total3B += tb;
-    pmHariIni.push({ NAMA_PM: namaPm, JENIS_PM: jenisPm, PK: pk, PB: pb, TIGA_B: tb, JUMLAH: jumlah });
+    totalBalita += balita; totalBusui += busui; totalBumil += bumil;
+    pmHariIni.push({ NAMA_PM: namaPm, JENIS_PM: jenisPm, PK: pk, PB: pb, TIGA_B: tb, BALITA: balita, BUSUI: busui, BUMIL: bumil, JUMLAH: jumlah });
   }
 
   return {
@@ -88,6 +94,7 @@ function getRingkasanPmDashboard() {
     jumlahPmHariIni: pmHariIni.length,
     jumlahPmLibur: pmLibur.length,
     totalPK: totalPK, totalPB: totalPB, total3B: total3B,
+    totalBalita: totalBalita, totalBusui: totalBusui, totalBumil: totalBumil,
     pmHariIni: pmHariIni, pmLibur: pmLibur
   };
 }
@@ -169,6 +176,8 @@ function getProfilTimPublik() {
  * getMenuHariIniDashboard, halaman ini memang utk pengunjung umum.
  */
 function getRingkasanPmPublik() {
+  // 4 Nov 2026: bila PM harian SIPANDU baru hari ini sudah TERVERIFIKASI -> pakai itu; bila tidak (belum tersambung/belum diisi/galat) -> cara lama (kolom acuan).
+  try { var v2p = v2RingkasanPmPublik_(v2HariIniIso_()); if (v2p) return v2p; } catch (e) { /* lanjut cara lama */ }
   var ss;
   try { ss = SpreadsheetApp.openById(SIPENDOK_SPREADSHEET_ID); } catch (e) { return null; }
   var shPm = ss.getSheetByName('01_PM');

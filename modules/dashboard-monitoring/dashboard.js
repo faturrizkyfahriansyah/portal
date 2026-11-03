@@ -92,6 +92,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const pm = await apiGet('getRingkasanPmDashboard', {});
       const el = document.getElementById('dbPmIsi');
       if (!pm) { el.innerHTML = '<p style="margin:0;font-size:12.5px;color:#8a93a3;">Data Penerima Manfaat belum tersedia.</p>'; return; }
+      // 2 Nov 2026: tampilan baru (total, PK/PB/3B dirinci Balita/Busui/Bumil, 'Lihat detail' per instansi) = core/ringkasan-pm.js.
+      // Kode di bawah SENGAJA dipertahankan sbg cadangan kalau modul itu gagal dimuat.
+      if (typeof isiRingkasanPm === 'function') { isiRingkasanPm(el, pm); return; }
       // Perbaikan 15 Okt 2026: angka utama = TOTAL PORSI (PK+PB+3B),
       // bukan jumlah institusi -- pola sama dgn admin.js (Portal Pengelola).
       const totalPorsi = pm.totalPK + pm.totalPB + pm.total3B;
@@ -107,7 +110,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div><b>${pm.total3B.toLocaleString('id-ID')}</b><br>3B</div>
         </div>`;
     } catch (e) {
-      document.getElementById('dbPmWrap').style.display = 'none';
+      // 4 Nov 2026: tahan terhadap halaman yang berpindah (mis. portal.html -> dashboard.html) saat respons tiba: elemen bisa sudah tidak ada.
+      const pembungkus = document.getElementById('dbPmWrap');
+      if (pembungkus) pembungkus.style.display = 'none';
     }
   })();
 
