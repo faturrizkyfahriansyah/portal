@@ -15,7 +15,7 @@
      portal.css belum tersedia, sekarang sudah dihapus -- jangan
      tambahkan <link> ke file itu lagi kalau terlihat di versi lama). -->
 <link rel="stylesheet" href="styles/portal.css?v=20261023a">
-<link rel="stylesheet" href="styles/admin.css?v=20261104b">
+<link rel="stylesheet" href="styles/admin.css?v=20261105b">
 <link rel="stylesheet" href="styles/app-shell.css?v=20261015b">
 <link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
@@ -216,7 +216,7 @@
          yg sesungguhnya jalan di browser, tanpa menebak lagi apakah
          deploy sudah masuk atau belum. Diperbarui manual tiap kali
          admin.html diubah -- lihat juga console.log di bawah. -->
-    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-04g (kalender & PM seperti dashboard, tanpa ikon)</span></div>
+    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-05b (koreksi presensi & jadwal baru)</span></div>
   </aside>
     <div class="shell-main">
   <header class="shell-topbar">
@@ -652,33 +652,16 @@
   <div class="admin-panel" id="panelRekapMingguan">
     <div class="shell-page-head">
       <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h3"/></svg></div>
-      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Rekap Mingguan</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Kehadiran dan insentif relawan per rentang tanggal — dasar penggajian mingguan (tarif harian × hari hadir).</p></div>
+      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Rekap Mingguan</h1></div>
     </div>
     <div class="filter-bar">
-      <select id="rmgMode" aria-label="Rentang">
-        <option value="mingguan">Mingguan (7 hari)</option><option value="duaminggu">Dua Minggu (14 hari)</option><option value="bulanan">Bulanan</option><option value="kustom">Kustom</option>
-      </select>
-      <button class="btn-mini" id="rmgMundur" type="button" aria-label="Rentang sebelumnya">◀</button>
       <label style="font-size:12px;">Mulai <input type="date" id="rmgAwal"></label>
-      <label style="font-size:12px;">Sampai <input type="date" id="rmgAkhir" disabled></label>
-      <button class="btn-mini" id="rmgMaju" type="button" aria-label="Rentang berikutnya">▶</button>
-    </div>
-    <div class="filter-bar">
-      <input type="text" id="rmgCari" placeholder="Cari nama relawan..." style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;min-width:190px;">
-      <select id="rmgDivisi"><option value="">Semua Divisi</option></select>
-      <button class="btn-mini primary" id="btnMuatRekapMingguan" type="button">Tampilkan</button>
+      <select id="rmgDivisi" aria-label="Divisi"><option value="">Semua Divisi</option></select>
+      <select id="rmgRelawan" aria-label="Relawan"><option value="">Semua Relawan</option></select>
+      <select id="rmgStatus" aria-label="Status"><option value="">Semua Status</option><option value="H">Hadir</option><option value="T">Terlambat</option><option value="I">Izin</option><option value="S">Sakit</option><option value="A">Alfa</option><option value="C">Cuti</option></select>
       <button class="btn-mini export" id="btnExportRekapMingguan" type="button">Export Excel</button>
-      <span id="rmgRentang" style="font-size:12px;color:var(--color-text-muted);"></span>
     </div>
-    <p class="section-title">Ringkasan</p>
-    <div class="admin-stat-grid">
-      <div class="admin-stat-card"><div class="admin-stat-value" id="rmgTotalInsentif">–</div><div class="admin-stat-label">Total Insentif</div></div>
-      <div class="admin-stat-card accent-success"><div class="admin-stat-value" id="rmgTotalHadir">–</div><div class="admin-stat-label">Total Hari Hadir</div></div>
-      <div class="admin-stat-card accent-info"><div class="admin-stat-value" id="rmgJumlahRelawan">–</div><div class="admin-stat-label">Relawan</div></div>
-      <div class="admin-stat-card accent-warning"><div class="admin-stat-value" id="rmgBelumLengkap">–</div><div class="admin-stat-label">Tarif Belum Diatur</div></div>
-    </div>
-    <p id="rmgCatatan" style="font-size:12.5px;color:var(--color-text-muted);margin:8px 0 0;"></p>
-    <p class="section-title">Rekap per Relawan</p>
+    <div class="rmg-chips" id="rmgChips"><span class="rmg-chip"><b id="rmgTotalInsentif">–</b> Total Insentif</span><span class="rmg-chip"><b id="rmgTotalHadir">–</b> Hadir</span><span class="rmg-chip"><b id="rmgTotalTerlambat">–</b> Terlambat</span><span class="rmg-chip"><b id="rmgTotalIzin">–</b> Izin</span><span class="rmg-chip"><b id="rmgTotalSakit">–</b> Sakit</span><span class="rmg-chip"><b id="rmgTotalAlfa">–</b> Alfa</span><span class="rmg-chip"><b id="rmgTotalCuti">–</b> Cuti</span></div>
     <div class="rmg-legenda" id="rmgLegenda"><span><i class="rmg-H">✓</i> Hadir</span><span><i class="rmg-T">T</i> Terlambat</span><span><i class="rmg-I">I</i> Izin</span><span><i class="rmg-S">S</i> Sakit</span><span><i class="rmg-A">A</i> Alfa</span><span><i class="rmg-C">C</i> Cuti</span><span><i class="rmg-B" style="background:#fff;border:1px solid #e3e7ee;">·</i> Belum waktunya</span><span><i style="background:#e6e8ec;color:#6b7280;">&nbsp;</i> Libur</span></div>
     <div class="table-wrap">
       <table class="rmg-tabel" id="tabelRekapMingguan">
@@ -1724,80 +1707,7 @@
   </div>
 
   <!-- PEMERIKSAAN JADWAL INDIVIDU (Pengembangan Portal, poin 4-5) -->
-  <div class="admin-panel" id="panelJadwalIndividu">
-    <div class="shell-page-head">
-      <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Koreksi Presensi</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">SIPRES — Lihat, buat, dan ubah jadwal/presensi satu relawan dalam satu periode kerja.</p></div>
-    </div>
-
-    <div class="filter-bar">
-      <select id="jiPeriode"><option value="">Pilih periode...</option></select>
-      <select id="jiPilihRelawan" style="min-width:200px;"><option value="">Pilih relawan...</option></select>
-    </div>
-
-    <div id="jiHasil" style="display:none;">
-      <div class="panel-block" style="margin-bottom:14px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-          <div>
-            <p class="panel-block-title" id="jiNamaRelawan" style="margin:0;">-</p>
-            <p style="font-size:12.5px;color:var(--color-text-muted);margin:2px 0 0;" id="jiDivisiRelawan"></p>
-          </div>
-          <div style="display:flex;gap:16px;align-items:center;">
-            <div style="text-align:center;"><div style="font-size:20px;font-weight:800;" id="jiTarget">-</div><div style="font-size:11px;color:var(--color-text-muted);">Target</div></div>
-            <div style="text-align:center;"><div style="font-size:20px;font-weight:800;" id="jiTerjadwal">-</div><div style="font-size:11px;color:var(--color-text-muted);">Terjadwal</div></div>
-            <span class="badge" id="jiStatusBadge">-</span>
-          </div>
-        </div>
-        <p id="jiAnomaliPeringatan" style="display:none;font-size:12px;color:#b23a3a;margin:8px 0 0;"></p>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Tanggal</th><th>Hari</th><th>Divisi</th><th>Jenis Penugasan</th><th>Jam Masuk</th><th>Jam Selesai</th><th>Catatan</th><th>Status</th><th>Aksi</th></tr></thead>
-          <tbody id="jiTbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Form Buat/Edit -- kartu terpisah, muncul saat salah satu tanggal diketuk -->
-    <div class="panel-block" id="jiKartuForm" style="display:none;margin-top:14px;">
-      <p class="panel-block-title" id="jiJudulForm">Buat Jadwal</p>
-      <p style="font-size:12.5px;color:var(--color-text-muted);margin:2px 0 10px;" id="jiSubjudulForm"></p>
-
-      <div id="jiBlokStatus" style="display:none;margin-bottom:10px;">
-        <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:4px;">Status Kehadiran</label>
-        <select id="jiStatusBaru" style="width:100%;padding:8px;border:1px solid var(--color-border);border-radius:8px;">
-          <option value="HADIR">Hadir</option>
-          <option value="IZIN">Izin</option>
-          <option value="SAKIT">Sakit</option>
-          <option value="CUTI">Cuti</option>
-          <option value="ALFA">Alfa (tidak masuk, tidak ada keterangan)</option>
-          <option value="PINDAH_TANGGAL">Pindah Tanggal</option>
-        </select>
-      </div>
-
-      <!-- Perbaikan E: field tanggal tujuan, tampil hanya kalau status =
-           Pindah Tanggal. Diisi dinamis dari daftarTanggal periode yg sama
-           (lihat admin-jadwal-individu.js) -- bukan status kehadiran
-           permanen, ini perubahan JADWAL (sesuai catatan prompt: jangan
-           perlakukan Pindah Tanggal sbg status kehadiran). -->
-      <div id="jiBlokPindahTanggal" style="display:none;margin-bottom:10px;">
-        <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:4px;">Pindahkan ke Tanggal</label>
-        <select id="jiTanggalTujuan" style="width:100%;padding:8px;border:1px solid var(--color-border);border-radius:8px;"></select>
-      </div>
-
-      <div class="inline-form-relawan" style="flex-wrap:wrap;" id="jiBlokJam">
-        <input type="time" id="jiJamMasuk">
-        <span style="align-self:center;">s/d</span>
-        <input type="time" id="jiJamPulang">
-      </div>
-      <p style="font-size:11.5px;color:var(--color-text-muted);margin:6px 0 10px;">Jam selesai boleh lebih kecil dari jam masuk untuk shift yang melewati tengah malam (mis. 23:00 s/d 07:00).</p>
-      <textarea id="jiCatatan" placeholder="Catatan penugasan (opsional)" style="width:100%;min-height:60px;padding:8px;border:1px solid var(--color-border);border-radius:8px;font-family:inherit;"></textarea>
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button type="button" class="btn-mini primary" id="jiBtnSimpan">Simpan</button>
-        <button type="button" class="btn-mini" id="jiBtnBatal">Batal</button>
-      </div>
-    </div>
-  </div>
+  <div class="admin-panel" id="panelJadwalIndividu"><div class="empty-state">Memuat…</div></div>
 
   <!-- JADWAL & PENUGASAN -->
   <div class="admin-panel" id="panelJadwal">
@@ -2456,7 +2366,7 @@
 <script src="modules/admin/admin-sipres-monitoring.js?v=20260922a"></script>
 <script src="modules/admin/admin-migrasi-roster-v2.js"></script>
 <script src="core/xlsx-mini.js?v=20261104d"></script>
-<script src="modules/admin/admin-rekap-mingguan.js?v=20261104b"></script>
+<script src="modules/admin/admin-rekap-mingguan.js?v=20261105a"></script>
 <script src="modules/admin/admin-sipandu-master.js?v=20261104c"></script>
 <script src="modules/admin/admin-sipandu-pm.js?v=20261104d"></script>
 <script src="modules/admin/admin-sipandu-impor.js?v=20261104a"></script>
@@ -2466,6 +2376,7 @@
 <script src="modules/admin/admin-kalender-operasional.js?v=20261104c"></script>
 <script src="modules/admin/admin-akses-relawan.js?v=20261104a"></script>
 <script src="modules/admin/admin-jadwal-penugasan.js?v=20261104a"></script>
+<script src="modules/admin/admin-jadwal-baru.js?v=20261105b"></script>
 <script src="modules/admin/admin-kalender-pm.js?v=20261104c"></script>
 <!-- FASE 2: admin-stok.js, admin-shift.js, admin-role.js, admin-export.js,
      admin-import.js, admin-pengelola-sppg.js, admin-pengaturan.js, dan

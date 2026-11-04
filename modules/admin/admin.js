@@ -400,7 +400,7 @@
     // walau sebagian filenya sendiri belum tentu berubah isi -- supaya
     // SEMUA panel dipastikan ambil salinan terbaru, bukan cache lama.
     panelShift: 'modules/admin/admin-shift.js?v=20261024c',
-    panelJadwalIndividu: 'modules/admin/admin-jadwal-individu.js?v=20261023a',
+    panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261105b',
     panelLaporan: 'modules/admin/admin-laporan.js?v=20261104d',
     panelProfilRelawan: 'modules/admin/admin-profil-relawan.js?v=20261023a',
     panelMenuHariIni: 'modules/admin/admin-menu-hari-ini.js?v=20261023a',

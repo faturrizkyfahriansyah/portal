@@ -383,3 +383,28 @@ tbody tr:hover { background: var(--color-bg); }
 .rmg-legenda { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; margin: 6px 0 10px; align-items: center; }
 .rmg-legenda span { display: inline-flex; align-items: center; gap: 5px; }
 .rmg-legenda i { display: inline-block; min-width: 20px; height: 18px; line-height: 18px; text-align: center; border-radius: 4px; font-style: normal; font-weight: 700; font-size: 11.5px; padding: 0 3px; }
+
+/* 5 Nov 2026 (Admin: "aplikasi resmi, bersih"): ikon kepala halaman disembunyikan; ringkasan Rekap Mingguan berupa chip kecil. */
+.shell-page-head-icon { display: none !important; }
+.rmg-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; font-size: 12px; }
+.rmg-chip { background: var(--color-surface, #f6f8fb); border: 1px solid var(--color-border, #e8ebef); border-radius: 999px; padding: 3px 10px; white-space: nowrap; color: var(--color-text-muted, #55606f); }
+.rmg-chip b { font-weight: 800; color: var(--color-navy, #1f3864); margin-right: 2px; }
+
+/* Rekap Mingguan di layar sempit: filter dua per baris (hemat layar). */
+@media (max-width: 700px) {
+  #panelRekapMingguan .filter-bar { gap: 6px; }
+  #panelRekapMingguan .filter-bar label { flex: 1 1 100%; }
+  #panelRekapMingguan .filter-bar select, #panelRekapMingguan .filter-bar .btn-mini { flex: 1 1 44%; min-width: 0; }
+}
+
+/* Koreksi Presensi & Jadwal & Penugasan di layar sempit: filter dua per baris (hemat layar). */
+@media (max-width: 700px) {
+  #kpFilter, #jbRoot .filter-bar { gap: 6px; }
+  #kpFilter label, #jbRoot .filter-bar label:not(.jb-radio) { flex: 1 1 100%; }
+  #kpFilter select, #jbPilih select, #jbRoot .filter-bar:not(#jbPilih) select { flex: 1 1 44%; min-width: 0; }
+  #jbPilih select { flex: 1 1 100%; }
+}
+
+/* Di dalam kartu Jadwal & Penugasan: tanpa bingkai ganda; pilihan radio berjajar. */
+#jbRoot .filter-bar { background: transparent; border: 0; box-shadow: none; padding: 0; }
+#jbRoot .filter-bar .jb-radio { flex: 0 0 auto; white-space: nowrap; }
