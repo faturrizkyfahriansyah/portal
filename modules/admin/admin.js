@@ -401,7 +401,7 @@
     // SEMUA panel dipastikan ambil salinan terbaru, bukan cache lama.
     panelShift: 'modules/admin/admin-shift.js?v=20261024c',
     panelJadwalIndividu: 'modules/admin/admin-jadwal-individu.js?v=20261023a',
-    panelLaporan: 'modules/admin/admin-laporan.js?v=20261023a',
+    panelLaporan: 'modules/admin/admin-laporan.js?v=20261104d',
     panelProfilRelawan: 'modules/admin/admin-profil-relawan.js?v=20261023a',
     panelMenuHariIni: 'modules/admin/admin-menu-hari-ini.js?v=20261023a',
     panelPenerimaManfaatOps: 'modules/admin/admin-penerima-manfaat-ops.js?v=20261023a',
@@ -415,7 +415,7 @@
     // pernah tahu ada versi baru. Ditambahkan sekarang.
     panelPengaturan: 'modules/admin/admin-pengaturan.js?v=20261023a',
     panelWebsitePublik: 'modules/admin/admin-website-publik.js?v=20261023a',
-    panelDuaMinggu: 'modules/admin/admin-export.js?v=20261023a',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
+    panelDuaMinggu: 'modules/admin/admin-export.js?v=20261104d',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'modules/admin/admin-import.js?v=20261023a',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
     panelKartuQr: 'modules/admin/admin-kartu-qr.js?v=20261023a',
     panelMasterTarif: 'modules/admin/admin-master-tarif.js?v=20261104a'
@@ -879,8 +879,8 @@
 
   function buktiFotoCell_(r) {
     const tautan = [];
-    if (r.fotoMasukUrl) tautan.push(`<a href="${escapeHtml(r.fotoMasukUrl)}" target="_blank" rel="noopener" class="btn-mini" style="font-size:11px;">🖼 Masuk</a>`);
-    if (r.fotoPulangUrl) tautan.push(`<a href="${escapeHtml(r.fotoPulangUrl)}" target="_blank" rel="noopener" class="btn-mini" style="font-size:11px;">🖼 Pulang</a>`);
+    if (r.fotoMasukUrl) tautan.push(`<a href="${escapeHtml(r.fotoMasukUrl)}" target="_blank" rel="noopener" class="btn-mini" style="font-size:11px;">Masuk</a>`);
+    if (r.fotoPulangUrl) tautan.push(`<a href="${escapeHtml(r.fotoPulangUrl)}" target="_blank" rel="noopener" class="btn-mini" style="font-size:11px;">Pulang</a>`);
     return tautan.length ? tautan.join(' ') : '–';
   }
 
@@ -895,8 +895,8 @@
   // Fase 4: penanda seberapa mepet pengajuan Izin/Sakit dibanding jam shift.
   // Murni informasi buat Admin -- tidak mengubah status HADIR/IZIN/dst sama sekali.
   function labelStatusPengajuan_(statusPengajuan) {
-    if (statusPengajuan === 'MEPET') return ' <span class="stok-badge stok-badge-menipis" title="Diajukan mendekati jam shift">⚠️ Mepet</span>';
-    if (statusPengajuan === 'TELAT') return ' <span class="stok-badge stok-badge-habis" title="Diajukan setelah jam shift seharusnya mulai">⏰ Telat diajukan</span>';
+    if (statusPengajuan === 'MEPET') return ' <span class="stok-badge stok-badge-menipis" title="Diajukan mendekati jam shift">Mepet</span>';
+    if (statusPengajuan === 'TELAT') return ' <span class="stok-badge stok-badge-habis" title="Diajukan setelah jam shift seharusnya mulai">Telat diajukan</span>';
     return '';
   }
 
@@ -979,7 +979,7 @@
       }
       hasilBox.innerHTML = `
         <div class="panel-block" style="background:#fff3cd;">
-          <p style="margin:0 0 10px;font-weight:700;color:#8a5a12;">⚠ Ditemukan ${res.jumlahMasalah} kasus baris ganda -- ini kemungkinan besar penyebab Total Hari Kerja tidak akurat.</p>
+          <p style="margin:0 0 10px;font-weight:700;color:#8a5a12;">Ditemukan ${res.jumlahMasalah} kasus baris ganda -- ini kemungkinan besar penyebab Total Hari Kerja tidak akurat.</p>
           ${res.data.map(d => `
             <div style="background:#fff;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
               <b>${escapeHtml(d.nama)}</b> (${escapeHtml(d.divisi || '-')}) — tanggal <b>${escapeHtml(d.tanggal)}</b>: ${d.jumlahDuplikat} baris
@@ -997,7 +997,7 @@
         });
       });
     } catch (err) {
-      hasilBox.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      hasilBox.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   });
 
@@ -1069,7 +1069,7 @@
     const elPeringatan = document.getElementById('rpPeringatanTarif');
     if (total.jumlahTarifBelumDiatur) {
       elPeringatan.style.display = '';
-      elPeringatan.textContent = '⚠ Total Insentif belum termasuk ' + total.jumlahTarifBelumDiatur + ' relawan yang tarifnya belum diatur untuk periode ini.';
+      elPeringatan.textContent = 'Total Insentif belum termasuk ' + total.jumlahTarifBelumDiatur + ' relawan yang tarifnya belum diatur untuk periode ini.';
     } else {
       elPeringatan.style.display = 'none';
     }
@@ -1121,7 +1121,7 @@
         <td>${r.sakit}</td>
         <td>${r.tidakHadir}</td>
         <td>${r.hadir + r.terlambat}</td>
-        <td>${r.tarifLengkap ? formatRupiahDuaMinggu_(r.tarifHarian) : '<span style="color:#8a5a12;">⚠️ Tarif belum diatur</span>'}</td>
+        <td>${r.tarifLengkap ? formatRupiahDuaMinggu_(r.tarifHarian) : '<span style="color:#8a5a12;">Tarif belum diatur</span>'}</td>
         <td>${r.tarifLengkap ? formatRupiahDuaMinggu_(r.totalGaji) : '-'}</td>
       </tr>`).join('');
   }
@@ -1234,7 +1234,7 @@
           <span class="badge status-mengambang ${status === 'AKTIF' ? 'aktif' : 'nonaktif'}">${status}</span>
           <div class="editable-name">
             <span class="cell-nama">${escapeHtml(r.nama)}</span>
-            <button type="button" class="btn-mini btn-edit-nama" title="Ubah nama">✎</button>
+            <button type="button" class="btn-mini btn-edit-nama" title="Ubah nama">Ubah</button>
           </div>
         </td>
         <td data-label="ID">${escapeHtml(r.id)}</td>
@@ -1364,6 +1364,8 @@
 
   // ===== EXPORT CSV =====
   function downloadCsv(rows, filename) {
+    // 4 Nov 2026: Excel (.xlsx) asli, bukan CSV (CSV berpemisah koma terbuka berantakan di Excel berbahasa Indonesia).
+    if (window.Xlsx) { Xlsx.unduhDaftar(String(filename).replace(/\.csv$/i, '.xlsx'), rows, { nama: 'Rekap Harian' }); return; }
     const csv = rows.map(row => row.map(csvEscape).join(',')).join('\r\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -1723,7 +1725,7 @@
           </select>
         </td>
         <td style="white-space:nowrap;">
-          <button type="button" class="btn-mini btn-edit-periode" data-id="${escapeHtml(p.id)}" data-nama="${escapeHtml(p.nama)}" data-mulai="${escapeHtml(dmyKeIsoFrontend_(p.tanggalMulai))}" data-selesai="${escapeHtml(dmyKeIsoFrontend_(p.tanggalSelesai))}" data-keterangan="${escapeHtml(p.keterangan || '')}">✎ Edit</button>
+          <button type="button" class="btn-mini btn-edit-periode" data-id="${escapeHtml(p.id)}" data-nama="${escapeHtml(p.nama)}" data-mulai="${escapeHtml(dmyKeIsoFrontend_(p.tanggalMulai))}" data-selesai="${escapeHtml(dmyKeIsoFrontend_(p.tanggalSelesai))}" data-keterangan="${escapeHtml(p.keterangan || '')}">Edit</button>
           <a href="#" class="btn-mini btn-lihat-kalender-periode" data-id="${escapeHtml(p.id)}">Lihat Kalender</a>
           <button type="button" class="btn-mini btn-hapus-periode" data-id="${escapeHtml(p.id)}" style="background:var(--color-danger-bg);color:var(--color-danger);border-color:var(--color-danger);">Hapus</button>
         </td>
@@ -1779,7 +1781,7 @@
   // Perbaikan 16 Okt 2026 (diminta Admin -- gap nyata, backend
   // updatePeriode SUDAH ADA tapi sebelumnya tidak ada tombol sama
   // sekali): form "Tambah Periode" yg SAMA sekarang dipakai ganda --
-  // mode Tambah (default) & mode Edit (saat tombol ✎ Edit diklik di
+  // mode Tambah (default) & mode Edit (saat tombol Edit diklik di
   // baris tabel). Bukan form terpisah -- lebih ringkas, 1 tempat.
   let idPeriodeSedangDiedit = null;
 
@@ -1796,7 +1798,7 @@
   function bukaModalPeriode_(mode, data) {
     idPeriodeSedangDiedit = mode === 'edit' ? data.id : null;
     document.getElementById('prdModalJudul').textContent = mode === 'edit' ? 'Ubah Periode' : 'Tambah Periode';
-    document.getElementById('prdBtnSubmit').textContent = mode === 'edit' ? '💾 Simpan Perubahan' : '+ Tambah Periode';
+    document.getElementById('prdBtnSubmit').textContent = mode === 'edit' ? 'Simpan Perubahan' : '+ Tambah Periode';
     el.formTambahPeriode.reset();
     document.getElementById('prdModalPeringatanResmi').style.display = 'none';
     if (mode === 'edit') {
@@ -2350,10 +2352,10 @@
       if (dGagal) {
         kalIsi.textContent = gagalTanda;
       } else if (!d.periodeAktif) {
-        kalJudul.textContent = '🗓️ Kalender Operasional';
+        kalJudul.textContent = 'Kalender Operasional';
         kalIsi.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);margin:0;">Belum ada Periode Kerja yang berstatus AKTIF.</p>';
       } else {
-        kalJudul.textContent = '🗓️ ' + d.periodeAktif.nama;
+        kalJudul.textContent = '' + d.periodeAktif.nama;
         if (!d.kalenderPeriodeAktif.length) {
           kalIsi.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);margin:0;">Belum ada tanggal operasional untuk periode ini.</p>';
         } else {
@@ -2384,10 +2386,10 @@
       if (rdGagal) {
         rekIsi.textContent = gagalTanda;
       } else if (!rd.tersedia) {
-        rekJudul.textContent = '📊 Rekap Per Periode';
+        rekJudul.textContent = 'Rekap Per Periode';
         rekIsi.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);margin:0;">Belum ada Periode Kerja untuk direkap.</p>';
       } else {
-        rekJudul.textContent = '📊 Rekap Per Periode — ' + (rd.sementara ? 'Sementara' : 'Periode Selesai') + ' (' + rd.judul + ')';
+        rekJudul.textContent = 'Rekap Per Periode — ' + (rd.sementara ? 'Sementara' : 'Periode Selesai') + ' (' + rd.judul + ')';
         const rk = rd.data;
         const totalHadir = rk.reduce((a, r) => a + (r.hadir || 0), 0);
         const totalTerlambat = rk.reduce((a, r) => a + (r.terlambat || 0), 0);
@@ -2424,7 +2426,7 @@
       }
     }
 
-    // ===== 🔴 PERLU TINDAKAN =====
+    // ===== PERLU TINDAKAN =====
     // BARU: setiap sumbernya (Kehadiran/Jadwal dari dashboardPengelola,
     // SIRAGA dari siragaDashboard, SIPANDU dari sipanduRingkas) sekarang
     // independen -- jadi tiap kondisi CUMA dicek kalau sumber data-nya

@@ -42,7 +42,7 @@
       modeEdit = false;
       render();
     } catch (err) {
-      kontenUtama.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      kontenUtama.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 
@@ -55,7 +55,7 @@
       <div class="panel-block" style="margin-bottom:14px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
           <button type="button" class="btn-mini" id="prBtnKembali">← Kembali</button>
-          <button type="button" class="btn-mini primary" id="prBtnEdit">${modeEdit ? 'Batal Edit' : '✎ Edit Profil'}</button>
+          <button type="button" class="btn-mini primary" id="prBtnEdit">${modeEdit ? 'Batal Edit' : 'Edit Profil'}</button>
         </div>
         <div style="display:flex;gap:16px;align-items:center;margin-top:14px;flex-wrap:wrap;">
           ${p.fotoProfilUrl
@@ -122,7 +122,7 @@
               <div style="font-size:11px;color:var(--color-text-muted);font-weight:600;">Nomor Rekening</div>
               <div id="prNomorRekening" style="font-size:15px;font-weight:700;margin-top:2px;font-family:monospace;">${p.nomorRekening ? escapeHtml(samarkanRekening_(p.nomorRekening)) : '<span style="color:var(--color-text-muted);font-family:var(--font-main);font-weight:400;">Belum diisi</span>'}</div>
             </div>
-            ${p.nomorRekening ? '<button type="button" class="btn-mini" id="prBtnTampilRekening">👁 Tampilkan</button>' : ''}
+            ${p.nomorRekening ? '<button type="button" class="btn-mini" id="prBtnTampilRekening">Tampilkan</button>' : ''}
           </div>` : fieldEdit_('Nomor Rekening', 'prRekening', p.nomorRekening, 'text', 'Hanya angka')}
           <p style="font-size:11px;color:var(--color-text-muted);margin:8px 0 0;">Tersamarkan secara default. Nama bank &amp; nama pemilik rekening belum menjadi bagian dari data sistem saat ini — hanya nomor rekening yang tersimpan.</p>
         </div>
@@ -157,12 +157,12 @@
             <input type="checkbox" id="prPetugasStok" ${p.akses.petugasStok ? 'checked' : ''} style="width:16px;height:16px;">
             Petugas Stok (akses modul SIRAGA)
           </label>
-          <button type="button" class="btn-mini primary" id="prBtnSimpanHakAkses">💾 Simpan Hak Akses</button>
+          <button type="button" class="btn-mini primary" id="prBtnSimpanHakAkses">Simpan Hak Akses</button>
         </div>
       </div>
 
       <div id="prAksiSimpan" style="display:${modeEdit ? 'flex' : 'none'};gap:8px;margin-top:14px;position:sticky;bottom:12px;">
-        <button type="button" class="btn-mini primary" id="prBtnSimpan" style="flex:1;padding:12px;">💾 Simpan Perubahan</button>
+        <button type="button" class="btn-mini primary" id="prBtnSimpan" style="flex:1;padding:12px;">Simpan Perubahan</button>
       </div>
     `;
 
@@ -227,7 +227,7 @@
       const el = document.getElementById('prNomorRekening');
       const ditampilkan = btnRekening.textContent.indexOf('Sembunyikan') !== -1;
       el.textContent = ditampilkan ? samarkanRekening_(profilSaatIni.nomorRekening) : profilSaatIni.nomorRekening;
-      btnRekening.innerHTML = ditampilkan ? '👁 Tampilkan' : '🙈 Sembunyikan';
+      btnRekening.innerHTML = ditampilkan ? 'Tampilkan' : 'Sembunyikan';
     });
     const btnSimpan = document.getElementById('prBtnSimpan');
     if (btnSimpan) btnSimpan.addEventListener('click', simpanPerubahan_);
@@ -252,13 +252,13 @@
       if (petugasStokBaru !== profilSaatIni.akses.petugasStok) {
         panggilan.push(apiPost('setRoleStok', { token: token(), idRelawan: profilSaatIni.id, jadikanPetugas: petugasStokBaru }));
       }
-      if (!panggilan.length) { showError('Tidak ada perubahan untuk disimpan.'); btn.disabled = false; btn.textContent = '💾 Simpan Hak Akses'; return; }
+      if (!panggilan.length) { showError('Tidak ada perubahan untuk disimpan.'); btn.disabled = false; btn.textContent = 'Simpan Hak Akses'; return; }
       await Promise.all(panggilan);
       showSuccess('Hak akses berhasil disimpan.');
       await muatProfil(profilSaatIni.id);
     } catch (err) {
       showError(err.message);
-      btn.disabled = false; btn.textContent = '💾 Simpan Hak Akses';
+      btn.disabled = false; btn.textContent = 'Simpan Hak Akses';
     }
   }
 
@@ -293,7 +293,7 @@
       await muatProfil(profilSaatIni.id); // muat ulang -- kelengkapan % & tampilan otomatis ikut data terbaru
     } catch (err) {
       showError(err.message);
-      btn.disabled = false; btn.textContent = '💾 Simpan Perubahan';
+      btn.disabled = false; btn.textContent = 'Simpan Perubahan';
     }
   }
 

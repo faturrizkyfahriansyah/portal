@@ -24,8 +24,8 @@
       <div class="inline-form-relawan" style="flex-wrap:wrap;">
         <input type="date" id="exportTanggalAwal">
         <input type="date" id="exportTanggalAkhir">
-        <button type="button" class="btn-outline" id="btnExportCsvLaporan">⬇️ Export CSV</button>
-        <button type="button" class="btn-outline" id="btnExportPdfLaporan">📄 Export PDF</button>
+        <button type="button" class="btn-outline" id="btnExportCsvLaporan">Export Excel</button>
+        <button type="button" class="btn-outline" id="btnExportPdfLaporan">Export PDF</button>
       </div>
       <p id="statusExportLaporan" style="font-size:12px;color:var(--color-text-muted);margin:8px 0 0;"></p>
     `;
@@ -100,11 +100,11 @@
     document.getElementById('btnExportCsvLaporan').addEventListener('click', async () => {
       const status = document.getElementById('statusExportLaporan');
       try {
-        status.textContent = 'Menyiapkan CSV...';
+        status.textContent = 'Menyiapkan Excel...';
         const hasil = await ambilDataExport_();
-        unduhFile_('laporan-kehadiran-' + hasil.periodeAwal + '-sd-' + hasil.periodeAkhir + '.csv', '\ufeff' + keCsv_(hasil), 'text/csv;charset=utf-8;');
-        status.textContent = 'CSV berhasil diunduh.';
-      } catch (err) { status.textContent = '❌ ' + err.message; }
+        Xlsx.unduhDaftar('laporan-kehadiran-' + hasil.periodeAwal + '-sd-' + hasil.periodeAkhir + '.xlsx', [['Nama', 'Divisi', 'Tanggal', 'Jam Masuk', 'Jam Pulang', 'Status']].concat(hasil.data.map(r => [r.nama, r.divisi, r.tanggal, r.jamMasuk, r.jamPulang, r.status])), { nama: 'Kehadiran' });
+        status.textContent = 'Excel berhasil diunduh.';
+      } catch (err) { status.textContent = '' + err.message; }
     });
 
     document.getElementById('btnExportPdfLaporan').addEventListener('click', async () => {
@@ -114,7 +114,7 @@
         const hasil = await ambilDataExport_();
         await buatPdf_(hasil);
         status.textContent = 'PDF berhasil diunduh.';
-      } catch (err) { status.textContent = '❌ ' + err.message; }
+      } catch (err) { status.textContent = '' + err.message; }
     });
   }
 

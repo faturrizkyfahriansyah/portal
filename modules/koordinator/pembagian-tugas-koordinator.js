@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <div>
                 <p style="margin:0;font-weight:700;">${escapeHtml(t.NAMA_RELAWAN)}</p>
                 <p style="margin:4px 0 0;font-size:13.5px;">${escapeHtml(t.TUGAS)}</p>
-                ${t.LOKASI_POS ? `<p style="margin:4px 0 0;font-size:12px;color:var(--color-text-muted);">📍 ${escapeHtml(t.LOKASI_POS)}</p>` : ''}
+                ${t.LOKASI_POS ? `<p style="margin:4px 0 0;font-size:12px;color:var(--color-text-muted);">${escapeHtml(t.LOKASI_POS)}</p>` : ''}
                 ${t.CATATAN_INSTRUKSI ? `<p style="margin:4px 0 0;font-size:12px;color:var(--color-text-muted);">${escapeHtml(t.CATATAN_INSTRUKSI)}</p>` : ''}
               </div>
               <button type="button" class="btn-mini btn-edit-tugas" data-id="${escapeHtml(t.ID_TUGAS)}" data-tugas="${escapeHtml(t.TUGAS)}" data-lokasi="${escapeHtml(t.LOKASI_POS || '')}" data-catatan="${escapeHtml(t.CATATAN_INSTRUKSI || '')}" data-relawan="${escapeHtml(t.ID_RELAWAN)}" style="flex-shrink:0;">Ubah</button>
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
     } catch (err) {
-      elIsi.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      elIsi.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 

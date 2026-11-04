@@ -152,18 +152,18 @@
     }
   }
 
-  /** Ikon per kata kunci umum makanan Indonesia -- dipakai preview (Admin) & bisa dipakai ulang di halaman publik. Fallback ke 🍽️ kalau tidak ada kata kunci yang cocok. */
+  /** Ikon per kata kunci umum makanan Indonesia -- dipakai preview (Admin) & bisa dipakai ulang di halaman publik. Fallback ke kalau tidak ada kata kunci yang cocok. */
   function ikonMenuItem_(namaItem) {
     const n = String(namaItem || '').toLowerCase();
     const kamus = [
-      [/nasi/, '🍚'], [/rendang|sapi|daging|empal|semur/, '🥩'], [/ayam/, '🍗'],
-      [/ikan|bandeng|lele|nila/, '🐟'], [/tahu/, '🍢'], [/tempe/, '🍢'],
-      [/telur/, '🥚'], [/sayur|tumis|sop|bayam|kangkung|labu|wortel|kol/, '🥕'],
-      [/semangka|melon|pisang|pepaya|jeruk|apel|buah/, '🍉'],
-      [/susu/, '🥛'], [/roti/, '🍞'], [/mie|bihun/, '🍜']
+      [/nasi/, ''], [/rendang|sapi|daging|empal|semur/, ''], [/ayam/, ''],
+      [/ikan|bandeng|lele|nila/, ''], [/tahu/, ''], [/tempe/, ''],
+      [/telur/, ''], [/sayur|tumis|sop|bayam|kangkung|labu|wortel|kol/, ''],
+      [/semangka|melon|pisang|pepaya|jeruk|apel|buah/, ''],
+      [/susu/, ''], [/roti/, ''], [/mie|bihun/, '']
     ];
     for (const [re, ikon] of kamus) { if (re.test(n)) return ikon; }
-    return '🍽️';
+    return '';
   }
 
   /**
@@ -221,7 +221,7 @@
         itemMenu.map(it => `<div style="text-align:center;padding:10px 6px;background:#fff;border:1px solid var(--color-border);border-radius:8px;"><div style="font-size:22px;">${ikonMenuItem_(it)}</div><div style="font-size:10.5px;margin-top:4px;font-weight:600;">${escapeHtml(it)}</div></div>`).join('') +
         '</div>';
     } else {
-      html += '<p style="font-size:12.5px;color:#b9852f;">⚠️ Menu belum terbaca dari teks.</p>';
+      html += '<p style="font-size:12.5px;color:#b9852f;">Menu belum terbaca dari teks.</p>';
     }
     if (hasil.komposisi) {
       html += `<p style="font-size:12.5px;margin:0 0 12px;"><strong>Komposisi:</strong> ${escapeHtml(hasil.komposisi)}</p>`;
@@ -239,7 +239,7 @@
           </div>`).join('') +
         '</div>';
     } else {
-      html += '<p style="font-size:12.5px;color:#b9852f;">⚠️ Data gizi belum terbaca dari teks.</p>';
+      html += '<p style="font-size:12.5px;color:#b9852f;">Data gizi belum terbaca dari teks.</p>';
     }
 
     isi.innerHTML = html;
@@ -254,7 +254,7 @@
     btn.addEventListener('click', () => {
       const { hasil, berhasil } = baca_TeksMenuHarian_(ta.value);
       if (!berhasil) {
-        status.textContent = '⚠️ Tidak ada yang bisa dibaca dari teks ini. Cek lagi formatnya.';
+        status.textContent = 'Tidak ada yang bisa dibaca dari teks ini. Cek lagi formatnya.';
         status.style.color = '#b9852f';
         document.getElementById('previewMenuHarianWrap').style.display = 'none';
         return;
@@ -267,7 +267,7 @@
       if (!inputHari.value.trim() && hasil.hari) inputHari.value = hasil.hari;
 
       renderPreviewMenuHarian_(hasil);
-      status.textContent = '✅ Pratinjau diperbarui. Ini belum tersimpan -- cek dulu lalu klik Simpan.';
+      status.textContent = 'Pratinjau diperbarui. Ini belum tersimpan -- cek dulu lalu klik Simpan.';
       status.style.color = '#1a7a4c';
     });
   }

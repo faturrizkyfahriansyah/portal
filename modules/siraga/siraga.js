@@ -152,13 +152,13 @@ function tambahBarisItem(containerId, jenis) {
             if (!batchList.length) {
               selBatch.innerHTML = '<option value="">— Tidak ada batch tersedia —</option>';
             } else {
-              selBatch.innerHTML = batchList.map(bt => `<option value="${bt.id}">${bt.nomorBatch} (Exp: ${bt.tanggalExpired || '-'}, Stok: ${formatRupiahSederhana(bt.stok)}) ${bt.statusExpired === 'KEDALUWARSA' ? '⚠️ KEDALUWARSA' : bt.statusExpired === 'AKAN KEDALUWARSA' ? '⚠️ Akan Exp' : ''}</option>`).join('');
+              selBatch.innerHTML = batchList.map(bt => `<option value="${bt.id}">${bt.nomorBatch} (Exp: ${bt.tanggalExpired || '-'}, Stok: ${formatRupiahSederhana(bt.stok)}) ${bt.statusExpired === 'KEDALUWARSA' ? 'KEDALUWARSA' : bt.statusExpired === 'AKAN KEDALUWARSA' ? 'Akan Exp' : ''}</option>`).join('');
             }
           } catch (e) { selBatch.innerHTML = '<option value="">Gagal memuat batch</option>'; }
         } else {
           batchWrap.style.display = 'none';
         }
-        const warnStok = b.stok <= 0 ? ' ⚠️ STOK HABIS' : (b.statusStok === 'DI BAWAH MINIMUM' ? ' ⚠️ di bawah minimum' : '');
+        const warnStok = b.stok <= 0 ? ' STOK HABIS' : (b.statusStok === 'DI BAWAH MINIMUM' ? ' di bawah minimum' : '');
         hint.textContent = 'Stok tersedia: ' + formatRupiahSederhana(b.stok) + ' ' + b.satuan + warnStok;
         hint.className = 'siraga-item-hint' + (b.stok <= 0 ? ' warn' : '');
       }
@@ -307,7 +307,7 @@ function inisialisasiFormMasuk() {
         token: sesiSiraga.token, tanggal: isoKeDmyTampilan(document.getElementById('masukTanggal').value),
         idSupplier: dropdownSupplier.value, keterangan: document.getElementById('masukKeterangan').value.trim(), items: items
       });
-      showError('✅ Transaksi ' + hasil.nomorTransaksi + ' berhasil disimpan.');
+      showError('Transaksi ' + hasil.nomorTransaksi + ' berhasil disimpan.');
       kosongkanBarisItem('masukDaftarItem');
       tambahBarisItem('masukDaftarItem', 'MASUK');
       document.getElementById('masukKeterangan').value = '';
@@ -342,7 +342,7 @@ function inisialisasiFormKeluar() {
         token: sesiSiraga.token, tanggal: isoKeDmyTampilan(document.getElementById('keluarTanggal').value),
         tujuan: tujuan, keterangan: document.getElementById('keluarKeterangan').value.trim(), items: items
       });
-      showError('✅ Transaksi ' + hasil.nomorTransaksi + ' berhasil disimpan.');
+      showError('Transaksi ' + hasil.nomorTransaksi + ' berhasil disimpan.');
       kosongkanBarisItem('keluarDaftarItem');
       tambahBarisItem('keluarDaftarItem', 'KELUAR');
       document.getElementById('keluarKeterangan').value = '';
@@ -378,7 +378,7 @@ function inisialisasiFormTransfer() {
         token: sesiSiraga.token, tanggal: isoKeDmyTampilan(document.getElementById('transferTanggal').value),
         sumber: sumber, tujuan: tujuan, keterangan: document.getElementById('transferKeterangan').value.trim(), items: items
       });
-      showError('✅ Transfer ' + hasil.nomorTransaksi + ' berhasil disimpan.');
+      showError('Transfer ' + hasil.nomorTransaksi + ' berhasil disimpan.');
       kosongkanBarisItem('transferDaftarItem');
       tambahBarisItem('transferDaftarItem', 'TRANSFER');
       document.getElementById('transferKeterangan').value = '';
@@ -419,7 +419,7 @@ function inisialisasiFormPemusnahan() {
         token: sesiSiraga.token, tanggal: isoKeDmyTampilan(document.getElementById('pemusnahanTanggal').value),
         alasanPemusnahan: alasan, keterangan: keterangan, items: items
       });
-      showError('✅ Pemusnahan ' + hasil.nomorTransaksi + ' berhasil dicatat.');
+      showError('Pemusnahan ' + hasil.nomorTransaksi + ' berhasil dicatat.');
       kosongkanBarisItem('pemusnahanDaftarItem');
       tambahBarisItem('pemusnahanDaftarItem', 'PEMUSNAHAN');
       document.getElementById('pemusnahanKeterangan').value = '';
@@ -482,7 +482,7 @@ function inisialisasiOpname() {
       showLoading('Menyelesaikan opname...');
       const hasil = await apiPost('selesaikanSiragaOpname', { token: sesiSiraga.token, id: opnameAktifId });
       hideLoading();
-      showError(hasil.selisih === 0 ? '✅ Opname selesai, tidak ada selisih.' : '✅ Opname selesai. Penyesuaian ' + (hasil.selisih > 0 ? '+' : '') + hasil.selisih + ' tercatat otomatis.');
+      showError(hasil.selisih === 0 ? 'Opname selesai, tidak ada selisih.' : 'Opname selesai. Penyesuaian ' + (hasil.selisih > 0 ? '+' : '') + hasil.selisih + ' tercatat otomatis.');
       tutupFormOpnameFisik();
       await muatRiwayatOpname();
       delete sudahDimuatTab.dashboard; delete sudahDimuatTab.barang; delete sudahDimuatTab.laporan;
@@ -652,7 +652,7 @@ async function muatMasterDataAwal() {
         kelolaBatch: document.getElementById('barangBaruKelolaBatch').checked,
         kelolaExpired: document.getElementById('barangBaruKelolaExpired').checked
       });
-      showError('✅ Barang berhasil ditambahkan.');
+      showError('Barang berhasil ditambahkan.');
       document.getElementById('barangBaruNama').value = '';
       document.getElementById('barangBaruStokMinimum').value = '0';
       document.getElementById('barangBaruKelolaBatch').checked = false;

@@ -47,14 +47,22 @@
     if (r.acuanBalita !== null || r.acuanBumil !== null || r.acuanBusui !== null) bagian.push('Bal ' + (r.acuanBalita === null ? '-' : r.acuanBalita) + ' · Bumil ' + (r.acuanBumil === null ? '-' : r.acuanBumil) + ' · Busui ' + (r.acuanBusui === null ? '-' : r.acuanBusui));
     return bagian.join(' | ') || '—';
   }
+  /** Jumlah siswa yang DIPAKAI: isian manual, atau otomatis dari acuan PK + PB (ditandai), atau kosong. Hanya berlaku untuk sekolah. */
+  function siswaTeks(r) {
+    if (r.jenis !== 'SEKOLAH') return '<span style="color:var(--color-text-muted,#55606f);">—</span>';
+    if (r.jumlahSiswa !== null) return String(r.jumlahSiswa);
+    if (r.jumlahSiswaOtomatis !== null && r.jumlahSiswaOtomatis !== undefined) return r.jumlahSiswaOtomatis + ' <span style="font-size:10.5px;color:#1565c0;" title="Otomatis = acuan PK + PB">otomatis</span>';
+    return '<span style="color:#c0392b;">kosong</span>';
+  }
   function isiTabelInstansi() {
     const kata = $('spmCari').value.toLowerCase(), st = $('spmStatus').value;
     const baris = data.instansi.filter(function (r) { return (!st || r.status === st) && (!kata || (r.nama + ' ' + r.npsn + ' ' + r.namaPic).toLowerCase().indexOf(kata) >= 0); });
     $('spmTbody').innerHTML = baris.length ? baris.map(function (r) {
-      return '<tr><td>' + esc(r.nama) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + esc(r.idInstansi) + '</div></td><td>' + esc(r.jenis) + '</td><td>' + esc(r.npsn || '—') + '</td>' +
+      return '<tr' + (r.status === 'AKTIF' ? '' : ' style="opacity:.62;"') + '><td>' + esc(r.nama) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + esc(r.idInstansi) + '</div></td><td>' + esc(r.jenis) + '</td><td>' + esc(r.npsn || '—') + '</td>' +
         '<td>' + esc([r.desa, r.kecamatan].filter(Boolean).join(', ') || '—') + '</td><td>' + (r.namaPic ? esc(r.namaPic) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + esc(r.jabatanPic) + '</div>' : '<span style="color:#c0392b;">belum ada</span>') + '</td>' +
-        '<td>' + (r.jumlahSiswa === null ? '<span style="color:#c0392b;">kosong</span>' : r.jumlahSiswa) + '</td><td style="font-size:12px;">' + esc(ringkasAcuan(r)) + '</td><td>' + esc(r.status) + '</td>' +
-        '<td style="white-space:nowrap;"><button class="btn-mini" data-aksi="ubah" data-id="' + esc(r.idInstansi) + '" type="button">Ubah</button> <button class="btn-mini" data-aksi="gantipic" data-id="' + esc(r.idInstansi) + '" type="button">Ganti PIC</button></td></tr>';
+        '<td>' + siswaTeks(r) + '</td><td style="font-size:12px;">' + esc(ringkasAcuan(r)) + '</td><td><b style="color:' + (r.status === 'AKTIF' ? '#1a7a4c' : '#b23a3a') + ';">' + esc(r.status) + '</b></td>' +
+        '<td style="white-space:nowrap;"><button class="btn-mini" data-aksi="ubah" data-id="' + esc(r.idInstansi) + '" type="button">Ubah</button> <button class="btn-mini" data-aksi="gantipic" data-id="' + esc(r.idInstansi) + '" type="button">Ganti PIC</button> ' +
+        (data.bolehEdit === false ? '' : '<button class="btn-mini" data-aksi="status" data-ke="' + (r.status === 'AKTIF' ? 'NONAKTIF' : 'AKTIF') + '" data-id="' + esc(r.idInstansi) + '" type="button" style="' + (r.status === 'AKTIF' ? 'color:#b23a3a;' : 'color:#1a7a4c;font-weight:700;') + '">' + (r.status === 'AKTIF' ? 'Nonaktifkan' : 'Aktifkan') + '</button>') + '</td></tr>';
     }).join('') : '<tr><td colspan="9"><div class="empty-state">Tidak ada instansi.</div></td></tr>';
   }
   function renderInstansi() {
@@ -70,8 +78,16 @@
     $('spmTbody').addEventListener('click', function (e) {
       const b = e.target.closest('button[data-aksi]'); if (!b) return;
       const r = data.instansi.filter(function (x) { return x.idInstansi === b.dataset.id; })[0];
-      if (b.dataset.aksi === 'ubah') formInstansi(r); else formGantiPic(r);
+      if (b.dataset.aksi === 'ubah') formInstansi(r);
+      else if (b.dataset.aksi === 'status') ubahStatus(r, b.dataset.ke);
+      else formGantiPic(r);
     });
+  }
+  async function ubahStatus(r, ke) {
+    const aktif = ke === 'AKTIF';
+    if (!confirm((aktif ? 'Aktifkan ' : 'Nonaktifkan ') + r.nama + '?\n\n' + (aktif ? 'Instansi akan kembali muncul di Manajemen PM, kalender, dan dashboard.' : 'Instansi tidak lagi muncul di Manajemen PM, kalender, dan dashboard. Data lama tetap tersimpan.'))) return;
+    try { pesan('Menyimpan…'); await api('setStatusInstansiV2', { idInstansi: r.idInstansi, status: ke }); await muat(true); pesan(r.nama + (aktif ? ' diaktifkan.' : ' dinonaktifkan.')); }
+    catch (err) { pesan(err.message || 'Gagal mengubah status.', true); }
   }
   function formInstansi(r) {
     r = r || { idInstansi: '', nama: '', jenis: data.jenis[0] ? data.jenis[0].kode : '', npsn: '', alamat: '', desa: '', kecamatan: '', jumlahSiswa: null, urutan: null, status: 'AKTIF', keterangan: '', acuanPk: null, acuanPb: null, acuanBalita: null, acuanBumil: null, acuanBusui: null, acuanNoKendaraan: '' };
@@ -79,19 +95,30 @@
     $('spmForm').innerHTML = '<div class="admin-stat-card" style="padding:14px;text-align:left;margin-bottom:12px;"><b>' + (r.idInstansi ? 'Ubah ' + esc(r.idInstansi) : 'Instansi baru') + '</b><div style="' + grid + '">' +
       input('fiNama', 'Nama instansi *', r.nama) + pilih('fiJenis', 'Jenis *', data.jenis.map(function (j) { return [j.kode, j.nama]; }), r.jenis) + input('fiNpsn', 'NPSN (bila ada)', r.npsn) +
       input('fiAlamat', 'Alamat', r.alamat) + input('fiDesa', 'Desa/Kelurahan', r.desa) + input('fiKec', 'Kecamatan', r.kecamatan) +
-      input('fiSiswa', 'Jumlah siswa (untuk jenjang insentif PIC)', r.jumlahSiswa === null ? '' : r.jumlahSiswa, 'number', 'min="0"') + input('fiUrut', 'Urutan tampil', r.urutan === null ? '' : r.urutan, 'number', 'min="0"') +
+      input('fiUrut', 'Urutan tampil', r.urutan === null ? '' : r.urutan, 'number', 'min="0"') +
       pilih('fiStatus', 'Status', [['AKTIF', 'AKTIF'], ['NONAKTIF', 'NONAKTIF']], r.status) + input('fiKet', 'Keterangan', r.keterangan) + '</div>' +
       '<div style="font-size:12px;font-weight:700;margin-top:6px;">Acuan (nilai awal pengisian PM Harian)</div><div style="font-size:11.5px;color:var(--color-text-muted,#55606f);">Dipakai tombol "Isi dari Acuan" di Manajemen PM. <b>Bukan sumber laporan</b>: dashboard, website, kalender, dokumen, dan pagu membaca PM Harian.</div>' +
-      '<div style="' + grid + '">' + input('fiAcPk', 'Acuan PK', nv(r.acuanPk), 'number', 'min="0"') + input('fiAcPb', 'Acuan PB', nv(r.acuanPb), 'number', 'min="0"') + input('fiAcBalita', 'Acuan Balita', nv(r.acuanBalita), 'number', 'min="0"') +
-      input('fiAcBumil', 'Acuan Ibu Hamil', nv(r.acuanBumil), 'number', 'min="0"') + input('fiAcBusui', 'Acuan Ibu Menyusui', nv(r.acuanBusui), 'number', 'min="0"') + input('fiAcKend', 'Acuan No. Kendaraan', r.acuanNoKendaraan) + '</div>' +
+      '<div id="fiGrupSekolah" style="' + grid + '">' + input('fiAcPk', 'Acuan PK (porsi kecil)', nv(r.acuanPk), 'number', 'min="0"') + input('fiAcPb', 'Acuan PB (porsi besar)', nv(r.acuanPb), 'number', 'min="0"') +
+      '<div>' + input('fiSiswa', 'Jumlah siswa (kosong = otomatis PK + PB)', r.jumlahSiswa === null ? '' : r.jumlahSiswa, 'number', 'min="0"') + '<div id="fiSiswaInfo" style="font-size:11.5px;color:#1565c0;margin-top:3px;"></div></div></div>' +
+      '<div id="fiGrupPosyandu" style="' + grid + '">' + input('fiAcBalita', 'Acuan Balita', nv(r.acuanBalita), 'number', 'min="0"') + input('fiAcBumil', 'Acuan Ibu Hamil', nv(r.acuanBumil), 'number', 'min="0"') + input('fiAcBusui', 'Acuan Ibu Menyusui', nv(r.acuanBusui), 'number', 'min="0"') + '</div>' +
+      '<div style="' + grid + '">' + input('fiAcKend', 'Acuan No. Kendaraan', r.acuanNoKendaraan) + '</div>' +
       '<button class="btn-mini primary" id="fiSimpan" type="button">Simpan</button> <button class="btn-mini" id="fiBatal" type="button">Batal</button></div>';
+    // Kelompok isian mengikuti JENIS (permintaan Admin 4 Nov): Sekolah = PK, PB, jumlah siswa; Posyandu = Balita, Ibu Hamil, Ibu Menyusui.
+    const kelompok = function () { const j = String($('fiJenis').value || '').toUpperCase(); return { sekolah: j !== 'POSYANDU', posyandu: j !== 'SEKOLAH' }; };
+    const infoSiswa = function () {
+      const pk = $('fiAcPk').value, pb = $('fiAcPb').value, el = $('fiSiswaInfo'); if (!el) return;
+      el.textContent = (pk === '' && pb === '') ? '' : ($('fiSiswa').value === '' ? 'Otomatis dipakai: ' + ((Number(pk) || 0) + (Number(pb) || 0)) + ' siswa (PK ' + (Number(pk) || 0) + ' + PB ' + (Number(pb) || 0) + ')' : 'Isian manual menggantikan otomatis (' + ((Number(pk) || 0) + (Number(pb) || 0)) + ').');
+    };
+    const terapkanJenis = function () { const k = kelompok(); $('fiGrupSekolah').style.display = k.sekolah ? '' : 'none'; $('fiGrupPosyandu').style.display = k.posyandu ? '' : 'none'; infoSiswa(); };
+    $('fiJenis').addEventListener('change', terapkanJenis); ['fiAcPk', 'fiAcPb', 'fiSiswa'].forEach(function (id) { $(id).addEventListener('input', infoSiswa); }); terapkanJenis();
     $('fiBatal').addEventListener('click', function () { $('spmForm').innerHTML = ''; });
     $('fiSimpan').addEventListener('click', async function () {
       try {
         pesan('Menyimpan…');
+        const kg = kelompok(), nilaiKel = function (aktifKel, id) { return aktifKel ? $(id).value : ''; };   // kelompok yang tidak relevan dikosongkan
         await api('simpanInstansiV2', { idInstansi: r.idInstansi, nama: $('fiNama').value, jenis: $('fiJenis').value, npsn: $('fiNpsn').value, alamat: $('fiAlamat').value, desa: $('fiDesa').value,
-                                        kecamatan: $('fiKec').value, jumlahSiswa: $('fiSiswa').value, urutan: $('fiUrut').value, status: $('fiStatus').value, keterangan: $('fiKet').value,
-                                        acuanPk: $('fiAcPk').value, acuanPb: $('fiAcPb').value, acuanBalita: $('fiAcBalita').value, acuanBumil: $('fiAcBumil').value, acuanBusui: $('fiAcBusui').value, acuanNoKendaraan: $('fiAcKend').value });
+                                        kecamatan: $('fiKec').value, jumlahSiswa: nilaiKel(kg.sekolah, 'fiSiswa'), urutan: $('fiUrut').value, status: $('fiStatus').value, keterangan: $('fiKet').value,
+                                        acuanPk: nilaiKel(kg.sekolah, 'fiAcPk'), acuanPb: nilaiKel(kg.sekolah, 'fiAcPb'), acuanBalita: nilaiKel(kg.posyandu, 'fiAcBalita'), acuanBumil: nilaiKel(kg.posyandu, 'fiAcBumil'), acuanBusui: nilaiKel(kg.posyandu, 'fiAcBusui'), acuanNoKendaraan: $('fiAcKend').value });
         await muat(true); pesan('Instansi tersimpan.');
       } catch (err) { pesan(err.message || 'Gagal menyimpan.', true); }
     });

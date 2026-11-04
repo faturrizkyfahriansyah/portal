@@ -83,7 +83,7 @@
       daftarPenggunaCache = await apiGet('getDaftarPenggunaHakAkses', { token: T });
       renderPengguna_();
     } catch (err) {
-      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">${escapeHtml(err.message)}</div></td></tr>`;
     }
   }
 
@@ -191,7 +191,7 @@
         const cfg = await apiPost('getKonfigurasiHakAksesSatu', { token: T, roleKode, modulKode });
         renderFormKonfigurasi_(el, modulTerpilih, cfg);
       } catch (err) {
-        el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+        el.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
       }
     } else {
       // >1 modul -> form kosong, diterapkan ke SEMUA saat disimpan.
@@ -274,7 +274,7 @@
         </div>`;
       }).join('');
     } catch (err) {
-      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      el.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
   document.getElementById('mhaCariRiwayat').addEventListener('input', () => { clearTimeout(window._mhaRiwayatTimeout); window._mhaRiwayatTimeout = setTimeout(muatRiwayat_, 300); });

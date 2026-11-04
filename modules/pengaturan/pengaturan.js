@@ -181,14 +181,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     if (Notification.permission === 'granted') {
-      status.textContent = '✅ Notifikasi HP aktif.';
-      btn.textContent = '🔕 Matikan Notifikasi HP';
+      status.textContent = 'Notifikasi HP aktif.';
+      btn.textContent = 'Matikan Notifikasi HP';
     } else if (Notification.permission === 'denied') {
-      status.textContent = '⚠️ Izin notifikasi diblokir. Aktifkan lewat pengaturan browser/HP kamu.';
-      btn.textContent = '🔔 Aktifkan Notifikasi HP';
+      status.textContent = 'Izin notifikasi diblokir. Aktifkan lewat pengaturan browser/HP kamu.';
+      btn.textContent = 'Aktifkan Notifikasi HP';
     } else {
       status.textContent = 'Notifikasi HP belum diaktifkan.';
-      btn.textContent = '🔔 Aktifkan Notifikasi HP';
+      btn.textContent = 'Aktifkan Notifikasi HP';
     }
   }
   perbaruiTampilanStatus_();

@@ -25,7 +25,7 @@
           }).join('')}
         </div>`;
     } catch (err) {
-      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      el.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 

@@ -15,7 +15,7 @@
      portal.css belum tersedia, sekarang sudah dihapus -- jangan
      tambahkan <link> ke file itu lagi kalau terlihat di versi lama). -->
 <link rel="stylesheet" href="styles/portal.css?v=20261023a">
-<link rel="stylesheet" href="styles/admin.css?v=20261023a">
+<link rel="stylesheet" href="styles/admin.css?v=20261104b">
 <link rel="stylesheet" href="styles/app-shell.css?v=20261015b">
 <link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
@@ -91,7 +91,7 @@
            (admin.js) TIDAK berubah -- cuma ID elemen yg dirujuk, posisi
            DOM-nya saja yang pindah. -->
       <div class="shell-sidebar-search" style="position:relative;padding:0 14px 14px;">
-        <input type="text" id="pencarianGlobalRelawan" placeholder="🔍 Cari relawan..." autocomplete="off"
+        <input type="text" id="pencarianGlobalRelawan" placeholder="Cari relawan..." autocomplete="off"
           style="width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--color-border);background:#f5f7fa;color:var(--color-navy);font-size:13px;">
         <div id="hasilPencarianGlobalRelawan" style="display:none;position:absolute;top:calc(100% - 8px);left:14px;right:14px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);max-height:320px;overflow-y:auto;z-index:50;"></div>
       </div>
@@ -216,7 +216,7 @@
          yg sesungguhnya jalan di browser, tanpa menebak lagi apakah
          deploy sudah masuk atau belum. Diperbarui manual tiap kali
          admin.html diubah -- lihat juga console.log di bawah. -->
-    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-10-23a</span></div>
+    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-04g (kalender & PM seperti dashboard, tanpa ikon)</span></div>
   </aside>
     <div class="shell-main">
   <header class="shell-topbar">
@@ -254,9 +254,9 @@
       </div>
     </section>
 
-    <!-- 🔴 KEHADIRAN RELAWAN HARI INI -->
+    <!-- KEHADIRAN RELAWAN HARI INI -->
     <section class="panel-block" style="margin-bottom:16px;">
-      <p class="panel-block-title">🔴 Kehadiran Relawan Hari Ini</p>
+      <p class="panel-block-title">Kehadiran Relawan Hari Ini</p>
       <div class="admin-stat-grid" id="ovKehadiranGrid">
         <!-- BARU (16 Okt 2026, diminta Admin) -- jumlah relawan
              terjadwal hari ini, konsisten dgn kartu yg sama di Rekap
@@ -272,45 +272,45 @@
       <div id="ovKehadiranAksiWrap" style="margin-top:10px;display:flex;flex-direction:column;gap:6px;"></div>
     </section>
 
-    <!-- 🟠 JADWAL & PENUGASAN HARI INI -->
+    <!-- JADWAL & PENUGASAN HARI INI -->
     <section class="panel-block" style="margin-bottom:16px;">
-      <p class="panel-block-title">🟠 Jadwal &amp; Penugasan Hari Ini</p>
+      <p class="panel-block-title">Jadwal &amp; Penugasan Hari Ini</p>
       <div id="ovJadwalStatus" style="padding:12px 14px;border-radius:10px;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <span id="ovJadwalTeks">Memuat...</span>
         <button type="button" class="btn-mini primary" onclick="document.querySelector('[data-panel=panelShift]').click()">Atur Jadwal &amp; Penugasan</button>
       </div>
     </section>
 
-    <!-- 🍽️ MENU HARI INI (BARU, 15 Okt 2026) -- dashboard utama Pengelola,
+    <!-- MENU HARI INI (BARU, 15 Okt 2026) -- dashboard utama Pengelola,
          bukan cuma Monitoring ASN. Sumber & pola sama dgn dashboard.html
          Portal Relawan. -->
     <section class="panel-block" style="margin-bottom:16px;" id="ovMenuWrap">
-      <p class="panel-block-title">🍽️ Menu Hari Ini</p>
+      <p class="panel-block-title">Menu Hari Ini</p>
       <div id="ovMenuIsi"><p style="margin:0;font-size:12.5px;color:var(--color-text-muted);">Memuat...</p></div>
     </section>
 
-    <!-- 🧒 PENERIMA MANFAAT HARI INI (BARU, 15 Okt 2026) -->
+    <!-- PENERIMA MANFAAT HARI INI (BARU, 15 Okt 2026) -->
     <section class="panel-block" style="margin-bottom:16px;" id="ovPmWrap">
-      <p class="panel-block-title">🧒 Penerima Manfaat Hari Ini</p>
+      <p class="panel-block-title">Penerima Manfaat Hari Ini</p>
       <div id="ovPmIsi"><p style="margin:0;font-size:12.5px;color:var(--color-text-muted);">Memuat...</p></div>
     </section>
 
-    <!-- 🗓️ KALENDER OPERASIONAL — judul = nama Periode Aktif -->
+    <!-- KALENDER OPERASIONAL — judul = nama Periode Aktif -->
     <section class="panel-block" style="margin-bottom:16px;">
-      <p class="panel-block-title" id="ovKalenderJudul">🗓️ Kalender Operasional</p>
+      <p class="panel-block-title" id="ovKalenderJudul">Kalender Operasional</p>
       <div id="ovKalenderIsi">Memuat...</div>
     </section>
 
-    <!-- 📊 REKAP 2 MINGGU — otomatis Sementara/Selesai -->
+    <!-- REKAP 2 MINGGU — otomatis Sementara/Selesai -->
     <section class="panel-block" style="margin-bottom:16px;">
-      <p class="panel-block-title" id="ovRekapJudul">📊 Rekap Per Periode</p>
+      <p class="panel-block-title" id="ovRekapJudul">Rekap Per Periode</p>
       <div id="ovRekapIsi">Memuat...</div>
       <button type="button" class="btn-mini" style="margin-top:10px;" onclick="document.querySelector('[data-panel=panelDuaMinggu]').click()">Lihat Rekap Lengkap</button>
     </section>
 
-    <!-- 🟡 SIRAGA — PERSEDIAAN -->
+    <!-- SIRAGA — PERSEDIAAN -->
     <section class="panel-block" style="margin-bottom:16px;">
-      <p class="panel-block-title">🟡 SIRAGA — Persediaan</p>
+      <p class="panel-block-title">SIRAGA — Persediaan</p>
       <div class="admin-stat-grid">
         <div class="admin-stat-card"><div class="admin-stat-value" id="ovStokTotal">–</div><div class="admin-stat-label">Total Barang</div></div>
         <div class="admin-stat-card accent-success"><div class="admin-stat-value" id="ovStokAman">–</div><div class="admin-stat-label">Stok Aman</div></div>
@@ -320,25 +320,25 @@
       <button type="button" class="btn-mini" style="margin-top:10px;" onclick="document.querySelector('[data-panel=panelStok]').click()">Lihat SIRAGA</button>
     </section>
 
-    <!-- 🟡 SIPANDU -->
+    <!-- SIPANDU -->
     <section class="panel-block" style="margin-bottom:16px;">
-      <p class="panel-block-title">🟡 SIPANDU</p>
+      <p class="panel-block-title">SIPANDU</p>
       <p id="ovSipanduRingkasan" style="font-size:13.5px;color:var(--color-text-muted);margin:0 0 10px;">Memuat...</p>
       <button type="button" class="btn-mini" id="btnBukaSipanduOverview">Lihat SIPANDU</button>
     </section>
 
-    <!-- 🔴 PERLU TINDAKAN (dinamis) -->
+    <!-- PERLU TINDAKAN (dinamis) -->
     <section class="panel-block" style="margin-bottom:16px;">
-      <p class="panel-block-title">🔴 Perlu Tindakan</p>
+      <p class="panel-block-title">Perlu Tindakan</p>
       <div id="ovPerluTindakan" class="profile-identity-list">
         <div class="profile-identity-row"><span>Memuat...</span><span></span></div>
       </div>
     </section>
 
-    <!-- 📰 AKTIVITAS & INFORMASI TERBARU (dipertahankan apa adanya) -->
+    <!-- AKTIVITAS & INFORMASI TERBARU (dipertahankan apa adanya) -->
     <div class="panel-columns">
       <section class="panel-block">
-        <p class="panel-block-title">📰 Aktivitas Terbaru</p>
+        <p class="panel-block-title">Aktivitas Terbaru</p>
         <div class="activity-list" id="ovAktivitasList"></div>
       </section>
       <section class="panel-block">
@@ -495,7 +495,7 @@
     <!-- Tombol migrasi -- cuma tampil kalau migrasi BELUM pernah
          dijalankan (dicek via mhaSudahMigrasi flag dari backend). -->
     <div class="panel-block" id="mhaBannerMigrasi" style="display:none;background:#FFF3E0;border-color:#F58220;margin-bottom:16px;">
-      <p style="margin:0 0 4px;font-weight:700;color:#0B2D6B;">⚙️ Migrasi Role Belum Dijalankan</p>
+      <p style="margin:0 0 4px;font-weight:700;color:#0B2D6B;">Migrasi Role Belum Dijalankan</p>
       <p style="margin:0 0 10px;font-size:12.5px;color:var(--color-text-muted);">Jalankan sekali untuk memetakan role lama (Admin/Staff/ASN/Kepala SPPG) ke 7 role baru dan membuat konfigurasi izin default (VIEW-saja, konservatif). Aman dijalankan berkali-kali -- data yang sudah dimigrasi tidak akan ditimpa ulang.</p>
       <button type="button" class="btn-mini primary" id="btnJalankanMigrasiHakAkses" style="background:#F58220;border-color:#F58220;">Jalankan Migrasi Sekarang</button>
     </div>
@@ -517,7 +517,7 @@
     <!-- TAB 1: PENGGUNA & ROLE -->
     <div class="mha-tab-content active" id="mhaTabPengguna">
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">
-        <input type="text" id="mhaCariPengguna" class="form-field-input" placeholder="🔍 Cari nama atau ID..." style="flex:1;min-width:160px;">
+        <input type="text" id="mhaCariPengguna" class="form-field-input" placeholder="Cari nama atau ID..." style="flex:1;min-width:160px;">
         <select id="mhaFilterRole" class="mini-select"><option value="">Semua Role</option></select>
         <select id="mhaFilterStatus" class="mini-select">
           <option value="">Semua Status</option><option value="AKTIF">Aktif</option><option value="NONAKTIF">Nonaktif</option>
@@ -559,7 +559,7 @@
     <!-- TAB 3: RIWAYAT -->
     <div class="mha-tab-content" id="mhaTabRiwayat" style="display:none;">
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">
-        <input type="text" id="mhaCariRiwayat" class="form-field-input" placeholder="🔍 Cari pengguna atau role..." style="flex:1;min-width:160px;">
+        <input type="text" id="mhaCariRiwayat" class="form-field-input" placeholder="Cari pengguna atau role..." style="flex:1;min-width:160px;">
         <select id="mhaFilterJenisRiwayat" class="mini-select">
           <option value="">Semua Jenis Perubahan</option>
           <option value="UBAH_ROLE_BARU">Role pengguna diubah</option>
@@ -589,7 +589,7 @@
         <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">Alasan Perubahan</label>
         <textarea id="mhaModalAlasan" class="form-field-input" rows="2" placeholder="Contoh: penyesuaian tanggung jawab operasional..." style="width:100%;margin-bottom:14px;resize:vertical;"></textarea>
         <div style="background:#EEF3FB;border-radius:8px;padding:10px 12px;margin-bottom:16px;">
-          <p style="margin:0 0 4px;font-size:12.5px;font-weight:700;color:#0B2D6B;">ℹ️ Dampak Perubahan</p>
+          <p style="margin:0 0 4px;font-size:12.5px;font-weight:700;color:#0B2D6B;">ℹDampak Perubahan</p>
           <p style="margin:0;font-size:12px;color:var(--color-text-muted);">Role yang dipilih dapat mengubah akses pengguna ke sejumlah modul sesuai Tab Konfigurasi Hak Akses.</p>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;">
@@ -632,7 +632,7 @@
         <option value="BELUM ABSEN">Belum Absen</option>
       </select>
       <button class="btn-mini primary" id="btnMuatHarian">Tampilkan</button>
-      <button class="btn-mini export" id="btnExportHarian">Export CSV</button>
+      <button class="btn-mini export" id="btnExportHarian">Export Excel</button>
     </div>
 
     <p class="section-title">Rekap per Divisi</p>
@@ -664,10 +664,10 @@
       <button class="btn-mini" id="rmgMaju" type="button" aria-label="Rentang berikutnya">▶</button>
     </div>
     <div class="filter-bar">
-      <input type="text" id="rmgCari" placeholder="🔍 Cari nama relawan..." style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;min-width:190px;">
+      <input type="text" id="rmgCari" placeholder="Cari nama relawan..." style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;min-width:190px;">
       <select id="rmgDivisi"><option value="">Semua Divisi</option></select>
       <button class="btn-mini primary" id="btnMuatRekapMingguan" type="button">Tampilkan</button>
-      <button class="btn-mini export" id="btnExportRekapMingguan" type="button">Export CSV</button>
+      <button class="btn-mini export" id="btnExportRekapMingguan" type="button">Export Excel</button>
       <span id="rmgRentang" style="font-size:12px;color:var(--color-text-muted);"></span>
     </div>
     <p class="section-title">Ringkasan</p>
@@ -679,10 +679,11 @@
     </div>
     <p id="rmgCatatan" style="font-size:12.5px;color:var(--color-text-muted);margin:8px 0 0;"></p>
     <p class="section-title">Rekap per Relawan</p>
+    <div class="rmg-legenda" id="rmgLegenda"><span><i class="rmg-H">✓</i> Hadir</span><span><i class="rmg-T">T</i> Terlambat</span><span><i class="rmg-I">I</i> Izin</span><span><i class="rmg-S">S</i> Sakit</span><span><i class="rmg-A">A</i> Alfa</span><span><i class="rmg-C">C</i> Cuti</span><span><i class="rmg-B" style="background:#fff;border:1px solid #e3e7ee;">·</i> Belum waktunya</span><span><i style="background:#e6e8ec;color:#6b7280;">&nbsp;</i> Libur</span></div>
     <div class="table-wrap">
-      <table class="tabel-kolom-beku-3">
-        <thead><tr><th>Nama</th><th>Divisi</th><th>Nomor Rekening</th><th>Hadir</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Alfa</th><th>Total Hari Kerja</th><th>Tarif per Hari</th><th>Total Insentif</th></tr></thead>
-        <tbody id="tbodyRekapMingguan"><tr><td colspan="11"><div class="empty-state">Pilih rentang lalu klik Tampilkan.</div></td></tr></tbody>
+      <table class="rmg-tabel" id="tabelRekapMingguan">
+        <thead id="theadRekapMingguan"><tr><th>No</th><th>Nama</th><th>Divisi</th><th>No. Rekening</th><th>Hari Kerja</th><th>Tarif/Hari</th><th>Total Insentif</th></tr></thead>
+        <tbody id="tbodyRekapMingguan"><tr><td colspan="7"><div class="empty-state">Pilih rentang lalu klik Tampilkan.</div></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -701,7 +702,7 @@
            Admin soal Total Hari Kerja tidak konsisten (13/14 vs 10).
            Murni baca, tidak mengubah apa pun -- Admin yg memutuskan &
            menghapus lewat Koreksi Presensi (SIPRES) kalau memang ada. -->
-      <button class="btn-mini" id="btnCekDuplikatRoster" title="Cek baris presensi ganda yang mungkin membuat Total Hari Kerja tidak akurat">🔍 Cek Duplikat</button>
+      <button class="btn-mini" id="btnCekDuplikatRoster" title="Cek baris presensi ganda yang mungkin membuat Total Hari Kerja tidak akurat">Cek Duplikat</button>
     </div>
     <div id="hasilCekDuplikat" style="display:none;margin-bottom:16px;"></div>
 
@@ -859,14 +860,14 @@
     </div>
 
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-      <input type="text" id="kqCari" class="form-field-input" placeholder="🔍 Cari nama/ID relawan..." style="flex:1;min-width:160px;">
+      <input type="text" id="kqCari" class="form-field-input" placeholder="Cari nama/ID relawan..." style="flex:1;min-width:160px;">
       <select id="kqFilterStatus" class="mini-select">
         <option value="">Semua Kartu</option>
         <option value="BELUM_DIBUAT">Belum Dibuat</option>
         <option value="AKTIF">Sudah Dibuat (Aktif)</option>
         <option value="NONAKTIF">Dinonaktifkan</option>
       </select>
-      <button class="btn-mini primary" id="btnCetakTerpilihKq" disabled>🖨️ Cetak Terpilih (<span id="kqJumlahTerpilih">0</span>)</button>
+      <button class="btn-mini primary" id="btnCetakTerpilihKq" disabled>Cetak Terpilih (<span id="kqJumlahTerpilih">0</span>)</button>
     </div>
 
     <!-- Distandarkan ke pola .table-wrap (16 Okt 2026, diminta Admin) --
@@ -895,8 +896,8 @@
         </div>
         <div id="kqPreviewArea" style="display:flex;justify-content:center;margin-bottom:14px;"></div>
         <div style="display:flex;gap:8px;">
-          <button class="btn-outline" id="btnDownloadPreviewKq" style="flex:1;">⬇️ Download PNG</button>
-          <button class="btn-submit" id="btnPrintPreviewKq" style="flex:1;margin-top:0;">🖨️ Print</button>
+          <button class="btn-outline" id="btnDownloadPreviewKq" style="flex:1;">Download PNG</button>
+          <button class="btn-submit" id="btnPrintPreviewKq" style="flex:1;margin-top:0;">Print</button>
         </div>
       </div>
     </div>
@@ -924,7 +925,7 @@
     </div>
 
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-      <input type="text" id="prdCari" class="form-field-input" placeholder="🔍 Cari nama periode..." style="flex:1;min-width:160px;">
+      <input type="text" id="prdCari" class="form-field-input" placeholder="Cari nama periode..." style="flex:1;min-width:160px;">
       <button type="button" class="btn-mini primary" id="prdBtnTambah">+ Tambah Periode</button>
     </div>
 
@@ -943,7 +944,7 @@
           <button type="button" id="prdModalTutup" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--color-text-muted);">×</button>
         </div>
         <div id="prdModalPeringatanResmi" style="display:none;background:#fff4e5;border-radius:8px;padding:10px 12px;margin-bottom:14px;">
-          <p style="margin:0;font-size:12.5px;color:#8a5a12;">⚠ Periode ini sudah punya jadwal resmi pada satu atau lebih divisi. Mengubah rentang tanggal dapat berdampak pada jadwal yang sudah ditetapkan.</p>
+          <p style="margin:0;font-size:12.5px;color:#8a5a12;">Periode ini sudah punya jadwal resmi pada satu atau lebih divisi. Mengubah rentang tanggal dapat berdampak pada jadwal yang sudah ditetapkan.</p>
         </div>
         <form id="formTambahPeriode" style="display:flex;flex-direction:column;gap:10px;">
           <div>
@@ -1030,7 +1031,7 @@
         <input type="text" id="inputKeteranganGenerate" placeholder="Keterangan (opsional, berlaku utk semua tanggal yg dibuat)">
         <button type="submit" class="btn-mini primary">Buat Tanggal Operasional</button>
       </form>
-      <button type="button" class="btn-mini" id="btnHapusSemuaKalender" style="margin-top:10px;background:var(--color-danger-bg);color:var(--color-danger);border-color:var(--color-danger);">🗑 Hapus Semua (periode terpilih)</button>
+      <button type="button" class="btn-mini" id="btnHapusSemuaKalender" style="margin-top:10px;background:var(--color-danger-bg);color:var(--color-danger);border-color:var(--color-danger);">Hapus Semua (periode terpilih)</button>
     </details>
   </div>
 
@@ -1043,7 +1044,7 @@
     <p class="section-title">Tambah / Tetapkan Lokasi</p>
     <form class="inline-form" id="formTambahLokasi" style="flex-direction:column;align-items:stretch;">
       <input type="text" id="inputNamaLokasi" placeholder="Nama Lokasi (mis. SPPG Jeungjing)" required>
-      <button type="button" class="btn-mini" id="btnPakaiLokasiSaya" style="align-self:flex-start;">🎯 Gunakan Lokasi Saya Sekarang</button>
+      <button type="button" class="btn-mini" id="btnPakaiLokasiSaya" style="align-self:flex-start;">Gunakan Lokasi Saya Sekarang</button>
       <div style="display:flex;gap:8px;">
         <input type="number" step="0.0000001" id="inputLatitudeLokasi" placeholder="Latitude" required style="flex:1;">
         <input type="number" step="0.0000001" id="inputLongitudeLokasi" placeholder="Longitude" required style="flex:1;">
@@ -1107,7 +1108,7 @@
     <!-- DATA BARANG -->
     <div class="stok-sub" id="aStokSubBarang" style="display:none;">
       <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input type="text" id="aBarangCari" class="form-field-input" placeholder="🔍 Cari nama/kode barang...">
+        <input type="text" id="aBarangCari" class="form-field-input" placeholder="Cari nama/kode barang...">
         <button type="button" class="btn-mini primary" id="aBtnBukaTambahBarang" style="white-space:nowrap;">+ Tambah Barang</button>
       </div>
       <div id="aBarangList" class="riwayat-list"></div>
@@ -1115,7 +1116,7 @@
 
     <!-- BARANG MASUK -->
     <div class="stok-sub" id="aStokSubMasuk" style="display:none;">
-      <p class="section-title">📥 Catat Barang Masuk</p>
+      <p class="section-title">Catat Barang Masuk</p>
       <label class="form-field" style="margin-bottom:10px;"><span class="form-field-label">Tanggal</span><input type="date" id="aMasukTanggal" class="form-field-input"></label>
       <label class="form-field" style="margin-bottom:10px;"><span class="form-field-label">Supplier <span class="form-field-optional">(opsional)</span></span><select id="aMasukSupplier" class="form-field-input"><option value="">— Tanpa Supplier —</option></select></label>
       <div id="aMasukDaftarItem"></div>
@@ -1126,7 +1127,7 @@
 
     <!-- BARANG KELUAR -->
     <div class="stok-sub" id="aStokSubKeluar" style="display:none;">
-      <p class="section-title">📤 Catat Barang Keluar</p>
+      <p class="section-title">Catat Barang Keluar</p>
       <label class="form-field" style="margin-bottom:10px;"><span class="form-field-label">Tanggal</span><input type="date" id="aKeluarTanggal" class="form-field-input"></label>
       <label class="form-field" style="margin-bottom:10px;"><span class="form-field-label">Tujuan</span>
         <select id="aKeluarTujuan" class="form-field-input">
@@ -1145,7 +1146,7 @@
 
     <!-- TRANSFER -->
     <div class="stok-sub" id="aStokSubTransfer" style="display:none;">
-      <p class="section-title">🔁 Transfer Internal</p>
+      <p class="section-title">Transfer Internal</p>
       <label class="form-field" style="margin-bottom:10px;"><span class="form-field-label">Tanggal</span><input type="date" id="aTransferTanggal" class="form-field-input"></label>
       <div class="form-field-row" style="margin-bottom:10px;">
         <label class="form-field"><span class="form-field-label">Sumber</span><input type="text" id="aTransferSumber" class="form-field-input" placeholder="mis. Gudang Utama"></label>
@@ -1159,7 +1160,7 @@
 
     <!-- PEMUSNAHAN -->
     <div class="stok-sub" id="aStokSubPemusnahan" style="display:none;">
-      <p class="section-title">🗑️ Catat Pemusnahan</p>
+      <p class="section-title">Catat Pemusnahan</p>
       <label class="form-field" style="margin-bottom:10px;"><span class="form-field-label">Tanggal</span><input type="date" id="aPemusnahanTanggal" class="form-field-input"></label>
       <label class="form-field" style="margin-bottom:10px;"><span class="form-field-label">Alasan Pemusnahan</span>
         <select id="aPemusnahanAlasan" class="form-field-input">
@@ -1179,7 +1180,7 @@
 
     <!-- STOCK OPNAME -->
     <div class="stok-sub" id="aStokSubOpname" style="display:none;">
-      <p class="section-title">📋 Stock Opname</p>
+      <p class="section-title">Stock Opname</p>
       <div class="auth-card absensi-card" id="aOpnameFormMulai">
         <label class="form-field" style="margin-bottom:10px;"><span class="form-field-label">Barang</span><div class="searchable-dropdown" id="aOpnameBarangDropdown"></div></label>
         <button type="button" class="btn-submit" id="aBtnMulaiOpname" disabled>Mulai Opname (Ambil Snapshot Stok Sistem)</button>
@@ -1284,7 +1285,7 @@
 
     <!-- DIAGNOSA DATABASE -->
     <div class="stok-sub" id="aStokSubDiagnosa" style="display:none;">
-      <p class="section-title" style="margin-top:0;">🩺 Diagnosa Database SIRAGA</p>
+      <p class="section-title" style="margin-top:0;">Diagnosa Database SIRAGA</p>
       <p style="font-size:13px;color:var(--color-text-muted);margin:0 0 12px;">Memeriksa apakah sheet, kolom, dan data barang di spreadsheet SIRAGA cocok dengan aplikasi. Hanya membaca, tidak mengubah data.</p>
       <button type="button" class="btn-submit" id="aBtnJalankanDiagnosa">Jalankan Diagnosa</button>
       <div id="aDiagnosaHasil" style="margin-top:14px;"></div>
@@ -1446,7 +1447,7 @@
       <div id="pbjDivisiCheckbox" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button type="button" class="btn-mini primary" id="pbjBtnPratinjau">🔄 Perbarui Jadwal Sekarang</button>
+        <button type="button" class="btn-mini primary" id="pbjBtnPratinjau">Perbarui Jadwal Sekarang</button>
       </div>
 
       <div id="pbjHasil" style="margin-top:18px;"></div>
@@ -1515,19 +1516,19 @@
            tidak perlu divisi, tapi sebelumnya ikut tersembunyi). -->
       <div id="pengLanding" style="display:grid;grid-template-columns:1fr;gap:10px;">
         <button type="button" class="peng-kartu" data-seksi="PolaKerja" style="display:flex;align-items:center;gap:12px;text-align:left;padding:14px;background:#fff;border:1px solid var(--color-border);border-radius:10px;cursor:pointer;">
-          <span style="font-size:22px;">🕐</span>
+          
           <span><span style="display:block;font-weight:700;font-size:14px;color:var(--color-navy);">Pola Kerja per Divisi</span><span style="display:block;font-size:12px;color:var(--color-text-muted);">Jam masuk, jam pulang, shift, dan aturan tanggal.</span></span>
         </button>
         <button type="button" class="peng-kartu" data-seksi="Kelompok" style="display:flex;align-items:center;gap:12px;text-align:left;padding:14px;background:#fff;border:1px solid var(--color-border);border-radius:10px;cursor:pointer;">
-          <span style="font-size:22px;">👥</span>
+          
           <span><span style="display:block;font-weight:700;font-size:14px;color:var(--color-navy);">Kelompok dan Rotasi</span><span style="display:block;font-size:12px;color:var(--color-text-muted);">Anggota, kelompok, pembagian Minggu 1 dan Minggu 2.</span></span>
         </button>
         <button type="button" class="peng-kartu" data-seksi="Validasi" style="display:flex;align-items:center;gap:12px;text-align:left;padding:14px;background:#fff;border:1px solid var(--color-border);border-radius:10px;cursor:pointer;">
-          <span style="font-size:22px;">✅</span>
+          
           <span><span style="display:block;font-weight:700;font-size:14px;color:var(--color-navy);">Validasi Jadwal</span><span style="display:block;font-size:12px;color:var(--color-text-muted);">Aturan pemeriksaan dan kesalahan yang memblokir penetapan.</span></span>
         </button>
         <button type="button" class="peng-kartu" data-seksi="Templat" style="display:flex;align-items:center;gap:12px;text-align:left;padding:14px;background:#fff;border:1px solid var(--color-border);border-radius:10px;cursor:pointer;">
-          <span style="font-size:22px;">📄</span>
+          
           <span><span style="display:block;font-weight:700;font-size:14px;color:var(--color-navy);">Templat Keterangan Penugasan</span><span style="display:block;font-size:12px;color:var(--color-text-muted);">Keterangan standar yang dapat digunakan kembali.</span></span>
         </button>
       </div>
@@ -1606,7 +1607,7 @@
                  yg BISA dipilih via radio button "Jam pulang di
                  tanggal berikutnya" di atas). -->
             <div style="background:#eef2fb;border-radius:8px;padding:10px 12px;margin:4px 0;">
-              <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#0B2D6B;">ℹ️ Tanggal penugasan</p>
+              <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#0B2D6B;">ℹTanggal penugasan</p>
               <p style="margin:0;font-size:12px;color:#334;">Selalu mengikuti tanggal shift dimulai (tidak bisa diubah). Yang BISA dipilih per divisi adalah tanggal acuan absensi untuk shift lintas tengah malam — lihat pilihan di atas kalau "lintas tengah malam" dicentang.</p>
             </div>
 
@@ -1892,7 +1893,7 @@
       <span style="align-self:center;font-size:13px;color:var(--color-text-muted);">s/d</span>
       <input type="date" id="laporanKoreksiSampai">
       <button type="button" class="btn-mini primary" id="btnMuatLaporanKoreksi">Tampilkan</button>
-      <button type="button" class="btn-mini export" id="btnExportLaporanKoreksi">Export CSV</button>
+      <button type="button" class="btn-mini export" id="btnExportLaporanKoreksi">Export Excel</button>
     </div>
     <div class="table-wrap">
       <table>
@@ -1905,7 +1906,7 @@
     <p style="font-size:12.5px;color:var(--color-text-muted);margin:-8px 0 10px;">Jumlah relawan aktif/nonaktif per divisi, plus daftar lengkap.</p>
     <div class="filter-bar">
       <button type="button" class="btn-mini primary" id="btnMuatLaporanRelawan">Tampilkan</button>
-      <button type="button" class="btn-mini export" id="btnExportLaporanRelawan">Export CSV</button>
+      <button type="button" class="btn-mini export" id="btnExportLaporanRelawan">Export Excel</button>
     </div>
     <div id="ringkasanLaporanRelawan" style="margin-bottom:10px;"></div>
     <div class="table-wrap">
@@ -1921,7 +1922,7 @@
       <select id="laporanJadwalPeriode"></select>
       <select id="laporanJadwalDivisi"><option value="">Semua Divisi</option></select>
       <button type="button" class="btn-mini primary" id="btnMuatLaporanJadwal">Tampilkan</button>
-      <button type="button" class="btn-mini export" id="btnExportLaporanJadwal">Export CSV</button>
+      <button type="button" class="btn-mini export" id="btnExportLaporanJadwal">Export Excel</button>
     </div>
     <div class="table-wrap">
       <table>
@@ -2262,17 +2263,17 @@
       <summary style="cursor:pointer;font-weight:700;color:var(--color-navy);font-size:14px;">Menu Hari Ini (menu makanan &amp; gizi harian)</summary>
       <div style="margin-top:12px;">
         <p style="font-size:12px;color:var(--color-text-muted);margin:0 0 10px;">Tempel teks menu harian (format WhatsApp seperti biasa dikirim) di bawah — sistem otomatis membaca Menu, Komposisi, dan data gizi. Tanggal &amp; Hari terisi otomatis dari teks kalau ada, tapi tetap bisa diedit manual.</p>
-        <p style="font-size:12px;margin:0 0 10px;"><a href="qr-label-ompreng.html" target="_blank" rel="noopener">🏷️ Buka halaman QR Code Label Ompreng →</a></p>
+        <p style="font-size:12px;margin:0 0 10px;"><a href="qr-label-ompreng.html" target="_blank" rel="noopener">Buka halaman QR Code Label Ompreng →</a></p>
 
         <input type="hidden" id="mhEditId" value="">
         <div class="inline-form-relawan" style="flex-wrap:wrap;">
           <input type="text" id="mhTanggal" placeholder="Tanggal (DD/MM/YY)" style="width:150px;">
           <input type="text" id="mhHari" placeholder="Hari (mis. Senin)" style="width:130px;">
         </div>
-        <textarea id="taTempelMenuHarian" rows="9" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:13px;padding:10px 12px;border-radius:8px;border:1.5px solid var(--color-border);margin-top:10px;" placeholder="Tempel teks menu harian di sini, mis:&#10;📋 Data Menu Hari Senin 07/09/26&#10;Menu: NASI + RENDANG SAPI + TAHU GORENG + ...&#10;Komposisi: Nasi + lauk hewani + lauk nabati + sayur + buah&#10;Kandungan gizi/porsi:&#10;- Porsi kecil: 525,85 kkal | 20,09 g protein | ..."></textarea>
+        <textarea id="taTempelMenuHarian" rows="9" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:13px;padding:10px 12px;border-radius:8px;border:1.5px solid var(--color-border);margin-top:10px;" placeholder="Tempel teks menu harian di sini, mis:&#10;Data Menu Hari Senin 07/09/26&#10;Menu: NASI + RENDANG SAPI + TAHU GORENG + ...&#10;Komposisi: Nasi + lauk hewani + lauk nabati + sayur + buah&#10;Kandungan gizi/porsi:&#10;- Porsi kecil: 525,85 kkal | 20,09 g protein | ..."></textarea>
 
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-          <button type="button" class="btn-outline" id="btnPreviewMenuHarian">👁️ Preview</button>
+          <button type="button" class="btn-outline" id="btnPreviewMenuHarian">Preview</button>
           <button type="button" class="btn-mini primary" id="btnSimpanMenuHarian">Simpan Menu Hari Ini</button>
           <button type="button" class="btn-mini" id="btnBatalEditMenuHarian" style="display:none;">Batal Edit</button>
         </div>
@@ -2388,10 +2389,10 @@
 
     <!-- 7. PEMULIHAN ID RELAWAN (dipakai kalau ID_RELAWAN pernah diedit langsung di sheet) -->
     <details class="panel-block" style="margin:14px 0;border-color:#b9852f;">
-      <summary style="cursor:pointer;font-weight:700;color:#b9852f;font-size:14px;">7. ⚠️ Pemulihan ID Relawan (khusus kalau ada ID yang diedit langsung di Spreadsheet)</summary>
+      <summary style="cursor:pointer;font-weight:700;color:#b9852f;font-size:14px;">7. Pemulihan ID Relawan (khusus kalau ada ID yang diedit langsung di Spreadsheet)</summary>
       <div style="margin-top:12px;">
         <p style="font-size:12.5px;color:var(--color-text-muted);margin:0 0 12px;">Pakai ini KALAU relawan tidak bisa login ("Data relawan tidak aktif") setelah kolom ID_RELAWAN di sheet 01_DATA_RELAWAN diedit/diganti langsung. Sistem akan mengusulkan pemetaan ID LAMA → ID BARU berdasarkan kecocokan nama di riwayat presensi. <strong>Wajib ditinjau dulu di sini sebelum diterapkan</strong> — tidak ada yang otomatis berubah sampai Anda menekan tombol Terapkan.</p>
-        <button type="button" class="btn-outline" id="btnMuatPemetaanId">🔍 Cari Pemetaan ID yang Perlu Diperbaiki</button>
+        <button type="button" class="btn-outline" id="btnMuatPemetaanId">Cari Pemetaan ID yang Perlu Diperbaiki</button>
         <div id="hasilPemetaanId" style="margin-top:14px;"></div>
       </div>
     </details>
@@ -2449,22 +2450,23 @@
 <script src="core/auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="core/ringkasan-pm.js?v=20261102a"></script>
-<script src="modules/admin/admin.js?v=20261104a"></script>
+<script src="modules/admin/admin.js?v=20261104d"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="modules/admin/admin-kartu-qr.js?v=20261023a"></script>
 <script src="modules/admin/admin-sipres-monitoring.js?v=20260922a"></script>
 <script src="modules/admin/admin-migrasi-roster-v2.js"></script>
-<script src="modules/admin/admin-rekap-mingguan.js"></script>
-<script src="modules/admin/admin-sipandu-master.js?v=20261104a"></script>
-<script src="modules/admin/admin-sipandu-pm.js?v=20261104a"></script>
+<script src="core/xlsx-mini.js?v=20261104d"></script>
+<script src="modules/admin/admin-rekap-mingguan.js?v=20261104b"></script>
+<script src="modules/admin/admin-sipandu-master.js?v=20261104c"></script>
+<script src="modules/admin/admin-sipandu-pm.js?v=20261104d"></script>
 <script src="modules/admin/admin-sipandu-impor.js?v=20261104a"></script>
-<script src="modules/admin/admin-sipandu-menu.js?v=20261104a"></script>
-<script src="modules/admin/admin-sipandu-pagu.js?v=20261104a"></script>
-<script src="modules/admin/admin-sipandu-biaya.js?v=20261104a"></script>
-<script src="modules/admin/admin-kalender-operasional.js?v=20261104a"></script>
+<script src="modules/admin/admin-sipandu-menu.js?v=20261104e"></script>
+<script src="modules/admin/admin-sipandu-pagu.js?v=20261104b"></script>
+<script src="modules/admin/admin-sipandu-biaya.js?v=20261104b"></script>
+<script src="modules/admin/admin-kalender-operasional.js?v=20261104c"></script>
 <script src="modules/admin/admin-akses-relawan.js?v=20261104a"></script>
 <script src="modules/admin/admin-jadwal-penugasan.js?v=20261104a"></script>
-<script src="modules/admin/admin-kalender-pm.js?v=20261104a"></script>
+<script src="modules/admin/admin-kalender-pm.js?v=20261104c"></script>
 <!-- FASE 2: admin-stok.js, admin-shift.js, admin-role.js, admin-export.js,
      admin-import.js, admin-pengelola-sppg.js, admin-pengaturan.js, dan
      admin-website-publik.js SEKARANG dimuat lazy oleh admin.js sendiri

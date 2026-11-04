@@ -1,4 +1,6 @@
 // SPPG JEUNGJING — ADMIN: SIKOP › Kalender Operasional PER TANGGAL (panelKalenderOperasional). BARU 4 Nov 2026.
+// REVISI 4 Nov 2026 (Admin): tampilan seperti Rekap Biaya — Hari ini / 7 hari / 14 hari (dimulai dari HARI INI di kiri) / Bulan, digeser dengan panah.
+// Angka PM ditampilkan PENUH (2.610, bukan "2,6rb"); klik tanggal = PM lengkap per instansi (kategori sesuai jenis) + tombol ubah di Manajemen PM.
 // Tampilan bulan (Senin–Minggu) TANPA memilih periode. Setiap tanggal: status Operasional / Libur / Operasional Khusus / Belum diatur,
 // total PM harian (dari PM HARIAN, bukan acuan) dan penanda menu. Staff boleh melihat; hanya Admin yang boleh mengubah.
 // Backend: KalenderTanggal.gs (getKalenderRentangV2, simpanKalenderTanggalV2, hapusKalenderTanggalV2, simpanKalenderMassalV2).
@@ -21,48 +23,90 @@
   const api = function (aksi, payload) { return apiPost(aksi, Object.assign({ token: ambilSesiAdmin().token }, payload || {})); };
   const staff = function () { return window.sppgAdminRole === 'STAFF'; };
   const singkat = function (n) { return n >= 1000 ? (Math.round(n / 100) / 10).toString().replace('.', ',') + 'rb' : String(n); };
-  let hariIni = isoLokal(new Date()), tahun, bulan, terpilih = hariIni, peta = {}, divisi = [], sudah = false, ringkasan = null;
+  const fmt = function (n) { return Number(n || 0).toLocaleString('id-ID'); };
+  const KATEGORI = [['pk', 'PK'], ['pb', 'PB'], ['bumil', 'Ibu Hamil'], ['busui', 'Ibu Menyusui'], ['balita', 'Balita']];
+  const HARI_PENDEK = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'], BULAN_PENDEK = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  let urutMuat = 0;   // penjaga: jawaban lama dari rentang sebelumnya TIDAK boleh menimpa tampilan terbaru (tombol ditekan cepat)
+  let hariIni = isoLokal(new Date()), mode = '7', mulai = hariIni, terpilih = hariIni, peta = {}, divisi = [], sudah = false, ringkasan = null;
+  const tahun = function () { return dariIso(mulai).getFullYear(); }, bulan = function () { return dariIso(mulai).getMonth(); };
 
   function pesan(t, g) { const el = $('kcPesan'); if (el) { el.textContent = t || ''; el.style.color = g ? '#c0392b' : '#2e7d32'; } }
+  const badge = function (k) { const b = STYLE[k.status] || STYLE.BELUM_DIATUR; return '<span style="background:' + b[2] + ';color:#fff;border-radius:10px;padding:2px 8px;font-size:11px;white-space:nowrap;">' + b[0] + '</span>'; };
 
   function kerangka() {
+    const tombol = function (m, teks) { return '<button class="btn-mini" data-mode="' + m + '" type="button">' + teks + '</button>'; };
     root.innerHTML =
-      '<div class="filter-bar" style="flex-wrap:wrap;"><button class="btn-mini" id="kcMundur" type="button">◀</button><b id="kcJudul" style="min-width:140px;text-align:center;font-size:15px;"></b><button class="btn-mini" id="kcMaju" type="button">▶</button>' +
-      '<button class="btn-mini" id="kcHariIni" type="button">Hari ini</button><span id="kcRingkas" style="font-size:12px;color:var(--color-text-muted,#55606f);"></span></div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;font-size:11.5px;">' + ['OPERASIONAL', 'OPERASIONAL_KHUSUS', 'LIBUR', 'BELUM_DIATUR'].map(function (k) { return '<span style="display:inline-flex;align-items:center;gap:4px;"><i style="width:12px;height:12px;border-radius:3px;background:' + STYLE[k][1] + ';border:1px solid ' + STYLE[k][2] + ';"></i>' + STYLE[k][0] + '</span>'; }).join('') + '<span style="color:var(--color-text-muted,#55606f);">angka kecil = total PM harian · titik = ada menu</span></div>' +
-      '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:11px;font-weight:700;color:var(--color-text-muted,#55606f);text-align:center;margin-bottom:4px;">' + HARI.map(function (h) { return '<div>' + h.slice(0, 3) + '</div>'; }).join('') + '</div>' +
+      '<div class="filter-bar" style="flex-wrap:wrap;">' + tombol('hari', 'Hari ini') + tombol('7', '7 hari') + tombol('14', '14 hari') + tombol('bulan', 'Bulan ini') +
+      '<span style="width:10px;"></span><button class="btn-mini" id="kcMundur" type="button" aria-label="Sebelumnya">◀</button><b id="kcJudul" style="min-width:170px;text-align:center;font-size:14.5px;"></b><button class="btn-mini" id="kcMaju" type="button" aria-label="Berikutnya">▶</button></div>' +
+      '<div id="kcRingkas" style="font-size:12px;color:var(--color-text-muted,#55606f);margin:2px 0 6px;"></div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0;font-size:11.5px;">' + ['OPERASIONAL', 'OPERASIONAL_KHUSUS', 'LIBUR', 'BELUM_DIATUR'].map(function (k) { return '<span style="display:inline-flex;align-items:center;gap:4px;"><i style="width:12px;height:12px;border-radius:3px;background:' + STYLE[k][1] + ';border:1px solid ' + STYLE[k][2] + ';"></i>' + STYLE[k][0] + '</span>'; }).join('') + '<span style="color:var(--color-text-muted,#55606f);">angka = total PM harian · ● = ada menu</span></div>' +
+      '<div id="kcKepala" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:11px;font-weight:700;color:var(--color-text-muted,#55606f);text-align:center;margin-bottom:4px;">' + HARI.map(function (h) { return '<div>' + h.slice(0, 3) + '</div>'; }).join('') + '</div>' +
       '<div id="kcGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>' +
       '<div id="kcPesan" style="font-size:13px;margin:8px 0;"></div><div id="kcDetail"></div><div id="kcMassal"></div>';
-    $('kcMundur').addEventListener('click', function () { geserBulan(-1); });
-    $('kcMaju').addEventListener('click', function () { geserBulan(1); });
-    $('kcHariIni').addEventListener('click', function () { const d = dariIso(hariIni); tahun = d.getFullYear(); bulan = d.getMonth(); terpilih = hariIni; muat(); });
+    root.querySelectorAll('button[data-mode]').forEach(function (b) { b.addEventListener('click', function () { pilihMode(b.dataset.mode); }); });
+    $('kcMundur').addEventListener('click', function () { geserRentang(-1); });
+    $('kcMaju').addEventListener('click', function () { geserRentang(1); });
     $('kcGrid').addEventListener('click', function (e) { const b = e.target.closest('button[data-t]'); if (b) { terpilih = b.dataset.t; gambarGrid(); gambarDetail(); } });
   }
-  function geserBulan(n) { const d = new Date(tahun, bulan + n, 1); tahun = d.getFullYear(); bulan = d.getMonth(); terpilih = isoLokal(d); muat(); }
-  function rentangGrid() {
-    const awalBulan = new Date(tahun, bulan, 1), akhirBulan = new Date(tahun, bulan + 1, 0);
-    const mulai = new Date(awalBulan); mulai.setDate(1 - ((awalBulan.getDay() + 6) % 7));
-    const selesai = new Date(akhirBulan); selesai.setDate(akhirBulan.getDate() + (6 - ((akhirBulan.getDay() + 6) % 7)));
-    return [isoLokal(mulai), isoLokal(selesai)];
+  function pilihMode(m) {
+    mode = m;
+    if (m === 'bulan') { const d = dariIso(hariIni); mulai = isoLokal(new Date(d.getFullYear(), d.getMonth(), 1)); terpilih = hariIni; }
+    else { mulai = hariIni; terpilih = hariIni; }
+    muat();
+  }
+  function geserRentang(arah) {
+    if (mode === 'hari') mulai = geser(mulai, arah);
+    else if (mode === '7') mulai = geser(mulai, 7 * arah);
+    else if (mode === '14') mulai = geser(mulai, 14 * arah);
+    else { const d = new Date(tahun(), bulan() + arah, 1); mulai = isoLokal(d); }
+    terpilih = mulai; muat();
+  }
+  function rentang() {
+    if (mode === 'hari') return [mulai, mulai];
+    if (mode === '7') return [mulai, geser(mulai, 6)];
+    if (mode === '14') return [mulai, geser(mulai, 13)];
+    const awalBulan = new Date(tahun(), bulan(), 1), akhirBulan = new Date(tahun(), bulan() + 1, 0);
+    const a = new Date(awalBulan); a.setDate(1 - ((awalBulan.getDay() + 6) % 7));
+    const b = new Date(akhirBulan); b.setDate(akhirBulan.getDate() + (6 - ((akhirBulan.getDay() + 6) % 7)));
+    return [isoLokal(a), isoLokal(b)];
+  }
+  function judul() {
+    const d = dariIso(mulai);
+    if (mode === 'bulan') return BULAN[d.getMonth()] + ' ' + d.getFullYear();
+    if (mode === 'hari') return HARI[(d.getDay() + 6) % 7] + ', ' + d.getDate() + ' ' + BULAN[d.getMonth()] + ' ' + d.getFullYear();
+    const e = dariIso(geser(mulai, mode === '7' ? 6 : 13));
+    return d.getDate() + ' ' + BULAN_PENDEK[d.getMonth()] + ' – ' + e.getDate() + ' ' + BULAN_PENDEK[e.getMonth()] + ' ' + e.getFullYear();
   }
   async function muat() {
-    $('kcJudul').textContent = BULAN[bulan] + ' ' + tahun; pesan('');
-    const r = rentangGrid();
+    $('kcJudul').textContent = judul(); pesan('');
+    root.querySelectorAll('button[data-mode]').forEach(function (b) { b.classList.toggle('primary', b.dataset.mode === mode); });
+    $('kcKepala').style.display = mode === 'hari' ? 'none' : 'grid'; $('kcGrid').style.display = mode === 'hari' ? 'none' : 'grid';
+    const r = rentang(), giliran = ++urutMuat;
     try {
       const d = await api('getKalenderRentangV2', { tanggalAwal: r[0], tanggalAkhir: r[1] });
+      if (giliran !== urutMuat) return;      // sudah ada permintaan yang lebih baru
       peta = {}; d.hari.forEach(function (h) { peta[h.tanggal] = h; }); hariIni = d.hariIni || hariIni;
-      const bulanIni = d.hari.filter(function (h) { return dariIso(h.tanggal).getMonth() === bulan; });
-      ringkasan = { op: bulanIni.filter(function (h) { return h.status === 'OPERASIONAL'; }).length, kh: bulanIni.filter(function (h) { return h.status === 'OPERASIONAL_KHUSUS'; }).length, li: bulanIni.filter(function (h) { return h.status === 'LIBUR'; }).length, bd: bulanIni.filter(function (h) { return h.status === 'BELUM_DIATUR'; }).length };
+      if (!peta[terpilih]) terpilih = mulai;
+      const dalam = d.hari.filter(function (h) { return mode !== 'bulan' || dariIso(h.tanggal).getMonth() === bulan(); });
+      const hit = function (st) { return dalam.filter(function (h) { return h.status === st; }).length; };
+      ringkasan = { op: hit('OPERASIONAL'), kh: hit('OPERASIONAL_KHUSUS'), li: hit('LIBUR'), bd: hit('BELUM_DIATUR') };
       $('kcRingkas').textContent = ringkasan.op + ' operasional · ' + ringkasan.kh + ' khusus · ' + ringkasan.li + ' libur · ' + ringkasan.bd + ' belum diatur';
       gambarGrid(); gambarDetail();
-    } catch (err) { $('kcGrid').innerHTML = ''; pesan(err.message || 'Gagal memuat kalender.', true); }
+    } catch (err) { if (giliran !== urutMuat) return; $('kcGrid').innerHTML = ''; pesan(err.message || 'Gagal memuat kalender.', true); }
   }
   function gambarGrid() {
-    const r = rentangGrid(); let html = '';
+    if (mode === 'hari') { $('kcGrid').innerHTML = ''; return; }
+    const r = rentang(); let html = '';
     for (let iso = r[0]; iso <= r[1]; iso = geser(iso, 1)) {
-      const h = peta[iso] || { status: 'BELUM_DIATUR' }, s = STYLE[h.status] || STYLE.BELUM_DIATUR, luar = dariIso(iso).getMonth() !== bulan, dipilih = iso === terpilih, ini = iso === hariIni;
-      html += '<button type="button" data-t="' + iso + '" data-status="' + h.status + '" title="' + esc(s[0] + (h.pm ? ' · PM ' + h.pm.total : '')) + '" style="min-height:56px;padding:4px 2px;border-radius:8px;cursor:pointer;background:' + s[1] + ';color:' + s[2] + ';border:' + (dipilih ? '2px solid #0B2D6B' : (h.status === 'BELUM_DIATUR' ? '1px dashed #c3cad4' : '1px solid var(--color-border,#d5dbe3)')) + ';opacity:' + (luar ? '.5' : '1') + ';font-size:13px;font-weight:' + (ini ? '800' : '600') + ';' + (ini ? 'box-shadow:0 0 0 2px #e65100 inset;' : '') + '">' +
-        dariIso(iso).getDate() + (h.pm ? '<span class="kc-pm" style="display:block;font-size:10px;font-weight:600;line-height:1.1;">' + singkat(h.pm.total) + '</span>' : '') + (h.menu ? '<span class="kc-menu" style="display:block;font-size:9px;line-height:1;color:' + (h.menu === 'DISETUJUI' ? '#2e7d32' : '#e65100') + ';">●</span>' : '') + '</button>';
+      const h = peta[iso] || { status: 'BELUM_DIATUR' }, s = STYLE[h.status] || STYLE.BELUM_DIATUR, dipilih = iso === terpilih, ini = iso === hariIni, d = dariIso(iso), luar = mode === 'bulan' && d.getMonth() !== bulan();
+      const gaya = 'padding:5px 2px;border-radius:8px;cursor:pointer;background:' + s[1] + ';color:' + s[2] + ';border:' + (dipilih ? '2px solid #0B2D6B' : (h.status === 'BELUM_DIATUR' ? '1px dashed #c3cad4' : '1px solid var(--color-border,#d5dbe3)')) + ';opacity:' + (luar ? '.5' : '1') + ';' + (ini ? 'box-shadow:0 0 0 2px #e65100 inset;' : '');
+      const pm = h.pm ? '<span class="kc-pm" style="display:block;font-size:10.5px;font-weight:700;line-height:1.15;">' + fmt(h.pm.total) + '</span>' : '';
+      const menu = h.menu ? '<span class="kc-menu" style="display:block;font-size:9px;line-height:1;color:' + (h.menu === 'DISETUJUI' ? '#2e7d32' : '#e65100') + ';">●</span>' : '';
+      if (mode === 'bulan') html += '<button type="button" data-t="' + iso + '" data-status="' + h.status + '" title="' + esc(s[0] + (h.pm ? ' · PM ' + fmt(h.pm.total) + ' porsi' : '')) + '" style="min-height:58px;font-size:13px;font-weight:' + (ini ? '800' : '600') + ';' + gaya + '">' + d.getDate() + pm + menu + '</button>';
+      else html += '<button type="button" data-t="' + iso + '" data-status="' + h.status + '" title="' + esc(s[0]) + '" style="min-height:96px;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;' + gaya + '">' +
+        '<span style="font-size:11px;font-weight:700;">' + HARI_PENDEK[d.getDay()] + '</span><span style="font-size:15px;font-weight:' + (ini ? '800' : '700') + ';">' + d.getDate() + ' ' + BULAN_PENDEK[d.getMonth()] + '</span>' +
+        '<span style="font-size:10px;font-weight:600;">' + s[0] + (h.divisiKhusus && h.divisiKhusus.length ? '<br>' + esc(h.divisiKhusus.join(', ')) : '') + '</span>' +
+        (h.pm ? '<span class="kc-pm" style="font-size:13px;font-weight:800;">' + fmt(h.pm.total) + ' <small style="font-weight:600;font-size:10px;">PM</small></span>' : '<span style="font-size:10px;opacity:.7;">belum ada PM</span>') + (h.menu ? '<span class="kc-menu" style="font-size:10px;color:' + (h.menu === 'DISETUJUI' ? '#2e7d32' : '#e65100') + ';">● menu</span>' : '') + '</button>';
     }
     $('kcGrid').innerHTML = html;
   }
@@ -76,11 +120,8 @@
       '<span id="kcBadge" style="background:' + s[2] + ';color:#fff;border-radius:10px;padding:2px 10px;font-size:12px;">' + s[0] + '</span></div>' +
       (h.divisiKhusus.length ? '<div style="font-size:12.5px;margin-top:6px;">Divisi yang beroperasi: <b>' + esc(h.divisiKhusus.join(', ')) + '</b></div>' : '') +
       (h.keterangan ? '<div style="font-size:12.5px;margin-top:4px;">' + esc(h.keterangan) + '</div>' : '') +
-      '<div id="kcInfo" style="font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--color-border,#e8ebef);">' +
-      (h.pm ? 'PM harian: <b>' + Number(h.pm.total).toLocaleString('id-ID') + '</b> porsi · ' + h.pm.instansi + ' instansi' : '<span style="color:var(--color-text-muted,#55606f);">' + (h.status === 'LIBUR' ? 'Libur — tidak ada PM.' : 'Belum ada PM harian terverifikasi.') + '</span>') +
-      '<div>Menu: ' + (h.menu ? (h.menu === 'DISETUJUI' ? '<span style="color:#2e7d32;">disetujui</span>' : '<span style="color:#e65100;">draf</span>') : '<span style="color:var(--color-text-muted,#55606f);">belum ada</span>') + '</div></div>' +
-      (!h.adaPeriode ? '' : '') +
-      (boleh ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--color-border,#e8ebef);"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"><select id="kcStatus" style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;">' +
+      '<div id="kcPm" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--color-border,#e8ebef);"><span style="font-size:12.5px;color:var(--color-text-muted,#55606f);">Memuat data PM…</span></div>' +
+      (boleh ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--color-border,#e8ebef);"><div style="font-size:11.5px;font-weight:700;margin-bottom:6px;">Status tanggal</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"><select id="kcStatus" style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;">' +
         [['OPERASIONAL', 'Operasional'], ['LIBUR', 'Libur'], ['OPERASIONAL_KHUSUS', 'Operasional Khusus']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === pilih ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
         '</select><input id="kcKet" maxlength="200" placeholder="Keterangan (opsional)" value="' + esc(h.keterangan) + '" style="flex:1;min-width:180px;padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;"></div>' +
         '<div id="kcDivisiWrap" style="display:' + (pilih === 'OPERASIONAL_KHUSUS' ? 'block' : 'none') + ';margin-bottom:8px;"><div style="font-size:11.5px;font-weight:700;margin-bottom:4px;">Divisi yang beroperasi</div><div id="kcDivisi" style="display:flex;flex-wrap:wrap;gap:6px;">' +
@@ -91,6 +132,32 @@
       $('kcStatus').addEventListener('change', function () { $('kcDivisiWrap').style.display = $('kcStatus').value === 'OPERASIONAL_KHUSUS' ? 'block' : 'none'; });
       $('kcSimpan').addEventListener('click', simpan); if ($('kcHapus')) $('kcHapus').addEventListener('click', hapus);
     }
+    muatPm(terpilih, h);
+  }
+  /**
+   * Rincian satu tanggal PERSIS seperti dashboard (permintaan Admin 4 Nov): kartu "Menu" (isiMenuHariIni) lalu "Penerima Manfaat" (isiRingkasanPm):
+   * total porsi, PK / PB / 3B, rincian Balita / Ibu Menyusui / Ibu Hamil, dan tabel per instansi (langsung terbuka). Penyaji dipakai BERSAMA dgn dashboard (core/ringkasan-pm.js).
+   */
+  async function muatPm(iso, h) {
+    const kotak = $('kcPm'); if (!kotak) return;
+    const tombolUbah = function (teks) { return staff() ? '' : ' <button class="btn-mini" id="kcBukaPm" type="button">' + teks + '</button>'; };
+    const judul = function (t) { return '<div style="font-weight:700;font-size:13.5px;margin:0 0 8px;">' + t + '</div>'; };
+    const pasang = function () { const b = $('kcBukaPm'); if (b) b.addEventListener('click', function () { if (window.sppgBukaPmTanggal) window.sppgBukaPmTanggal(iso); }); };
+    try {
+      const p = await api('getKalenderDetailPmV2', { tanggal: iso });
+      if (!document.body.contains(kotak) || terpilih !== iso) return;
+      if (!p.tersedia) { kotak.innerHTML = '<span style="font-size:12.5px;color:var(--color-text-muted,#55606f);">Data PM belum tersedia (database SIPANDU belum disambungkan).</span>'; return; }
+      const ada = p.dashboard && !p.dashboard.belumAdaData;
+      kotak.innerHTML =
+        '<div style="margin-bottom:14px;">' + judul('Menu') + '<div id="kcMenuIsi"></div></div>' +
+        '<div><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;"><b style="font-size:13.5px;">Penerima Manfaat</b>' +
+          (ada ? tombolUbah('Lihat / ubah di Manajemen PM') : (h.status === 'LIBUR' ? '' : tombolUbah('Isi di Manajemen PM'))) + '</div><div id="kcPmIsi"></div>' +
+          (ada && p.nonaktifTersembunyi && p.nonaktifTersembunyi.instansi ? '<div style="font-size:11px;color:var(--color-text-muted,#55606f);margin-top:8px;">' + p.nonaktifTersembunyi.instansi + ' instansi nonaktif (' + fmt(p.nonaktifTersembunyi.porsi) + ' porsi) tidak dihitung.</div>' : '') + '</div>';
+      isiMenuHariIni($('kcMenuIsi'), p.menuDashboard, 'Menu belum ada untuk tanggal ini.');
+      if (ada) isiRingkasanPm($('kcPmIsi'), p.dashboard, { terbuka: true, judulTotal: 'Total Porsi PM' });
+      else $('kcPmIsi').innerHTML = '<p style="margin:0;font-size:12.5px;color:var(--color-text-muted,#55606f);">' + (h.status === 'LIBUR' ? 'Libur — tidak ada PM.' : 'Belum ada PM harian terverifikasi untuk tanggal ini.') + '</p>';
+      pasang();
+    } catch (err) { kotak.innerHTML = '<span style="font-size:12.5px;color:var(--color-text-muted,#55606f);">Data PM tidak tersedia.</span>'; }
   }
   async function kirimDenganDampak(aksi, payload) {
     try { return await api(aksi, payload); }
@@ -118,7 +185,7 @@
   // ---- isi banyak tanggal sekaligus (nyicil per bulan) ----
   function gambarMassal() {
     if (staff()) { $('kcMassal').innerHTML = ''; return; }
-    const awal = isoLokal(new Date(tahun, bulan, 1)), akhir = isoLokal(new Date(tahun, bulan + 1, 0));
+    const awal = isoLokal(new Date(tahun(), bulan(), 1)), akhir = isoLokal(new Date(tahun(), bulan() + 1, 0));
     const terbuka = !!($('kcMassal').querySelector('details') && $('kcMassal').querySelector('details').open);   // tetap terbuka setelah dirender ulang
     const simpanForm = $('kmAwal') ? { awal: $('kmAwal').value, akhir: $('kmAkhir').value, status: $('kmStatus').value, ket: $('kmKet').value, timpa: $('kmTimpa').checked, hari: Array.prototype.map.call(document.querySelectorAll('.km-hari:checked'), function (c) { return c.value; }) } : null;   // isian dipertahankan
     $('kcMassal').innerHTML = '<details' + (terbuka ? ' open' : '') + ' style="margin:10px 0;"><summary style="cursor:pointer;font-weight:700;font-size:13px;">Isi banyak tanggal sekaligus</summary><div class="admin-stat-card" style="padding:14px;text-align:left;margin-top:8px;">' +
@@ -150,8 +217,9 @@
     } catch (err) { pesan(err.message || 'Gagal.', true); }
   }
 
+
   async function mulaiPanel() {
-    const d = dariIso(hariIni); tahun = d.getFullYear(); bulan = d.getMonth(); terpilih = hariIni;
+    hariIni = isoLokal(new Date()); mode = '7'; mulai = hariIni; terpilih = hariIni;
     root.innerHTML = '<div class="empty-state">Memuat…</div>';
     kerangka();
     try { divisi = await apiGet('getDivisi', { token: ambilSesiAdmin().token }); if (!Array.isArray(divisi)) divisi = []; } catch (e) { divisi = []; }

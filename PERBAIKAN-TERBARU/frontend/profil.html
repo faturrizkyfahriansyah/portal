@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<script src="core/terapkan-preferensi.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Profil Saya — SPPG Jeungjing</title>
+<meta name="description" content="Profil Relawan SPPG Jeungjing">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/style.css?v=20260903c">
+<link rel="stylesheet" href="styles/preferensi-tampilan.css">
+<link rel="stylesheet" href="styles/portal.css?v=20261001g">
+<link rel="stylesheet" href="styles/app-shell.css?v=20260903c">
+<link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
+</head>
+<body>
+<div class="shell">
+  <div class="shell-body">
+  <div class="shell-overlay" id="shellOverlay"></div>
+  <aside class="shell-sidebar" id="shellSidebar">
+    <div class="shell-sidebar-head">
+      <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
+      <div class="shell-sidebar-head-text">
+        <strong>SPPG JEUNGJING</strong>
+        <span>PORTAL SPPG JEUNGJING</span>
+      </div>
+      <button type="button" class="shell-sidebar-close" id="shellSidebarClose" aria-label="Tutup menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
+    </div>
+    <div class="shell-sidebar-user" id="shellSidebarUser">
+      <div class="shell-sidebar-user-avatar" id="sidebarAvatar">–</div>
+      <div class="shell-sidebar-user-text">
+        <strong id="sidebarNama">Memuat...</strong>
+        <span class="shell-sidebar-user-status" id="sidebarStatus"></span>
+      </div>
+    </div>
+    <nav class="shell-nav" aria-label="Menu Portal SPPG Jeungjing">
+    <p class="shell-nav-group-title">Utama</p>
+    <a href="dashboard.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span><span>Dashboard</span></a>
+    <!-- Dipindah ke grup "SIM SDM" (23 Okt 2026, dokumen Kartu
+         Identitas Relawan C.2) -- ID Card Saya ditambahkan di sampingnya. -->
+
+    <p class="shell-nav-group-title">SIM SDM</p>
+    <a href="profil.html" class="shell-nav-link active"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></span><span>Profil Saya</span></a>
+    <a href="id-card-saya.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.8"/><path d="M5.5 16c.5-2 2-3 3-3s2.5 1 3 3"/><path d="M14 9h5M14 13h3"/></svg></span><span>ID Card Saya</span></a>
+
+    <p class="shell-nav-group-title">SIPRES</p>
+    <a href="absensi.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 12l2 2 4-4"/></svg></span><span>Presensi Kehadiran</span></a>
+    <a href="riwayat.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Riwayat Presensi</span></a>
+    <a href="pengajuan.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M12 9v6"/><circle cx="12" cy="12" r="9"/></svg></span><span>Pengajuan Ketidakhadiran</span></a>
+
+    <p class="shell-nav-group-title">SIPANDU</p>
+    <a href="sipandu.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span><span>Produksi &amp; Data Operasional</span></a>
+
+    <p class="shell-nav-group-title">SIRAGA</p>
+    <a href="stok-relawan.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></span><span>Stok &amp; Persediaan</span></a>
+
+    <p class="shell-nav-group-title">SIKOP</p>
+    <a href="jadwal.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Jadwal &amp; Penugasan</span></a>
+
+    <p class="shell-nav-group-title">MONITORING</p>
+    <a href="monitoring.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg></span><span>Pengawasan Pengelola SPPG</span></a>
+
+    <p class="shell-nav-group-title">SIPIKA</p>
+    <a href="notifikasi.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21h4"/></svg></span><span>Notifikasi</span></a>
+    <a href="informasi.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.01"/></svg></span><span>Informasi</span></a>
+    <a href="penerimaan-pat.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Penerima Manfaat</span></a>
+    <a href="dokumen.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span><span>Dokumen</span></a>
+    <a href="bantuan.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1.5 1-1.5 2.2"/><path d="M12 17v.01"/></svg></span><span>Bantuan</span></a>
+
+    <p class="shell-nav-group-title">Akun</p>
+    <a href="pengaturan.html" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></span><span>Pengaturan Akun</span></a>
+    </nav>
+    <button type="button" class="shell-nav-link shell-nav-link--danger" id="btnLogoutShell" style="margin:0 10px 8px;width:calc(100% - 20px);"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span>Keluar</span></button>
+    <button type="button" class="shell-sidebar-collapse-toggle" id="shellCollapseToggle"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg> Ciutkan Menu</button>
+    <div class="shell-sidebar-foot">PORTAL SPPG JEUNGJING<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730</div>
+  </aside>
+    <div class="shell-main">
+  <header class="shell-topbar">
+    <button type="button" class="shell-topbar-burger" aria-label="Buka menu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
+    <div class="shell-topbar-brand shell-topbar-brand--portal">
+      <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional" class="shell-topbar-logo-bgn">
+      <img src="assets/logo.png" alt="Logo SPPG Jeungjing" class="shell-topbar-logo-sppg">
+      <div class="shell-topbar-brand-text">
+        <span class="shell-topbar-brand-label">PORTAL</span>
+        <strong>SPPG JEUNGJING</strong>
+      </div>
+    </div>
+    <div class="shell-topbar-right">
+      <a href="notifikasi.html" class="shell-topbar-bell" aria-label="Notifikasi" id="topbarBell">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21h4"/></svg>
+        <span class="shell-topbar-bell-count is-hidden" id="topbarBellCount">0</span>
+      </a>
+      <a href="profil.html" class="shell-topbar-avatar" id="topbarAvatar" aria-label="Profil Saya"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></a>
+    </div>
+  </header>
+      <main class="shell-content">
+<a href="dashboard.html" class="shell-back"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg> Kembali</a>
+  <div class="shell-page-head">
+    <div class="shell-page-head-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+    <div>
+      <h1>Profil Saya</h1>
+      <p>Identitas dan data kontak Anda sebagai relawan.</p>
+    </div>
+  </div>
+
+        <div id="profilMain" style="display:none;">
+
+          <section class="panel-block" style="margin-bottom:14px;text-align:center;">
+            <div id="fotoProfilPratinjau" style="width:88px;height:88px;border-radius:50%;background:#eef2f8;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto 10px;color:var(--color-navy);font-weight:800;font-size:26px;">—</div>
+            <input type="file" id="inputFotoProfil" accept="image/*" style="font-size:12.5px;">
+            <p style="font-size:11.5px;color:var(--color-text-muted);margin:6px 0 10px;">JPG/PNG/WEBP, maks. 5MB.</p>
+            <button type="button" id="btnSimpanFoto" class="btn-outline" style="width:100%;">Ubah Foto Profil</button>
+          </section>
+
+          <p class="profile-section-title">Identitas</p>
+          <section class="panel-block" style="margin-bottom:14px;">
+            <div class="profile-identity-list">
+              <div class="profile-identity-row"><span>Nama Lengkap</span><span id="pNama">—</span></div>
+              <div class="profile-identity-row"><span>ID Relawan</span><span id="pIdRelawan">—</span></div>
+              <div class="profile-identity-row"><span>Divisi</span><span id="pDivisi">—</span></div>
+              <div class="profile-identity-row"><span>Jabatan/Posisi</span><span id="pJabatan">Belum diisi</span></div>
+              <div class="profile-identity-row"><span>Status Akun</span><span id="pStatusAkun">—</span></div>
+              <div class="profile-identity-row"><span>Tanggal Bergabung</span><span id="pTanggalBergabung">—</span></div>
+            </div>
+            <p style="font-size:11px;color:var(--color-text-muted);margin:8px 0 0;">Dikelola Admin — hubungi Admin SPPG untuk perubahan.</p>
+          </section>
+
+          <!-- ============ DATA PRIBADI ============ -->
+          <p class="profile-section-title">Data Pribadi</p>
+          <section class="panel-block" id="viewDataPribadi" style="margin-bottom:14px;">
+            <div class="profile-identity-list">
+              <div class="profile-identity-row"><span>NIK</span><span id="vNik">Belum diisi</span></div>
+              <div class="profile-identity-row"><span>Tempat Lahir</span><span id="vTempatLahir">Belum diisi</span></div>
+              <div class="profile-identity-row"><span>Tanggal Lahir</span><span id="vTanggalLahir">Belum diisi</span></div>
+              <div class="profile-identity-row"><span>Jenis Kelamin</span><span id="vJenisKelamin">Belum diisi</span></div>
+              <div class="profile-identity-row"><span>Status</span><span id="vStatusPernikahan">Belum diisi</span></div>
+              <div class="profile-identity-row"><span>Agama</span><span id="vAgama">Belum diisi</span></div>
+            </div>
+            <button type="button" class="btn-outline btn-ubah-bagian" id="btnUbahDataPribadi" data-bagian="dataPribadi" style="width:100%;margin-top:10px;">Ubah Data Pribadi</button>
+          </section>
+          <form class="panel-block is-hidden form-edit-bagian" id="formDataPribadi" data-bagian="dataPribadi" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label for="inputNik">NIK</label>
+              <input type="text" id="inputNik" class="form-input" placeholder="16 digit NIK" maxlength="16" inputmode="numeric">
+            </div>
+            <div class="form-group">
+              <label for="inputTempatLahir">Tempat Lahir</label>
+              <input type="text" id="inputTempatLahir" class="form-input" placeholder="Kota tempat lahir">
+            </div>
+            <div class="form-group">
+              <label for="inputTanggalLahir">Tanggal Lahir</label>
+              <input type="date" id="inputTanggalLahir" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="inputJenisKelamin">Jenis Kelamin</label>
+              <select id="inputJenisKelamin" class="form-input">
+                <option value="">Pilih jenis kelamin</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="inputStatusPernikahan">Status</label>
+              <select id="inputStatusPernikahan" class="form-input">
+                <option value="">Pilih status</option>
+                <option value="Belum Menikah">Belum Menikah</option>
+                <option value="Menikah">Menikah</option>
+                <option value="Cerai Hidup">Cerai Hidup</option>
+                <option value="Cerai Mati">Cerai Mati</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="inputAgama">Agama</label>
+              <input type="text" id="inputAgama" class="form-input" placeholder="Agama">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button type="button" class="btn-outline btn-batal-bagian" data-bagian="dataPribadi" style="flex:1;">Batal</button>
+              <button type="submit" class="btn-submit" id="btnSimpanDataPribadi" style="flex:1;">Simpan Perubahan</button>
+            </div>
+          </form>
+
+          <!-- ============ KONTAK ============ -->
+          <p class="profile-section-title">Kontak</p>
+          <section class="panel-block" id="viewKontak" style="margin-bottom:14px;">
+            <div class="profile-identity-list">
+              <div class="profile-identity-row"><span>Nomor Telepon</span><span id="vNoHp">Belum diisi</span></div>
+              <div class="profile-identity-row"><span>Email</span><span id="vEmail">Belum diisi</span></div>
+            </div>
+            <button type="button" class="btn-outline btn-ubah-bagian" id="btnUbahKontak" data-bagian="kontak" style="width:100%;margin-top:10px;">Ubah Kontak</button>
+          </section>
+          <form class="panel-block is-hidden form-edit-bagian" id="formKontak" data-bagian="kontak" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label for="inputNoHp">Nomor Telepon</label>
+              <input type="tel" id="inputNoHp" class="form-input" placeholder="08xxxxxxxxxx">
+            </div>
+            <div class="form-group">
+              <label for="inputEmail">Email <span class="optional-tag">(opsional)</span></label>
+              <input type="email" id="inputEmail" class="form-input" placeholder="nama@email.com">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button type="button" class="btn-outline btn-batal-bagian" data-bagian="kontak" style="flex:1;">Batal</button>
+              <button type="submit" class="btn-submit" id="btnSimpanKontak" style="flex:1;">Simpan Perubahan</button>
+            </div>
+          </form>
+
+          <!-- ============ ALAMAT ============ -->
+          <p class="profile-section-title">Alamat</p>
+          <section class="panel-block" id="viewAlamat" style="margin-bottom:14px;">
+            <div class="profile-identity-list">
+              <div class="profile-identity-row"><span>Alamat Lengkap</span><span id="vAlamat">Belum diisi</span></div>
+            </div>
+            <button type="button" class="btn-outline btn-ubah-bagian" id="btnUbahAlamat" data-bagian="alamat" style="width:100%;margin-top:10px;">Ubah Alamat</button>
+          </section>
+          <form class="panel-block is-hidden form-edit-bagian" id="formAlamat" data-bagian="alamat" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label for="inputAlamat">Alamat Lengkap</label>
+              <textarea id="inputAlamat" class="form-input" rows="3" placeholder="Alamat tempat tinggal"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button type="button" class="btn-outline btn-batal-bagian" data-bagian="alamat" style="flex:1;">Batal</button>
+              <button type="submit" class="btn-submit" id="btnSimpanAlamat" style="flex:1;">Simpan Perubahan</button>
+            </div>
+          </form>
+
+          <!-- ============ KONTAK DARURAT ============ -->
+          <p class="profile-section-title">Kontak Darurat</p>
+          <section class="panel-block" id="viewKontakDarurat" style="margin-bottom:14px;">
+            <div class="profile-identity-list">
+              <div class="profile-identity-row"><span>Nama</span><span id="vKdNama">Belum diisi</span></div>
+              <div class="profile-identity-row"><span>Hubungan</span><span id="vKdHubungan">Belum diisi</span></div>
+              <div class="profile-identity-row"><span>Nomor Telepon</span><span id="vKdNoHp">Belum diisi</span></div>
+            </div>
+            <button type="button" class="btn-outline btn-ubah-bagian" id="btnUbahKontakDarurat" data-bagian="kontakDarurat" style="width:100%;margin-top:10px;">Tambahkan Data</button>
+          </section>
+          <form class="panel-block is-hidden form-edit-bagian" id="formKontakDarurat" data-bagian="kontakDarurat" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label for="inputKdNama">Nama</label>
+              <input type="text" id="inputKdNama" class="form-input" placeholder="Nama kontak darurat">
+            </div>
+            <div class="form-group">
+              <label for="inputKdHubungan">Hubungan</label>
+              <select id="inputKdHubungan" class="form-input">
+                <option value="">Pilih hubungan</option>
+                <option value="Ayah">Ayah</option>
+                <option value="Ibu">Ibu</option>
+                <option value="Suami">Suami</option>
+                <option value="Istri">Istri</option>
+                <option value="Anak">Anak</option>
+                <option value="Kakak">Kakak</option>
+                <option value="Adik">Adik</option>
+                <option value="Saudara">Saudara</option>
+                <option value="Wali">Wali</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div class="form-group is-hidden" id="groupKdHubunganLainnya">
+              <label for="inputKdHubunganLainnya">Hubungan Lainnya</label>
+              <input type="text" id="inputKdHubunganLainnya" class="form-input" placeholder="Sebutkan hubungan">
+            </div>
+            <div class="form-group">
+              <label for="inputKdNoHp">Nomor Telepon</label>
+              <input type="tel" id="inputKdNoHp" class="form-input" placeholder="08xxxxxxxxxx">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button type="button" class="btn-outline btn-batal-bagian" data-bagian="kontakDarurat" style="flex:1;">Batal</button>
+              <button type="submit" class="btn-submit" id="btnSimpanKontakDarurat" style="flex:1;">Simpan Perubahan</button>
+            </div>
+          </form>
+
+          <p class="profile-section-title">Keanggotaan SPPG</p>
+          <section class="panel-block" style="margin-bottom:14px;">
+            <div class="profile-identity-list">
+              <div class="profile-identity-row"><span>ID Relawan</span><span id="idRelawan2">—</span></div>
+              <div class="profile-identity-row"><span>Divisi</span><span id="divisiRelawan2">—</span></div>
+              <div class="profile-identity-row"><span>Tanggal Bergabung</span><span id="tanggalBergabungRelawan">—</span></div>
+              <div class="profile-identity-row"><span>Status Aktif/Nonaktif</span><span id="statusRelawan2">—</span></div>
+            </div>
+            <p style="font-size:11px;color:var(--color-text-muted);margin:8px 0 0;">Dikelola Admin.</p>
+          </section>
+
+          <p class="profile-section-title">Data Akses</p>
+          <section class="panel-block" style="margin-bottom:14px;">
+            <div class="profile-identity-list">
+              <div class="profile-identity-row"><span>Username</span><span id="usernameRelawan">—</span></div>
+              <div class="profile-identity-row"><span>Role</span><span id="roleRelawan">—</span></div>
+              <div class="profile-identity-row"><span>Hak Akses</span><span id="hakAksesRelawan">—</span></div>
+              <div class="profile-identity-row"><span>Terakhir Login</span><span id="terakhirLoginRelawan">—</span></div>
+            </div>
+            <p style="font-size:11px;color:var(--color-text-muted);margin:8px 0 0;">Informasi sistem — untuk ubah Username, buka Pengaturan Akun.</p>
+          </section>
+
+          <p class="settings-section-title">Pengaturan Akun</p>
+          <nav class="settings-menu-list" aria-label="Pengaturan Akun">
+            <a href="ganti-password.html" class="settings-menu-item">
+              
+              <span class="settings-menu-item-text">
+                <p class="settings-menu-item-title">Ganti Password</p>
+                <p class="settings-menu-item-desc">Ubah password akun Anda</p>
+              </span>
+              <span class="settings-menu-item-arrow">→</span>
+            </a>
+            <a href="pengaturan.html" class="settings-menu-item">
+              
+              <span class="settings-menu-item-text">
+                <p class="settings-menu-item-title">Pengaturan Akun</p>
+                <p class="settings-menu-item-desc">Kelola pengaturan akun</p>
+              </span>
+              <span class="settings-menu-item-arrow">→</span>
+            </a>
+          </nav>
+
+          <section class="panel-block">
+            <button type="button" id="btnKeluar" class="btn-danger-outline">Keluar</button>
+          </section>
+
+        </div>
+
+        <!-- Modal "Data masih terkunci" -- dipakai SEMUA bagian (Data Pribadi/Kontak/Alamat/Kontak Darurat/Foto Profil), teksnya diisi JS sebelum ditampilkan. -->
+        <div class="modal-overlay is-hidden" id="modalTerkunci">
+          <div class="modal-card" style="text-align:center;max-width:320px;">
+            <p style="font-size:32px;margin:0 0 6px;"></p>
+            <h2 style="font-size:16px;">Data masih terkunci</h2>
+            <p id="modalTerkunciTeks" style="font-size:13.5px;">Data dapat diubah kembali nanti.</p>
+            <button type="button" class="btn-submit" id="btnTutupModalTerkunci" style="width:100%;">Mengerti</button>
+          </div>
+        </div>
+
+        <div class="toast is-hidden" id="errorToast" role="alert"></div>
+        <div class="loading-overlay is-hidden" id="loadingOverlay">
+          <div class="spinner"></div>
+          <p id="loadingText">Memuat data...</p>
+        </div>
+      </main>
+  <footer class="shell-footer">
+    <p><strong>PORTAL SPPG JEUNGJING</strong></p>
+    <p>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730</p>
+    <p class="credit">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
+  </footer>
+    </div>
+  </div>
+</div>
+
+<script src="core/config.js?v=20260903c"></script>
+<script src="core/common.js?v=20260903c"></script>
+<script src="core/auth-relawan.js?v=20260903c"></script>
+<script src="core/NavigasiTerpusat.js"></script>
+<script src="core/app-shell.js?v=20260903c"></script>
+<script src="modules/relawan/profil.js?v=20260903c"></script>
+</body>
+</html>

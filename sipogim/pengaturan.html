@@ -81,7 +81,7 @@
         alert('Kata sandi berhasil diganti. Anda akan diarahkan ke halaman login.');
         sessionStorage.removeItem('sipogim_token');
         location.href = 'login.html';
-      } catch (err) { galat.textContent = '⚠️ ' + err.message; galat.style.display = 'block'; }
+      } catch (err) { galat.textContent = '' + err.message; galat.style.display = 'block'; }
     });
 
     document.getElementById('btnGantiPin').addEventListener('click', async () => {
@@ -94,7 +94,7 @@
         });
         alert('PIN berhasil diganti.');
         document.getElementById('fPinLama').value = ''; document.getElementById('fPinBaru').value = '';
-      } catch (err) { galat.textContent = '⚠️ ' + err.message; galat.style.display = 'block'; }
+      } catch (err) { galat.textContent = '' + err.message; galat.style.display = 'block'; }
     });
 
     async function muatPengaturan() {
@@ -107,7 +107,7 @@
       try {
         await apiPostSipogim('ubahPengaturan', { kunci: 'JUMLAH_DESIMAL_TAMPIL', nilai: document.getElementById('fDesimal').value });
         alert('Tersimpan.');
-      } catch (err) { alert('⚠️ ' + err.message); }
+      } catch (err) { alert('' + err.message); }
     });
     muatPengaturan();
 

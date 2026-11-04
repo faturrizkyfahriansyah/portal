@@ -56,7 +56,7 @@
     }
     if (hasil.pagu.jumlahTanggalTarifKurang) html += '<div style="font-size:12.5px;color:#c0392b;margin-bottom:8px;">' + hasil.pagu.jumlahTanggalTarifKurang + ' tanggal pagu memakai tarif yang belum ditetapkan (dihitung Rp0) — lengkapi di Master Tarif.</div>';
     const tabs = [['pic', 'Per PIC (pembayaran)'], ['sekolah', 'Insentif Sekolah'], ['posyandu', 'Insentif Posyandu'], ['pagu', 'Pagu per Tanggal']];
-    html += '<div class="filter-bar" style="flex-wrap:wrap;">' + tabs.map(function (x) { return '<button class="btn-mini' + (x[0] === tab ? ' primary' : '') + '" data-tab="' + x[0] + '" type="button">' + x[1] + '</button>'; }).join('') + '<button class="btn-mini export" id="sbiCsv" type="button">Export CSV</button></div>' +
+    html += '<div class="filter-bar" style="flex-wrap:wrap;">' + tabs.map(function (x) { return '<button class="btn-mini' + (x[0] === tab ? ' primary' : '') + '" data-tab="' + x[0] + '" type="button">' + x[1] + '</button>'; }).join('') + '<button class="btn-mini export" id="sbiCsv" type="button">Export Excel</button></div>' +
       '<div class="table-wrap">' + tabel() + '</div>';
     $('sbiIsi').innerHTML = html;
   }
@@ -66,7 +66,7 @@
     const ins = hasil.insentif;
     if (tab === 'pagu') {
       const b = hasil.pagu.baris;
-      return '<table><thead><tr><th>Tanggal</th><th>Instansi</th><th>Porsi Kecil</th><th>Porsi Besar</th><th>Bahan Baku</th><th>Sewa Fasilitas</th><th>Operasional</th><th>Total Pagu</th></tr></thead><tbody>' + (b.length ? b.map(function (x) { return '<tr><td>' + tglIndo(x.tanggal) + (x.tarifLengkap ? '' : ' <span style="color:#c0392b;" title="Tarif belum ditetapkan">⚠</span>') + '</td><td>' + x.jumlahInstansi + '</td><td>' + f(x.porsiKecil) + '</td><td>' + f(x.porsiBesar) + '</td><td>' + rp(x.bahanBaku) + '</td><td>' + rp(x.sewaFasilitas) + '</td><td>' + rp(x.operasional) + '</td><td><b>' + rp(x.totalPagu) + '</b></td></tr>'; }).join('') : '<tr><td colspan="8"><div class="empty-state">Tidak ada PM harian terverifikasi pada rentang ini.</div></td></tr>') + '</tbody></table>';
+      return '<table><thead><tr><th>Tanggal</th><th>Instansi</th><th>Porsi Kecil</th><th>Porsi Besar</th><th>Bahan Baku</th><th>Sewa Fasilitas</th><th>Operasional</th><th>Total Pagu</th></tr></thead><tbody>' + (b.length ? b.map(function (x) { return '<tr><td>' + tglIndo(x.tanggal) + (x.tarifLengkap ? '' : ' <span style="color:#c0392b;" title="Tarif belum ditetapkan">(!)</span>') + '</td><td>' + x.jumlahInstansi + '</td><td>' + f(x.porsiKecil) + '</td><td>' + f(x.porsiBesar) + '</td><td>' + rp(x.bahanBaku) + '</td><td>' + rp(x.sewaFasilitas) + '</td><td>' + rp(x.operasional) + '</td><td><b>' + rp(x.totalPagu) + '</b></td></tr>'; }).join('') : '<tr><td colspan="8"><div class="empty-state">Tidak ada PM harian terverifikasi pada rentang ini.</div></td></tr>') + '</tbody></table>';
     }
     if (tab === 'pic') {
       return '<table id="sbiTabelPic"><thead><tr><th>Nama PIC</th><th>Jabatan</th><th>No. Rekening</th><th>Instansi</th><th>Sekolah</th><th>Posyandu</th><th>Total</th></tr></thead><tbody>' +
@@ -82,17 +82,25 @@
       return '<tr><td>' + esc(r.nama) + (r.nonaktif ? ' <i style="color:#757575;">(nonaktif)</i>' : '') + '</td><td>' + f(r.totalPorsi) + '</td><td>' + (r.tarifRingkas ? rp(r.tarifRingkas.split('–')[0]) + (r.tarifRingkas.indexOf('–') > 0 ? '–' + rp(r.tarifRingkas.split('–')[1]) : '') : '—') + '</td><td>' + r.hariPm + '</td><td><b>' + rp(r.total) + '</b></td><td style="font-size:12px;">' + picTeks(r) + '</td><td>' + badge(r.status) + '</td></tr>'; }).join('') +
       '<tr style="background:var(--color-surface,#f6f8fb);font-weight:700;"><td colspan="4">TOTAL POSYANDU</td><td>' + rp(ins.total.posyandu) + '</td><td colspan="2"></td></tr></tbody></table>';
   }
-  function csv() {
+  function csv() {   // nama lama dipertahankan; kini Excel (.xlsx) asli
     if (!hasil) { alert('Belum ada data. Klik Tampilkan dulu.'); return; }
-    const ins = hasil.insentif; let kepala, baris;
-    if (tab === 'pagu') { kepala = ['Tanggal', 'Instansi', 'Porsi Kecil', 'Porsi Besar', 'Bahan Baku', 'Sewa Fasilitas', 'Operasional', 'Total Pagu']; baris = hasil.pagu.baris.map(function (x) { return [x.tanggal, x.jumlahInstansi, x.porsiKecil, x.porsiBesar, x.bahanBaku, x.sewaFasilitas, x.operasional, x.totalPagu]; }); }
-    else if (!ins) { alert('Insentif belum tersedia (BAST belum dihubungkan).'); return; }
-    else if (tab === 'pic') { kepala = ['Nama PIC', 'Jabatan', 'No Rekening', 'Instansi', 'Sekolah', 'Posyandu', 'Total']; baris = ins.perPic.map(function (p) { return [p.nama, p.jabatan, p.rekening, p.instansi.join(' / '), p.sekolah, p.posyandu, p.total]; }); }
-    else if (tab === 'sekolah') { kepala = ['Instansi', 'Jumlah Siswa', 'Jenjang', 'Tarif per Hari', 'Hari PM', 'Total', 'PIC', 'Status']; baris = ins.sekolah.map(function (r) { return [r.nama, r.jumlahSiswa === null ? '' : r.jumlahSiswa, r.jenjang, r.tarifRingkas, r.hariPm, r.total, r.pic.map(function (p) { return p.nama; }).join(' / '), r.status]; }); }
-    else { kepala = ['Instansi', 'Total Porsi', 'Tarif per Porsi', 'Hari PM', 'Total', 'PIC', 'Status']; baris = ins.posyandu.map(function (r) { return [r.nama, r.totalPorsi, r.tarifRingkas, r.hariPm, r.total, r.pic.map(function (p) { return p.nama; }).join(' / '), r.status]; }); }
-    const q = function (v) { const s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    const blob = new Blob(['\uFEFF' + [kepala].concat(baris).map(function (r) { return r.map(q).join(','); }).join('\r\n')], { type: 'text/csv;charset=utf-8;' }), a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = 'biaya-' + tab + '-' + hasil.tanggalAwal + '-sd-' + hasil.tanggalAkhir + '.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    const ins = hasil.insentif, rentang = tglIndo(hasil.tanggalAwal) + ' s.d. ' + tglIndo(hasil.tanggalAkhir), nama = 'biaya-' + tab + '-' + hasil.tanggalAwal + '-sd-' + hasil.tanggalAkhir + '.xlsx';
+    const picTeks = function (r) { return r.pic.map(function (p) { return p.nama; }).join(' / '); };
+    if (tab === 'pagu') {
+      const t = hasil.pagu.total;
+      Xlsx.unduhTabel(nama, { nama: 'Pagu', judul: 'PAGU PER TANGGAL  ' + rentang, kolom: [{ judul: 'TANGGAL', lebar: 13, tipe: 'tengah' }, { judul: 'INSTANSI', lebar: 10, tipe: 'angka' }, { judul: 'PORSI KECIL', lebar: 12, tipe: 'angka' }, { judul: 'PORSI BESAR', lebar: 12, tipe: 'angka' }, { judul: 'BAHAN BAKU', lebar: 16, tipe: 'rp' }, { judul: 'SEWA FASILITAS', lebar: 16, tipe: 'rp' }, { judul: 'OPERASIONAL', lebar: 16, tipe: 'rp' }, { judul: 'TOTAL PAGU', lebar: 17, tipe: 'rp' }],
+        baris: hasil.pagu.baris.map(function (x) { return [tglIndo(x.tanggal), x.jumlahInstansi, x.porsiKecil, x.porsiBesar, x.bahanBaku, x.sewaFasilitas, x.operasional, x.totalPagu]; }), total: ['TOTAL', '', t.porsiKecil, t.porsiBesar, t.bahanBaku, t.sewaFasilitas, t.operasional, t.totalPagu] });
+    } else if (!ins) { alert('Insentif belum tersedia.'); }
+    else if (tab === 'pic') {
+      Xlsx.unduhTabel(nama, { nama: 'Per PIC', judul: 'INSENTIF PIC PER ORANG  ' + rentang, kolom: [{ judul: 'NAMA PIC', lebar: 28 }, { judul: 'JABATAN', lebar: 16 }, { judul: 'NO. REKENING', lebar: 18 }, { judul: 'INSTANSI', lebar: 44 }, { judul: 'SEKOLAH', lebar: 16, tipe: 'rp' }, { judul: 'POSYANDU', lebar: 16, tipe: 'rp' }, { judul: 'TOTAL', lebar: 17, tipe: 'rp' }],
+        baris: ins.perPic.map(function (p) { return [p.nama, p.jabatan || '', p.rekening ? String(p.rekening) : '', p.instansi.join(' / '), p.sekolah, p.posyandu, p.total]; }), total: ['TOTAL', '', '', '', ins.total.sekolah, ins.total.posyandu, ins.total.gabungan] });
+    } else if (tab === 'sekolah') {
+      Xlsx.unduhTabel(nama, { nama: 'Sekolah', judul: 'INSENTIF PIC SEKOLAH  ' + rentang, kolom: [{ judul: 'INSTANSI', lebar: 36 }, { judul: 'JUMLAH SISWA', lebar: 14, tipe: 'angka' }, { judul: 'JENJANG', lebar: 16 }, { judul: 'TARIF / HARI', lebar: 18, tipe: 'tengah' }, { judul: 'HARI PM', lebar: 10, tipe: 'angka' }, { judul: 'TOTAL', lebar: 16, tipe: 'rp' }, { judul: 'PIC', lebar: 28 }, { judul: 'STATUS', lebar: 24 }],
+        baris: ins.sekolah.map(function (r) { return [r.nama, r.jumlahSiswa === null ? '' : r.jumlahSiswa, r.jenjang, r.tarifRingkas, r.hariPm, r.total, picTeks(r), r.status === 'OK' ? '' : r.status]; }), total: ['TOTAL SEKOLAH', '', '', '', '', ins.total.sekolah, '', ''] });
+    } else {
+      Xlsx.unduhTabel(nama, { nama: 'Posyandu', judul: 'INSENTIF PIC POSYANDU  ' + rentang, kolom: [{ judul: 'INSTANSI', lebar: 36 }, { judul: 'TOTAL PORSI', lebar: 14, tipe: 'angka' }, { judul: 'TARIF / PORSI', lebar: 16, tipe: 'tengah' }, { judul: 'HARI PM', lebar: 10, tipe: 'angka' }, { judul: 'TOTAL', lebar: 16, tipe: 'rp' }, { judul: 'PIC', lebar: 28 }, { judul: 'STATUS', lebar: 24 }],
+        baris: ins.posyandu.map(function (r) { return [r.nama, r.totalPorsi, r.tarifRingkas, r.hariPm, r.total, picTeks(r), r.status === 'OK' ? '' : r.status]; }), total: ['TOTAL POSYANDU', '', '', '', ins.total.posyandu, '', ''] });
+    }
   }
   async function mulaiPanel() {
     try {

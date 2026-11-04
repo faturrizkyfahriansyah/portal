@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu Hari Ini — SPPG Jeungjing</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="styles/public.css">
+</head>
+<body class="pub-body">
+
+  <header class="pub-header">
+    <div class="pub-header-inner">
+      <a href="index.html" class="pub-header-brand">
+        <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional">
+        <img src="assets/logo.png" alt="Logo SPPG Jeungjing">
+        <span>SPPG Jeungjing</span>
+      </a>
+      <button type="button" class="pub-menu-btn" aria-label="Buka menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="pub-overlay"></div>
+  <aside class="pub-sidebar">
+    <button type="button" class="pub-sidebar-close" aria-label="Tutup menu">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <nav>
+      <a href="index.html">Beranda</a>
+      <a href="profil-sppg.html">Profil SPPG</a>
+      <a href="penerima-manfaat.html">Penerima Manfaat</a>
+      <a href="menu-hari-ini.html">Menu Hari Ini</a>
+      <a href="informasi-publik.html">Informasi</a>
+      <a href="kontak.html">Kontak</a>
+      <a href="portal.html" class="pub-sidebar-cta">Portal SPPG Jeungjing →</a>
+    </nav>
+  </aside>
+
+  <section class="pub-hero" style="padding:44px 0 40px;">
+    <div class="pub-wrap">
+      <div class="pub-hero-inner">
+        <p class="pub-eyebrow-plain" id="tglMenuHariIni">Memuat tanggal...</p>
+        <h1 style="font-size:clamp(28px,5vw,42px);">Menu Hari Ini</h1>
+        <p class="lede">Susunan menu bergizi seimbang yang disiapkan dan didistribusikan hari ini oleh dapur SPPG Jeungjing.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pub-section alt">
+    <div class="pub-wrap">
+      <div id="menuHariIniIsi">
+        <p class="empty-state">Memuat menu hari ini...</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pub-footer">
+    <div class="pub-wrap">
+      <strong>SPPG JEUNGJING</strong>
+      <p style="margin:10px 0 0;">Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang – Banten, 15730</p>
+      <hr class="rule">
+      <p class="fine">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
+    </div>
+  </footer>
+
+  <script src="modules/website-publik/public-nav.js"></script>
+  <script src="core/config.js"></script>
+  <script>
+    // Menu Hari Ini -- HALAMAN INI DIBUKA LEWAT QR CODE LABEL OMPRENG dalam
+    // jumlah banyak, jadi sengaja SANGAT ringan: cuma 1 panggilan API
+    // (getMenuHariIniPublik), tidak memuat dashboard/data lain apa pun.
+    // getMenuHariIniPublik mencocokkan tanggal HARI INI secara ketat (server)
+    // -- kalau Admin belum input menu utk hari ini, tampil "belum tersedia",
+    // BUKAN menu hari sebelumnya yang tersisa.
+    function escapeHtmlMenuHariIni_(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // Ikon per kata kunci umum makanan Indonesia -- SAMA PERSIS dengan yang
+    // dipakai Admin saat Preview (admin-website-publik.js), supaya yang
+    // Admin lihat di Preview = yang tampil di sini.
+    function ikonMenuItemPublik_(namaItem) {
+      const n = String(namaItem || '').toLowerCase();
+      const kamus = [
+        [/nasi/, ''], [/rendang|sapi|daging|empal|semur/, ''], [/ayam/, ''],
+        [/ikan|bandeng|lele|nila/, ''], [/tahu/, ''], [/tempe/, ''],
+        [/telur/, ''], [/sayur|tumis|sop|bayam|kangkung|labu|wortel|kol/, ''],
+        [/semangka|melon|pisang|pepaya|jeruk|apel|buah/, ''],
+        [/susu/, ''], [/roti/, ''], [/mie|bihun/, '']
+      ];
+      for (const [re, ikon] of kamus) { if (re.test(n)) return ikon; }
+      return '';
+    }
+
+    function tampilkanBelumTersedia_(judulTgl, wadah, pesan) {
+      if (judulTgl) judulTgl.textContent = 'Hari ini';
+      wadah.innerHTML = `<p style="color:var(--pub-ink-soft);text-align:center;padding:24px 0;">${pesan}</p>`;
+    }
+
+    (async function () {
+      const wadah = document.getElementById('menuHariIniIsi');
+      const judulTgl = document.getElementById('tglMenuHariIni');
+      try {
+        const url = GOOGLE_APPS_SCRIPT_WEB_APP_URL + '?action=getMenuHariIniPublik';
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (!json.success || !json.data) {
+          // §22: BUKAN halaman kosong -- pesan jelas + tombol Coba Lagi.
+          tampilkanBelumTersedia_(judulTgl, wadah, 'Menu untuk hari ini belum tersedia. Silakan kembali lagi nanti.');
+          return;
+        }
+
+        const m = json.data;
+        judulTgl.textContent = [m.hari, m.tanggal].filter(Boolean).join(', ') || 'Hari ini';
+
+        const itemMenu = String(m.menu || '').split('+').map(s => s.trim()).filter(Boolean);
+        let html = '';
+        if (itemMenu.length) {
+          html += '<div class="pub-menu-grid">' +
+            itemMenu.map(it => `<div class="pub-menu-item"><div class="label">${escapeHtmlMenuHariIni_(it)}</div></div>`).join('') +
+            '</div>';
+        }
+        if (m.komposisi) {
+          html += `<p style="margin-top:24px;font-size:13.5px;color:var(--pub-ink-soft);"><strong>Komposisi:</strong> ${escapeHtmlMenuHariIni_(m.komposisi)}</p>`;
+        }
+
+        const kategoriLabel = { kecil: 'Porsi Kecil', besar: 'Porsi Besar', balita: 'Balita', bumil: 'Ibu Hamil', busui: 'Ibu Menyusui' };
+        const gizi = m.gizi || {};
+        const barisGizi = Object.keys(kategoriLabel)
+          .map(k => ({ label: kategoriLabel[k], g: gizi[k] || {} }))
+          .filter(x => x.g.kkal || x.g.protein || x.g.lemak || x.g.karbo || x.g.serat);
+
+        if (barisGizi.length) {
+          html += '<p style="font-size:12.5px;font-weight:700;color:var(--pub-navy);margin:28px 0 12px;text-transform:uppercase;letter-spacing:.03em;">Kandungan Gizi per Porsi</p>';
+
+          // Desktop: tabel lebar. Mobile (<=640px): card ringkas per kategori.
+          // Keduanya dirender sekaligus, CSS (.pub-gizi-table-wrap / .pub-gizi-cards)
+          // yang menentukan mana yang tampil sesuai lebar layar (§13).
+          html += '<div class="pub-gizi-table-wrap"><table><thead><tr><th>Kategori</th><th>Kkal</th><th>Protein (g)</th><th>Lemak (g)</th><th>Karbo (g)</th><th>Serat (g)</th></tr></thead><tbody>' +
+            barisGizi.map(x => `<tr><td>${escapeHtmlMenuHariIni_(x.label)}</td><td>${escapeHtmlMenuHariIni_(x.g.kkal || '-')}</td><td>${escapeHtmlMenuHariIni_(x.g.protein || '-')}</td><td>${escapeHtmlMenuHariIni_(x.g.lemak || '-')}</td><td>${escapeHtmlMenuHariIni_(x.g.karbo || '-')}</td><td>${escapeHtmlMenuHariIni_(x.g.serat || '-')}</td></tr>`).join('') +
+            '</tbody></table></div>';
+
+          html += '<div class="pub-gizi-cards">' + barisGizi.map(x => `
+            <div class="pub-gizi-card">
+              <p class="judul">${escapeHtmlMenuHariIni_(x.label)}</p>
+              ${x.g.kkal ? `<div class="baris"><span>Energi</span><strong>${escapeHtmlMenuHariIni_(x.g.kkal)} kkal</strong></div>` : ''}
+              ${x.g.protein ? `<div class="baris"><span>Protein</span><strong>${escapeHtmlMenuHariIni_(x.g.protein)} g</strong></div>` : ''}
+              ${x.g.lemak ? `<div class="baris"><span>Lemak</span><strong>${escapeHtmlMenuHariIni_(x.g.lemak)} g</strong></div>` : ''}
+              ${x.g.karbo ? `<div class="baris"><span>Karbohidrat</span><strong>${escapeHtmlMenuHariIni_(x.g.karbo)} g</strong></div>` : ''}
+              ${x.g.serat ? `<div class="baris"><span>Serat</span><strong>${escapeHtmlMenuHariIni_(x.g.serat)} g</strong></div>` : ''}
+            </div>`).join('') + '</div>';
+        }
+
+        wadah.innerHTML = html || '<p style="color:var(--pub-ink-soft);text-align:center;padding:24px 0;">Menu untuk hari ini belum tersedia. Silakan kembali lagi nanti.</p>';
+      } catch (e) {
+        // §26: kegagalan HANYA memengaruhi komponen ini, bukan seluruh halaman -- + tombol Coba Lagi.
+        wadah.innerHTML = `
+          <p style="color:var(--pub-ink-soft);text-align:center;padding:24px 0 12px;">Menu Hari Ini belum dapat dimuat. Silakan coba lagi.</p>
+          <p style="text-align:center;"><button type="button" onclick="location.reload()" class="pub-btn pub-btn-outline" style="cursor:pointer;">Coba Lagi</button></p>`;
+        if (judulTgl) judulTgl.textContent = 'Hari ini';
+      }
+    })();
+  </script>
+</body>
+</html>

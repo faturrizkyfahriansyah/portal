@@ -21,7 +21,7 @@
   kartu.style.border = '1px solid #f0ad4e';
   kartu.innerHTML = `
     <div style="padding:14px;">
-      <h3 style="margin:0 0 6px;font-size:15px;color:var(--color-navy);">🔧 Migrasi Sistem Presensi V2 (Roster-First)</h3>
+      <h3 style="margin:0 0 6px;font-size:15px;color:var(--color-navy);">Migrasi Sistem Presensi V2 (Roster-First)</h3>
       <p style="font-size:12.5px;color:var(--color-text-muted);margin:0 0 10px;">
         Arsitektur presensi baru (1 baris per relawan per operasional) sudah dibangun tapi belum diaktifkan.
         Migrasi ini TIDAK menghapus/mengubah data lama (03_DATA_ABSENSI) -- hanya MENAMBAH struktur baru di sampingnya.

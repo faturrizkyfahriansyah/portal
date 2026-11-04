@@ -191,7 +191,7 @@ function lanjutkanKeForm() {
   el.fotoPreview.style.display = 'none';
   el.videoLive.style.display = 'none';
   el.cameraPlaceholder.style.display = 'block';
-  el.cameraPlaceholder.textContent = '📷 Menyiapkan kamera…';
+  el.cameraPlaceholder.textContent = 'Menyiapkan kamera…';
 
   el.stateKonfirmasi.style.display = 'none';
   el.stateForm.style.display = 'block';
@@ -211,7 +211,7 @@ async function mulaiKamera() {
   el.btnAmbilFoto.style.display = 'block';
   el.btnAmbilFoto.disabled = true;
   el.cameraPlaceholder.style.display = 'block';
-  el.cameraPlaceholder.textContent = '📷 Menyiapkan kamera…';
+  el.cameraPlaceholder.textContent = 'Menyiapkan kamera…';
   perbaruiTombolKirim();
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -277,7 +277,7 @@ function hentikanKamera() {
 
 function mulaiGps() {
   el.gpsRow.className = 'absensi-gps-row';
-  el.gpsRow.textContent = '📍 Mengambil lokasi Anda…';
+  el.gpsRow.textContent = 'Mengambil lokasi Anda…';
   el.zonaBadgeWrap.innerHTML = '';
   lokasiSaya = null;
   zonaValid = false;
@@ -308,7 +308,7 @@ function mulaiGps() {
 
 function tampilkanGpsGagal(pesan) {
   el.gpsRow.className = 'absensi-gps-row bad';
-  el.gpsRow.innerHTML = '⚠️ ' + escapeHtml(pesan) + '<br><button type="button" class="absensi-gps-retry" id="btnUlangGps">Coba Lagi</button>';
+  el.gpsRow.innerHTML = '' + escapeHtml(pesan) + '<br><button type="button" class="absensi-gps-retry" id="btnUlangGps">Coba Lagi</button>';
   document.getElementById('btnUlangGps').addEventListener('click', mulaiGps);
   perbaruiTombolKirim();
 }
@@ -317,7 +317,7 @@ function evaluasiZona() {
   const lokasiSppg = statusTerkini && statusTerkini.lokasiSppg;
   if (!lokasiSppg) {
     el.gpsRow.className = 'absensi-gps-row bad';
-    el.gpsRow.textContent = '⚠️ Lokasi SPPG belum diatur oleh Admin. Absensi belum dapat dilakukan.';
+    el.gpsRow.textContent = 'Lokasi SPPG belum diatur oleh Admin. Absensi belum dapat dilakukan.';
     zonaValid = false;
     perbaruiTombolKirim();
     return;
@@ -327,7 +327,7 @@ function evaluasiZona() {
   zonaValid = jarak <= lokasiSppg.radiusMeter;
 
   el.gpsRow.className = 'absensi-gps-row ok';
-  el.gpsRow.textContent = `📍 Lokasi terdeteksi (±${Math.round(lokasiSaya.akurasi)} m akurasi GPS).`;
+  el.gpsRow.textContent = `Lokasi terdeteksi (±${Math.round(lokasiSaya.akurasi)} m akurasi GPS).`;
 
   const badge = document.createElement('span');
   badge.className = 'absensi-zone-badge ' + (zonaValid ? 'ok' : 'bad');
@@ -337,8 +337,8 @@ function evaluasiZona() {
   // indikator visualnya). Logic zonaValid/pemblokiran SAMA SEKALI
   // tidak diubah -- cuma teks tampilannya.
   badge.textContent = zonaValid
-    ? `📍 Jarak Aktual: ${Math.round(jarak)} m dari ${lokasiSppg.nama}`
-    : `⚠️ Jarak Aktual: ${Math.round(jarak)} m dari ${lokasiSppg.nama} (di luar radius ${lokasiSppg.radiusMeter} m)`;
+    ? `Jarak Aktual: ${Math.round(jarak)} m dari ${lokasiSppg.nama}`
+    : `Jarak Aktual: ${Math.round(jarak)} m dari ${lokasiSppg.nama} (di luar radius ${lokasiSppg.radiusMeter} m)`;
   el.zonaBadgeWrap.innerHTML = '';
   el.zonaBadgeWrap.appendChild(badge);
 
@@ -506,7 +506,7 @@ function tampilkanSelesaiLengkap() {
   // kontainernya sama sekali (supaya layout 2 kolom selalu konsisten).
   const kotakFoto_ = (url, label) => url
     ? `<div class="absensi-detail-photo"><img src="${escapeHtml(url)}" alt="Swafoto ${label}" loading="lazy"><span>Swafoto ${label}</span></div>`
-    : `<div class="absensi-detail-photo absensi-detail-photo--kosong"><span class="absensi-detail-photo-placeholder">📷 Foto ${label} belum tersedia</span><span>Swafoto ${label}</span></div>`;
+    : `<div class="absensi-detail-photo absensi-detail-photo--kosong"><span class="absensi-detail-photo-placeholder">Foto ${label} belum tersedia</span><span>Swafoto ${label}</span></div>`;
   const foto = kotakFoto_(s.masuk.fotoUrl, 'Masuk') + kotakFoto_(s.pulang.fotoUrl, 'Pulang');
   el.detailFotoWrap.innerHTML = foto;
 

@@ -105,7 +105,7 @@
           document.getElementById('fSerat').value = b.seratG ?? '';
           document.getElementById('fCatatan').value = b.sumberCatatan || '';
           versiSedangDiedit = b.versi;
-        } catch (err) { alert('⚠️ ' + err.message); return; }
+        } catch (err) { alert('' + err.message); return; }
       }
       document.getElementById('kartuForm').style.display = 'block';
       document.getElementById('kartuForm').scrollIntoView({ behavior: 'smooth' });
@@ -137,7 +137,7 @@
           bukaForm(idSedangDiedit); // muat ulang -- versi terbaru otomatis terbawa, perubahan yg belum disimpan hilang
           return;
         }
-        galat.textContent = '⚠️ ' + err.message;
+        galat.textContent = '' + err.message;
         galat.style.display = 'block';
       }
     });

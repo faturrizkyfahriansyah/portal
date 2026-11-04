@@ -117,17 +117,9 @@
    data lain terlihat menembus/tumpang tindih dgn header saat halaman
    digeser. */
 .table-wrap { background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto; overflow-y: visible; box-shadow: var(--shadow-card); margin-bottom: 22px; position: relative; }
-/* BARU 25 Okt 2026 (akar masalah "tabel kepotong/nggak pernah bener" yg
-   dilaporkan berulang kali -- Master Tarif, dll): tabelnya SEBENARNYA
-   SUDAH bisa digeser (overflow-x:auto), masalahnya TIDAK ADA TANDA
-   VISUAL bahwa masih ada kolom di sebelah kanan. Bayangan tipis ini
-   kasih isyarat "masih ada lagi, geser" -- SELALU tampil kalau tabel
-   LEBIH LEBAR dari .table-wrap, tidak mengganggu kalau tidak overflow. */
-.table-wrap::after {
-  content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 28px;
-  background: linear-gradient(90deg, transparent, rgba(0,0,0,.08));
-  pointer-events: none; border-radius: 0 var(--radius-md) var(--radius-md) 0;
-}
+/* 4 Nov 2026 (keluhan Admin: "setiap tabel ada bayangan hitam/gelap samar di pojok"): bayangan gradien di tepi kanan .table-wrap
+   (isyarat "masih ada kolom, geser", ditambah 25 Okt) DIHAPUS. Ia selalu tampil dan terbaca sebagai noda gelap di pojok SEMUA tabel.
+   Tabel tetap bisa digeser (overflow-x:auto, bilah geser terlihat); tabel yang lebar kini dipadatkan, bukan diberi bayangan. */
 /* Diperluas jadi GLOBAL 22 Okt 2026 (dilaporkan berulang kali di
    beberapa tabel BERBEDA -- Manajemen Hak Akses, Rekap per Relawan,
    Kelompok Rotasi, Pola Shift): border-collapse:separate dipasang di
@@ -366,3 +358,28 @@ tbody tr:hover { background: var(--color-bg); }
 .mha-riwayat-item .waktu { font-size: 11px; color: var(--color-text-muted); }
 .mha-riwayat-item .judul { font-weight: 700; color: #0B2D6B; margin: 3px 0; }
 .mha-riwayat-item .pelaku { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }
+
+/* ===== 4 Nov 2026: Rekap Mingguan bentuk MATRIKS (nama, divisi, rekening, hari Sen..Min berwarna, total) =====
+   DIPADATKAN agar MUAT di area konten (~1030px pada layar 1366px): nama & divisi boleh turun baris, kolom hari 34px. */
+.table-wrap .rmg-tabel { border-collapse: collapse; width: auto; min-width: 100%; font-size: 12px; }
+.table-wrap .rmg-tabel th, .table-wrap .rmg-tabel td { padding: 4px 5px; border: 1px solid #e3e7ee; background: #fff; vertical-align: middle; }
+.table-wrap .rmg-tabel thead th { background: #eef2f8; color: #1f3864; font-weight: 700; text-align: center; line-height: 1.15; white-space: nowrap; font-size: 11px; text-transform: none; letter-spacing: 0; padding: 5px 3px; }
+.table-wrap .rmg-tabel td.rmg-nama { white-space: normal; min-width: 120px; max-width: 165px; line-height: 1.25; }
+.table-wrap .rmg-tabel td.rmg-div { white-space: normal; min-width: 70px; max-width: 105px; line-height: 1.25; font-size: 11.5px; }
+.table-wrap .rmg-tabel td.rmg-rek { white-space: nowrap; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.table-wrap .rmg-tabel th.rmg-libur, .table-wrap .rmg-tabel td.rmg-libur { background: #e6e8ec; color: #6b7280; }
+.table-wrap .rmg-tabel th.rmg-ini { box-shadow: inset 0 -3px 0 #e65100; }
+.table-wrap .rmg-tabel th small { display: block; font-weight: 500; font-size: 10.5px; color: #55606f; }
+.table-wrap .rmg-tabel td.rmg-hari { width: 34px; min-width: 34px; text-align: center; padding: 4px 1px; font-weight: 700; }
+.table-wrap .rmg-tabel.rmg-rapat td.rmg-hari { width: 26px; min-width: 26px; }
+.table-wrap .rmg-tabel td.rmg-angka { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.table-wrap .rmg-tabel td.rmg-tengah { text-align: center; white-space: nowrap; }
+.table-wrap .rmg-tabel tr.rmg-awal-divisi td { border-top: 2px solid #b8c2d4; }
+.table-wrap .rmg-tabel tr.rmg-jumlah td { background: #f3f5f9; font-weight: 700; white-space: nowrap; }
+.table-wrap .rmg-tabel tr.rmg-total td { background: #e8edf5; font-weight: 800; border-top: 2px solid #1f3864; white-space: nowrap; }
+.rmg-H { background: #c8e6c9 !important; color: #1b5e20; } .rmg-T { background: #ffe0b2 !important; color: #e65100; }
+.rmg-I { background: #bbdefb !important; color: #0d47a1; } .rmg-S { background: #e1bee7 !important; color: #6a1b9a; }
+.rmg-C { background: #b2dfdb !important; color: #004d40; } .rmg-A { background: #ffcdd2 !important; color: #b71c1c; } .rmg-B { color: #9aa3b0; font-weight: 400 !important; }
+.rmg-legenda { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; margin: 6px 0 10px; align-items: center; }
+.rmg-legenda span { display: inline-flex; align-items: center; gap: 5px; }
+.rmg-legenda i { display: inline-block; min-width: 20px; height: 18px; line-height: 18px; text-align: center; border-radius: 4px; font-style: normal; font-weight: 700; font-size: 11.5px; padding: 0 3px; }

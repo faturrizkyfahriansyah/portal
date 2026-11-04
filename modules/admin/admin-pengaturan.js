@@ -104,11 +104,11 @@
   // 7. PEMULIHAN ID RELAWAN
   // ==========================================================
   const LABEL_STATUS_PEMETAAN = {
-    cocok: '✅ Cocok otomatis (cek sekali lagi sebelum diterapkan)',
-    mirip: '🟡 Nama MIRIP tapi tidak persis sama (mungkin beda ejaan/typo) — WAJIB dicek manual, jangan langsung percaya',
-    ambigu: '⚠️ Ada lebih dari 1 nama sama/mirip — pilih manual',
-    tidak_ketemu: '❌ Nama tidak ditemukan di data relawan saat ini — pilih manual atau lewati',
-    tanpa_nama: '❌ Tidak ada riwayat presensi sama sekali — pilih manual atau lewati'
+    cocok: 'Cocok otomatis (cek sekali lagi sebelum diterapkan)',
+    mirip: 'Nama MIRIP tapi tidak persis sama (mungkin beda ejaan/typo) — WAJIB dicek manual, jangan langsung percaya',
+    ambigu: 'Ada lebih dari 1 nama sama/mirip — pilih manual',
+    tidak_ketemu: 'Nama tidak ditemukan di data relawan saat ini — pilih manual atau lewati',
+    tanpa_nama: 'Tidak ada riwayat presensi sama sekali — pilih manual atau lewati'
   };
 
   function opsiRelawanUntukDropdown_(daftarRelawan, terpilihSaatIni) {
@@ -133,7 +133,7 @@
         }
 
         wadah.innerHTML = `
-          <p style="font-size:12.5px;color:var(--color-text-muted);margin:0 0 10px;">Ditemukan ${usulan.length} ID lama yang perlu ditinjau. Baris dengan tanda 🔑 punya akun login — paling mendesak diperbaiki dulu.</p>
+          <p style="font-size:12.5px;color:var(--color-text-muted);margin:0 0 10px;">Ditemukan ${usulan.length} ID lama yang perlu ditinjau. Baris dengan tanda punya akun login — paling mendesak diperbaiki dulu.</p>
           <div id="daftarPemetaanId" style="display:flex;flex-direction:column;gap:10px;"></div>
           <button type="button" class="btn-mini primary" id="btnTerapkanPemetaanId" style="margin-top:14px;">Terapkan Pemetaan yang Dipilih</button>
         `;
@@ -141,7 +141,7 @@
         const daftarEl = document.getElementById('daftarPemetaanId');
         daftarEl.innerHTML = usulan.map((u, i) => `
           <div class="panel-block" style="padding:12px;${u.status !== 'cocok' ? 'border-left:4px solid #b9852f;' : ''}">
-            <p style="margin:0 0 6px;font-size:13px;"><strong>${u.adaAkunLogin ? '🔑 ' : ''}${escapeHtml(u.idLama)}</strong> — ${escapeHtml(u.nama || '(tidak ada nama di riwayat)')} ${u.jumlahAbsensi ? `<span style="color:var(--color-text-muted);">(${u.jumlahAbsensi} riwayat presensi)</span>` : ''}</p>
+            <p style="margin:0 0 6px;font-size:13px;"><strong>${u.adaAkunLogin ? '' : ''}${escapeHtml(u.idLama)}</strong> — ${escapeHtml(u.nama || '(tidak ada nama di riwayat)')} ${u.jumlahAbsensi ? `<span style="color:var(--color-text-muted);">(${u.jumlahAbsensi} riwayat presensi)</span>` : ''}</p>
             <p style="margin:0 0 8px;font-size:12px;color:var(--color-text-muted);">${LABEL_STATUS_PEMETAAN[u.status] || u.status}</p>
             <select id="pemetaanPilihan${i}" data-id-lama="${escapeHtml(u.idLama)}">${opsiRelawanUntukDropdown_(daftarRelawan, u.idBaruUsulan)}</select>
           </div>

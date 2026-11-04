@@ -43,7 +43,7 @@
         <td>${escapeHtml(r.ringkasan || '-')}</td>
       </tr>`).join('');
     } catch (err) {
-      el.tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
+      el.tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">${escapeHtml(err.message)}</div></td></tr>`;
     }
   }
 
@@ -60,12 +60,7 @@
     const baris = dataTerakhir.map(r => [
       formatWaktuLaporan_(r.waktu), LABEL_AKSI[r.aksi] || r.aksi, r.petugas || '', r.keterangan || '', r.ringkasan || ''
     ]);
-    const csv = [header, ...baris].map(row => row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'laporan-koreksi-presensi-' + el.dari.value + '-sd-' + el.sampai.value + '.csv';
-    a.click();
+    Xlsx.unduhDaftar('laporan-koreksi-presensi-' + el.dari.value + '-sd-' + el.sampai.value + '.xlsx', [header, ...baris], { nama: 'Koreksi Presensi' });
   });
 
   isiDefaultTanggal();
@@ -97,7 +92,7 @@
         <td><span class="badge ${String(r.status).toUpperCase() === 'AKTIF' ? 'aktif' : 'nonaktif'}">${escapeHtml(r.status)}</span></td>
       </tr>`).join('');
     } catch (err) {
-      elR.tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
+      elR.tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">${escapeHtml(err.message)}</div></td></tr>`;
     }
   }
   elR.btnMuat.addEventListener('click', muatLaporanRelawan);
@@ -105,12 +100,7 @@
     if (!dataRelawanTerakhir.length) { showError('Belum ada data -- klik Tampilkan dulu.'); return; }
     const header = ['ID', 'Nama', 'Divisi', 'Status'];
     const baris = dataRelawanTerakhir.map(r => [r.id, r.nama, r.divisi || '', r.status]);
-    const csv = [header, ...baris].map(row => row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'laporan-relawan.csv';
-    a.click();
+    Xlsx.unduhDaftar('laporan-relawan.xlsx', [header, ...baris], { nama: 'Relawan' });
   });
   muatLaporanRelawan();
 
@@ -148,7 +138,7 @@
         <td><span class="badge ${r.status === 'sesuai' ? 'aktif' : 'nonaktif'}">${labelStatus[r.status] || r.status}</span></td>
       </tr>`).join('');
     } catch (err) {
-      elJ.tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
+      elJ.tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">${escapeHtml(err.message)}</div></td></tr>`;
     }
   }
   elJ.btnMuat.addEventListener('click', muatLaporanJadwal);
@@ -156,12 +146,7 @@
     if (!dataJadwalTerakhir.length) { showError('Belum ada data -- klik Tampilkan dulu.'); return; }
     const header = ['Nama', 'Divisi', 'Target', 'Terjadwal', 'Status'];
     const baris = dataJadwalTerakhir.map(r => [r.nama, r.divisi || '', r.target, r.terjadwal, r.status]);
-    const csv = [header, ...baris].map(row => row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'laporan-jadwal-penugasan-' + elJ.periode.value + '.csv';
-    a.click();
+    Xlsx.unduhDaftar('laporan-jadwal-penugasan-' + elJ.periode.value + '.xlsx', [header, ...baris], { nama: 'Jadwal Penugasan' });
   });
   isiDropdownPeriodeDivisiLaporan();
 })();

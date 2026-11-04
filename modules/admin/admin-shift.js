@@ -322,7 +322,7 @@
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button type="button" class="btn-mini primary" style="margin-top:8px;" data-aksi-koreksi="${escapeHtml(h.idAbsensi)}" data-koreksi-tujuan-idx="${i}">Koreksi ke Tanggal Ini</button>
             ${!h.jamMasuk ? `<button type="button" class="btn-mini" style="margin-top:8px;color:#1a7a3c;" data-aksi-tandai-hadir="${escapeHtml(h.idAbsensi)}">✓ Tandai Hadir Manual</button>` : ''}
-            <button type="button" class="btn-mini" style="margin-top:8px;color:#b23a3a;" data-aksi-hapus="${escapeHtml(h.idAbsensi)}">🗑️ Hapus Baris Ini</button>
+            <button type="button" class="btn-mini" style="margin-top:8px;color:#b23a3a;" data-aksi-hapus="${escapeHtml(h.idAbsensi)}">Hapus Baris Ini</button>
           </div>
         </div>`).join('');
 
@@ -616,7 +616,7 @@
         (cache.divisi || []).map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
       renderDaftarTemuan_();
     } catch (err) {
-      elTemuan.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      elTemuan.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
   pmrPeriodeEl.addEventListener('change', muatPemeriksaan_);
@@ -694,7 +694,7 @@
           <td data-label="Divisi"><b>${escapeHtml(d.divisi)}</b></td>
           <td data-label="Status"><span class="badge ${BADGE_STATUS_PTP[d.status] || 'nonaktif'}">${LABEL_STATUS_PTP[d.status] || d.status}</span></td>
           <td data-label="Versi">${d.versi || '-'}</td>
-          <td data-label="Sinkronisasi">${d.statusSinkronisasi === 'TERSINKRON' ? '✅ Tersinkron' : d.statusSinkronisasi === 'GAGAL' ? '⚠️ Gagal' : d.statusSinkronisasi === 'MENUNGGU' ? '⏳ Menunggu' : '-'}</td>
+          <td data-label="Sinkronisasi">${d.statusSinkronisasi === 'TERSINKRON' ? 'Tersinkron' : d.statusSinkronisasi === 'GAGAL' ? 'Gagal' : d.statusSinkronisasi === 'MENUNGGU' ? 'Menunggu' : '-'}</td>
           <td data-label="Aksi"><button type="button" class="btn-mini btn-lihat-detail-penetapan">Lihat Detail</button></td>
         </tr>`).join('');
 
@@ -702,7 +702,7 @@
         btn.addEventListener('click', () => muatDetailPenetapan_(btn.closest('tr').dataset.divisi));
       });
     } catch (err) {
-      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">${escapeHtml(err.message)}</div></td></tr>`;
     }
   }
   ptpPeriodeEl.addEventListener('change', muatTabelPenetapan_);
@@ -719,14 +719,14 @@
 
       if (s.validasi.jumlahKesalahan > 0) {
         html += `<div style="background:#fdecea;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
-          <p style="margin:0 0 6px;font-weight:700;color:#b3261e;">⚠ ${s.validasi.jumlahKesalahan} Kesalahan menghambat penetapan</p>
+          <p style="margin:0 0 6px;font-weight:700;color:#b3261e;">${s.validasi.jumlahKesalahan} Kesalahan menghambat penetapan</p>
           ${s.validasi.kesalahan.slice(0, 8).map(k => `<p style="margin:3px 0;font-size:12.5px;">${escapeHtml(k.penjelasan)}</p>`).join('')}
         </div>`;
       }
 
       html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">`;
       html += `<button type="button" class="btn-mini primary" id="ptpBtnTetapkan" ${s.validasi.valid ? '' : 'disabled'}>${s.status === 'DITETAPKAN' ? 'Tetapkan Ulang (Revisi)' : 'Tetapkan Jadwal Divisi'}</button>`;
-      if (s.statusSinkronisasi === 'GAGAL') html += `<button type="button" class="btn-mini" id="ptpBtnSinkronUlang">🔄 Coba Sinkronisasi Kembali</button>`;
+      if (s.statusSinkronisasi === 'GAGAL') html += `<button type="button" class="btn-mini" id="ptpBtnSinkronUlang">Coba Sinkronisasi Kembali</button>`;
       html += `</div>`;
 
       html += `<p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 6px;">Riwayat Perubahan</p><div id="ptpRiwayat"></div></div>`;
@@ -775,7 +775,7 @@
         elRiwayat.innerHTML = '<p style="font-size:12px;color:var(--color-text-muted);">Belum ada riwayat.</p>';
       }
     } catch (err) {
-      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      el.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 
@@ -805,7 +805,7 @@
         });
       });
     } catch (err) {
-      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      el.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 
@@ -835,7 +835,7 @@
         });
       });
     } catch (err) {
-      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      el.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 
@@ -920,7 +920,7 @@
       pbjDataTerakhir = { daftarDivisi, idPeriode };
       renderPratinjauJadwal_(hasil);
     } catch (err) {
-      elHasil.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      elHasil.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   });
 
@@ -958,7 +958,7 @@
     // tidak membingungkan. "Bentuk Ulang" tetap terpisah krn
     // perilakunya GENUINELY beda (hapus+buat ulang baris yg belum absen).
     html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
-      <button type="button" class="btn-mini primary" id="pbjBtnTerapkan">✅ Terapkan ke Jadwal</button>
+      <button type="button" class="btn-mini primary" id="pbjBtnTerapkan">Terapkan ke Jadwal</button>
       <button type="button" class="btn-mini" id="pbjBtnBentukUlang">Bentuk Ulang (baris belum absen saja)</button>
     </div>`;
     elHasil.innerHTML = html;

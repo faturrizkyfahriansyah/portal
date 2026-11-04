@@ -161,10 +161,10 @@ const offlineAbsensi = (function () {
     el.style.cssText += 'background:#fff8e6;border:1px solid #e8c46a;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;color:#7a5c12;';
     let html = '';
     if (menunggu.length) {
-      html += `<p style="margin:0;">📶 ${menunggu.length} absensi menunggu sinkronisasi (akan otomatis terkirim saat koneksi stabil).</p>`;
+      html += `<p style="margin:0;">${menunggu.length} absensi menunggu sinkronisasi (akan otomatis terkirim saat koneksi stabil).</p>`;
     }
     if (gagal.length) {
-      html += `<p style="margin:${menunggu.length ? '6px' : '0'} 0 0;color:#b23a3a;">⚠️ ${gagal.length} absensi gagal disinkronkan (bukan soal koneksi -- perlu dicoba manual lagi atau hubungi Admin).</p>`;
+      html += `<p style="margin:${menunggu.length ? '6px' : '0'} 0 0;color:#b23a3a;">${gagal.length} absensi gagal disinkronkan (bukan soal koneksi -- perlu dicoba manual lagi atau hubungi Admin).</p>`;
     }
     el.innerHTML = html;
   }

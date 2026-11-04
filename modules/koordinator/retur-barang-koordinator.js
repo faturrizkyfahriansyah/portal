@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </table>
         </div>`;
     } catch (err) {
-      elIsi.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      elIsi.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 

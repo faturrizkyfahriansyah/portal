@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const gridBenef = document.querySelector('.pub-benef-grid');
   if (!gridMenu && !gridBenef) return; // halaman ini tidak punya kedua elemen -- tidak relevan
 
-  const IKON = { karbohidrat: '🍚', laukHewani: '🍗', laukNabati: '🌱', sayur: '🥬', buah: '🍉', pelengkap: '🥛' };
+  const IKON = { karbohidrat: '', laukHewani: '', laukNabati: '', sayur: '', buah: '', pelengkap: '' };
   const LABEL_KATEGORI = { karbohidrat: 'Karbohidrat', laukHewani: 'Protein Hewani', laukNabati: 'Protein Nabati', sayur: 'Serat & Vitamin', buah: 'Buah', pelengkap: 'Pelengkap' };
 
   if (gridMenu) {

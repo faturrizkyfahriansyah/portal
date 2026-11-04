@@ -58,11 +58,11 @@
 
     const headerHilang = HEADER_WAJIB.filter(h => !header.includes(h));
     if (headerHilang.length) {
-      wadahHasil.innerHTML = `<p style="color:#b23a3a;font-size:13px;">❌ Header CSV tidak sesuai. Kolom wajib: ${HEADER_WAJIB.join(', ')}. Kolom hilang: ${headerHilang.join(', ')}.</p>`;
+      wadahHasil.innerHTML = `<p style="color:#b23a3a;font-size:13px;">Header CSV tidak sesuai. Kolom wajib: ${HEADER_WAJIB.join(', ')}. Kolom hilang: ${headerHilang.join(', ')}.</p>`;
       return;
     }
     if (!rows.length) {
-      wadahHasil.innerHTML = '<p style="color:#b23a3a;font-size:13px;">❌ File CSV kosong (tidak ada baris data setelah header).</p>';
+      wadahHasil.innerHTML = '<p style="color:#b23a3a;font-size:13px;">File CSV kosong (tidak ada baris data setelah header).</p>';
       return;
     }
 
@@ -87,7 +87,7 @@
       }
 
       if (preview.jumlahValid > 0) {
-        html += `<button type="button" class="btn-submit" id="btnKonfirmasiImport" style="width:100%;margin-top:12px;">✅ Impor ${preview.jumlahValid} Relawan yang Valid</button>`;
+        html += `<button type="button" class="btn-submit" id="btnKonfirmasiImport" style="width:100%;margin-top:12px;">Impor ${preview.jumlahValid} Relawan yang Valid</button>`;
       } else {
         html += '<p style="font-size:13px;color:var(--color-text-muted);margin-top:10px;">Tidak ada data valid untuk diimpor.</p>';
       }
@@ -101,18 +101,18 @@
           btnKonfirmasi.textContent = 'Mengimpor...';
           try {
             const hasil = await apiPost('importRelawanMassal', { token: token(), rows: dataValidUntukImport, konfirmasi: true });
-            wadahHasil.innerHTML = `<p style="color:#1a7a4c;font-size:13.5px;font-weight:700;">✅ Berhasil mengimpor ${hasil.jumlahBerhasil} relawan baru.</p>`;
+            wadahHasil.innerHTML = `<p style="color:#1a7a4c;font-size:13.5px;font-weight:700;">Berhasil mengimpor ${hasil.jumlahBerhasil} relawan baru.</p>`;
             showSuccess(hasil.jumlahBerhasil + ' relawan berhasil diimpor.');
             document.getElementById('inputCsvImport').value = '';
           } catch (err) {
             showError(err.message);
             btnKonfirmasi.disabled = false;
-            btnKonfirmasi.textContent = '✅ Coba Impor Lagi';
+            btnKonfirmasi.textContent = 'Coba Impor Lagi';
           }
         });
       }
     } catch (err) {
-      wadahHasil.innerHTML = `<p style="color:#b23a3a;font-size:13px;">❌ ${escapeHtml(err.message)}</p>`;
+      wadahHasil.innerHTML = `<p style="color:#b23a3a;font-size:13px;">${escapeHtml(err.message)}</p>`;
     }
   }
 

@@ -88,13 +88,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     el.stokHabis.textContent = d.stokHabis;
 
     if (!d.perluPerhatian.length) {
-      el.stokPerluPerhatian.innerHTML = '<div class="empty-state">Semua stok dalam kondisi aman. 🎉</div>';
+      el.stokPerluPerhatian.innerHTML = '<div class="empty-state">Semua stok dalam kondisi aman.</div>';
       return;
     }
     el.stokPerluPerhatian.innerHTML = d.perluPerhatian.map(b => `
       <div class="stok-perhatian-row">
         <div><p>${escapeHtml(b.nama)}</p><small>Stok: ${b.stok} ${escapeHtml(b.satuan)} · Minimum: ${b.minimum} ${escapeHtml(b.satuan)}</small></div>
-        <span class="stok-badge stok-badge-${b.status.toLowerCase()}">${b.status === 'HABIS' ? '🔴 Habis' : '🟡 Menipis'}</span>
+        <span class="stok-badge stok-badge-${b.status.toLowerCase()}">${b.status === 'HABIS' ? 'Habis' : 'Menipis'}</span>
       </div>`).join('');
   }
 
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       el.stokDaftarBarang.innerHTML = cacheBarang.map(b => `
         <div class="stok-perhatian-row">
           <div><p><strong>${escapeHtml(b.kode || '-')}</strong> — ${escapeHtml(b.nama)}</p><small>${escapeHtml(b.namaKategori)} · Stok: ${b.stok} ${escapeHtml(b.satuan)}</small></div>
-          <span class="stok-badge stok-badge-${b.status.toLowerCase()}">${b.status === 'AMAN' ? '🟢' : b.status === 'MENIPIS' ? '🟡' : '🔴'} ${b.status}</span>
+          <span class="stok-badge stok-badge-${b.status.toLowerCase()}">${b.status}</span>
         </div>`).join('');
     } catch (err) {
       showError(err.message);
@@ -136,10 +136,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const baris = document.createElement('div');
     baris.className = 'stok-item-row';
     baris.innerHTML = `
-      <input type="text" class="stok-item-cari" placeholder="🔍 Cari ID/nama barang..." autocomplete="off">
+      <input type="text" class="stok-item-cari" placeholder="Cari ID/nama barang..." autocomplete="off">
       <select class="stok-item-barang">${opsiBarang_()}</select>
       <input type="number" class="stok-item-jumlah" placeholder="Jumlah" min="0.01" step="0.01">
-      <button type="button" title="Hapus baris">🗑</button>`;
+      <button type="button" title="Hapus baris">Hapus</button>`;
     baris.querySelector('button').addEventListener('click', () => baris.remove());
 
     const inputCari = baris.querySelector('.stok-item-cari');
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!list.length) { el.stokRiwayatList.innerHTML = '<div class="empty-state">Belum ada transaksi.</div>'; return; }
       el.stokRiwayatList.innerHTML = list.map(r => `
         <div class="stok-perhatian-row">
-          <div><p>${r.jenis === 'MASUK' ? '📥' : '📤'} ${escapeHtml(r.namaBarang)} · ${r.jumlah} ${escapeHtml(r.satuan)}</p>
+          <div><p>${r.jenis === 'MASUK' ? 'Masuk' : 'Keluar'}: ${escapeHtml(r.namaBarang)} · ${r.jumlah} ${escapeHtml(r.satuan)}</p>
           <small>${escapeHtml(r.tanggal)} · ${escapeHtml(r.nomorTransaksi)} · Petugas: ${escapeHtml(r.petugas)}</small></div>
         </div>`).join('');
     } catch (err) {

@@ -81,7 +81,7 @@
       el.statusBadge.className = 'badge ' + (KELAS_STATUS[d.status] || '');
       if (d.jumlahAnomali) {
         el.anomali.style.display = 'block';
-        el.anomali.textContent = '⚠️ ' + d.jumlahAnomali + ' baris jadwal relawan ini tercatat di luar Kalender Operasional periode ini -- perlu diperiksa manual.';
+        el.anomali.textContent = '' + d.jumlahAnomali + ' baris jadwal relawan ini tercatat di luar Kalender Operasional periode ini -- perlu diperiksa manual.';
       } else { el.anomali.style.display = 'none'; }
 
       el.tbody.innerHTML = d.daftarTanggal.map(t => {
@@ -131,7 +131,7 @@
       // tidak digenerate lagi sejak Perbaikan 3/4/5/6 -- keduanya
       // sekarang bagian dari form Koreksi Absen (dropdown Status Koreksi).
     } catch (err) {
-      el.tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">❌ ${escapeHtml(err.message)}</div></td></tr>`;
+      el.tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">${escapeHtml(err.message)}</div></td></tr>`;
     }
   }
 

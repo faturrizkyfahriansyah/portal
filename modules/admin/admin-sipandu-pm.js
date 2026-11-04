@@ -18,8 +18,9 @@
   const BELUM = 'SIPANDU_V2_BELUM_DISAMBUNGKAN';
   const KAT = [['pk', 'PK'], ['pb', 'PB'], ['bumil', 'Ibu Hamil'], ['busui', 'Ibu Menyusui'], ['balita', 'Balita']];
 
-  let S = { tanggal: isoLokal(new Date()), data: null, mode: 'baru', kotor: false };
-  let sudahMuat = false;
+  const kotakRingkas = function (id, label, redup) { return '<div style="text-align:center;padding:10px 4px;background:var(--color-surface,#f6f8fb);border-radius:10px;"><div id="' + id + '" style="font-size:18px;font-weight:800;color:' + (redup ? 'var(--color-text-muted,#55606f)' : 'var(--color-navy,#1f3864)') + ';">–</div><div style="font-size:11px;color:var(--color-text-muted,#55606f);margin-top:2px;">' + label + '</div></div>'; };
+  let S = { tanggal: isoLokal(new Date()), data: null, mode: 'baru', kotor: false, sertakanNonaktif: false };
+  let sudahMuat = false, urutMuat = 0;   // penjaga: jawaban lama (tanggal sebelumnya) tidak boleh menimpa tampilan terbaru
 
   function pesan(teks, galat) { const el = $('pmPesan'); if (el) { el.textContent = teks || ''; el.style.color = galat ? '#c0392b' : '#2e7d32'; } }
   function kartuBelumTersambung(teks) {
@@ -31,11 +32,13 @@
       '<div class="filter-bar"><button class="btn-mini" id="pmMundur" type="button">◀</button><input type="date" id="pmTanggal" aria-label="Tanggal"><button class="btn-mini" id="pmMaju" type="button">▶</button>' +
       '<button class="btn-mini primary" id="pmMuat" type="button">Tampilkan</button><span id="pmHari" style="font-weight:600;"></span></div>' +
       '<div class="filter-bar" id="pmBarisSalin"><span style="font-size:13px;">Salin dari tanggal:</span><input type="date" id="pmSalinDari" aria-label="Salin dari tanggal"><button class="btn-mini" id="pmSalin" type="button">Salin data</button><span style="font-size:13px;margin-left:8px;">atau</span><button class="btn-mini" id="pmAcuan" type="button" title="Isi semua baris dengan nilai acuan tiap instansi (belum tersimpan)">Isi dari Acuan</button></div>' +
-      '<div id="pmStatus" style="padding:10px 12px;border-radius:10px;font-size:13px;margin:8px 0;"></div>' +
-      '<div class="admin-stat-grid"><div class="admin-stat-card"><div class="admin-stat-value" id="pmTotal">–</div><div class="admin-stat-label">Total Porsi</div></div>' +
-      '<div class="admin-stat-card accent-success"><div class="admin-stat-value" id="pmTerisi">–</div><div class="admin-stat-label">Instansi Terisi</div></div>' +
-      '<div class="admin-stat-card accent-info"><div class="admin-stat-value" id="pmSekolah">–</div><div class="admin-stat-label">PK + PB</div></div>' +
-      '<div class="admin-stat-card accent-warning"><div class="admin-stat-value" id="pm3b">–</div><div class="admin-stat-label">3B (Balita + Busui + Bumil)</div></div></div>' +
+      '<div id="pmStatus" style="padding:10px 12px;border-radius:10px;font-size:13px;margin:8px 0;"></div><div id="pmNonaktif" style="font-size:12.5px;margin:0 0 8px;"></div>' +
+      '<div class="admin-stat-grid" style="grid-template-columns:repeat(2,1fr);"><div class="admin-stat-card"><div class="admin-stat-value" id="pmTotal">–</div><div class="admin-stat-label">Total Porsi</div></div>' +
+      '<div class="admin-stat-card accent-success"><div class="admin-stat-value" id="pmTerisi">–</div><div class="admin-stat-label">Instansi Terisi</div></div></div>' +
+      // Rincian SAMA seperti kartu "Penerima Manfaat" di dashboard: PK / PB / 3B, lalu 3B dirinci Balita / Ibu Menyusui / Ibu Hamil (dihitung langsung dari isian).
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 0;">' + kotakRingkas('pmPk', 'PK (Porsi Kecil)') + kotakRingkas('pmPb', 'PB (Porsi Besar)') + kotakRingkas('pm3b', '3B') + '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 0;">' + kotakRingkas('pmBalita', 'Balita', 1) + kotakRingkas('pmBusui', 'Ibu Menyusui', 1) + kotakRingkas('pmBumil', 'Ibu Hamil', 1) + '</div>' +
+      '<div style="font-size:11px;color:var(--color-text-muted,#55606f);text-align:center;margin:4px 0 12px;">3B = Balita + Ibu Menyusui + Ibu Hamil</div>' +
       '<div class="table-wrap"><table><thead><tr><th>Instansi</th><th>PK</th><th>PB</th><th>Ibu Hamil</th><th>Ibu Menyusui</th><th>Balita</th><th>No. Kendaraan</th><th>PIC</th><th>Total</th></tr></thead><tbody id="pmTbody"></tbody></table></div>' +
       '<div id="pmKonfirmasi" style="margin:14px 0;padding:12px;border:1px solid var(--color-border,#d5dbe3);border-radius:10px;"></div>' +
       '<div id="pmPesan" style="font-size:13px;margin:6px 0;"></div>' +
@@ -55,7 +58,7 @@
   async function ganti(tanggal) {
     if (!tanggal) { alert('Pilih tanggal dulu.'); return; }
     if (S.kotor && !confirm('Ada isian yang belum disimpan pada tanggal ini. Tetap pindah tanggal?')) { $('pmTanggal').value = S.tanggal; return; }
-    S.tanggal = tanggal; $('pmTanggal').value = tanggal; S.kotor = false; $('pmRiwayatIsi').innerHTML = '';
+    S.tanggal = tanggal; $('pmTanggal').value = tanggal; S.kotor = false; S.sertakanNonaktif = false; $('pmRiwayatIsi').innerHTML = '';
     await muat('');
   }
   async function salin() {
@@ -66,8 +69,10 @@
   }
   async function muat(salinDari, dariAcuan) {
     pesan('');
+    const giliran = ++urutMuat;
     try {
-      const d = await api('getPmHarianV2', { tanggal: S.tanggal, salinDari: salinDari || '', dariAcuan: dariAcuan === true });
+      const d = await api('getPmHarianV2', { tanggal: S.tanggal, salinDari: salinDari || '', dariAcuan: dariAcuan === true, sertakanNonaktif: S.sertakanNonaktif === true });
+      if (giliran !== urutMuat) return;      // sudah ada permintaan yang lebih baru
       S.data = d; S.mode = d.header ? 'tersimpan' : ((d.draftSalinan || d.draftAcuan) ? 'draft' : 'baru');
       if (d.draftSalinan || d.draftAcuan) S.kotor = true;
       render(); if (d.peringatan) pesan(d.peringatan, true);
@@ -84,15 +89,23 @@
     else if (S.mode === 'draft') { st.style.background = '#e3f2fd'; st.textContent = (d.draftAcuan ? 'DRAF dari ACUAN instansi' : 'DRAF salinan dari ' + d.disalinDariTanggal) + ' — BELUM tersimpan. Periksa dan sesuaikan angka serta kendaraan, lalu konfirmasi dan simpan.'; }
     else if (S.mode === 'koreksi') { st.style.background = '#fff3e0'; st.textContent = 'Mode KOREKSI: ubah angka, isi alasan, periksa ulang seluruh daftar, lalu simpan. Setiap perubahan dicatat di riwayat.'; }
     else { st.style.background = '#e8f5e9'; st.textContent = 'Tersimpan & TERVERIFIKASI oleh ' + (d.header.dikonfirmasiOleh || '—') + ' pada ' + (d.header.dikonfirmasiPada || '—') + (d.header.disalinDariTanggal ? ' · disalin dari ' + d.header.disalinDariTanggal : '') + '.'; }
-    const cell = function (b, k) {
+    const cellInput = function (b, k) {
       const v = b[k]; return '<td><input type="number" min="0" step="1" data-id="' + esc(b.idInstansi) + '" data-k="' + k + '" value="' + (v === null ? '' : v) + '" placeholder="' + (b.acuan && b.acuan[k] !== null && b.acuan[k] !== undefined ? 'acuan ' + b.acuan[k] : '') + '"' + (edit ? '' : ' disabled') + ' style="width:70px;padding:5px;border:1px solid var(--color-border,#d5dbe3);border-radius:6px;"></td>';
     };
+    // Sel hanya untuk kategori yang RELEVAN menurut jenis instansi (Sekolah: PK & PB; Posyandu: Ibu Hamil, Ibu Menyusui, Balita); lainnya "–" tanpa isian.
+    const cell = function (b, k) { return (b.kategori || KAT.map(function (x) { return x[0]; })).indexOf(k) >= 0 ? cellInput(b, k) : '<td style="text-align:center;color:#c3c9d3;background:#fafbfc;">–</td>'; };
     $('pmTbody').innerHTML = d.baris.length ? d.baris.map(function (b) {
       return '<tr><td>' + esc(b.nama) + (b.nonaktif ? ' <span style="font-size:11px;color:#c0392b;">(nonaktif)</span>' : '') + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + esc(b.jenis) + '</div></td>' +
         KAT.map(function (k) { return cell(b, k[0]); }).join('') +
         '<td><input type="text" maxlength="30" data-id="' + esc(b.idInstansi) + '" data-k="noKendaraan" value="' + esc(b.noKendaraan) + '"' + (edit ? '' : ' disabled') + ' style="width:110px;padding:5px;border:1px solid var(--color-border,#d5dbe3);border-radius:6px;text-transform:uppercase;"></td>' +
         '<td style="font-size:12px;">' + esc(b.namaPic || '—') + '</td><td data-total="' + esc(b.idInstansi) + '"><b>' + (b.total === null ? '–' : f(b.total)) + '</b></td></tr>';
     }).join('') : '<tr><td colspan="9"><div class="empty-state">Belum ada instansi aktif. Tambahkan di Master Instansi &amp; PIC.</div></td></tr>';
+    const nk = d.nonaktifTersembunyi || { instansi: 0, porsi: 0 }, boxN = $('pmNonaktif');
+    if (d.nonaktifDisertakan && d.baris.some(function (b) { return b.nonaktif; })) boxN.innerHTML = '<span style="color:#b26a00;">Menampilkan juga instansi <b>nonaktif</b> yang punya data tanggal ini.</span> <button class="btn-mini" id="pmSembunyiNon" type="button">Sembunyikan</button>';
+    else if (nk.instansi > 0) boxN.innerHTML = '<span style="color:var(--color-text-muted,#55606f);">' + nk.instansi + ' instansi nonaktif punya data tanggal ini (' + f(nk.porsi) + ' porsi) — tidak ditampilkan dan tidak dihitung di sini.</span> <button class="btn-mini" id="pmTampilNon" type="button">Tampilkan</button>';
+    else boxN.innerHTML = '';
+    if ($('pmTampilNon')) $('pmTampilNon').addEventListener('click', function () { S.sertakanNonaktif = true; muat(''); });
+    if ($('pmSembunyiNon')) $('pmSembunyiNon').addEventListener('click', function () { S.sertakanNonaktif = false; muat(''); });
     renderKonfirmasi(); hitungUlang();
   }
 
@@ -131,7 +144,8 @@
       if (ada) { terisi++; porsi += t; }
     });
     $('pmTotal').textContent = f(porsi); $('pmTerisi').textContent = terisi + ' / ' + (S.data ? S.data.baris.length : 0);
-    $('pmSekolah').textContent = f(tot.pk + tot.pb); $('pm3b').textContent = f(tot.bumil + tot.busui + tot.balita);
+    $('pmPk').textContent = f(tot.pk); $('pmPb').textContent = f(tot.pb); $('pm3b').textContent = f(tot.bumil + tot.busui + tot.balita);
+    $('pmBalita').textContent = f(tot.balita); $('pmBusui').textContent = f(tot.busui); $('pmBumil').textContent = f(tot.bumil);
   }
 
   async function simpan() {
@@ -170,6 +184,14 @@
       if (String(err.message || '').indexOf(BELUM) >= 0) kartuBelumTersambung(''); else root.innerHTML = '<div class="empty-state" style="color:#c0392b;">' + esc(err.message || 'Gagal memuat.') + '</div>';
     }
   }
+  /** Dipakai Kalender Operasional: buka Manajemen PM langsung di tanggal tertentu (untuk melihat/mengubah PM lengkap). */
+  window.sppgBukaPmTanggal = async function (iso) {
+    const t = document.querySelector('[data-panel="panelSipanduPm"]');
+    if (!sudahMuat) { S.tanggal = iso; if (t) t.click(); return; }      // pemuatan pertama memakai tanggal ini
+    if (t) t.click();
+    if (!$('pmTanggal')) return;
+    S.kotor = false; S.sertakanNonaktif = false; S.tanggal = iso; $('pmTanggal').value = iso; await muat('');
+  };
   const tombol = document.querySelector('[data-panel="panelSipanduPm"]');
   if (tombol) tombol.addEventListener('click', function () { if (!sudahMuat) { sudahMuat = true; mulai(); } });
 })();

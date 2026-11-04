@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       namaHari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][new Date().getDay()];
     }
-    document.getElementById('infoOperasionalTanggal').textContent = '📅 ' + namaHari + ', ' + tglFormatDariP0;
+    document.getElementById('infoOperasionalTanggal').textContent = '' + namaHari + ', ' + tglFormatDariP0;
     document.getElementById('infoOperasionalStatus').textContent = d.statusOperasional.label;
 
     // ---- JADWAL SAYA ----

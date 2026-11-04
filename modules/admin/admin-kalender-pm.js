@@ -6,7 +6,7 @@
   const esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
   const f = function (n) { return Number(n || 0).toLocaleString('id-ID'); };
   const dmyIso = function (d) { const p = d.split('/'); return p[2] + '-' + p[1] + '-' + p[0]; };
-  const singkat = function (n) { return n >= 1000 ? (Math.round(n / 100) / 10).toString().replace('.', ',') + 'rb' : String(n); };
+  const singkat = function (n) { return Number(n || 0).toLocaleString('id-ID'); };   // angka PENUH (2.610), bukan 2,6rb
   const api = function (aksi, payload) { return apiPost(aksi, Object.assign({ token: ambilSesiAdmin().token }, payload || {})); };
   let cache = { kunci: '', waktu: 0, peta: {} }, mati = false;   // mati = SIPANDU belum tersambung: berhenti bertanya
 

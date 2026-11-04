@@ -42,8 +42,8 @@
         <p class="sg-title" style="font-size:15px;">Total Hari</p>
         <div id="isiTotal"></div>
         <div style="display:flex; gap:8px; margin-top:8px;">
-          <button class="sg-btn success" id="btnSalinBesar">📋 Salin Porsi Besar</button>
-          <button class="sg-btn success" id="btnSalinKecil">📋 Salin Porsi Kecil</button>
+          <button class="sg-btn success" id="btnSalinBesar">Salin Porsi Besar</button>
+          <button class="sg-btn success" id="btnSalinKecil">Salin Porsi Kecil</button>
         </div>
       </div>
     </div>
@@ -95,7 +95,7 @@
         ? `${nama}: ${formatAngkaSipogim(info.lama[kunci],1)} → <strong>${formatAngkaSipogim(info.baru[kunci],1)}</strong> ${satuan}<br>`
         : '';
       return `<div class="sg-error" style="background:#fff3cd; color:#8a5a12;">
-        ⚠️ <strong>Berubah sejak disalin (Porsi ${labelPorsi})</strong> -- disalin ${new Date(info.waktuSalin || Date.now()).toLocaleDateString('id-ID')}<br>
+        <strong>Berubah sejak disalin (Porsi ${labelPorsi})</strong> -- disalin ${new Date(info.waktuSalin || Date.now()).toLocaleDateString('id-ID')}<br>
         ${info.alasan ? escapeHtmlSipogim(info.alasan) : baris('Energi','energiKkal','kkal') + baris('Protein','proteinG','g') + baris('Lemak','lemakG','g') + baris('KH','karbohidratG','g') + baris('Serat','seratG','g')}
       </div>`;
     }

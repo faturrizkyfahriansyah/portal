@@ -137,7 +137,8 @@ async function terapkanStatusAksesNavigasi_(opsi) {
 
   function kunciElemen_(el, kodeModul) {
     el.classList.add('shell-nav-link--terkunci');
-    el.insertAdjacentHTML('beforeend', '<span class="shell-nav-gembok" aria-hidden="true" style="margin-left:auto;opacity:.6;">🔒</span>');
+    // Penanda terkunci berupa TEKS (bukan ikon gembok; Admin 4 Nov: tampilan resmi tanpa ikon/emoji).
+    el.insertAdjacentHTML('beforeend', '<span class="shell-nav-gembok" style="margin-left:auto;font-size:10.5px;font-weight:600;opacity:.7;">Terkunci</span>');
     el.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();

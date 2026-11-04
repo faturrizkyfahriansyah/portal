@@ -429,7 +429,7 @@ function tampilkanMemproses_(info) {
 function tampilkanMenungguSinkron_(info) {
   const kartu = document.getElementById('kartuHasil');
   kartu.className = 'kartu-hasil tampil warna-info';
-  document.getElementById('hasilIkon').textContent = '⏳';
+  document.getElementById('hasilIkon').textContent = '';
   document.getElementById('hasilJudul').textContent = 'TERSIMPAN, MENUNGGU SINKRON';
   document.getElementById('hasilNama').textContent = info.nama || '-';
   document.getElementById('hasilDivisi').textContent = info.divisi ? ('Divisi: ' + info.divisi) : '';

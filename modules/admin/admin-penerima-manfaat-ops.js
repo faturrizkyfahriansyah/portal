@@ -50,7 +50,7 @@
         ? '<tr><td colspan="2"><div class="empty-state">Tidak ada institusi libur hari ini — semua aktif.</div></td></tr>'
         : pm.pmLibur.map(p => `<tr><td>${escapeHtml(p.NAMA_PM)}</td><td>${escapeHtml(LABEL_JENIS[p.JENIS_PM] || p.JENIS_PM)}</td></tr>`).join('');
     } catch (err) {
-      elRingkasan.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      elRingkasan.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 

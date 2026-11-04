@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('icsIsi').style.display = 'block';
     renderKartuUtamaIcs_();
   } catch (err) {
-    elMuat.textContent = '❌ ' + (err.message || 'Gagal memuat data kartu.');
+    elMuat.textContent = '' + (err.message || 'Gagal memuat data kartu.');
     return;
   }
 

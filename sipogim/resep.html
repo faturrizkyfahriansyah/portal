@@ -157,7 +157,7 @@
 
       if (!daftarSemuaBahan.length) {
         try { daftarSemuaBahan = await apiPostSipogim('getBahanList', {}); }
-        catch (err) { alert('⚠️ Gagal memuat daftar bahan: ' + err.message); return; }
+        catch (err) { alert('Gagal memuat daftar bahan: ' + err.message); return; }
       }
 
       if (id) {
@@ -171,7 +171,7 @@
           document.getElementById('isiHasil').innerHTML = renderHasilHitung(r.giziBesar, 'Porsi Besar') + renderHasilHitung(r.giziKecil, 'Porsi Kecil');
           document.getElementById('btnSetujui').style.display = r.status === 'sudah_dicek' ? 'none' : 'block';
           versiSedangDiedit = r.versi;
-        } catch (err) { alert('⚠️ ' + err.message); return; }
+        } catch (err) { alert('' + err.message); return; }
       } else {
         tambahBarisBahan(null, '', '');
       }
@@ -198,7 +198,7 @@
         muatDaftar(document.getElementById('inputCari').value.trim());
       } catch (err) {
         if (err.message.indexOf('KONFLIK') === 0 && confirm(err.message + '\n\nMuat ulang data terbaru sekarang?')) { bukaForm(idSedangDiedit); return; }
-        galat.textContent = '⚠️ ' + err.message; galat.style.display = 'block';
+        galat.textContent = '' + err.message; galat.style.display = 'block';
       }
     });
 
@@ -209,7 +209,7 @@
         await apiPostSipogim('setujuiResep', { id: idSedangDiedit, pin });
         alert('Resep disetujui.');
         bukaForm(idSedangDiedit);
-      } catch (err) { alert('⚠️ ' + err.message); }
+      } catch (err) { alert('' + err.message); }
     });
 
     muatDaftar('');

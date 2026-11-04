@@ -35,7 +35,7 @@
         btn.addEventListener('click', () => bukaDialogProses_(btn.dataset.id, btn.dataset.status));
       });
     } catch (err) {
-      el.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      el.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 

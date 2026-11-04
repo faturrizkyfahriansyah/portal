@@ -84,14 +84,14 @@
     function ikonMenuItemPublik_(namaItem) {
       const n = String(namaItem || '').toLowerCase();
       const kamus = [
-        [/nasi/, '🍚'], [/rendang|sapi|daging|empal|semur/, '🥩'], [/ayam/, '🍗'],
-        [/ikan|bandeng|lele|nila/, '🐟'], [/tahu/, '🍢'], [/tempe/, '🍢'],
-        [/telur/, '🥚'], [/sayur|tumis|sop|bayam|kangkung|labu|wortel|kol/, '🥕'],
-        [/semangka|melon|pisang|pepaya|jeruk|apel|buah/, '🍉'],
-        [/susu/, '🥛'], [/roti/, '🍞'], [/mie|bihun/, '🍜']
+        [/nasi/, ''], [/rendang|sapi|daging|empal|semur/, ''], [/ayam/, ''],
+        [/ikan|bandeng|lele|nila/, ''], [/tahu/, ''], [/tempe/, ''],
+        [/telur/, ''], [/sayur|tumis|sop|bayam|kangkung|labu|wortel|kol/, ''],
+        [/semangka|melon|pisang|pepaya|jeruk|apel|buah/, ''],
+        [/susu/, ''], [/roti/, ''], [/mie|bihun/, '']
       ];
       for (const [re, ikon] of kamus) { if (re.test(n)) return ikon; }
-      return '🍽️';
+      return '';
     }
 
     function tampilkanBelumTersedia_(judulTgl, wadah, pesan) {
@@ -120,7 +120,7 @@
         let html = '';
         if (itemMenu.length) {
           html += '<div class="pub-menu-grid">' +
-            itemMenu.map(it => `<div class="pub-menu-item"><div class="ico">${ikonMenuItemPublik_(it)}</div><div class="label">${escapeHtmlMenuHariIni_(it)}</div></div>`).join('') +
+            itemMenu.map(it => `<div class="pub-menu-item"><div class="label">${escapeHtmlMenuHariIni_(it)}</div></div>`).join('') +
             '</div>';
         }
         if (m.komposisi) {

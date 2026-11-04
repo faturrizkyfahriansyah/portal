@@ -53,7 +53,7 @@ function pastikanNamaSayaSipogim() {
 
 function tampilkanGalatSipogim(elemenAtauId, err) {
   const el = typeof elemenAtauId === 'string' ? document.getElementById(elemenAtauId) : elemenAtauId;
-  if (el) el.textContent = '⚠️ ' + err.message;
+  if (el) el.textContent = '' + err.message;
   console.error(err);
 }
 

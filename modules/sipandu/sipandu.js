@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const snap = await sipanduApiGet('getLatestSnapshot', { token, idWo });
 
       if (!snap) {
-        el.detailWoAksiStatus.innerHTML = `<button type="button" class="btn-submit" id="btnGeneratePop" style="width:100%;">⚡ Generate POP</button>`;
+        el.detailWoAksiStatus.innerHTML = `<button type="button" class="btn-submit" id="btnGeneratePop" style="width:100%;">Generate POP</button>`;
         document.getElementById('btnGeneratePop').addEventListener('click', () => jalankanGeneratePOP(idWo));
         return;
       }
@@ -247,9 +247,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (snap.isStale) {
         el.detailWoAksiStatus.innerHTML = `
           <div class="stok-perhatian-row" style="margin-bottom:10px;">
-            <div><p>⚠️ POP Perlu Diperbarui</p><small>Data SIPANDU berubah setelah POP dibuat (versi ${snap.versi}).</small></div>
+            <div><p>POP Perlu Diperbarui</p><small>Data SIPANDU berubah setelah POP dibuat (versi ${snap.versi}).</small></div>
           </div>
-          <button type="button" class="btn-submit" id="btnGeneratePop" style="width:100%;">⚡ Generate Ulang POP</button>`;
+          <button type="button" class="btn-submit" id="btnGeneratePop" style="width:100%;">Generate Ulang POP</button>`;
         document.getElementById('btnGeneratePop').addEventListener('click', () => jalankanGeneratePOP(idWo));
         return;
       }

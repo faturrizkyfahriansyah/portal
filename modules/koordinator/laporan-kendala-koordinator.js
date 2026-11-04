@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>`).join('');
     } catch (err) {
-      elIsi.innerHTML = `<div class="empty-state">❌ ${escapeHtml(err.message)}</div>`;
+      elIsi.innerHTML = `<div class="empty-state">${escapeHtml(err.message)}</div>`;
     }
   }
 

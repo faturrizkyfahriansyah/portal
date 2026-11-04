@@ -128,10 +128,10 @@ function tambahBarisItemAdmin(containerId, jenis) {
           try {
             const batchList = await apiPost('getSiragaBatchList', { token: sesiAdminStok.token, idBarang: b.id });
             selBatch.innerHTML = !batchList.length ? '<option value="">— Tidak ada batch tersedia —</option>' :
-              batchList.map(bt => `<option value="${bt.id}">${bt.nomorBatch} (Exp: ${bt.tanggalExpired || '-'}, Stok: ${formatRupiahSederhanaAdmin(bt.stok)}) ${bt.statusExpired === 'KEDALUWARSA' ? '⚠️ KEDALUWARSA' : bt.statusExpired === 'AKAN KEDALUWARSA' ? '⚠️ Akan Exp' : ''}</option>`).join('');
+              batchList.map(bt => `<option value="${bt.id}">${bt.nomorBatch} (Exp: ${bt.tanggalExpired || '-'}, Stok: ${formatRupiahSederhanaAdmin(bt.stok)}) ${bt.statusExpired === 'KEDALUWARSA' ? 'KEDALUWARSA' : bt.statusExpired === 'AKAN KEDALUWARSA' ? 'Akan Exp' : ''}</option>`).join('');
           } catch (e) { selBatch.innerHTML = '<option value="">Gagal memuat batch</option>'; }
         } else { batchWrap.style.display = 'none'; }
-        const warnStok = b.stok <= 0 ? ' ⚠️ STOK HABIS' : (b.statusStok === 'DI BAWAH MINIMUM' ? ' ⚠️ di bawah minimum' : '');
+        const warnStok = b.stok <= 0 ? ' STOK HABIS' : (b.statusStok === 'DI BAWAH MINIMUM' ? ' di bawah minimum' : '');
         hint.textContent = 'Stok tersedia: ' + formatRupiahSederhanaAdmin(b.stok) + ' ' + b.satuan + warnStok;
         hint.className = 'siraga-item-hint' + (b.stok <= 0 ? ' warn' : '');
       }
@@ -306,7 +306,7 @@ function inisialisasiFormMasukAdmin() {
       const items = bacaSemuaBarisItemAdmin('aMasukDaftarItem');
       tombol.disabled = true; tombol.textContent = 'Menyimpan...';
       const hasil = await apiPost('siragaBarangMasuk', { token: sesiAdminStok.token, tanggal: isoKeDmyTampilanAdmin(document.getElementById('aMasukTanggal').value), idSupplier: document.getElementById('aMasukSupplier').value, keterangan: document.getElementById('aMasukKeterangan').value.trim(), items: items });
-      showError('✅ Transaksi ' + hasil.nomorTransaksi + ' berhasil disimpan.');
+      showError('Transaksi ' + hasil.nomorTransaksi + ' berhasil disimpan.');
       kosongkanBarisItemAdmin('aMasukDaftarItem'); tambahBarisItemAdmin('aMasukDaftarItem', 'MASUK');
       document.getElementById('aMasukKeterangan').value = '';
       Object.keys(sudahDimuatTabAdminStok).forEach(k => delete sudahDimuatTabAdminStok[k]);
@@ -329,7 +329,7 @@ function inisialisasiFormKeluarAdmin() {
       const items = bacaSemuaBarisItemAdmin('aKeluarDaftarItem');
       tombol.disabled = true; tombol.textContent = 'Menyimpan...';
       const hasil = await apiPost('siragaBarangKeluar', { token: sesiAdminStok.token, tanggal: isoKeDmyTampilanAdmin(document.getElementById('aKeluarTanggal').value), tujuan: tujuan, keterangan: document.getElementById('aKeluarKeterangan').value.trim(), items: items });
-      showError('✅ Transaksi ' + hasil.nomorTransaksi + ' berhasil disimpan.');
+      showError('Transaksi ' + hasil.nomorTransaksi + ' berhasil disimpan.');
       kosongkanBarisItemAdmin('aKeluarDaftarItem'); tambahBarisItemAdmin('aKeluarDaftarItem', 'KELUAR');
       document.getElementById('aKeluarKeterangan').value = '';
       Object.keys(sudahDimuatTabAdminStok).forEach(k => delete sudahDimuatTabAdminStok[k]);
@@ -353,7 +353,7 @@ function inisialisasiFormTransferAdmin() {
       const items = bacaSemuaBarisItemAdmin('aTransferDaftarItem');
       tombol.disabled = true; tombol.textContent = 'Menyimpan...';
       const hasil = await apiPost('siragaTransfer', { token: sesiAdminStok.token, tanggal: isoKeDmyTampilanAdmin(document.getElementById('aTransferTanggal').value), sumber: sumber, tujuan: tujuan, keterangan: document.getElementById('aTransferKeterangan').value.trim(), items: items });
-      showError('✅ Transfer ' + hasil.nomorTransaksi + ' berhasil disimpan.');
+      showError('Transfer ' + hasil.nomorTransaksi + ' berhasil disimpan.');
       kosongkanBarisItemAdmin('aTransferDaftarItem'); tambahBarisItemAdmin('aTransferDaftarItem', 'TRANSFER');
       document.getElementById('aTransferKeterangan').value = '';
       Object.keys(sudahDimuatTabAdminStok).forEach(k => delete sudahDimuatTabAdminStok[k]);
@@ -379,7 +379,7 @@ function inisialisasiFormPemusnahanAdmin() {
       const items = bacaSemuaBarisItemAdmin('aPemusnahanDaftarItem');
       tombol.disabled = true; tombol.textContent = 'Menyimpan...';
       const hasil = await apiPost('siragaPemusnahan', { token: sesiAdminStok.token, tanggal: isoKeDmyTampilanAdmin(document.getElementById('aPemusnahanTanggal').value), alasanPemusnahan: alasan, keterangan: keterangan, items: items });
-      showError('✅ Pemusnahan ' + hasil.nomorTransaksi + ' berhasil dicatat.');
+      showError('Pemusnahan ' + hasil.nomorTransaksi + ' berhasil dicatat.');
       kosongkanBarisItemAdmin('aPemusnahanDaftarItem'); tambahBarisItemAdmin('aPemusnahanDaftarItem', 'PEMUSNAHAN');
       document.getElementById('aPemusnahanKeterangan').value = '';
       Object.keys(sudahDimuatTabAdminStok).forEach(k => delete sudahDimuatTabAdminStok[k]);
@@ -432,7 +432,7 @@ function inisialisasiOpnameAdmin() {
       showLoading('Menyelesaikan opname...');
       const hasil = await apiPost('selesaikanSiragaOpname', { token: sesiAdminStok.token, id: opnameAdminAktifId });
       hideLoading();
-      showError(hasil.selisih === 0 ? '✅ Opname selesai, tidak ada selisih.' : '✅ Opname selesai. Penyesuaian ' + (hasil.selisih > 0 ? '+' : '') + hasil.selisih + ' tercatat otomatis.');
+      showError(hasil.selisih === 0 ? 'Opname selesai, tidak ada selisih.' : 'Opname selesai. Penyesuaian ' + (hasil.selisih > 0 ? '+' : '') + hasil.selisih + ' tercatat otomatis.');
       tutupFormOpnameFisikAdmin(); await muatRiwayatOpnameAdmin();
       delete sudahDimuatTabAdminStok.dashboard; delete sudahDimuatTabAdminStok.barang; delete sudahDimuatTabAdminStok.laporan;
     } catch (err) { hideLoading(); showError(err.message || 'Gagal menyelesaikan opname.'); }
@@ -606,7 +606,7 @@ async function inisialisasiFormTambahBarangAdmin() {
         kelolaBatch: document.getElementById('aBarangBaruKelolaBatch').checked,
         kelolaExpired: document.getElementById('aBarangBaruKelolaExpired').checked
       });
-      showError('✅ Barang berhasil ditambahkan.');
+      showError('Barang berhasil ditambahkan.');
       document.getElementById('aBarangBaruNama').value = '';
       document.getElementById('aBarangBaruStokMinimum').value = '0';
       document.getElementById('aBarangBaruKelolaBatch').checked = false;
@@ -730,7 +730,7 @@ function inisialisasiDiagnosaAdmin() {
       }
       html += '<p class="section-title" style="margin-top:16px;">Catatan</p>' + (h.catatan.length
         ? h.catatan.map(c => '<div class="empty-state" style="text-align:left;margin-bottom:8px;">' + escapeHtml(c) + '</div>').join('')
-        : '<div class="empty-state" style="text-align:left;">✅ Tidak ada masalah ditemukan.</div>');
+        : '<div class="empty-state" style="text-align:left;">Tidak ada masalah ditemukan.</div>');
       wadah.innerHTML = html;
     } catch (err) {
       wadah.innerHTML = '<div class="empty-state" style="text-align:left;">' + escapeHtml(err.message || 'Diagnosa gagal.') + '</div>';

@@ -94,7 +94,7 @@ async function tanganiAksiKartu_(aksi, id, status) {
     if (aksi === 'generate' || aksi === 'regenerate') {
       if (aksi === 'regenerate' && !confirm('Regenerate kartu ini? Kartu lama (QR yang sudah dicetak) langsung tidak berlaku lagi.')) return;
       await apiPost('generateKartuAdmin', { token: sesiKartuQr.token, idRelawan: id });
-      showError(aksi === 'regenerate' ? '✅ Kartu diregenerasi. Cetak ulang kartu baru untuk relawan ini.' : '✅ Kartu berhasil dibuat.');
+      showError(aksi === 'regenerate' ? 'Kartu diregenerasi. Cetak ulang kartu baru untuk relawan ini.' : 'Kartu berhasil dibuat.');
       await muatDaftarKartuAdmin_();
     } else if (aksi === 'toggle') {
       await apiPost('setStatusKartuAdmin', { token: sesiKartuQr.token, idRelawan: id, status: status });

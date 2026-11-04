@@ -7,7 +7,8 @@
 // Data: respons getRingkasanPmDashboard. Bila backend lama belum menyediakan rincian 3B
 // (totalBalita/totalBusui/totalBumil tidak ada), tampilan otomatis ringkas (PK/PB/3B saja)
 // dan tidak error -- urutan deploy frontend/backend tidak menjadi masalah.
-function isiRingkasanPm(el, pm) {
+function isiRingkasanPm(el, pm, opsi) {
+  opsi = opsi || {};   // opsi.terbuka = true: rincian per instansi langsung terbuka (dipakai Kalender); opsi.tanpaKosong: lihat di bawah
   const f = function (n) { return Number(n || 0).toLocaleString('id-ID'); };
   const esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
   const C = { muted: 'var(--color-text-muted,#55606f)', garis: 'var(--color-border,#e8ebef)', sukses: 'var(--color-success,#2e7d32)', navy: 'var(--color-navy,#1f3864)', latar: 'var(--color-surface,#f6f8fb)' };
@@ -26,7 +27,8 @@ function isiRingkasanPm(el, pm) {
   let html =
     '<div style="text-align:center;margin-bottom:12px;">' +
       '<div style="font-size:30px;font-weight:800;color:' + C.sukses + ';line-height:1;">' + f(total) + '</div>' +
-      '<div style="font-size:12px;color:' + C.muted + ';margin-top:4px;font-weight:600;">Total Porsi PM Hari Ini</div>' +
+      '<div style="font-size:12px;color:' + C.muted + ';margin-top:4px;font-weight:600;">' + (opsi.judulTotal || 'Total Porsi PM Hari Ini') + '</div>' +
+      (pm.tanggalIndo && !pm.belumAdaData ? '<div style="font-size:11.5px;color:' + C.muted + ';margin-top:2px;">' + esc(pm.tanggalIndo) + '</div>' : '') +
       '<div style="font-size:11px;color:' + C.muted + ';margin-top:6px;">' + f(pm.jumlahPmHariIni) + ' institusi aktif · ' + f(pm.jumlahPmLibur) + ' libur</div>' +
       (pm.belumAdaData ? '<div style="font-size:11.5px;color:#c0392b;margin-top:6px;font-weight:600;">Belum ada data PM harian yang terverifikasi.</div>' : (pm.bukanHariIni && pm.tanggalData ? '<div style="font-size:11.5px;color:#e65100;margin-top:6px;font-weight:600;">Data PM harian terakhir: ' + esc(pm.tanggalData.split('-').reverse().join('/')) + ' (hari ini belum diisi)</div>' : '')) +
     '</div>' +
@@ -56,8 +58,8 @@ function isiRingkasanPm(el, pm) {
   jumlahBaris += td('<b>' + f(total) + '</b>');
 
   html +=
-    '<button type="button" id="' + uid + 'Btn" aria-expanded="false" style="width:100%;margin-top:14px;padding:9px;border:1px solid ' + C.garis + ';background:transparent;border-radius:10px;font-weight:600;cursor:pointer;color:inherit;">Lihat detail per instansi ▾</button>' +
-    '<div id="' + uid + 'Isi" style="display:none;margin-top:12px;">' +
+    '<button type="button" id="' + uid + 'Btn" aria-expanded="' + (opsi.terbuka ? 'true' : 'false') + '" style="width:100%;margin-top:14px;padding:9px;border:1px solid ' + C.garis + ';background:transparent;border-radius:10px;font-weight:600;cursor:pointer;color:inherit;">' + (opsi.terbuka ? 'Sembunyikan detail ▴' : 'Lihat detail per instansi ▾') + '</button>' +
+    '<div id="' + uid + 'Isi" style="display:' + (opsi.terbuka ? 'block' : 'none') + ';margin-top:12px;">' +
       (daftar.length
         ? '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:' + (rinci ? 420 : 340) + 'px;"><thead><tr>' + kepala + '</tr></thead><tbody>' + baris + '<tr style="background:' + C.latar + ';">' + jumlahBaris + '</tr></tbody></table></div>'
         : '<p style="margin:0;font-size:12.5px;color:' + C.muted + ';">Belum ada instansi aktif hari ini.</p>') +
@@ -72,4 +74,23 @@ function isiRingkasanPm(el, pm) {
     btn.setAttribute('aria-expanded', String(buka));
     btn.textContent = buka ? 'Sembunyikan detail ▴' : 'Lihat detail per instansi ▾';
   });
+}
+
+/**
+ * Kartu menu satu tanggal — markup SAMA dengan kartu "Menu Hari Ini" di dashboard Pengelola (hari + tanggal + tema, 6 komponen dalam 3 kolom).
+ * m = bentuk getMenuHariIniDashboard ({ hari, tanggal, tema, karbohidrat, laukHewani, laukNabati, sayur, buah, pelengkap }); null -> pesan kosong.
+ */
+function isiMenuHariIni(el, m, pesanKosong) {
+  const esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+  if (!m) { el.innerHTML = '<p style="margin:0;font-size:12.5px;color:var(--color-text-muted);">' + esc(pesanKosong || 'Menu belum tersedia.') + '</p>'; return; }
+  el.innerHTML =
+    '<p style="margin:0 0 10px;font-size:12.5px;color:var(--color-text-muted);">' + esc(m.hari) + ', ' + esc(m.tanggal) + (m.tema ? ' · ' + esc(m.tema) : '') + '</p>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:12.5px;">' +
+      '<div><b>Karbohidrat</b><br>' + esc(m.karbohidrat || '-') + '</div>' +
+      '<div><b>Lauk Hewani</b><br>' + esc(m.laukHewani || '-') + '</div>' +
+      '<div><b>Lauk Nabati</b><br>' + esc(m.laukNabati || '-') + '</div>' +
+      '<div><b>Sayur</b><br>' + esc(m.sayur || '-') + '</div>' +
+      '<div><b>Buah</b><br>' + esc(m.buah || '-') + '</div>' +
+      '<div><b>Pelengkap</b><br>' + esc(m.pelengkap || '-') + '</div>' +
+    '</div>';
 }

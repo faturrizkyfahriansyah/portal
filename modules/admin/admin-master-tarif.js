@@ -22,7 +22,7 @@
     $('mtIsi').innerHTML =
       '<div class="admin-stat-card" style="padding:12px;text-align:left;margin-bottom:12px;font-size:13px;line-height:1.55;">' +
       'Tarif harian berlaku <b>mulai tanggal yang Anda pilih</b> dan dikali jumlah hari hadir pada <b>Rekap Mingguan</b>. Minggu yang sudah lewat <b>tidak berubah</b> kecuali Anda memilih tanggal berlaku yang sudah lewat (akan diminta konfirmasi).</div>' +
-      '<div class="filter-bar"><input id="mtCari" placeholder="🔍 Cari nama relawan..." style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;min-width:200px;">' +
+      '<div class="filter-bar"><input id="mtCari" placeholder="Cari nama relawan..." style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;min-width:200px;">' +
       '<select id="mtDivisi"><option value="">Semua Divisi</option></select>' +
       '<label style="font-size:12px;">Tarif yang tampil berlaku pada <input type="date" id="mtLihat"></label></div>' +
       '<div class="filter-bar" style="background:var(--color-surface,#f6f8fb);padding:10px;border-radius:10px;">' +
@@ -115,7 +115,7 @@
       if (dv.indexOf(pilih) >= 0) $('mtDivisi').value = pilih;
       isiTabel();
       if (h.jumlahTanpaTarif) pesan(h.jumlahTanpaTarif + ' relawan aktif belum punya tarif pada tanggal ini.', true);
-    } catch (err) { $('mtTbody').innerHTML = '<tr><td colspan="5"><div class="empty-state" style="color:#c0392b;">❌ ' + esc(err.message) + '</div></td></tr>'; }
+    } catch (err) { $('mtTbody').innerHTML = '<tr><td colspan="5"><div class="empty-state" style="color:#c0392b;">' + esc(err.message) + '</div></td></tr>'; }
   }
 
   // ======================= TAB TARIF LAIN (SIPANDU) =======================
