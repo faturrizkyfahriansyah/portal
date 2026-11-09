@@ -30,12 +30,12 @@
     '<div class="filter-bar" style="margin-bottom:8px;"><span style="font-size:12.5px;font-weight:600;">Cakupan</span><label class="jb-radio" style="font-size:13px;"><input type="radio" name="jbCak" value="INDIVIDU" checked> Individu</label><label class="jb-radio" style="font-size:13px;"><input type="radio" name="jbCak" value="DIVISI"> Divisi</label><label class="jb-radio" style="font-size:13px;"><input type="radio" name="jbCak" value="KELOMPOK"> Kelompok</label></div>' +
     '<div class="filter-bar" id="jbPilih" style="margin-bottom:8px;"><select id="jbRelawan" aria-label="Relawan"></select><select id="jbDivisi" aria-label="Divisi" style="display:none;"></select></div>' +
     '<div id="jbKelompok" style="display:none;margin-bottom:8px;font-size:13px;"></div>' +
-    '<div class="filter-bar" style="margin-bottom:8px;"><label style="font-size:12px;">Jam masuk <input type="time" id="jbJamMasuk" value="08:00"></label><label style="font-size:12px;">Jam pulang <input type="time" id="jbJamPulang" value="16:00"></label><input id="jbCatatan" maxlength="200" placeholder="Catatan (opsional)" style="' + inp + 'flex:1;min-width:150px;"></div>' +
+    '<div class="filter-bar" style="margin-bottom:8px;"><label class="jb-jam-global" style="font-size:12px;">Jam masuk <input type="time" id="jbJamMasuk" value="08:00"></label><label class="jb-jam-global" style="font-size:12px;">Jam pulang <input type="time" id="jbJamPulang" value="16:00"></label><input id="jbCatatan" maxlength="200" placeholder="Catatan (opsional)" style="' + inp + 'flex:1;min-width:150px;"></div>' +
     '<div id="jbPratinjau" style="font-size:13px;margin:8px 0;line-height:1.5;"></div>' +
     '<div><button class="btn-mini primary" id="jbBuat" type="button" disabled>Buat Jadwal Penugasan</button> <span id="jbPesan" style="margin-left:8px;font-size:13px;"></span></div></div>' +
     '<div class="admin-stat-card" style="padding:14px;text-align:left;margin-bottom:14px;"><div style="font-weight:700;font-size:15px;margin-bottom:10px;">Periksa Jadwal</div>' +
-    '<div class="filter-bar"><select id="jpMode" aria-label="Rentang"><option value="1">Harian</option><option value="7">Mingguan</option></select><label style="font-size:12px;">Tanggal <input type="date" id="jpAwal"></label><select id="jpDivisi" aria-label="Divisi"><option value="">Semua Divisi</option></select><select id="jpStatus" aria-label="Status"><option value="">Semua Status</option><option value="SUDAH">Sudah dijadwalkan</option><option value="BELUM">Belum dijadwalkan</option></select></div>' +
-    '<div class="rmg-chips" id="jpChips"></div><div id="jpPesan" style="font-size:13px;margin:4px 0;"></div><div class="table-wrap"><table class="rmg-tabel"><thead id="jpThead"></thead><tbody id="jpTbody"></tbody></table></div><div id="jpAksi" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--color-border,#e8ebef);"></div></div>' +
+    '<div class="filter-bar"><select id="jxMode" aria-label="Rentang"><option value="1">Harian</option><option value="7">Mingguan</option></select><label style="font-size:12px;">Tanggal <input type="date" id="jxAwal"></label><select id="jxDivisi" aria-label="Divisi"><option value="">Semua Divisi</option></select><select id="jxStatus" aria-label="Status"><option value="">Semua Status</option><option value="SUDAH">Sudah dijadwalkan</option><option value="BELUM">Belum dijadwalkan</option></select></div>' +
+    '<div class="rmg-chips" id="jxChips"></div><div id="jxPesan" style="font-size:13px;margin:4px 0;"></div><div class="table-wrap"><table class="rmg-tabel"><thead id="jxThead"></thead><tbody id="jxTbody"></tbody></table></div><div id="jxAksi" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--color-border,#e8ebef);"></div></div>' +
     '<details style="margin-bottom:14px;"><summary style="cursor:pointer;font-size:13px;font-weight:600;">Jadwal otomatis lama</summary><div id="jbOto" class="admin-stat-card" style="padding:12px 14px;text-align:left;margin-top:8px;font-size:13px;">Memuat…</div></details>';
 
   // ---------------- Buat Jadwal ----------------
@@ -44,7 +44,7 @@
     $('jbRelawan').innerHTML = '<option value="">Pilih relawan…</option>' + opsi.relawan.map(function (r) { return '<option value="' + esc(r.id) + '">' + esc(r.nama) + ' — ' + esc(r.divisi) + '</option>'; }).join('');
     aturCakupan();
     const d = Array.from(new Set(opsi.divisi.map(function (x) { return x.nama; })));
-    $('jpDivisi').innerHTML = '<option value="">Semua Divisi</option>' + d.map(function (x) { return '<option value="' + esc(x) + '">' + esc(x) + '</option>'; }).join('');
+    $('jxDivisi').innerHTML = '<option value="">Semua Divisi</option>' + d.map(function (x) { return '<option value="' + esc(x) + '">' + esc(x) + '</option>'; }).join('');
   }
   function aturCakupan() {
     const c = cak(), daftarDivisi = c === 'KELOMPOK' ? opsi.divisi.filter(function (d) { return d.kelompok.length; }) : opsi.divisi, pd = $('jbDivisi').value;
@@ -53,60 +53,90 @@
     if (daftarDivisi.some(function (d) { return d.nama === pd; })) $('jbDivisi').value = pd;
     aturKelompok(); jadwalkanPratinjau();
   }
-  function aturKelompok() {   // kelompok hanya tampil untuk cakupan Kelompok, dan hanya bila divisinya punya kelompok
-    const box = $('jbKelompok'), d = opsi.divisi.filter(function (x) { return x.nama === $('jbDivisi').value; })[0];
-    if (cak() !== 'KELOMPOK' || !d || !d.kelompok.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  function divTerpilih() { return opsi.divisi.filter(function (x) { return x.nama === $('jbDivisi').value; })[0]; }
+  function aturKelompok() {   // Kelompok: tiap kelompok = kartu sendiri (anggota + jam masuk/pulang sendiri), hanya untuk divisi yang punya kelompok
+    const box = $('jbKelompok'), d = divTerpilih(), kelompok = cak() === 'KELOMPOK';
+    document.querySelectorAll('.jb-jam-global').forEach(function (e) { e.style.display = kelompok ? 'none' : ''; });
+    if (!kelompok || !d || !d.kelompok.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
     box.style.display = 'block';
-    box.innerHTML = '<span style="font-weight:600;margin-right:8px;">Kelompok</span>' + d.kelompok.map(function (k) { return '<label style="margin-right:12px;"><input type="checkbox" class="jb-kel" value="' + esc(k.nama) + '" checked> ' + esc(k.nama) + ' (' + k.jumlah + ')</label>'; }).join('');
-    box.querySelectorAll('.jb-kel').forEach(function (c) { c.addEventListener('change', jadwalkanPratinjau); });
+    box.innerHTML = d.kelompok.map(function (k) {
+      return '<div class="jb-kel-kartu" data-k="' + esc(k.nama) + '" style="border:1px solid var(--color-border,#e8ebef);border-radius:10px;padding:10px 12px;margin-bottom:8px;">' +
+        '<label style="font-weight:700;"><input type="checkbox" class="jb-kel" value="' + esc(k.nama) + '" checked> Kelompok ' + esc(k.nama) + ' (' + k.jumlah + ')</label>' +
+        '<div style="font-size:12.5px;color:var(--color-text-muted);margin:4px 0 8px;line-height:1.45;">' + k.anggota.map(function (a) { return esc(a.nama); }).join(', ') + '</div>' +
+        '<div class="filter-bar" style="margin:0;"><label style="font-size:12px;">Jam masuk <input type="time" class="jb-kel-jm" data-k="' + esc(k.nama) + '" value="' + esc(hm(k.jamSaran && k.jamSaran.jamMasuk) || '08:00') + '"></label>' +
+        '<label style="font-size:12px;">Jam pulang <input type="time" class="jb-kel-jp" data-k="' + esc(k.nama) + '" value="' + esc(hm(k.jamSaran && k.jamSaran.jamPulang) || '16:00') + '"></label></div></div>';
+    }).join('');
+    box.querySelectorAll('.jb-kel').forEach(function (c) { c.addEventListener('change', function () { const kartu = c.closest('.jb-kel-kartu'); kartu.style.opacity = c.checked ? '' : '.5'; kartu.querySelectorAll('input[type=time]').forEach(function (i) { i.disabled = !c.checked; }); jadwalkanPratinjau(); }); });
+    box.querySelectorAll('input[type=time]').forEach(function (i) { i.addEventListener('input', jadwalkanPratinjau); });
   }
   function bodyBuat() {
     const c = cak(), b = { tanggalMulai: $('jbAwal').value, hari: hariPilih(), cakupan: c, jamMasuk: $('jbJamMasuk').value, jamPulang: $('jbJamPulang').value, catatan: $('jbCatatan').value.trim() };
     if (c === 'INDIVIDU') b.idRelawan = $('jbRelawan').value; else b.namaDivisi = $('jbDivisi').value;
-    if (c === 'KELOMPOK') b.kelompok = Array.from(document.querySelectorAll('.jb-kel:checked')).map(function (x) { return x.value; });
+    if (c === 'KELOMPOK') {
+      b.kelompok = Array.from(document.querySelectorAll('.jb-kel:checked')).map(function (x) { return x.value; }); b.kelompokJam = {};
+      b.kelompok.forEach(function (k) { const kartu = document.querySelector('.jb-kel-kartu[data-k="' + k.replace(/"/g, '\\"') + '"]'); b.kelompokJam[k] = { jamMasuk: kartu.querySelector('.jb-kel-jm').value, jamPulang: kartu.querySelector('.jb-kel-jp').value }; });
+    }
     return b;
   }
-  function lengkap(b) { return b.tanggalMulai && (b.cakupan === 'INDIVIDU' ? b.idRelawan : (b.namaDivisi && (b.cakupan !== 'KELOMPOK' || b.kelompok.length))); }
+  const jamOk = function (j) { return j && /^\d{2}:\d{2}$/.test(j.jamMasuk) && /^\d{2}:\d{2}$/.test(j.jamPulang); };
+  function lengkap(b) {
+    if (!b.tanggalMulai) return false;
+    if (b.cakupan === 'INDIVIDU') return !!b.idRelawan;
+    if (!b.namaDivisi) return false;
+    return b.cakupan !== 'KELOMPOK' || (b.kelompok.length > 0 && b.kelompok.every(function (k) { return jamOk(b.kelompokJam[k]); }));
+  }
   function jadwalkanPratinjau() { clearTimeout(timer); timer = setTimeout(pratinjau, 250); }
+  const lewatTeks = function (r) { const l = r.hari.filter(function (h) { return !h.dipakai; }); return l.length ? '<br><span style="color:var(--color-text-muted);">Dilewati: ' + l.map(function (h) { return tglPendek(h.iso) + ' (' + esc(h.alasan) + ')'; }).join(', ') + '.</span>' : ''; };
   async function pratinjau() {
     const b = bodyBuat(), box = $('jbPratinjau'); pv = null; $('jbBuat').disabled = true;
-    if (!lengkap(b)) { box.innerHTML = '<span style="color:var(--color-text-muted);">Pilih tanggal dan ' + (b.cakupan === 'INDIVIDU' ? 'relawan' : (b.cakupan === 'DIVISI' ? 'divisi' : 'divisi dan kelompok')) + '.</span>'; return; }
+    if (!lengkap(b)) { box.innerHTML = '<span style="color:var(--color-text-muted);">' + (b.cakupan === 'KELOMPOK' && b.namaDivisi && !b.kelompok.length ? 'Centang minimal satu kelompok.' : 'Pilih tanggal dan ' + (b.cakupan === 'INDIVIDU' ? 'relawan' : (b.cakupan === 'DIVISI' ? 'divisi' : 'divisi dan kelompok')) + '.') + '</span>'; return; }
+    box.innerHTML = '<span style="color:var(--color-text-muted);">Menghitung…</span>';   // jangan biarkan angka pilihan sebelumnya tampil
     const giliran = ++urutPv;
     try {
       const r = await api('pratinjauPenugasanBaru', b); if (giliran !== urutPv) return; pv = r;
-      if (!jamDiubah && r.jamSaran) { $('jbJamMasuk').value = hm(r.jamSaran.jamMasuk) || $('jbJamMasuk').value; $('jbJamPulang').value = hm(r.jamSaran.jamPulang) || $('jbJamPulang').value; }
-      const dipakai = r.hari.filter(function (h) { return h.dipakai; }), lewat = r.hari.filter(function (h) { return !h.dipakai; });
-      box.innerHTML = r.jumlahTarget
-        ? '<b>' + f(r.jumlahRelawan) + '</b> relawan (' + esc(r.contoh.join(', ')) + (r.jumlahRelawan > r.contoh.length ? ', …' : '') + ') × <b>' + dipakai.length + '</b> hari = <b>' + f(r.jumlahTarget) + '</b> jadwal (' + f(r.jumlahBaru) + ' baru, ' + f(r.jumlahDiperbarui) + ' diperbarui)' + (r.jumlahSudahAbsen ? '<br><span style="color:#b26a00;">' + f(r.jumlahSudahAbsen) + ' jadwal sudah ada absennya: jam absen tidak diubah.</span>' : '') + (r.dilewatiDivisi ? '<br><span style="color:var(--color-text-muted);">' + f(r.dilewatiDivisi) + ' relawan dilewati karena hari khusus divisi lain.</span>' : '') + (lewat.length ? '<br><span style="color:var(--color-text-muted);">Dilewati: ' + lewat.map(function (h) { return tglPendek(h.iso) + ' (' + esc(h.alasan) + ')'; }).join(', ') + '.</span>' : '')
-        : '<span style="color:#c0392b;">Tidak ada tanggal operasional pada rentang ini' + (lewat.length ? ': ' + lewat.map(function (h) { return tglPendek(h.iso) + ' (' + esc(h.alasan) + ')'; }).join(', ') : '') + '. Atur dulu di Kalender Operasional.</span>';
-      $('jbBuat').disabled = !r.jumlahTarget;
+      if (b.cakupan !== 'KELOMPOK' && !jamDiubah && r.jamSaran) { $('jbJamMasuk').value = hm(r.jamSaran.jamMasuk) || $('jbJamMasuk').value; $('jbJamPulang').value = hm(r.jamSaran.jamPulang) || $('jbJamPulang').value; }
+      const dipakai = r.hari.filter(function (h) { return h.dipakai; });
+      if (!r.jumlahTarget) { box.innerHTML = '<span style="color:#c0392b;">Tidak ada tanggal operasional pada rentang ini' + (r.hari.filter(function (h) { return !h.dipakai; }).length ? ': ' + r.hari.filter(function (h) { return !h.dipakai; }).map(function (h) { return tglPendek(h.iso) + ' (' + esc(h.alasan) + ')'; }).join(', ') : '') + '. Atur dulu di Kalender Operasional.</span>'; return; }
+      const absen = function (n) { return n ? ' <span style="color:#b26a00;">· ' + f(n) + ' sudah absen, jam absen tidak diubah</span>' : ''; };
+      if (r.perKelompok) {
+        box.innerHTML = r.perKelompok.map(function (k) { return '<div style="margin-bottom:4px;"><b>Kelompok ' + esc(k.nama) + '</b> · ' + f(k.jumlahRelawan) + ' relawan · jam <b>' + esc(k.jamMasuk) + '–' + esc(k.jamPulang) + '</b> → ' + f(k.jumlahTarget) + ' jadwal (' + f(k.jumlahBaru) + ' baru, ' + f(k.jumlahDiperbarui) + ' diperbarui)' + absen(k.jumlahSudahAbsen) + '</div>'; }).join('') +
+          '<div style="margin-top:2px;">Total <b>' + f(r.jumlahTarget) + '</b> jadwal untuk <b>' + dipakai.length + '</b> hari.</div>' + (r.dilewatiDivisi ? '<span style="color:var(--color-text-muted);">' + f(r.dilewatiDivisi) + ' relawan dilewati karena hari khusus divisi lain.</span>' : '') + lewatTeks(r);
+      } else {
+        box.innerHTML = '<b>' + f(r.jumlahRelawan) + '</b> relawan (' + esc(r.contoh.join(', ')) + (r.jumlahRelawan > r.contoh.length ? ', …' : '') + ') × <b>' + dipakai.length + '</b> hari = <b>' + f(r.jumlahTarget) + '</b> jadwal (' + f(r.jumlahBaru) + ' baru, ' + f(r.jumlahDiperbarui) + ' diperbarui)' + (r.jumlahSudahAbsen ? '<br><span style="color:#b26a00;">' + f(r.jumlahSudahAbsen) + ' jadwal sudah ada absennya: jam absen tidak diubah.</span>' : '') + (r.dilewatiDivisi ? '<br><span style="color:var(--color-text-muted);">' + f(r.dilewatiDivisi) + ' relawan dilewati karena hari khusus divisi lain.</span>' : '') + lewatTeks(r);
+      }
+      $('jbBuat').disabled = false;
     } catch (err) { if (giliran !== urutPv) return; box.innerHTML = '<span style="color:#c0392b;">' + esc(err.message || 'Gagal membuat pratinjau.') + '</span>'; }
   }
   async function buat() {
     const b = bodyBuat(); if (!pv || !lengkap(b)) return;
-    if (!/^\d{2}:\d{2}$/.test(b.jamMasuk) || !/^\d{2}:\d{2}$/.test(b.jamPulang)) { $('jbPesan').style.color = '#c0392b'; $('jbPesan').textContent = 'Jam masuk dan jam pulang wajib diisi.'; return; }
-    if (!confirm('Buat ' + f(pv.jumlahTarget) + ' jadwal (' + f(pv.jumlahBaru) + ' baru, ' + f(pv.jumlahDiperbarui) + ' diperbarui) untuk ' + f(pv.jumlahRelawan) + ' relawan, jam ' + b.jamMasuk + '–' + b.jamPulang + '?\n\nRelawan akan menerima notifikasi penugasan.')) return;
+    if (b.cakupan !== 'KELOMPOK' && (!/^\d{2}:\d{2}$/.test(b.jamMasuk) || !/^\d{2}:\d{2}$/.test(b.jamPulang))) { $('jbPesan').style.color = '#c0392b'; $('jbPesan').textContent = 'Jam masuk dan jam pulang wajib diisi.'; return; }
+    const ringkas = pv.perKelompok ? pv.perKelompok.map(function (k) { return 'Kelompok ' + k.nama + ': ' + f(k.jumlahRelawan) + ' relawan, jam ' + k.jamMasuk + '–' + k.jamPulang; }).join('\n') : 'Jam ' + b.jamMasuk + '–' + b.jamPulang;
+    if (!confirm('Buat ' + f(pv.jumlahTarget) + ' jadwal (' + f(pv.jumlahBaru) + ' baru, ' + f(pv.jumlahDiperbarui) + ' diperbarui) untuk ' + f(pv.jumlahRelawan) + ' relawan?\n\n' + ringkas + '\n\nRelawan akan menerima notifikasi penugasan.')) return;
     $('jbBuat').disabled = true; $('jbPesan').style.color = ''; $('jbPesan').textContent = 'Memproses…';
-    try { const h = await api('buatPenugasanBaru', Object.assign(b, { konfirmasi: true })); $('jbPesan').style.color = '#2e7d32'; $('jbPesan').textContent = 'Selesai: ' + f(h.jumlah) + ' jadwal (' + f(h.jumlahBaru) + ' baru, ' + f(h.jumlahDiperbarui) + ' diperbarui)' + (h.jadwalHarianDiperbarui ? '; ' + f(h.jadwalHarianDiperbarui) + ' jadwal harian lama diselaraskan' : '') + (h.sudahAbsen ? '; ' + f(h.sudahAbsen) + ' sudah absen (tidak diubah)' : '') + (h.belumTerbentuk ? '; ' + f(h.belumTerbentuk) + ' jadwal harian belum terbentuk' : '') + '.'; await pratinjau(); await muatData(); }
-    catch (err) { $('jbPesan').style.color = '#c0392b'; $('jbPesan').textContent = err.message || 'Gagal membuat jadwal.'; $('jbBuat').disabled = false; }
+    try {
+      const h = await api('buatPenugasanBaru', Object.assign(b, { konfirmasi: true }));
+      $('jbPesan').style.color = '#2e7d32';
+      $('jbPesan').textContent = 'Selesai: ' + f(h.jumlah) + ' jadwal (' + f(h.jumlahBaru) + ' baru, ' + f(h.jumlahDiperbarui) + ' diperbarui)' + (h.perKelompok && h.perKelompok.length ? ' — ' + h.perKelompok.map(function (k) { return k.nama + ' ' + k.jamMasuk + '–' + k.jamPulang; }).join(', ') : '') + (h.jadwalHarianDiperbarui ? '; ' + f(h.jadwalHarianDiperbarui) + ' jadwal harian lama diselaraskan' : '') + (h.sudahAbsen ? '; ' + f(h.sudahAbsen) + ' sudah absen (tidak diubah)' : '') + (h.belumTerbentuk ? '; ' + f(h.belumTerbentuk) + ' jadwal harian belum terbentuk' : '') + '.';
+      await pratinjau(); await muatData();
+    } catch (err) { $('jbPesan').style.color = '#c0392b'; $('jbPesan').textContent = err.message || 'Gagal membuat jadwal.'; $('jbBuat').disabled = false; }
   }
 
   // ---------------- Periksa Jadwal ----------------
   function barisData() {
-    if (!data) return []; const st = $('jpStatus').value;
+    if (!data) return []; const st = $('jxStatus').value;
     return data.relawan.filter(function (r) { const s = Object.keys(r.hari).map(function (k) { return r.hari[k]; }); return !st || (st === 'SUDAH' ? s.some(function (c) { return c.adaJadwal; }) : s.some(function (c) { return c.perluDibuat; })); });
   }
   async function muatData() {
-    const awal = $('jpAwal').value; if (!awal) return; const giliran = ++urutData;
-    try { const d = await api('getJadwalRentangV2', { tanggalMulai: awal, hari: Number($('jpMode').value), namaDivisi: $('jpDivisi').value }); if (giliran !== urutData) return; data = d; renderData(); }
-    catch (err) { if (giliran !== urutData) return; data = null; $('jpTbody').innerHTML = '<tr><td colspan="9"><div class="empty-state" style="color:#c0392b;">' + esc(err.message || 'Gagal memuat.') + '</div></td></tr>'; }
+    const awal = $('jxAwal').value; if (!awal) return; const giliran = ++urutData;
+    try { const d = await api('getJadwalRentangV2', { tanggalMulai: awal, hari: Number($('jxMode').value), namaDivisi: $('jxDivisi').value }); if (giliran !== urutData) return; data = d; renderData(); }
+    catch (err) { if (giliran !== urutData) return; data = null; $('jxTbody').innerHTML = '<tr><td colspan="9"><div class="empty-state" style="color:#c0392b;">' + esc(err.message || 'Gagal memuat.') + '</div></td></tr>'; }
   }
   function renderData() {
     const baris = barisData(), hari = data.hari; let sudah = 0, belum = 0;
     baris.forEach(function (r) { hari.forEach(function (h) { const c = r.hari[h.iso]; if (c && c.adaJadwal) sudah++; if (c && c.perluDibuat) belum++; }); });
-    $('jpChips').innerHTML = '<span class="rmg-chip"><b>' + f(sudah) + '</b> Sudah dijadwalkan</span><span class="rmg-chip"><b>' + f(belum) + '</b> Belum dijadwalkan</span>';
-    $('jpThead').innerHTML = '<tr><th>No</th><th style="text-align:left;">Nama</th><th>Divisi</th>' + hari.map(function (h) { return '<th class="' + (h.status === 'LIBUR' ? 'rmg-libur' : '') + '">' + HARI[dari(h.iso).getDay()] + '<small>' + tglPendek(h.iso) + '</small></th>'; }).join('') + '</tr>';
-    $('jpTbody').innerHTML = baris.length ? baris.map(function (r, i) {
+    $('jxChips').innerHTML = '<span class="rmg-chip"><b>' + f(sudah) + '</b> Sudah dijadwalkan</span><span class="rmg-chip"><b>' + f(belum) + '</b> Belum dijadwalkan</span>';
+    $('jxThead').innerHTML = '<tr><th>No</th><th style="text-align:left;">Nama</th><th>Divisi</th>' + hari.map(function (h) { return '<th class="' + (h.status === 'LIBUR' ? 'rmg-libur' : '') + '">' + HARI[dari(h.iso).getDay()] + '<small>' + tglPendek(h.iso) + '</small></th>'; }).join('') + '</tr>';
+    $('jxTbody').innerHTML = baris.length ? baris.map(function (r, i) {
       return '<tr><td class="rmg-tengah">' + (i + 1) + '</td><td class="rmg-nama">' + esc(r.nama) + '</td><td class="rmg-div">' + esc(r.divisi) + '</td>' + hari.map(function (h) {
         const c = r.hari[h.iso] || {}, dapat = c.adaJadwal || c.perluDibuat;
         const isi = c.adaJadwal ? hm(c.jamMasuk).slice(0, 5).replace(/^0/, '') + '–' + hm(c.jamPulang).slice(0, 5).replace(/^0/, '') : (c.perluDibuat ? 'Belum' : '');
@@ -115,20 +145,20 @@
     }).join('') : '<tr><td colspan="' + (3 + hari.length) + '"><div class="empty-state">Tidak ada relawan sesuai pilihan.</div></td></tr>';
   }
   function bukaAksi(idR, iso) {
-    const r = data.relawan.filter(function (x) { return x.id === idR; })[0], c = r.hari[iso], box = $('jpAksi'), ada = c.adaJadwal; box.style.display = 'block';
+    const r = data.relawan.filter(function (x) { return x.id === idR; })[0], c = r.hari[iso], box = $('jxAksi'), ada = c.adaJadwal; box.style.display = 'block';
     box.innerHTML = '<div style="font-weight:700;">' + esc(r.nama) + ' <span style="font-weight:500;color:var(--color-text-muted);">· ' + esc(r.divisi) + ' · ' + tglPanjang(iso) + '</span></div>' +
       (ada && c.statusMasuk && c.statusMasuk !== 'BELUM' ? '<div style="font-size:12px;color:#b26a00;margin-top:4px;">Relawan ini sudah absen pada tanggal itu. Mengubah jadwal tidak mengubah jam absen; gunakan Koreksi Presensi untuk koreksi absen.</div>' : '') +
-      '<div class="filter-bar" style="margin-top:8px;"><label style="font-size:12px;">Jam masuk <input type="time" id="jpJamM" value="' + (hm(c.jamMasuk) || '08:00') + '"></label><label style="font-size:12px;">Jam pulang <input type="time" id="jpJamP" value="' + (hm(c.jamPulang) || '16:00') + '"></label><input id="jpCat" maxlength="200" placeholder="Catatan (opsional)" value="' + esc(c.catatan || '') + '" style="' + inp + 'flex:1;min-width:140px;"></div>' +
-      '<div><button class="btn-mini primary" id="jpSimpan" type="button">' + (ada ? 'Ubah Jadwal' : 'Buat Jadwal') + '</button> ' + (ada ? '<button class="btn-mini" id="jpHapus" type="button" style="color:var(--color-danger);">Hapus</button> ' : '') + '<button class="btn-mini" id="jpBatal" type="button">Batal</button></div>';
-    $('jpBatal').addEventListener('click', function () { box.style.display = 'none'; });
-    $('jpSimpan').addEventListener('click', async function () {
-      const jm = $('jpJamM').value, jp = $('jpJamP').value, cat = $('jpCat').value.trim(); if (!jm || !jp) { $('jpPesan').style.color = '#c0392b'; $('jpPesan').textContent = 'Jam masuk dan jam pulang wajib diisi.'; return; }
+      '<div class="filter-bar" style="margin-top:8px;"><label style="font-size:12px;">Jam masuk <input type="time" id="jxJamM" value="' + (hm(c.jamMasuk) || '08:00') + '"></label><label style="font-size:12px;">Jam pulang <input type="time" id="jxJamP" value="' + (hm(c.jamPulang) || '16:00') + '"></label><input id="jxCat" maxlength="200" placeholder="Catatan (opsional)" value="' + esc(c.catatan || '') + '" style="' + inp + 'flex:1;min-width:140px;"></div>' +
+      '<div><button class="btn-mini primary" id="jxSimpan" type="button">' + (ada ? 'Ubah Jadwal' : 'Buat Jadwal') + '</button> ' + (ada ? '<button class="btn-mini" id="jxHapus" type="button" style="color:var(--color-danger);">Hapus</button> ' : '') + '<button class="btn-mini" id="jxBatal" type="button">Batal</button></div>';
+    $('jxBatal').addEventListener('click', function () { box.style.display = 'none'; });
+    $('jxSimpan').addEventListener('click', async function () {
+      const jm = $('jxJamM').value, jp = $('jxJamP').value, cat = $('jxCat').value.trim(); if (!jm || !jp) { $('jxPesan').style.color = '#c0392b'; $('jxPesan').textContent = 'Jam masuk dan jam pulang wajib diisi.'; return; }
       try { if (ada) await api('ubahJadwalIndividu', { idAbsensi: c.idAbsensi, jamMasuk: jm, jamPulang: jp, catatan: cat }); else await api('buatJadwalIndividu', { idOperasional: c.idOperasional, idRelawan: r.id, jamMasuk: jm, jamPulang: jp, catatan: cat });
-        $('jpPesan').style.color = '#2e7d32'; $('jpPesan').textContent = 'Jadwal tersimpan.'; box.style.display = 'none'; await muatData(); } catch (err) { $('jpPesan').style.color = '#c0392b'; $('jpPesan').textContent = err.message || 'Gagal menyimpan.'; }
+        $('jxPesan').style.color = '#2e7d32'; $('jxPesan').textContent = 'Jadwal tersimpan.'; box.style.display = 'none'; await muatData(); } catch (err) { $('jxPesan').style.color = '#c0392b'; $('jxPesan').textContent = err.message || 'Gagal menyimpan.'; }
     });
-    if ($('jpHapus')) $('jpHapus').addEventListener('click', async function () {
+    if ($('jxHapus')) $('jxHapus').addEventListener('click', async function () {
       if (!confirm('Hapus jadwal ' + r.nama + ' pada ' + tglPanjang(iso) + '?')) return;
-      try { await api('hapusJadwalIndividu', { idAbsensi: c.idAbsensi }); $('jpPesan').style.color = '#2e7d32'; $('jpPesan').textContent = 'Jadwal dihapus.'; box.style.display = 'none'; await muatData(); } catch (err) { $('jpPesan').style.color = '#c0392b'; $('jpPesan').textContent = err.message || 'Gagal menghapus.'; }
+      try { await api('hapusJadwalIndividu', { idAbsensi: c.idAbsensi }); $('jxPesan').style.color = '#2e7d32'; $('jxPesan').textContent = 'Jadwal dihapus.'; box.style.display = 'none'; await muatData(); } catch (err) { $('jxPesan').style.color = '#c0392b'; $('jxPesan').textContent = err.message || 'Gagal menghapus.'; }
     });
     box.scrollIntoView({ block: 'nearest' });
   }
@@ -155,15 +185,15 @@
   }
 
   // ---------------- pemasangan ----------------
-  const hariIni = isoLokal(new Date()); $('jbAwal').value = hariIni; $('jpAwal').value = hariIni;
+  const hariIni = isoLokal(new Date()); $('jbAwal').value = hariIni; $('jxAwal').value = hariIni;
   document.querySelectorAll('input[name="jbHari"]').forEach(function (e) { e.addEventListener('change', jadwalkanPratinjau); });
   document.querySelectorAll('input[name="jbCak"]').forEach(function (e) { e.addEventListener('change', aturCakupan); });
   $('jbAwal').addEventListener('change', jadwalkanPratinjau); $('jbRelawan').addEventListener('change', jadwalkanPratinjau);
   $('jbDivisi').addEventListener('change', function () { aturKelompok(); jadwalkanPratinjau(); });
   ['jbJamMasuk', 'jbJamPulang'].forEach(function (i) { $(i).addEventListener('input', function () { jamDiubah = true; }); });
   $('jbBuat').addEventListener('click', buat);
-  ['jpMode', 'jpAwal', 'jpDivisi'].forEach(function (i) { $(i).addEventListener('change', muatData); }); $('jpStatus').addEventListener('change', function () { if (data) renderData(); });
-  $('jpTbody').addEventListener('click', function (e) { const c = e.target.closest('td[data-pilih]'); if (c && data) bukaAksi(c.dataset.r, c.dataset.t); });
+  ['jxMode', 'jxAwal', 'jxDivisi'].forEach(function (i) { $(i).addEventListener('change', muatData); }); $('jxStatus').addEventListener('change', function () { if (data) renderData(); });
+  $('jxTbody').addEventListener('click', function (e) { const c = e.target.closest('td[data-pilih]'); if (c && data) bukaAksi(c.dataset.r, c.dataset.t); });
   async function init() {
     if (mulai) return; mulai = true;
     try { opsi = await api('getOpsiJadwalBaru'); isiOpsi(); } catch (err) { $('jbPratinjau').innerHTML = '<span style="color:#c0392b;">' + esc(err.message || 'Gagal memuat pilihan.') + '</span>'; }

@@ -430,9 +430,9 @@ function inisialisasiOpnameAdmin() {
   document.getElementById('aBtnSelesaikanOpname').addEventListener('click', async () => {
     try {
       showLoading('Menyelesaikan opname...');
-      const hasil = await apiPost('selesaikanSiragaOpname', { token: sesiAdminStok.token, id: opnameAdminAktifId });
+      const hasil = await selesaikanOpnameDenganAlasanAdmin_(opnameAdminAktifId);
       hideLoading();
-      showError(hasil.selisih === 0 ? 'Opname selesai, tidak ada selisih.' : 'Opname selesai. Penyesuaian ' + (hasil.selisih > 0 ? '+' : '') + hasil.selisih + ' tercatat otomatis.');
+      showError(hasil.diajukan ? 'Penyesuaian diajukan dan menunggu persetujuan.' : (hasil.selisih === 0 ? 'Opname selesai, tidak ada selisih.' : 'Opname selesai. Penyesuaian ' + (hasil.selisih > 0 ? '+' : '') + hasil.selisih + ' tercatat otomatis.'));
       tutupFormOpnameFisikAdmin(); await muatRiwayatOpnameAdmin();
       delete sudahDimuatTabAdminStok.dashboard; delete sudahDimuatTabAdminStok.barang; delete sudahDimuatTabAdminStok.laporan;
     } catch (err) { hideLoading(); showError(err.message || 'Gagal menyelesaikan opname.'); }
@@ -450,6 +450,16 @@ function inisialisasiOpnameAdmin() {
     document.getElementById('aBtnMulaiOpname').disabled = true;
   }
 }
+
+// Penyesuaian stok (D4): bila server meminta alasan (persetujuan aktif), tanyakan lalu kirim ulang.
+async function selesaikanOpnameDenganAlasanAdmin_(id) {
+  try { return await apiPost('selesaikanSiragaOpname', { token: sesiAdminStok.token, id: id }); }
+  catch (err) {
+    if (/Alasan penyesuaian wajib/i.test((err && err.message) || '')) { const alasan = prompt('Alasan penyesuaian stok (wajib):'); if (!alasan || !alasan.trim()) throw new Error('Pengajuan dibatalkan: alasan wajib diisi.'); return apiPost('selesaikanSiragaOpname', { token: sesiAdminStok.token, id: id, alasan: alasan.trim() }); }
+    throw err;
+  }
+}
+
 async function muatRiwayatOpnameAdmin() {
   const list = await apiPost('getSiragaOpnameList', { token: sesiAdminStok.token });
   const container = document.getElementById('aOpnameList');
@@ -458,7 +468,16 @@ async function muatRiwayatOpnameAdmin() {
     <div class="riwayat-item is-${badgeClassStatusTransaksiAdmin(o.status)}"><div class="riwayat-item-detail">
       <div class="riwayat-item-top"><strong class="riwayat-item-shift">${escapeHtml(o.namaBarang)}</strong><span class="riwayat-badge ${badgeClassStatusTransaksiAdmin(o.status)}">${o.status}</span></div>
       <div class="riwayat-item-jam">${o.tanggal} · Sistem: ${formatRupiahSederhanaAdmin(o.stokSistem)} · Fisik: ${o.stokFisik !== '' ? formatRupiahSederhanaAdmin(o.stokFisik) : '-'} · Selisih: ${o.selisih !== '' ? o.selisih : '-'}</div>
+${o.status === 'DIAJUKAN' ? `<div class="riwayat-item-jam">Diajukan ${escapeHtml(o.namaPengaju)} · Alasan: ${escapeHtml(o.alasan)}</div><div style="display:flex;gap:8px;margin-top:6px;"><button type="button" class="btn-mini primary" data-opname-aksi="setuju" data-id="${o.id}">Setujui</button><button type="button" class="btn-mini" data-opname-aksi="tolak" data-id="${o.id}">Tolak</button></div>` : (o.namaPenyetuju ? `<div class="riwayat-item-jam">Alasan: ${escapeHtml(o.alasan)} · ${o.status === 'DITOLAK' ? 'Ditolak' : 'Disetujui'} ${escapeHtml(o.namaPenyetuju)}${o.catatanKeputusan ? ' · ' + escapeHtml(o.catatanKeputusan) : ''}</div>` : '')}
     </div></div>`).join('');
+  container.onclick = async (e) => {   // persetujuan penyesuaian stok (D4): setujui / tolak; server menegakkan pengaju != penyetuju & kewenangan
+    const b = e.target.closest('button[data-opname-aksi]'); if (!b) return;
+    const setuju = b.dataset.opnameAksi === 'setuju', id = b.dataset.id; let catatan = '';
+    if (setuju) { if (!confirm('Setujui penyesuaian stok ini? Stok akan berubah dan tidak bisa dibatalkan.')) return; catatan = prompt('Catatan persetujuan (opsional):') || ''; }
+    else { catatan = prompt('Alasan penolakan (wajib):'); if (!catatan || !catatan.trim()) return; }
+    try { showLoading(setuju ? 'Menyetujui...' : 'Menolak...'); await apiPost(setuju ? 'setujuiSiragaOpname' : 'tolakSiragaOpname', { token: sesiAdminStok.token, id: id, catatan: catatan.trim() }); hideLoading(); showError(setuju ? 'Penyesuaian disetujui dan stok diperbarui.' : 'Pengajuan ditolak.'); await muatRiwayatOpnameAdmin(); delete sudahDimuatTabAdminStok.dashboard; delete sudahDimuatTabAdminStok.barang; delete sudahDimuatTabAdminStok.laporan; }
+    catch (err) { hideLoading(); showError(err.message || 'Gagal memproses.'); }
+  };
 }
 
 // ============================================================

@@ -228,8 +228,15 @@
    * supaya keduanya konsisten, tidak ada logic yang terpisah/berisiko
    * berbeda sendiri-sendiri seiring waktu.
    */
+  // 5 Nov 2026 (foto Admin: Rekap Mingguan & Kartu Identitas kosong setelah muat ulang): tab yang dibuka dari location.hash TIDAK lagi diklik saat
+  // skrip ini dimuat (modul statis lain belum terpasang & sesi belum dipulihkan -> pemicu muat terlewat / token kosong). Ia ditunda sampai dashboard siap.
+  let tabHashTertunda_ = null;
   function masukKeDashboard_(token, username, role) {
     authToken = token;
+    if (tabHashTertunda_) {   // tunggu SEMUA skrip statis selesai dimuat (readyState 'loading' = masih mengunduh skrip berikutnya)
+      const t = tabHashTertunda_; tabHashTertunda_ = null; const buka = function () { t.click(); };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buka, { once: true }); else setTimeout(buka, 0);
+    }
     // BARU (modul Stok): expose token secara terbatas ke luar closure ini,
     // supaya admin-stok.js (file terpisah, tidak mengubah logic admin.js
     // yang sudah ada) bisa memakai sesi admin yang sama tanpa login ulang.
@@ -385,7 +392,7 @@
   // sub-tab SIPANDU, bukan klik tab biasa -- terlalu berisiko diubah tanpa
   // bisa diuji langsung di browser).
   const MODUL_LAZY = {
-    panelStok: 'modules/admin/admin-stok.js?v=20261011b',
+    panelStok: 'modules/admin/admin-stok.js?v=20261105e',
     // Diperbaiki 23 Okt 2026 (ditemukan saat menelusuri laporan "sudah
     // diperbaiki tapi tidak muncul" yg berulang): peta ini adalah
     // SUMBER VERSI TERPISAH dari <script> statis di admin.html -- utk
@@ -400,12 +407,12 @@
     // walau sebagian filenya sendiri belum tentu berubah isi -- supaya
     // SEMUA panel dipastikan ambil salinan terbaru, bukan cache lama.
     panelShift: 'modules/admin/admin-shift.js?v=20261024c',
-    panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261105b',
+    panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261105c',
     panelLaporan: 'modules/admin/admin-laporan.js?v=20261104d',
     panelProfilRelawan: 'modules/admin/admin-profil-relawan.js?v=20261023a',
     panelMenuHariIni: 'modules/admin/admin-menu-hari-ini.js?v=20261023a',
     panelPenerimaManfaatOps: 'modules/admin/admin-penerima-manfaat-ops.js?v=20261023a',
-    panelManajemenHakAkses: 'modules/admin/admin-manajemen-hak-akses.js?v=20261023a',
+    panelManajemenHakAkses: 'modules/admin/admin-manajemen-hak-akses.js?v=20261105e',
     panelRoleAkses: 'modules/admin/admin-role.js?v=20261023a',
     panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261104a',
     panelPengajuanKebutuhanAdmin: 'modules/admin/admin-pengajuan-kebutuhan.js?v=20261023a',
@@ -417,7 +424,7 @@
     panelWebsitePublik: 'modules/admin/admin-website-publik.js?v=20261023a',
     panelDuaMinggu: 'modules/admin/admin-export.js?v=20261104d',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'modules/admin/admin-import.js?v=20261023a',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
-    panelKartuQr: 'modules/admin/admin-kartu-qr.js?v=20261023a',
+    panelKartuQr: 'modules/admin/admin-kartu-qr.js?v=20261105d',
     panelMasterTarif: 'modules/admin/admin-master-tarif.js?v=20261104a'
   };
   const modulTerpuat = new Set();
@@ -527,7 +534,7 @@
     const namaPanel = (location.hash || '').replace('#', '');
     if (!namaPanel) return;
     const tabCocok = Array.from(el.tabs).find(t => t.dataset.panel === namaPanel);
-    if (tabCocok) tabCocok.click();
+    if (tabCocok) tabHashTertunda_ = tabCocok;   // dibuka oleh masukKeDashboard_ (lihat atas), bukan sekarang
   })();
 
   // ===== INIT DASHBOARD =====

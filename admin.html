@@ -15,7 +15,7 @@
      portal.css belum tersedia, sekarang sudah dihapus -- jangan
      tambahkan <link> ke file itu lagi kalau terlihat di versi lama). -->
 <link rel="stylesheet" href="styles/portal.css?v=20261023a">
-<link rel="stylesheet" href="styles/admin.css?v=20261105b">
+<link rel="stylesheet" href="styles/admin.css?v=20261105c">
 <link rel="stylesheet" href="styles/app-shell.css?v=20261015b">
 <link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
@@ -216,7 +216,7 @@
          yg sesungguhnya jalan di browser, tanpa menebak lagi apakah
          deploy sudah masuk atau belum. Diperbarui manual tiap kali
          admin.html diubah -- lihat juga console.log di bawah. -->
-    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-05b (koreksi presensi & jadwal baru)</span></div>
+    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-05f (satu paket: hak akses, opname, nama divisi)</span></div>
   </aside>
     <div class="shell-main">
   <header class="shell-topbar">
@@ -519,9 +519,6 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">
         <input type="text" id="mhaCariPengguna" class="form-field-input" placeholder="Cari nama atau ID..." style="flex:1;min-width:160px;">
         <select id="mhaFilterRole" class="mini-select"><option value="">Semua Role</option></select>
-        <select id="mhaFilterStatus" class="mini-select">
-          <option value="">Semua Status</option><option value="AKTIF">Aktif</option><option value="NONAKTIF">Nonaktif</option>
-        </select>
       </div>
       <!-- Diganti 18 Okt 2026 (diminta Admin) dari kartu-bertumpuk
            (tabel-jadi-kartu) ke tabel beneran yg digeser samping, kolom
@@ -529,7 +526,7 @@
            utk daftar panjang (tidak perlu scroll jauh per orang). -->
       <div class="table-wrap">
         <table class="tabel-kolom-beku-3">
-          <thead><tr><th>Nama</th><th>ID</th><th>Jabatan</th><th>Role</th><th>Divisi</th><th>Status</th><th>Aksi</th></tr></thead>
+          <thead><tr><th>Nama</th><th>ID</th><th>Jabatan</th><th>Role</th><th>Divisi</th><th>Aksi</th></tr></thead>
           <tbody id="mhaTbodyPengguna"><tr><td colspan="7"><div class="empty-state">Memuat...</div></td></tr></tbody>
         </table>
       </div>
@@ -659,14 +656,14 @@
       <select id="rmgDivisi" aria-label="Divisi"><option value="">Semua Divisi</option></select>
       <select id="rmgRelawan" aria-label="Relawan"><option value="">Semua Relawan</option></select>
       <select id="rmgStatus" aria-label="Status"><option value="">Semua Status</option><option value="H">Hadir</option><option value="T">Terlambat</option><option value="I">Izin</option><option value="S">Sakit</option><option value="A">Alfa</option><option value="C">Cuti</option></select>
-      <button class="btn-mini export" id="btnExportRekapMingguan" type="button">Export Excel</button>
+      <button class="btn-mini" id="btnTampilkanRekap" type="button">Tampilkan</button><button class="btn-mini export" id="btnExportRekapMingguan" type="button">Export Excel</button>
     </div>
     <div class="rmg-chips" id="rmgChips"><span class="rmg-chip"><b id="rmgTotalInsentif">–</b> Total Insentif</span><span class="rmg-chip"><b id="rmgTotalHadir">–</b> Hadir</span><span class="rmg-chip"><b id="rmgTotalTerlambat">–</b> Terlambat</span><span class="rmg-chip"><b id="rmgTotalIzin">–</b> Izin</span><span class="rmg-chip"><b id="rmgTotalSakit">–</b> Sakit</span><span class="rmg-chip"><b id="rmgTotalAlfa">–</b> Alfa</span><span class="rmg-chip"><b id="rmgTotalCuti">–</b> Cuti</span></div>
     <div class="rmg-legenda" id="rmgLegenda"><span><i class="rmg-H">✓</i> Hadir</span><span><i class="rmg-T">T</i> Terlambat</span><span><i class="rmg-I">I</i> Izin</span><span><i class="rmg-S">S</i> Sakit</span><span><i class="rmg-A">A</i> Alfa</span><span><i class="rmg-C">C</i> Cuti</span><span><i class="rmg-B" style="background:#fff;border:1px solid #e3e7ee;">·</i> Belum waktunya</span><span><i style="background:#e6e8ec;color:#6b7280;">&nbsp;</i> Libur</span></div>
     <div class="table-wrap">
       <table class="rmg-tabel" id="tabelRekapMingguan">
         <thead id="theadRekapMingguan"><tr><th>No</th><th>Nama</th><th>Divisi</th><th>No. Rekening</th><th>Hari Kerja</th><th>Tarif/Hari</th><th>Total Insentif</th></tr></thead>
-        <tbody id="tbodyRekapMingguan"><tr><td colspan="7"><div class="empty-state">Pilih rentang lalu klik Tampilkan.</div></td></tr></tbody>
+        <tbody id="tbodyRekapMingguan"><tr><td colspan="7"><div class="empty-state">Memuat data…</div></td></tr></tbody>
       </table>
     </div>
   </div>
@@ -2360,13 +2357,13 @@
 <script src="core/auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="core/ringkasan-pm.js?v=20261102a"></script>
-<script src="modules/admin/admin.js?v=20261104d"></script>
+<script src="modules/admin/admin.js?v=20261105e"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="modules/admin/admin-kartu-qr.js?v=20261023a"></script>
 <script src="modules/admin/admin-sipres-monitoring.js?v=20260922a"></script>
 <script src="modules/admin/admin-migrasi-roster-v2.js"></script>
 <script src="core/xlsx-mini.js?v=20261104d"></script>
-<script src="modules/admin/admin-rekap-mingguan.js?v=20261105a"></script>
+<script src="modules/admin/admin-rekap-mingguan.js?v=20261105d"></script>
 <script src="modules/admin/admin-sipandu-master.js?v=20261104c"></script>
 <script src="modules/admin/admin-sipandu-pm.js?v=20261104d"></script>
 <script src="modules/admin/admin-sipandu-impor.js?v=20261104a"></script>
@@ -2376,7 +2373,7 @@
 <script src="modules/admin/admin-kalender-operasional.js?v=20261104c"></script>
 <script src="modules/admin/admin-akses-relawan.js?v=20261104a"></script>
 <script src="modules/admin/admin-jadwal-penugasan.js?v=20261104a"></script>
-<script src="modules/admin/admin-jadwal-baru.js?v=20261105b"></script>
+<script src="modules/admin/admin-jadwal-baru.js?v=20261105c"></script>
 <script src="modules/admin/admin-kalender-pm.js?v=20261104c"></script>
 <!-- FASE 2: admin-stok.js, admin-shift.js, admin-role.js, admin-export.js,
      admin-import.js, admin-pengelola-sppg.js, admin-pengaturan.js, dan

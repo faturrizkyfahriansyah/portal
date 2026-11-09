@@ -95,23 +95,20 @@
   function renderPengguna_() {
     const cari = document.getElementById('mhaCariPengguna').value.trim().toLowerCase();
     const filterRole = document.getElementById('mhaFilterRole').value;
-    const filterStatus = document.getElementById('mhaFilterStatus').value;
     let list = daftarPenggunaCache;
     if (cari) list = list.filter(p => p.nama.toLowerCase().includes(cari) || p.id.toLowerCase().includes(cari));
     if (filterRole) list = list.filter(p => p.roleBaru === filterRole);
-    if (filterStatus) list = list.filter(p => p.status === filterStatus);
 
     const tbody = document.getElementById('mhaTbodyPengguna');
-    if (!list.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Tidak ada pengguna yang cocok.</div></td></tr>'; return; }
+    if (!list.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">Tidak ada pengguna yang cocok.</div></td></tr>'; return; }
 
     tbody.innerHTML = list.map(p => `
       <tr data-id="${escapeHtml(p.id)}">
-        <td data-label="Nama"><b>${escapeHtml(p.nama)}</b></td>
+        <td data-label="Nama"><b>${escapeHtml(p.nama)}</b>${p.status === 'AKTIF' ? '' : ' <span style="font-size:11px;color:var(--color-text-muted);">· nonaktif</span>'}</td>
         <td data-label="ID">${escapeHtml(p.id)}</td>
-        <td data-label="Jabatan">${escapeHtml(p.jabatan)}</td>
+        <td data-label="Jabatan">${p.jabatan ? escapeHtml(p.jabatan) : '<span style="color:var(--color-text-muted);">Belum ditetapkan</span>'}</td>
         <td data-label="Role"><span class="badge aktif">${escapeHtml(namaRole_(p.roleBaru))}</span></td>
         <td data-label="Divisi">${escapeHtml(p.divisi)}</td>
-        <td data-label="Status"><span class="badge ${p.status === 'AKTIF' ? 'aktif' : 'nonaktif'}">${p.status}</span></td>
         <td data-label="Aksi"><button type="button" class="btn-mini mha-btn-ubah-role" style="background:#0B2D6B;color:#fff;border-color:#0B2D6B;">Ubah Role</button></td>
       </tr>`).join('');
 
@@ -126,7 +123,6 @@
 
   document.getElementById('mhaCariPengguna').addEventListener('input', renderPengguna_);
   document.getElementById('mhaFilterRole').addEventListener('change', renderPengguna_);
-  document.getElementById('mhaFilterStatus').addEventListener('change', renderPengguna_);
 
   // ---------- MODAL UBAH ROLE ----------
   function bukaModalUbahRole_(p) {
@@ -173,6 +169,23 @@
   // simpan akan MENERAPKAN pengaturan yg sama ke SEMUA modul tercentang.
   const IZIN_LABEL = { VIEW: 'Lihat data', CREATE: 'Tambah data', EDIT: 'Ubah data', DELETE: 'Hapus data', VALIDATE: 'Validasi', APPROVE: 'Setujui transaksi', EXPORT: 'Ekspor data' };
 
+  const IZIN_INFO = {
+    VIEW: ['Melihat daftar dan rincian data.', 'Pengguna melihat data sesuai batas datanya.', 'Tidak bisa membuka halaman data.', 'Pengawas Keuangan melihat rekap biaya.'],
+    CREATE: ['Membuat catatan baru.', 'Tombol dan layanan "tambah" aktif.', 'Tidak bisa membuat catatan baru.', 'Admin menambah relawan.'],
+    EDIT: ['Mengubah catatan yang sudah ada.', 'Boleh mengubah (tercatat di audit).', 'Data hanya bisa dilihat.', 'Koordinator mengoreksi isian divisinya.'],
+    DELETE: ['Menghapus catatan.', 'Boleh menghapus (tidak selalu bisa dibatalkan).', 'Tidak bisa menghapus.', 'Menghapus penugasan yang salah.'],
+    VALIDATE: ['Menandai data sah/diperiksa.', 'Pengguna dapat memvalidasi.', 'Data tetap berstatus belum divalidasi.', 'Pengawas Gizi memvalidasi menu.'],
+    APPROVE: ['Memberi persetujuan akhir.', 'Persetujuan dapat diberikan.', 'Transaksi menunggu pihak lain.', 'Kepala SPPG menyetujui pengajuan kebutuhan.'],
+    EXPORT: ['Mengunduh data (Excel).', 'Tombol ekspor tampil dan berfungsi.', 'Data tidak bisa diunduh.', 'Pengawas Keuangan mengunduh rekap.']
+  };
+  let pasanganRbac = null;   // izin yang BENAR-BENAR diperiksa server (dari getStatusRbac); null = belum diketahui
+  const diterapkan_ = (daftarModul, izin) => !pasanganRbac || daftarModul.every(m => pasanganRbac.some(p => p.modul === m && p.izin === izin && !p.khusus) || pasanganRbac.some(p => p.modul === m && p.izin === izin));
+  function infoIzinHtml_(k) {
+    const i = IZIN_INFO[k]; if (!i) return '';
+    return `<button type="button" class="mha-info" data-info="${k}" aria-label="Penjelasan ${IZIN_LABEL[k]}" aria-expanded="false" style="margin-left:6px;width:18px;height:18px;border-radius:50%;border:1px solid #9aa7b8;background:#fff;color:#55606f;font-size:11px;font-weight:700;line-height:16px;padding:0;cursor:pointer;">i</button>` +
+      `<span class="mha-info-isi" data-isi="${k}" style="display:none;flex-basis:100%;font-size:11.5px;color:#55606f;background:#f6f8fb;border-radius:8px;padding:8px 10px;margin-top:4px;line-height:1.45;"><b>Fungsi:</b> ${i[0]}<br><b>Jika aktif:</b> ${i[1]}<br><b>Jika nonaktif:</b> ${i[2]}<br><b>Contoh:</b> ${i[3]}</span>`;
+  }
+
   function modulTercentang_() {
     return Array.from(document.querySelectorAll('.mha-modul-checkbox:checked')).map(cb => cb.value);
   }
@@ -210,7 +223,7 @@
       <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:0 0 8px;">Izin tindakan</p>
       <div class="mha-izin-grid" id="mhaCfgIzinGrid">
         ${Object.keys(IZIN_LABEL).map(k => `
-          <label class="mha-izin-item"><input type="checkbox" data-izin="${k}" ${cfg && cfg.izin[k] ? 'checked' : ''}> ${IZIN_LABEL[k]}</label>`).join('')}
+          <label class="mha-izin-item" style="flex-wrap:wrap;${diterapkan_(daftarModulKode, k) ? '' : 'opacity:.6;'}"><input type="checkbox" data-izin="${k}" ${cfg && cfg.izin[k] ? 'checked' : ''} ${diterapkan_(daftarModulKode, k) ? '' : 'disabled'}> ${IZIN_LABEL[k]}${diterapkan_(daftarModulKode, k) ? '' : ' <span style="font-size:10.5px;color:#8a5a12;">(belum diterapkan di server)</span>'}${infoIzinHtml_(k)}</label>`).join('')}
       </div>
       <p style="font-size:11px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;margin:16px 0 6px;">Batas data</p>
       <select id="mhaCfgScope" class="mini-select" style="width:100%;margin-bottom:16px;">
@@ -219,10 +232,13 @@
         <option value="SENDIRI" ${cfg && cfg.scope === 'SENDIRI' ? 'selected' : ''}>Data milik sendiri</option>
       </select>
       ${cfg && cfg.diubahOleh ? `<p style="font-size:11px;color:var(--color-text-muted);margin-bottom:12px;">Terakhir diubah oleh ${escapeHtml(cfg.diubahOleh)}</p>` : ''}
+      <p id="mhaDirty" style="display:none;font-size:12px;color:#b26a00;margin:0 0 8px;text-align:right;">Ada perubahan yang belum disimpan</p>
       <div style="display:flex;gap:8px;justify-content:flex-end;">
         <button type="button" class="btn-mini" id="mhaCfgBatal">Batal</button>
         <button type="button" class="btn-mini primary" id="mhaCfgSimpan" style="background:#F58220;border-color:#F58220;">Simpan Konfigurasi${daftarModulKode.length > 1 ? ' (' + daftarModulKode.length + ' modul)' : ''}</button>
       </div>`;
+    el.querySelectorAll('.mha-info').forEach(b => b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const isi = el.querySelector('.mha-info-isi[data-isi="' + b.dataset.info + '"]'), buka = isi.style.display === 'none'; isi.style.display = buka ? 'block' : 'none'; b.setAttribute('aria-expanded', buka ? 'true' : 'false'); }));
+    el.querySelectorAll('input, select').forEach(i => i.addEventListener('change', () => { const d = document.getElementById('mhaDirty'); if (d) d.style.display = 'block'; }));
     document.getElementById('mhaCfgBatal').addEventListener('click', muatKonfigurasi_);
     document.getElementById('mhaCfgSimpan').addEventListener('click', () => simpanKonfigurasi_(document.getElementById('mhaKonfigRole').value, daftarModulKode));
   }
@@ -236,6 +252,7 @@
     document.querySelectorAll('#mhaCfgIzinGrid input[data-izin]').forEach(c => { izin[c.dataset.izin] = c.checked; });
     const aksesModul = document.getElementById('mhaCfgAksesModul').checked;
     const scope = document.getElementById('mhaCfgScope').value;
+    if (!aksesModul && !confirm('Akses modul akan DIMATIKAN untuk role ini. Seluruh pengguna berole ini kehilangan modul tersebut. Lanjutkan?')) { btn.disabled = false; btn.textContent = 'Simpan Konfigurasi' + (daftarModulKode.length > 1 ? ' (' + daftarModulKode.length + ' modul)' : ''); return; }
     try {
       // Diterapkan ke SEMUA modul tercentang -- berurutan (bukan
       // Promise.all) supaya kalau ada yg gagal di tengah, pesan error
@@ -281,4 +298,36 @@
   document.getElementById('mhaFilterJenisRiwayat').addEventListener('change', muatRiwayat_);
 
   muatSemua();
+
+  // ---------- STATUS RBAC & EVALUASI (Tahap 2 Hak Akses) ----------
+  // Mode ditampilkan saja; DIUBAH hanya oleh Admin lewat Script Properties (tidak ada tombol ubah mode). TEGAK menunggu persetujuan laporan evaluasi.
+  (function kartuRbac_() {
+    const panel = document.getElementById('panelManajemenHakAkses'); if (!panel) return;
+    const kartu = document.createElement('div'); kartu.id = 'mhaRbacKartu'; kartu.className = 'admin-stat-card'; kartu.style.cssText = 'padding:12px 14px;text-align:left;margin:0 0 14px;font-size:13px;';
+    const kepala = panel.querySelector('.shell-page-head'); if (kepala) kepala.after(kartu); else panel.prepend(kartu);
+    const LABEL_MODE = { OFF: 'OFF — sistem lama berlaku, mesin baru tidak aktif', BAYANGAN: 'BAYANGAN — sistem lama berlaku; mesin baru hanya mencatat selisih', TEGAK: 'TEGAK — mesin baru menentukan akses' };
+    const kelompok = (arr, f) => { const o = {}; arr.forEach(x => { const k = f(x); o[k] = (o[k] || 0) + 1; }); return Object.keys(o).sort().map(k => `<li>${escapeHtml(k)}: <b>${o[k]}</b></li>`).join(''); };
+    async function muat() {
+      try {
+        const s = await apiPost('getStatusRbac', { token: T }); pasanganRbac = s.pasangan || null;
+        kartu.innerHTML = `<div style="font-weight:700;margin-bottom:4px;">Mesin akses baru (RBAC)</div><div>Mode: <b>${escapeHtml(LABEL_MODE[s.mode] || s.mode)}</b></div>
+          <div style="color:var(--color-text-muted);font-size:12px;margin:4px 0 8px;">Konfigurasi sumber: ${s.sumberKonfigurasi === 'SHEET' ? 'sheet 34_KONFIGURASI_HAK_AKSES' : 'draf (belum diterapkan ke sheet)'} · ${s.jumlahPemeriksaan} pemeriksaan di server · selisih BAYANGAN tercatat: ${s.selisihBayanganTercatat}</div>
+          <button type="button" class="btn-mini" id="btnEvaluasiRbac">Lihat evaluasi</button> <span id="mhaEvalPesan" style="margin-left:8px;"></span><div id="mhaEvalIsi" style="margin-top:10px;"></div>`;
+        document.getElementById('btnEvaluasiRbac').addEventListener('click', evaluasi);
+      } catch (err) { kartu.innerHTML = '<span style="color:#c0392b;">' + escapeHtml(err.message || 'Gagal memuat status RBAC.') + '</span> <button type="button" class="btn-mini" id="btnRbacLagi">Coba lagi</button>'; const b = document.getElementById('btnRbacLagi'); if (b) b.addEventListener('click', muat); }
+    }
+    async function evaluasi() {
+      const pesan = document.getElementById('mhaEvalPesan'), isi = document.getElementById('mhaEvalIsi'); pesan.textContent = 'Menghitung…'; isi.innerHTML = '';
+      try {
+        const r = await apiPost('evaluasiBayanganRbac', { token: T }); pesan.textContent = '';
+        isi.innerHTML = `<div>${r.jumlahPengguna} pengguna × ${r.jumlahPemeriksaan} pemeriksaan = ${r.jumlahKeputusan} keputusan: <b>${r.sama}</b> sama · <b style="color:#c0392b;">${r.akanDitolak.length}</b> akan DITOLAK · <b style="color:#2e7d32;">${r.akanDibuka.length}</b> akan DIBUKA · <b style="color:#c0392b;">${r.potensiTerkunci.length}</b> potensi terkunci</div>
+          ${r.catatan.length ? '<ul style="margin:6px 0 0 18px;color:#8a5a12;">' + r.catatan.map(c => '<li>' + escapeHtml(c) + '</li>').join('') + '</ul>' : ''}
+          <details style="margin-top:6px;"><summary style="cursor:pointer;">Akan dibuka (${r.akanDibuka.length})</summary><ul style="margin:4px 0 0 18px;">${kelompok(r.akanDibuka, x => x.role + ' · ' + x.modul + ' · ' + (x.khusus || x.izin))}</ul></details>
+          <details><summary style="cursor:pointer;">Akan ditolak (${r.akanDitolak.length})</summary><ul style="margin:4px 0 0 18px;">${kelompok(r.akanDitolak, x => x.role + ' · ' + x.modul + ' · ' + (x.khusus || x.izin))}</ul></details>
+          <details><summary style="cursor:pointer;">Potensi terkunci (${r.potensiTerkunci.length})</summary><ul style="margin:4px 0 0 18px;">${r.potensiTerkunci.map(t => '<li>' + escapeHtml(t.nama + ' (' + t.role + ') — ' + t.modul) + '</li>').join('') || '<li>Tidak ada</li>'}</ul></details>
+          <p style="font-size:11.5px;color:var(--color-text-muted);margin:6px 0 0;">${escapeHtml(r.peringatan)}</p>`;
+      } catch (err) { pesan.style.color = '#c0392b'; pesan.textContent = err.message || 'Gagal membuat evaluasi.'; }
+    }
+    muat();
+  })();
 })();

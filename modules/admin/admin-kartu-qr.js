@@ -13,8 +13,15 @@ function escapeHtmlKq_(s) { return String(s == null ? '' : s).replace(/[&<>"']/g
 // MUAT & RENDER DAFTAR
 // ============================================================
 async function muatDaftarKartuAdmin_() {
-  daftarKartuCache = await apiPost('getDaftarKartuAdmin', { token: sesiKartuQr.token });
-  renderDaftarKartuAdmin_(document.getElementById('kqCari').value.trim());
+  // 5 Nov 2026: token dibaca SAAT permintaan dibuat (bukan salinan saat init) dan galat ditampilkan permanen di tabel, bukan hanya toast sesaat.
+  const tbody = document.getElementById('kqTbody') || document.querySelector('#panelKartuQr tbody');
+  try {
+    daftarKartuCache = await apiPost('getDaftarKartuAdmin', { token: window.sppgAdminToken || (sesiKartuQr && sesiKartuQr.token) });
+    renderDaftarKartuAdmin_(document.getElementById('kqCari').value.trim());
+  } catch (err) {
+    if (tbody) { tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state" style="color:#c0392b;">' + escapeHtmlKq_(err.message || 'Gagal memuat daftar kartu.') + '<br><button type="button" class="btn-mini" id="btnKqCobaLagi" style="margin-top:8px;">Coba lagi</button></div></td></tr>'; const b = document.getElementById('btnKqCobaLagi'); if (b) b.addEventListener('click', function () { muatDaftarKartuAdmin_(); }); }
+    throw err;
+  }
 }
 
 // Diperbaiki 16 Okt 2026 (diminta Admin -- "beda warna bentuk" dari
