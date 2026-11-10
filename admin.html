@@ -16,6 +16,7 @@
      tambahkan <link> ke file itu lagi kalau terlihat di versi lama). -->
 <link rel="stylesheet" href="styles/portal.css?v=20261023a">
 <link rel="stylesheet" href="styles/admin.css?v=20261105c">
+<link rel="stylesheet" href="styles/admin-dashboard.css?v=20261110a">
 <link rel="stylesheet" href="styles/app-shell.css?v=20261015b">
 <link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
 <link rel="manifest" href="manifest.json">
@@ -127,7 +128,6 @@
       <p class="shell-nav-group-desc">Sistem Informasi Presensi — rekap kehadiran dan pemantauan absensi relawan.</p>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelHarian"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 12l2 2 4-4"/></svg></span><span>Rekap Harian</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelRekapMingguan"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h3"/></svg></span><span>Rekap Mingguan</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDuaMinggu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><span>Rekap Per Periode (lama)</span></button>
       <!-- BARU (23 Okt 2026, diminta Admin) -- dulu "Atur Tarif per
            Relawan" di dalam Rekap Per Periode, sekarang halaman mandiri
            & standing (bukan per-periode lagi). -->
@@ -183,8 +183,6 @@
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduPagu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></span><span>Pagu &amp; Perhitungan</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduBiaya"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></span><span>Rekap Biaya &amp; Insentif</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelHakAksesSipandu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span><span>Operasional Produksi</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelMenuHariIni"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v20M18 2v7a3 3 0 0 1-3 3h-3M18 2v20"/></svg></span><span>Menu MBG (lama)</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPenerimaManfaatOps"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Penerima Manfaat (lama)</span></button>
 
       <p class="shell-nav-group-title">Aplikasi Terhubung</p>
       <p class="shell-nav-group-desc">Aplikasi terpisah dengan backend &amp; database sendiri.</p>
@@ -216,7 +214,7 @@
          yg sesungguhnya jalan di browser, tanpa menebak lagi apakah
          deploy sudah masuk atau belum. Diperbarui manual tiap kali
          admin.html diubah -- lihat juga console.log di bawah. -->
-    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-05f (satu paket: hak akses, opname, nama divisi)</span></div>
+    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-10a (kartu, rekap Minggu–Jumat, dashboard)</span></div>
   </aside>
     <div class="shell-main">
   <header class="shell-topbar">
@@ -252,6 +250,16 @@
         <h1 style="margin:0;font-size:19px;font-weight:800;">PENGELOLA SPPG JEUNGJING</h1>
         <p style="margin:4px 0 0;font-size:13px;opacity:.85;">Portal Pengelolaan SPPG Jeungjing</p>
       </div>
+    </section>
+
+    <!-- PERLU PERHATIAN (10 Nov 2026, permintaan Admin): diisi modules/admin/admin-dashboard-perhatian.js dari getDashboardPerhatian -->
+    <section class="panel-block dp-card" id="dpPerhatianCard" style="margin-bottom:16px;">
+      <div class="dp-head"><p class="panel-block-title" style="margin:0;">Perlu Perhatian</p><span class="dp-waktu" id="dpWaktu"></span><button type="button" class="btn-mini" id="dpMuatUlang">Muat ulang</button></div>
+      <div id="dpPerhatianIsi" class="dp-list"><div class="dp-kosong">Memuat…</div></div>
+    </section>
+    <section class="panel-block dp-card" id="dpPengajuanCard" style="margin-bottom:16px;display:none;">
+      <div class="dp-head"><p class="panel-block-title" style="margin:0;">Pengajuan Ketidakhadiran</p><button type="button" class="btn-mini" id="dpBukaPengajuan">Buka semua</button></div>
+      <div id="dpPengajuanIsi"></div>
     </section>
 
     <!-- KEHADIRAN RELAWAN HARI INI -->
@@ -301,11 +309,11 @@
       <div id="ovKalenderIsi">Memuat...</div>
     </section>
 
-    <!-- REKAP 2 MINGGU — otomatis Sementara/Selesai -->
+    <!-- REKAP PEKAN INI (Minggu–Jumat) — diisi admin-dashboard-perhatian.js (menggantikan Rekap Per Periode) -->
     <section class="panel-block" style="margin-bottom:16px;">
-      <p class="panel-block-title" id="ovRekapJudul">Rekap Per Periode</p>
+      <p class="panel-block-title" id="ovRekapJudul">Rekap Pekan Ini</p>
       <div id="ovRekapIsi">Memuat...</div>
-      <button type="button" class="btn-mini" style="margin-top:10px;" onclick="document.querySelector('[data-panel=panelDuaMinggu]').click()">Lihat Rekap Lengkap</button>
+      <button type="button" class="btn-mini" style="margin-top:10px;" onclick="document.querySelector('[data-panel=panelRekapMingguan]').click()">Lihat Rekap Lengkap</button>
     </section>
 
     <!-- SIRAGA — PERSEDIAAN -->
@@ -2364,6 +2372,7 @@
 <script src="modules/admin/admin-migrasi-roster-v2.js"></script>
 <script src="core/xlsx-mini.js?v=20261104d"></script>
 <script src="modules/admin/admin-rekap-mingguan.js?v=20261105d"></script>
+<script src="modules/admin/admin-dashboard-perhatian.js?v=20261110a"></script>
 <script src="modules/admin/admin-sipandu-master.js?v=20261104c"></script>
 <script src="modules/admin/admin-sipandu-pm.js?v=20261104d"></script>
 <script src="modules/admin/admin-sipandu-impor.js?v=20261104a"></script>
