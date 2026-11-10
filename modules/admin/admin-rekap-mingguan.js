@@ -1,4 +1,4 @@
-// SPPG JEUNGJING — ADMIN: Rekap Mingguan (SIPRES). REVISI 5 Nov 2026 (Admin): HANYA mingguan — pilih TANGGAL MULAI, otomatis 7 hari, langsung termuat
+// SPPG JEUNGJING — ADMIN: Rekap Mingguan (SIPRES). REVISI 5 Nov 2026 (Admin): HANYA mingguan — pilih TANGGAL, otomatis pekan MINGGU–JUMAT (6 hari), langsung termuat
 // (tanpa tombol Tampilkan, tanpa "sampai"); filter Divisi / Relawan / Status; ringkasan chip kecil; tanpa keterangan panjang. Tanpa periode. Penggajian mingguan: tarif harian (Master Tarif, berlaku mulai tanggal tertentu) × hari hadir.
 // REVISI 4 Nov 2026 (permintaan Admin): tampilan MATRIKS seperti rekap Excel Anda -- nama, divisi, rekening, lalu kolom HARI (Sen..Min + tanggal)
 // berwarna menurut kehadiran, lalu Hari Kerja, Tarif/Hari, Total Insentif. Tanpa pita per divisi. Ekspor = Excel asli (.xlsx), bukan CSV.
@@ -17,11 +17,13 @@
   const geserBulan = function (iso, n) { const d = dari(iso); return isoLokal(new Date(d.getFullYear(), d.getMonth() + n, 1)); };
   const selisihHari = function (a, b) { return Math.round((dari(b) - dari(a)) / 86400000); };
   const tglIndo = function (iso) { return iso.split('-').reverse().join('/'); };
-  const seninMingguIni = function () { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return isoLokal(d); };
+  // 10 Nov 2026 (Admin): PEKAN = MINGGU sampai JUMAT (6 hari; Sabtu tidak ditampilkan; Minggu di AWAL, sebelum Senin). Tanggal apa pun yang dipilih mundur ke Minggu pekannya.
+  const mingguPekan = function (iso) { const d = dari(iso); d.setDate(d.getDate() - d.getDay()); return isoLokal(d); };
+  const mingguIni = function () { return mingguPekan(isoLokal(new Date())); };
 
   let hasilTerakhir = null, sudahMuatPertama = false;
 
-  const akhirMinggu = function (mulai) { return geserHari(mulai, 6); };
+  const akhirMinggu = function (mulai) { return geserHari(mulai, 5); };   // Minggu + 5 = Jumat
   function baris_() {
     if (!hasilTerakhir) return [];
     const dv = $('rmgDivisi').value, id = $('rmgRelawan').value, st = $('rmgStatus').value;
@@ -149,8 +151,8 @@
       baris: [[{ v: judul, s: { f: 'b', z: 14 } }], header].concat(isi, [barisHadir, barisTotal], keterangan) }] });
   }
 
-  $('rmgAwal').value = seninMingguIni();
-  $('rmgAwal').addEventListener('change', muat);                       // pilih tanggal mulai = langsung tampil (7 hari)
+  $('rmgAwal').value = mingguIni();
+  $('rmgAwal').addEventListener('change', function () { if ($('rmgAwal').value) $('rmgAwal').value = mingguPekan($('rmgAwal').value); muat(); });   // pilih tanggal = mundur ke Minggu pekannya, langsung tampil (Minggu-Jumat)
   $('rmgDivisi').addEventListener('change', function () { if (hasilTerakhir) { isiFilterRelawan(); render(); } });
   $('rmgRelawan').addEventListener('change', function () { if (hasilTerakhir) render(); });
   $('rmgStatus').addEventListener('change', function () { if (hasilTerakhir) render(); });

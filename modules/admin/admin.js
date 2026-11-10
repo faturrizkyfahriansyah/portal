@@ -595,7 +595,7 @@
     { key: 'ringkasanAkun', label: 'Ringkasan Akun', fn: () => apiGet('getRingkasanAkunRelawan', { token: authToken }) },
     { key: 'siragaDashboard', label: 'SIRAGA', fn: () => apiGet('getSiragaDashboard', { token: authToken }) },
     { key: 'sipanduRingkas', label: 'SIPANDU', fn: () => apiGet('getSipanduDashboardRingkas', { token: authToken }) },
-    { key: 'rekapDuaMingguDashboard', label: 'Rekap Per Periode', fn: () => apiGet('getRekapDuaMingguDashboard', { token: authToken }) },
+    // 10 Nov 2026: 'rekapDuaMingguDashboard' (Rekap Per Periode) DIHAPUS -- diganti Rekap Pekan Ini (admin-dashboard-perhatian.js).
     // BARU (15 Okt 2026): Menu Hari Ini & Penerima Manfaat di dashboard
     // UTAMA Pengelola (sebelumnya cuma di Monitoring, khusus role ASN).
     // Tanpa token krn aksinya memang tanpa gerbang role (lihat Code.gs).
@@ -676,8 +676,7 @@
     // bagian di dalamnya sudah gated ke sumbernya masing-masing).
     ringkasanAkun: renderOverview,
     siragaDashboard: renderOverview,
-    sipanduRingkas: renderOverview,
-    rekapDuaMingguDashboard: renderOverview
+    sipanduRingkas: renderOverview
   };
 
   /** Muat ulang SATU sumber data saja (dipanggil dari tombol "Coba Lagi" di empty-state error). */
@@ -2384,30 +2383,7 @@
       }
     }
 
-    // ===== REKAP 2 MINGGU (P6 -- BARU: sumber SENDIRI, gate SENDIRI, tidak lagi ikut dashboardPengelola) =====
-    const rd = cache.rekapDuaMingguDashboard;
-    const rdGagal = cache.errors.rekapDuaMingguDashboard;
-    if (rd) {
-      const rekJudul = document.getElementById('ovRekapJudul');
-      const rekIsi = document.getElementById('ovRekapIsi');
-      if (rdGagal) {
-        rekIsi.textContent = gagalTanda;
-      } else if (!rd.tersedia) {
-        rekJudul.textContent = 'Rekap Per Periode';
-        rekIsi.innerHTML = '<p style="font-size:13px;color:var(--color-text-muted);margin:0;">Belum ada Periode Kerja untuk direkap.</p>';
-      } else {
-        rekJudul.textContent = 'Rekap Per Periode — ' + (rd.sementara ? 'Sementara' : 'Periode Selesai') + ' (' + rd.judul + ')';
-        const rk = rd.data;
-        const totalHadir = rk.reduce((a, r) => a + (r.hadir || 0), 0);
-        const totalTerlambat = rk.reduce((a, r) => a + (r.terlambat || 0), 0);
-        const totalTidakHadir = rk.reduce((a, r) => a + (r.tidakHadir || 0), 0);
-        rekIsi.innerHTML = `<div class="admin-stat-grid">
-          <div class="admin-stat-card accent-success"><div class="admin-stat-value">${totalHadir}</div><div class="admin-stat-label">Total Hadir</div></div>
-          <div class="admin-stat-card accent-warning"><div class="admin-stat-value">${totalTerlambat}</div><div class="admin-stat-label">Total Terlambat</div></div>
-          <div class="admin-stat-card accent-danger"><div class="admin-stat-value">${totalTidakHadir}</div><div class="admin-stat-label">Total Alfa</div></div>
-        </div>`;
-      }
-    }
+    // (blok Rekap 2 Minggu / Per Periode dihapus 10 Nov 2026 -- digantikan Rekap Pekan Ini oleh admin-dashboard-perhatian.js)
 
     // ===== SIRAGA — Persediaan (P5 -- BARU: sumber SENDIRI, gate SENDIRI) =====
     const sg = cache.siragaDashboard;
