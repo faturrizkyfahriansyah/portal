@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   pasangGrup_('kepadatan', 'sppgKepadatan', 'data-kepadatan', false);
 })();
 
-// ---- Unduh riwayat absensi periode aktif sebagai CSV
+// ---- Unduh riwayat presensi sebagai Excel (.xlsx; 10 Nov 2026: sebelumnya CSV, yang terbuka berantakan di Excel berbahasa Indonesia)
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('btnUnduhAbsensi');
   if (!btn) return;
@@ -154,11 +154,13 @@ document.addEventListener('DOMContentLoaded', () => {
       hideLoading();
       const baris = [['Tanggal', 'Hari', 'Jam Masuk', 'Jam Pulang', 'Status', 'Keterangan']];
       (hasil.items || []).forEach(r => baris.push([r.tanggal, r.hari, r.jamMasuk, r.jamPulang, r.status, r.keterangan]));
+      if (window.Xlsx) { Xlsx.unduhDaftar('riwayat-presensi-saya.xlsx', baris, { nama: 'Riwayat Presensi' }); return; }
+      // cadangan bila berkas Excel gagal dimuat (jaringan): tetap bisa unduh CSV
       const csv = baris.map(b => b.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n');
       const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' }));
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'riwayat-absensi-saya.csv';
+      a.download = 'riwayat-presensi-saya.csv';
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
