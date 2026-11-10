@@ -1,0 +1,22 @@
+/* Dashboard Pengelola: Perlu Perhatian + Pengajuan Ketidakhadiran + Rekap Pekan (10 Nov 2026). Berkas BARU; tidak menyentuh admin.css. */
+.dp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.dp-head .panel-block-title { flex: 1; }
+.dp-waktu { font-size: 11px; color: var(--color-text-muted, #667085); white-space: nowrap; }
+.dp-list { display: flex; flex-direction: column; gap: 8px; }
+.dp-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--color-border, #e3e8ef); border-left-width: 4px; border-radius: 10px; background: var(--color-surface, #fff); }
+.dp-item.merah { border-left-color: #d64545; background: rgba(214, 69, 69, .06); }
+.dp-item.kuning { border-left-color: #e0a100; background: rgba(224, 161, 0, .07); }
+.dp-item.biru { border-left-color: #3b82c4; background: rgba(59, 130, 196, .06); }
+.dp-teks { flex: 1; font-size: 13px; line-height: 1.4; color: var(--color-text, #1d2939); }
+.dp-item .btn-mini { flex-shrink: 0; }
+.dp-kosong { font-size: 13px; color: var(--color-text-muted, #667085); padding: 4px 2px; }
+.dp-peng { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--color-border, #e3e8ef); }
+.dp-peng:last-child { border-bottom: 0; }
+.dp-peng b { font-size: 13px; }
+.dp-peng span { font-size: 12px; color: var(--color-text-muted, #667085); }
+.dp-info { margin-top: 8px; font-size: 12px; color: var(--color-text-muted, #667085); }
+.dp-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.dp-chip { padding: 5px 11px; border-radius: 999px; background: rgba(18, 41, 77, .06); font-size: 12.5px; white-space: nowrap; }
+.dp-chip b { margin-right: 4px; }
+@media (max-width: 640px) { .dp-item { flex-wrap: wrap; } .dp-item .btn-mini { margin-left: auto; } }
+@media (prefers-color-scheme: dark) { .dp-chip { background: rgba(255, 255, 255, .08); } }
