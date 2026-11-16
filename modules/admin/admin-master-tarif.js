@@ -119,7 +119,7 @@
   }
 
   // ======================= TAB TARIF LAIN (SIPANDU) =======================
-  const TAB = [['RELAWAN', 'Relawan (per hari)'], ['PORSI_BAHAN_BAKU', 'Pagu Bahan Baku'], ['PORSI_SEWA_FASILITAS', 'Sewa Fasilitas'], ['PORSI_OPERASIONAL', 'Operasional'], ['PIC_POSYANDU', 'PIC Posyandu'], ['PIC_SEKOLAH', 'PIC Sekolah']];
+  const TAB = [['RELAWAN', 'Relawan (per hari)'], ['PORSI_BAHAN_BAKU', 'Pagu Bahan Baku'], ['PORSI_SEWA_FASILITAS', 'Sewa Fasilitas'], ['PORSI_OPERASIONAL', 'Operasional'], ['PIC_POSYANDU_JENJANG', 'PIC Posyandu (jenjang 3B)'], ['PIC_POSYANDU', 'PIC Posyandu (batas Rp/PM)'], ['PIC_SEKOLAH', 'PIC Sekolah']];
   const LABEL = { KECIL: 'Porsi Kecil (PK + Balita)', BESAR: 'Porsi Besar (PB + Ibu Hamil + Ibu Menyusui)', PER_PORSI: 'Per porsi' };
   let tabAktif = 'RELAWAN', dataLain = null;
   const st = 'padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;';
@@ -156,10 +156,11 @@
   }
   function renderLain(kat) {
     const k = dataLain.kategori[kat], sekolah = !!k.jenjang, satuan = k.satuan === 'PER_HARI' ? 'per hari' : 'per porsi';
+    if (k.jenjang) { renderJenjang(kat); return; }   // 17 Nov 2026: kategori berjenjang punya layar sendiri (tambah / hapus jenjang)
     const info = (kat.indexOf('PORSI_') === 0)
       ? (function () { const t = totalPerPorsi(); return '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;">Total pagu per porsi (bahan baku + sewa fasilitas + operasional) pada ' + tglIndo(dataLain.tanggal) + ': <b>Porsi Kecil ' + (t.KECIL === null ? 'belum lengkap' : rp(t.KECIL)) + '</b> · <b>Porsi Besar ' + (t.BESAR === null ? 'belum lengkap' : rp(t.BESAR)) + '</b></div>'; })()
       : (kat === 'PIC_SEKOLAH' ? '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;">Insentif PIC sekolah dihitung <b>per hari</b> menurut <b>jumlah siswa</b> instansi (diisi di Master Instansi). Tepat 100 siswa masuk jenjang 100–500. Jenjang tanpa tarif = <b>belum ditetapkan</b> (tidak dikarang).</div>'
-        : '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;">Insentif PIC posyandu dihitung <b>per porsi</b> dari paket pada hari BAST terbit.</div>');
+        : '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;">Tarif <b>per porsi</b> (skema lama). Setelah jenjang Kader/TPK 3B berlaku (tab <b>PIC Posyandu (jenjang 3B)</b>), angka ini dipakai sebagai <b>batas maksimum per PM 3B</b> (Juknis: Rp1.000 × jumlah PM 3B per hari). Tanggal yang belum punya jenjang tetap memakai skema per porsi ini.</div>');
     const baris = k.baris.map(function (b) {
       const sekarang = b.tarif === null ? '<span style="color:#c0392b;">belum ditetapkan</span>' : '<b>' + rp(b.tarif) + '</b> <span style="font-size:11px;color:var(--color-text-muted,#55606f);">' + satuan + '</span><div style="font-size:11px;color:var(--color-text-muted,#55606f);">sejak ' + tglIndo(b.berlakuSejak) + '</div>';
       const depan = b.tarifMendatang ? '<div style="font-size:11px;color:#e65100;">→ ' + (b.tarifMendatang.tarif === null ? 'belum ditetapkan' : rp(b.tarifMendatang.tarif)) + ' mulai ' + tglIndo(b.tarifMendatang.tanggal) + '</div>' : '';
@@ -183,6 +184,105 @@
     $('mlTbody').addEventListener('click', function (e) { const b = e.target.closest('button[data-riw]'); if (b) riwayatLain(kat, b.dataset.riw, b.closest('tr')); });
     hitungLain(kat);
   }
+
+  // ======================= KATEGORI BERJENJANG (PIC Sekolah & PIC Posyandu 3B) — BARU 17 Nov 2026 =======================
+  // Jenjang bisa DITAMBAH, DIUBAH batasnya, atau DIHAPUS (ditutup mulai tanggal berlaku; riwayat & rekap lama tidak berubah). Server memeriksa jenjang rapat (mulai 0, tanpa celah/tumpang tindih, terakhir tanpa batas atas).
+  const STANDAR_BGN = { PIC_POSYANDU_JENJANG: [[0, 100, 60000], [101, 300, 150000], [301, 500, 250000], [501, 1000, 400000], [1001, 1500, 550000], [1501, null, 700000]] };   // Juknis Pembiayaan MBG, Lampiran I: Insentif Kader/TPK 3B
+  const SATUAN_BATAS = { PIC_SEKOLAH: 'Siswa', PIC_POSYANDU_JENJANG: 'PM 3B' };
+  let draft = [];
+  function kunciBerikut() { let m = 0; draft.forEach(function (d) { const n = Number(String(d.kunci).slice(1)); if (n > m) m = n; }); (dataLain.kategori[tabAktif].baris || []).forEach(function (b) { const n = Number(String(b.kunci).slice(1)); if (n > m) m = n; }); return 'T' + (m + 1); }
+  function mulaiDraft(kat) {
+    const k = dataLain.kategori[kat];
+    draft = k.baris.map(function (b) { const o = { kunci: b.kunci, min: b.batasMin === null ? '' : String(b.batasMin), maks: b.batasMaks === null ? '' : String(b.batasMaks), tarif: b.tarif === null ? '' : String(b.tarif), baru: false, hapus: false, info: b }; o.awal = { min: o.min, maks: o.maks, tarif: o.tarif }; return o; })
+      .sort(function (a, b) { return Number(a.min) - Number(b.min); });
+  }
+  function barisJenjang(kat) {
+    const satuan = dataLain.kategori[kat].satuan === 'PER_HARI' ? 'per hari' : 'per porsi';
+    return draft.map(function (d, i) {
+      const b = d.info, sekarang = !b ? '<span style="color:var(--color-text-muted,#55606f);">baru</span>' : (b.tarif === null ? '<span style="color:#c0392b;">belum ditetapkan</span>' : '<b>' + rp(b.tarif) + '</b> <span style="font-size:11px;color:var(--color-text-muted,#55606f);">' + satuan + '</span><div style="font-size:11px;color:var(--color-text-muted,#55606f);">sejak ' + tglIndo(b.berlakuSejak) + '</div>');
+      const depan = b && b.tarifMendatang ? '<div style="font-size:11px;color:#e65100;">→ ' + (b.tarifMendatang.tarif === null ? 'belum ditetapkan' : rp(b.tarifMendatang.tarif)) + ' mulai ' + tglIndo(b.tarifMendatang.tanggal) + '</div>' : '';
+      const dis = d.hapus ? ' disabled' : '', gaya = d.hapus ? 'opacity:.45;text-decoration:line-through;' : '';
+      return '<tr data-i="' + i + '" style="' + gaya + '"><td>' + esc(d.kunci) + (d.baru ? ' <span style="font-size:11px;color:#2e7d32;">baru</span>' : '') + '</td>' +
+        '<td><input type="number" min="0" data-i="' + i + '" data-f="min" value="' + esc(d.min) + '"' + dis + ' style="width:84px;' + st + '"></td>' +
+        '<td><input type="number" min="0" data-i="' + i + '" data-f="maks" value="' + esc(d.maks) + '" placeholder="tanpa batas"' + dis + ' style="width:116px;' + st + '"></td>' +
+        '<td>' + sekarang + depan + '</td>' +
+        '<td><input type="number" min="0" step="500" data-i="' + i + '" data-f="tarif" value="' + esc(d.tarif) + '" placeholder="isi tarif"' + dis + ' style="width:120px;' + st + '"></td>' +
+        '<td style="white-space:nowrap;">' + (d.baru ? '' : '<button class="btn-mini" data-riw="' + esc(d.kunci) + '" type="button">Riwayat</button> ') + '<button class="btn-mini" data-hapus="' + i + '" type="button">' + (d.hapus ? 'Batal hapus' : 'Hapus') + '</button></td></tr>';
+    }).join('');
+  }
+  function renderJenjang(kat) {
+    const k = dataLain.kategori[kat], pos = kat === 'PIC_POSYANDU_JENJANG', unit = SATUAN_BATAS[kat] || 'PM', satuan = k.satuan === 'PER_HARI' ? 'per hari' : 'per porsi';
+    mulaiDraft(kat);
+    const info = pos
+      ? '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;line-height:1.55;">Insentif <b>Kader/TPK 3B</b> dihitung <b>per hari untuk seluruh SPPG</b>: jenjang ditentukan oleh <b>total PM 3B</b> (Ibu Hamil + Ibu Menyusui + Balita) semua posyandu pada hari itu, nilainya dibatasi maks <b>Rp per PM 3B × jumlah PM 3B</b> (tab <i>PIC Posyandu (batas Rp/PM)</i>), lalu <b>dibagi proporsional</b> ke tiap posyandu menurut PM 3B-nya dan masuk ke PIC posyandu itu. Selama <b>belum ada jenjang berlaku</b> pada suatu tanggal, tanggal itu tetap memakai skema lama (Rp per porsi), jadi rekap lama tidak berubah. Jenjang bisa ditambah, diubah batasnya, atau dihapus mulai tanggal berlaku.</div>'
+      : '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;">Insentif PIC sekolah dihitung <b>per hari</b> menurut <b>jumlah siswa</b> instansi (diisi di Master Instansi). Tepat 100 siswa masuk jenjang 100–500. Jenjang tanpa tarif = <b>belum ditetapkan</b> (tidak dikarang). Jenjang bisa ditambah, diubah batasnya, atau dihapus mulai tanggal berlaku.</div>';
+    $('mtIsi').innerHTML = info +
+      '<div class="filter-bar"><label style="font-size:12px;">Tarif yang tampil berlaku pada <input type="date" id="mlLihat"></label></div>' +
+      '<div class="filter-bar" style="background:var(--color-surface,#f6f8fb);padding:10px;border-radius:10px;"><label style="font-size:13px;font-weight:600;">Jenjang BARU berlaku mulai <input type="date" id="mlBerlaku"></label>' +
+      '<input id="mlKet" placeholder="Keterangan (opsional)" style="' + st + 'min-width:200px;"></div><div id="mlPesan" style="font-size:13px;margin:8px 0;"></div>' +
+      '<div class="table-wrap"><table><thead><tr><th>Jenjang</th><th>' + unit + ' dari</th><th>sampai</th><th>Tarif saat ini</th><th>Tarif (Rp ' + satuan + ')</th><th></th></tr></thead><tbody id="mlTbody">' + barisJenjang(kat) + '</tbody></table></div>' +
+      '<div style="margin:10px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><button class="btn-mini" id="mlTambah" type="button">+ Tambah jenjang</button>' + (STANDAR_BGN[kat] ? '<button class="btn-mini" id="mlStandar" type="button">Isi standar Juknis BGN</button>' : '') + '</div>' +
+      '<div style="margin:14px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><button class="btn-mini primary" id="mlSimpan" type="button" disabled>Simpan perubahan</button><span id="mlHitung" style="font-size:13px;"></span></div>';
+    $('mlLihat').value = dataLain.tanggal; $('mlBerlaku').value = senenDepan();
+    $('mlLihat').addEventListener('change', function () { if ($('mlLihat').value) { tanggalLihat = $('mlLihat').value; tabLain(kat); } });
+    $('mlBerlaku').addEventListener('change', function () { hitungJenjang(kat); });
+    $('mlTbody').addEventListener('input', function (e) { const el = e.target; if (el.dataset && el.dataset.f !== undefined) { draft[Number(el.dataset.i)][el.dataset.f] = el.value.trim(); hitungJenjang(kat); } });
+    $('mlTbody').addEventListener('click', function (e) {
+      const h = e.target.closest('button[data-hapus]');
+      if (h) { const i = Number(h.dataset.hapus); if (draft[i].baru) draft.splice(i, 1); else draft[i].hapus = !draft[i].hapus; gambarJenjang(kat); return; }
+      const b = e.target.closest('button[data-riw]'); if (b) riwayatLain(kat, b.dataset.riw, b.closest('tr'));
+    });
+    $('mlTambah').addEventListener('click', function () {
+      const terakhir = draft.filter(function (d) { return !d.hapus; }).slice().sort(function (a, b) { return Number(a.min) - Number(b.min); }).pop();
+      const mulaiBaru = terakhir && terakhir.maks !== '' ? String(Number(terakhir.maks) + 1) : '';
+      draft.push({ kunci: kunciBerikut(), min: mulaiBaru, maks: '', tarif: '', baru: true, hapus: false, info: null, awal: { min: '', maks: '', tarif: '' } });
+      gambarJenjang(kat);
+    });
+    if ($('mlStandar')) $('mlStandar').addEventListener('click', function () {
+      if (draft.some(function (d) { return !d.baru && !d.hapus; }) && !confirm('Jenjang yang ada akan diganti dengan standar Juknis BGN (Rp60.000 s.d. Rp700.000) pada tanggal berlaku yang Anda pilih. Anda masih bisa memeriksa dulu sebelum menekan Simpan.\n\nLanjutkan mengisi?')) return;
+      const lama = draft.filter(function (d) { return !d.baru; }), baru = STANDAR_BGN[kat];
+      const hasil = []; let mx = 0; lama.forEach(function (d) { mx = Math.max(mx, Number(String(d.kunci).slice(1)) || 0); });
+      baru.forEach(function (t, i) { const asal = lama[i]; hasil.push({ kunci: asal ? asal.kunci : 'T' + (++mx), min: String(t[0]), maks: t[1] === null ? '' : String(t[1]), tarif: String(t[2]), baru: !asal, hapus: false, info: asal ? asal.info : null, awal: asal ? asal.awal : { min: '', maks: '', tarif: '' } }); });
+      lama.slice(baru.length).forEach(function (d) { d.hapus = true; hasil.push(d); });
+      draft = hasil; gambarJenjang(kat);
+    });
+    $('mlSimpan').addEventListener('click', function () { simpanJenjang(kat); });
+    hitungJenjang(kat);
+  }
+  function gambarJenjang(kat) { $('mlTbody').innerHTML = barisJenjang(kat); hitungJenjang(kat); }
+  function perubahanJenjang() {
+    let n = 0;
+    draft.forEach(function (d) { if (d.baru) { if (!d.hapus) n++; } else if (d.hapus || d.min !== d.awal.min || d.maks !== d.awal.maks || d.tarif !== d.awal.tarif) n++; });
+    return n;
+  }
+  function hitungJenjang(kat) {
+    const n = perubahanJenjang();
+    $('mlHitung').textContent = n ? n + ' jenjang berubah, berlaku mulai ' + tglIndo($('mlBerlaku').value) + '.' : 'Ubah batas/tarif, tambah, atau hapus jenjang, lalu simpan.';
+    $('mlSimpan').disabled = n === 0; $('mlSimpan').textContent = n ? 'Simpan ' + n + ' perubahan' : 'Simpan perubahan';
+  }
+  async function simpanJenjang(kat) {
+    const tgl = $('mlBerlaku').value; if (!tgl) { pesanLain('Pilih tanggal berlaku dulu.', true); return; }
+    const aktif = draft.filter(function (d) { return !d.hapus; });
+    if (!aktif.length) { pesanLain('Minimal harus ada satu jenjang.', true); return; }
+    for (let i = 0; i < aktif.length; i++) {
+      if (aktif[i].min === '') { pesanLain('Isi batas bawah jenjang ' + aktif[i].kunci + '.', true); return; }
+      if (aktif[i].baru && aktif[i].tarif === '') { pesanLain('Isi tarif jenjang baru ' + aktif[i].kunci + '.', true); return; }
+    }
+    const items = aktif.map(function (d) { return { kunci: d.kunci, tarif: d.tarif, batasMin: d.min, batasMaks: d.maks }; });
+    const kirim = function (surut) { return api('simpanTarifLainV2', { kategori: kat, tanggalBerlaku: tgl, keterangan: $('mlKet').value, items: items, gantiSemuaJenjang: true, konfirmasiSurut: surut === true }); };
+    try {
+      pesanLain('Menyimpan…'); let h;
+      try { h = await kirim(false); }
+      catch (err) {
+        if (String(err.message || '').indexOf('BERLAKU_SURUT') < 0) throw err;
+        if (!confirm(String(err.message).replace('BERLAKU_SURUT: ', '') + '\n\nLanjutkan?')) { pesanLain('Dibatalkan.'); return; }
+        h = await kirim(true);
+      }
+      dataLain = await api('getMasterTarifLainV2', { tanggal: tanggalLihat }); renderLain(kat);
+      pesanLain('Tersimpan: ' + h.baru + ' baru, ' + h.diperbarui + ' diperbarui, ' + h.dilewati + ' dilewati (sudah sama), ' + (h.ditutup || 0) + ' ditutup. Berlaku mulai ' + tglIndo(h.tanggalBerlaku) + '.');
+    } catch (err) { pesanLain(err.message || 'Gagal menyimpan.', true); }
+  }
+
   function perubahanLain(kat) {
     const k = dataLain.kategori[kat], sekolah = !!k.jenjang, hasil = [];
     k.baris.forEach(function (b) {
@@ -225,7 +325,7 @@
       const h = await api('getRiwayatTarifLainV2', { kategori: kat, kunci: kunci });
       const baris = document.createElement('tr'); baris.dataset.riwayatDari = kunci;
       baris.innerHTML = '<td colspan="7" style="background:var(--color-surface,#f6f8fb);font-size:12px;">' + (h.riwayat.length ? h.riwayat.map(function (r) {
-        return '<div>Mulai ' + tglIndo(r.tanggalBerlaku) + ': <b>' + (r.tarif === null ? 'belum ditetapkan' : rp(r.tarif)) + '</b>' + (r.batasMin !== null ? ' <span style="color:var(--color-text-muted,#55606f);">(siswa ' + r.batasMin + '–' + (r.batasMaks === null ? 'dst' : r.batasMaks) + ')</span>' : '') + (r.keterangan ? ' <span style="color:var(--color-text-muted,#55606f);">— ' + esc(r.keterangan) + '</span>' : '') + (r.dibuatOleh ? ' <span style="color:var(--color-text-muted,#55606f);">· ' + esc(r.dibuatOleh) + '</span>' : '') + '</div>';
+        return '<div>Mulai ' + tglIndo(r.tanggalBerlaku) + ': <b>' + (r.ditutup ? '—' : (r.tarif === null ? 'belum ditetapkan' : rp(r.tarif))) + '</b>' + (r.ditutup ? ' <span style="color:#c0392b;">DITUTUP (jenjang tidak dipakai lagi)</span>' : '') + (r.batasMin !== null ? ' <span style="color:var(--color-text-muted,#55606f);">(' + (kat === 'PIC_SEKOLAH' ? 'siswa' : 'PM 3B') + ' ' + r.batasMin + '–' + (r.batasMaks === null ? 'dst' : r.batasMaks) + ')</span>' : '') + (r.keterangan ? ' <span style="color:var(--color-text-muted,#55606f);">— ' + esc(r.keterangan) + '</span>' : '') + (r.dibuatOleh ? ' <span style="color:var(--color-text-muted,#55606f);">· ' + esc(r.dibuatOleh) + '</span>' : '') + '</div>';
       }).join('') : 'Belum ada riwayat.') + '</td>';
       tr.parentNode.insertBefore(baris, tr.nextSibling);
     } catch (err) { pesanLain(err.message || 'Gagal memuat riwayat.', true); }

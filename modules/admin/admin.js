@@ -425,7 +425,7 @@
     panelDuaMinggu: 'modules/admin/admin-export.js?v=20261104d',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'modules/admin/admin-import.js?v=20261023a',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
     panelKartuQr: 'modules/admin/admin-kartu-qr.js?v=20261105d',
-    panelMasterTarif: 'modules/admin/admin-master-tarif.js?v=20261104a'
+    panelMasterTarif: 'modules/admin/admin-master-tarif.js?v=20261117a'
   };
   const modulTerpuat = new Set();
 
