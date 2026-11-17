@@ -2,7 +2,7 @@
 // Tarif harian berlaku MULAI tanggal tertentu dan dipakai Rekap Mingguan (tarif x hari hadir). Banyak relawan bisa
 // diubah sekaligus lalu disimpan sekali. Riwayat tarif (termasuk riwayat per periode lama) bisa dilihat per relawan.
 // Backend: MasterTarif.gs (getMasterTarifAdmin, simpanTarifBerlakuAdmin, getRiwayatTarifAdmin).
-// 4 Nov 2026: menu ini memuat 6 tarif (tab): Relawan per hari [Portal] + Pagu Bahan Baku, Sewa Fasilitas, Operasional, PIC Posyandu, PIC Sekolah
+// 4 Nov 2026: menu ini memuat 6 tarif (tab): Relawan per hari [Portal] + Pagu Bahan Baku, Sewa Fasilitas, Operasional, PIC Posyandu 3B, PIC Satuan Pendidikan
 // [database SIPANDU baru: SipanduTarifV2.gs]. Semua bertanggal berlaku.
 (function () {
   const root = document.getElementById('mtRoot');
@@ -119,7 +119,7 @@
   }
 
   // ======================= TAB TARIF LAIN (SIPANDU) =======================
-  const TAB = [['RELAWAN', 'Relawan (per hari)'], ['PORSI_BAHAN_BAKU', 'Pagu Bahan Baku'], ['PORSI_SEWA_FASILITAS', 'Sewa Fasilitas'], ['PORSI_OPERASIONAL', 'Operasional'], ['PIC_POSYANDU_JENJANG', 'PIC Posyandu (jenjang 3B)'], ['PIC_POSYANDU', 'PIC Posyandu (batas Rp/PM)'], ['PIC_SEKOLAH', 'PIC Sekolah']];
+  const TAB = [['RELAWAN', 'Relawan (per hari)'], ['PORSI_BAHAN_BAKU', 'Pagu Bahan Baku'], ['PORSI_SEWA_FASILITAS', 'Sewa Fasilitas'], ['PORSI_OPERASIONAL', 'Operasional'], ['PIC_POSYANDU_JENJANG', 'PIC Posyandu 3B'], ['PIC_SEKOLAH', 'PIC Satuan Pendidikan']];
   const LABEL = { KECIL: 'Porsi Kecil (PK + Balita)', BESAR: 'Porsi Besar (PB + Ibu Hamil + Ibu Menyusui)', PER_PORSI: 'Per porsi' };
   let tabAktif = 'RELAWAN', dataLain = null;
   const st = 'padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;';
@@ -187,7 +187,7 @@
 
   // ======================= KATEGORI BERJENJANG (PIC Sekolah & PIC Posyandu 3B) — BARU 17 Nov 2026 =======================
   // Jenjang bisa DITAMBAH, DIUBAH batasnya, atau DIHAPUS (ditutup mulai tanggal berlaku; riwayat & rekap lama tidak berubah). Server memeriksa jenjang rapat (mulai 0, tanpa celah/tumpang tindih, terakhir tanpa batas atas).
-  const STANDAR_BGN = { PIC_POSYANDU_JENJANG: [[0, 100, 60000], [101, 300, 150000], [301, 500, 250000], [501, 1000, 400000], [1001, 1500, 550000], [1501, null, 700000]] };   // Juknis Pembiayaan MBG, Lampiran I: Insentif Kader/TPK 3B
+  const STANDAR_BGN = {};   // 17 Nov 2026 (b): isian standar Juknis DIHAPUS — jenjang Posyandu kini per posyandu (bukan total SPPG), jadi angka Admin sendiri yang dipakai.
   const SATUAN_BATAS = { PIC_SEKOLAH: 'Siswa', PIC_POSYANDU_JENJANG: 'PM 3B' };
   let draft = [];
   function kunciBerikut() { let m = 0; draft.forEach(function (d) { const n = Number(String(d.kunci).slice(1)); if (n > m) m = n; }); (dataLain.kategori[tabAktif].baris || []).forEach(function (b) { const n = Number(String(b.kunci).slice(1)); if (n > m) m = n; }); return 'T' + (m + 1); }
@@ -214,8 +214,8 @@
     const k = dataLain.kategori[kat], pos = kat === 'PIC_POSYANDU_JENJANG', unit = SATUAN_BATAS[kat] || 'PM', satuan = k.satuan === 'PER_HARI' ? 'per hari' : 'per porsi';
     mulaiDraft(kat);
     const info = pos
-      ? '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;line-height:1.55;">Insentif <b>Kader/TPK 3B</b> dihitung <b>per hari untuk seluruh SPPG</b>: jenjang ditentukan oleh <b>total PM 3B</b> (Ibu Hamil + Ibu Menyusui + Balita) semua posyandu pada hari itu, nilainya dibatasi maks <b>Rp per PM 3B × jumlah PM 3B</b> (tab <i>PIC Posyandu (batas Rp/PM)</i>), lalu <b>dibagi proporsional</b> ke tiap posyandu menurut PM 3B-nya dan masuk ke PIC posyandu itu. Selama <b>belum ada jenjang berlaku</b> pada suatu tanggal, tanggal itu tetap memakai skema lama (Rp per porsi), jadi rekap lama tidak berubah. Jenjang bisa ditambah, diubah batasnya, atau dihapus mulai tanggal berlaku.</div>'
-      : '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;">Insentif PIC sekolah dihitung <b>per hari</b> menurut <b>jumlah siswa</b> instansi (diisi di Master Instansi). Tepat 100 siswa masuk jenjang 100–500. Jenjang tanpa tarif = <b>belum ditetapkan</b> (tidak dikarang). Jenjang bisa ditambah, diubah batasnya, atau dihapus mulai tanggal berlaku.</div>';
+      ? '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;line-height:1.55;">Insentif <b>PIC Posyandu (Kader/TPK 3B)</b> dihitung <b>per hari per posyandu</b> menurut <b>jumlah PM 3B</b> posyandu itu pada hari tersebut (Ibu Hamil + Ibu Menyusui + Balita), sama seperti PIC Satuan Pendidikan menurut jumlah siswa. Posyandu dengan PM 3B pada rentang sebuah jenjang menerima tarif jenjang itu. Tepat di batas atas masuk jenjang tersebut (mis. jenjang 0–101 memuat 101). Jenjang tanpa tarif = <b>belum ditetapkan</b>; tanggal tanpa jenjang yang memuat PM 3B dihitung Rp0 dan diberi peringatan. Jenjang bisa ditambah, diubah batasnya, atau dihapus mulai tanggal berlaku.</div>'
+      : '<div class="admin-stat-card" style="padding:10px 12px;text-align:left;margin-bottom:10px;font-size:13px;">Insentif <b>PIC Satuan Pendidikan</b> dihitung <b>per hari</b> menurut <b>jumlah siswa</b> instansi (diisi di Master Instansi). Tepat 100 siswa masuk jenjang 100–500. Jenjang tanpa tarif = <b>belum ditetapkan</b> (tidak dikarang). Jenjang bisa ditambah, diubah batasnya, atau dihapus mulai tanggal berlaku.</div>';
     $('mtIsi').innerHTML = info +
       '<div class="filter-bar"><label style="font-size:12px;">Tarif yang tampil berlaku pada <input type="date" id="mlLihat"></label></div>' +
       '<div class="filter-bar" style="background:var(--color-surface,#f6f8fb);padding:10px;border-radius:10px;"><label style="font-size:13px;font-weight:600;">Jenjang BARU berlaku mulai <input type="date" id="mlBerlaku"></label>' +
