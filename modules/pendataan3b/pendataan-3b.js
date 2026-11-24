@@ -11,7 +11,7 @@
   var KATS = ['Ibu Hamil', 'Ibu Menyusui', 'Balita'];
   var KEY = 'p3b.sesi.v1', MODE_PIC = window.P3B_MODE === 'pic';
   var JENIS = { POSYANDU: 'Posyandu', SEKOLAH: 'Satuan pendidikan' };
-  var S = { view: 'login', token: '', pic: null, instansi: [], posyandu: [], idi: '', nmPos: '', ring: null, peng: {}, items: [], filter: 'Semua', form: null, busy: false, memuat: false };
+  var S = { view: 'login', token: '', pic: null, instansi: [], posyandu: [], idi: '', nmPos: '', ring: null, peng: {}, items: [], filter: 'Semua', cari: '', tampil: 'kartu', form: null, busy: false, memuat: false };
 
   function h(tag, attrs) {
     var el = document.createElement(tag);
@@ -40,7 +40,11 @@
     tendik: 'M4 8h16v11H4zM9 8V5h6v3M4 13h16',
     lokasi: 'M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
     tempel: 'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M12 11v6M9 14l3 3 3-3',
-    kiri: 'M15 5l-7 7 7 7'
+    kiri: 'M15 5l-7 7 7 7',
+    pemutakhiran: 'M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4',
+    lonceng: 'M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6M10 21h4',
+    tabel: 'M3 5h18v14H3zM3 10h18M9 5v14',
+    kartu: 'M4 5h16v6H4zM4 14h16v5H4z'
   };
   function ikon(nama, ukuran) {
     var w = document.createElement('span'); w.className = 'svgi'; w.setAttribute('aria-hidden', 'true');
@@ -112,13 +116,15 @@
       } catch (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Masuk'; pin.value = ''; }
     }
     pin.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') go(); });
-    app.appendChild(h('header', { class: 'top' }, h('div', { class: 'in' }, h('small', { text: 'Portal SPPG • PIC' }), h('h1', { text: MODE_PIC ? 'Portal PIC' : 'Pendataan Penerima Manfaat 3B' }), h('p', { text: MODE_PIC ? 'Masuk sebagai PIC Posyandu atau satuan pendidikan' : 'Masuk sebagai PIC Posyandu' }))));
+    app.appendChild(h('div', { class: 'brand brand-login' }, h('div', { class: 'brand-in' }, h('div', { class: 'brand-mid' }, h('img', { src: 'assets/logo-bgn.png', alt: 'Logo Badan Gizi Nasional' }), h('img', { src: 'assets/logo.png', alt: 'Logo SPPG Jeungjing' }),
+      h('div', { class: 'brand-text' }, h('strong', { text: 'SPPG JEUNGJING' }), h('span', { text: MODE_PIC ? 'Portal PIC' : 'Pendataan penerima manfaat' }))))));
     app.appendChild(h('div', { class: 'wrap' },
-      h('div', { class: 'note', text: 'Halaman ini berisi data pribadi (NIK). Jangan berikan password Anda kepada orang lain.' }),
+      h('h2', { class: 'tengah', text: 'Masuk ke Portal PIC' }),
+      h('div', { class: 'note', text: 'Halaman ini berisi data pribadi. Jangan berikan password Anda kepada orang lain.' }),
       h('div', { class: 'fld' }, h('label', { for: 'hp', text: 'Nomor HP' }), h('div', { class: 'hint', text: 'Nomor HP yang terdaftar sebagai PIC di SPPG.' }), hp),
       h('div', { class: 'fld' }, h('label', { for: 'pin', text: 'Password' }), kolomSandi(pin)),
       msg, btn,
-      h('p', { style: 'text-align:center;margin-top:18px;font-size:16px;font-weight:700' }, h('a', { href: 'verifikasi.html', text: 'Lupa password?' }), ' · ', h('a', { href: 'https://wa.me/6285694765370?text=' + encodeURIComponent('Halo Admin, saya ingin daftar akun Portal SPPG Jeungjing.'), target: '_blank', rel: 'noopener', text: 'Daftar lewat WhatsApp' })),
+      h('p', { style: 'text-align:center;margin-top:18px;font-size:16px;font-weight:700' }, h('a', { href: 'verifikasi.html', text: 'Lupa password?' })),
       h('p', { style: 'text-align:center;margin-top:18px;font-size:14px' }, h('a', { href: 'masuk.html', text: 'Bukan akun PIC? Pilih jenis akun lain' }))));
   }
   function renderPilih() {
@@ -127,12 +133,12 @@
     S.instansi.forEach(function (p) {
       var pos = p.jenis === 'POSYANDU';
       var el = h('button', { class: 'kat pos', disabled: !pos, style: pos ? '' : 'opacity:.6;cursor:default', onclick: function () { if (!pos) return; S.idi = p.id; S.nmPos = p.nama; S.view = 'home'; S.filter = 'Semua'; simpanSesi(); muat(); } },
-        h('div', { class: 'ic' }, ikon(pos ? 'posyandu' : 'sekolah')), h('div', null, h('b', { text: p.nama }), h('span', { class: 's', text: pos ? 'Posyandu • Pendataan Penerima Manfaat 3B' : (JENIS[p.jenis] || 'Instansi') + ' • segera hadir' })));
+        h('div', { class: 'ic' }, ikon(pos ? 'posyandu' : 'sekolah')), h('div', null, h('b', { text: p.nama }), h('span', { class: 's', text: pos ? 'Posyandu • pendataan ibu hamil, ibu menyusui, balita' : (JENIS[p.jenis] || 'Satuan pendidikan') + ' • segera hadir' })));
       kats.appendChild(el);
     });
     wrap.appendChild(kats);
-    if (!S.posyandu.length) wrap.appendChild(h('div', { class: 'note', text: 'Fitur untuk satuan pendidikan sedang disiapkan. Saat ini yang tersedia: Pendataan 3B untuk Posyandu.' }));
-    app.appendChild(h('header', { class: 'top' }, h('div', { class: 'in' }, h('button', { class: 'keluar', text: 'Keluar', onclick: function () { keluar(); } }), h('small', { text: 'Halo, ' + (S.pic ? S.pic.nama : '') }), h('h1', { text: MODE_PIC ? 'Portal PIC' : 'Pendataan 3B' }))));
+    if (!S.posyandu.length) wrap.appendChild(h('div', { class: 'note', text: 'Fitur untuk satuan pendidikan sedang disiapkan. Saat ini yang tersedia: pendataan untuk Posyandu.' }));
+    app.appendChild(h('header', { class: 'top' }, h('div', { class: 'in' }, h('button', { class: 'keluar', text: 'Keluar', onclick: function () { keluar(); } }), h('small', { text: 'Halo, ' + (S.pic ? S.pic.nama : '') }), h('h1', { text: MODE_PIC ? 'Portal PIC' : 'Pendataan penerima manfaat' }))));
     app.appendChild(wrap);
   }
 
@@ -140,16 +146,19 @@
   function renderHome() {
     var r = S.ring || { 'Ibu Hamil': 0, 'Ibu Menyusui': 0, 'Balita': 0, total: 0, perluDiperbarui: 0 };
     var top = h('header', { class: 'top' }, h('div', { class: 'in' },
-      h('button', { class: 'keluar', text: 'Keluar', onclick: function () { keluar(); } }),
-      (MODE_PIC && window.PortalPic) ? h('button', { class: 'back', onclick: function () { S.view = 'beranda'; S.idi = ''; S.items = []; S.ring = null; simpanSesi(); render(); window.scrollTo(0, 0); } }, ikon('kiri', 18), 'Beranda')
+      (MODE_PIC && window.PortalPic) ? h('button', { class: 'back', onclick: function () { S.view = 'beranda'; S.idi = ''; S.items = []; S.ring = null; window.PortalPic.segar(); simpanSesi(); render(); window.scrollTo(0, 0); } }, ikon('kiri', 18), 'Beranda')
         : S.instansi.length > 1 ? h('button', { class: 'back', onclick: function () { S.view = 'pilih'; S.idi = ''; simpanSesi(); render(); } }, ikon('kiri', 18), 'Kembali ke daftar') : null,
-      h('small', { text: 'Posyandu • ' + (S.pic ? S.pic.nama : '') }), h('h1', { text: S.nmPos })));
+      h('small', { text: 'Pendataan • ' + (S.pic ? S.pic.nama : '') }), h('h1', { text: S.nmPos })));
     var wrap = h('div', { class: 'wrap' });
     if (S.peng && S.peng.putaranTanggal) {
       wrap.appendChild(h('div', { class: 'ban' }, h('b', { text: 'Admin meminta data diperbarui (sejak ' + dmy(S.peng.putaranTanggal) + ')' }),
         h('span', { text: (S.peng.putaranCatatan ? S.peng.putaranCatatan + ' ' : '') + (r.perluDiperbarui ? 'Masih ' + r.perluDiperbarui + ' data yang belum diperbarui.' : 'Semua data sudah diperbarui. Terima kasih.') })));
     } else if (r.perluDiperbarui) {
       wrap.appendChild(h('div', { class: 'ban' }, h('b', { text: r.perluDiperbarui + ' data perlu diperbarui' }), h('span', { text: 'Periksa datanya. Bila tidak ada perubahan, ketuk "Masih sesuai".' })));
+    }
+    if (MODE_PIC && window.PortalPic) {
+      var rt = window.PortalPic.ringkasanTempat(S.idi);
+      wrap.appendChild(window.PortalPic.kartuKemajuan(rt ? Object.assign({}, rt, { terisi: r.total || 0, kurang: Math.max(0, (rt.target || 0) - (r.total || 0)), persen: rt.target > 0 ? Math.min(100, Math.round((r.total || 0) * 100 / rt.target)) : 0, status: (rt.target > 0 ? ((r.total || 0) >= rt.target ? 'LENGKAP' : ((r.total || 0) > 0 ? 'SEBAGIAN' : 'BELUM')) : ((r.total || 0) > 0 ? 'TANPA_TARGET' : 'BELUM')) }) : null));
     }
     wrap.appendChild(h('h2', { text: 'Siapa yang mau didata?' }));
     var kats = h('div', { class: 'kats' });
@@ -164,10 +173,23 @@
       chips.appendChild(h('button', { class: 'chip', 'aria-pressed': String(S.filter === k), text: k, onclick: function () { S.filter = k; render(); } }));
     });
     wrap.appendChild(chips);
-    var list = S.items.filter(function (x) { return S.filter === 'Semua' || (S.filter === 'Perlu diperbarui' ? x.perluDiperbarui : x.kategori === S.filter); });
-    if (S.memuat && !S.items.length) wrap.appendChild(h('div', { class: 'empty', text: 'Memuat data…' }));
-    else if (!list.length) wrap.appendChild(h('div', { class: 'empty', text: 'Belum ada data. Pilih salah satu tombol di atas untuk mulai.' }));
-    list.forEach(function (x) { wrap.appendChild(kartu(x)); });
+    var cari = h('input', { type: 'text', id: 'cariPosyandu', placeholder: 'Cari nama…', autocomplete: 'off', style: 'width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 14px;font-size:17px;min-height:48px;margin-bottom:10px' });
+    cari.value = S.cari || ''; wrap.appendChild(cari);
+    wrap.appendChild(h('div', { class: 'seg', style: 'margin-bottom:12px' },
+      h('button', { type: 'button', id: 'tampilKartu', 'aria-pressed': String(S.tampil !== 'tabel'), onclick: function () { S.tampil = 'kartu'; render(); } }, ikon('kartu', 18), ' Kartu'),
+      h('button', { type: 'button', id: 'tampilTabel', 'aria-pressed': String(S.tampil === 'tabel'), onclick: function () { S.tampil = 'tabel'; render(); } }, ikon('tabel', 18), ' Tabel')));
+    var daftar = h('div', { id: 'daftarPosyandu' }); wrap.appendChild(daftar);
+    function isiDaftar() {
+      daftar.textContent = '';
+      var q = C.normNama(S.cari || '');
+      var list = S.items.filter(function (x) { return (S.filter === 'Semua' || (S.filter === 'Perlu diperbarui' ? x.perluDiperbarui : x.kategori === S.filter)) && (!q || C.normNama(x.nama).indexOf(q) >= 0); });
+      if (S.memuat && !S.items.length) daftar.appendChild(h('div', { class: 'empty', text: 'Memuat data…' }));
+      else if (!list.length) daftar.appendChild(h('div', { class: 'empty', text: S.items.length ? 'Tidak ada yang cocok.' : 'Belum ada data. Pilih salah satu tombol di atas untuk mulai.' }));
+      else if (S.tampil === 'tabel') daftar.appendChild(tabelData(list));
+      else list.slice(0, 300).forEach(function (x) { daftar.appendChild(kartu(x)); });
+    }
+    cari.addEventListener('input', function () { S.cari = cari.value; isiDaftar(); });
+    isiDaftar();
     app.appendChild(top); app.appendChild(wrap);
     if (r.perluDiperbarui) {
       app.appendChild(h('div', { class: 'bar' }, h('div', { class: 'in' }, h('button', { class: 'btn', disabled: S.busy, text: 'Semua yang belum diperbarui masih sesuai (' + r.perluDiperbarui + ')', onclick: function () {
@@ -183,13 +205,24 @@
     catch (e) { toast(e.message); }
     S.busy = false; muat();
   }
+  /** Tampilan tabel ringkas: satu baris per orang, ketuk baris untuk mengubah. Cocok untuk memeriksa banyak data sekaligus di HP. */
+  function tabelData(list) {
+    var t = h('table', { class: 'tb', id: 'tabelPosyandu' }), kep = h('tr');
+    ['No', 'Nama', 'Kelompok', 'Tersimpan'].forEach(function (k) { kep.appendChild(h('th', { text: k })); });
+    t.appendChild(h('thead', null, kep));
+    var tb = h('tbody');
+    list.slice(0, 300).forEach(function (x, i) {
+      tb.appendChild(h('tr', { tabindex: '0', onclick: function () { bukaForm(x.kategori, x.id); } }, h('td', { text: String(i + 1) }), h('td', { text: C.normNama(x.nama) }), h('td', null, h('span', { class: 'tag ' + KSTYLE[x.kategori].cls, text: x.kategori })), h('td', { text: dmy(x.diperbaruiPada) + (x.perluDiperbarui ? ' (perlu diperbarui)' : '') })));
+    });
+    t.appendChild(tb); return h('div', { class: 'table-scroll' }, t);
+  }
   function kartu(x) {
     var st = KSTYLE[x.kategori], meta;
     if (x.kategori === 'Ibu Hamil') meta = 'HPHT ' + x.hpht;
     else if (x.kategori === 'Ibu Menyusui') meta = 'Anak: ' + C.normNama(x.anak_nama) + ' (lahir ' + x.anak_tgl + ')';
     else meta = (x.gender === 'L' ? 'Laki-laki' : 'Perempuan') + ' • Ibu: ' + C.normNama(x.ibu_nama);
     return h('div', { class: 'item ' + st.cls },
-      h('span', { class: 'tag ' + st.cls, text: x.kategori }), x.perluDiperbarui ? h('span', { class: 'tag stale', text: 'Perlu diperbarui' }) : null, x.catatan ? h('span', { class: 'tag cat', text: 'Cek usia' }) : null,
+      h('span', { class: 'tag ' + st.cls, text: x.kategori }), h('span', { class: 'tag ok', text: 'Tersimpan' }), x.perluDiperbarui ? h('span', { class: 'tag stale', text: 'Perlu diperbarui' }) : null, x.catatan ? h('span', { class: 'tag cat', text: 'Cek usia' }) : null,
       h('div', { class: 'nm', text: C.normNama(x.nama) }),
       h('div', { class: 'meta', text: 'Lahir ' + x.tgl + ' • NIK ' + x.nik }),
       h('div', { class: 'meta', text: meta }),
@@ -293,11 +326,12 @@
   function render() {
     app.textContent = ''; document.body.classList.remove('ada-nav', 'ada-nav-desk');
     if (S.view === 'login' || !S.token) renderLogin(); else if (MODE_PIC && window.PortalPic && window.PortalPic.tampil(S.view)) window.PortalPic.render(); else if (MODE_PIC && window.PendataanSekolah && window.PendataanSekolah.tampil(S.view)) window.PendataanSekolah.render(); else if (S.view === 'pilih') renderPilih(); else if (S.view === 'form' && S.form) renderForm(); else renderHome();
+    if (MODE_PIC && S.token && S.view !== 'login' && window.PortalPic) window.PortalPic.sisipMerek(app);
   }
 
   /* ---------- alat bantu untuk Portal PIC (portal-pic.js) ---------- */
   window.P3BKit = { h: h, ikon: ikon, toast: toast, S: S, api: api, keluar: keluar, simpanSesi: simpanSesi, render: render,
-    bukaPendataan: function (id, nama) { S.idi = id; S.nmPos = nama; S.view = 'home'; S.filter = 'Semua'; S.items = []; S.ring = null; simpanSesi(); muat(); } };
+    bukaPendataan: function (id, nama, filter) { S.idi = id; S.nmPos = nama; S.view = 'home'; S.filter = filter || 'Semua'; S.cari = ''; S.items = []; S.ring = null; simpanSesi(); muat(); } };
 
   /* ---------- awal ---------- */
   (async function init() {

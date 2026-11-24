@@ -14,6 +14,9 @@
   const badge = function (t, w) { return '<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600;background:#eef1f5;color:' + (WARNA[w] || WARNA.abu) + '">' + esc(t) + '</span>'; };
   const KODE_WARNA = { DAPAT_ABSEN: 'ok', SEDANG_BERJALAN: 'ok', BELUM_DIBUKA: 'kuning', LIBUR_PERGILIRAN: 'abu', SELESAI: 'abu', RELAWAN_TIDAK_AKTIF: 'abu', KEDALUWARSA: 'salah', TIDAK_ADA_JADWAL: 'salah' };
   const OBJ = { tampil: 'cek' };
+  // Kode dari server ditampilkan dengan bahasa biasa (bukan huruf besar bergaris bawah).
+  const LABEL = { DAPAT_ABSEN: 'Bisa absen', SEDANG_BERJALAN: 'Sedang bertugas', BELUM_DIBUKA: 'Absen belum dibuka', LIBUR_PERGILIRAN: 'Libur pergiliran', SELESAI: 'Sudah selesai', RELAWAN_TIDAK_AKTIF: 'Relawan tidak aktif', KEDALUWARSA: 'Jadwal sudah lewat', TIDAK_ADA_JADWAL: 'Jadwal belum dibuat', JAM_LAMA: 'Jam jadwal lama', KALENDER_BUKAN_OPERASIONAL: 'Bukan hari operasional', BARIS_BELUM_DIBENTUK: 'Baris jadwal belum dibentuk', DIVISI_KHUSUS: 'Divisi khusus', PERIODE_TIDAK_AKTIF: 'Di luar masa tugas' };
+  const lbl = function (k) { k = String(k || ''); return LABEL[k] || (k ? k.charAt(0) + k.slice(1).toLowerCase().replace(/_/g, ' ') : '-'); };
 
   // Satu menu "Koreksi & Cek Absen": dua tab di atas panel (25 Nov 2026). Tombol menu lama tetap ada (disembunyikan) agar hak akses dan tautan lama tidak berubah.
   function stripGabung(aktif) {
@@ -75,7 +78,7 @@
     const d = x.diagnosa || {}, w = KODE_WARNA[d.kode] || 'abu';
     const grup = {}, urutGrup = []; (d.sebab || []).forEach(function (s) { const k = s.kode + '|' + (s.perbaikan ? 1 : 0); if (!grup[k]) { grup[k] = { kode: s.kode, admin: s.admin, perbaikan: s.perbaikan, tgl: [] }; urutGrup.push(k); } grup[k].tgl.push(s.tanggal); });
     const sebab = urutGrup.map(function (k) { const g = grup[k], t = g.tgl.length > 3 ? g.tgl[0] + ' s.d. ' + g.tgl[g.tgl.length - 1] + ' (' + g.tgl.length + ' hari)' : g.tgl.join(', ');
-      return '<li><b>' + esc(t) + '</b> · ' + esc(g.kode) + (g.perbaikan ? ' ' + badge('bisa diperbaiki', 'ok') : '') + (g.admin ? '<br><small style="color:#55606f">' + esc(g.admin) + '</small>' : '') + '</li>'; }).join('');
+      return '<li><b>' + esc(t) + '</b> · ' + esc(lbl(g.kode)) + (g.perbaikan ? ' ' + badge('bisa diperbaiki', 'ok') : '') + (g.admin ? '<br><small style="color:#55606f">' + esc(g.admin) + '</small>' : '') + '</li>'; }).join('');
     const basi = (d.jamBasi || []).length ? '<p style="font-size:13px;color:#8a5a00;margin:6px 0 0">' + d.jamBasi.length + ' jadwal masih memakai jam lama (beda dengan jadwal terkini).</p>' : '';
     const bisa = (d.sebab || []).some(function (s) { return s.perbaikan; }) || (d.jamBasi || []).length > 0;
     return '<div class="admin-stat-card" style="padding:12px 14px;text-align:left;margin:0 0 10px" data-rel="' + esc(x.id) + '">'
@@ -97,7 +100,7 @@
     const bentuk = (r.bentukBaris || []).map(function (b) { return '<li>Buat baris jadwal ' + esc(b.tanggal) + ' (' + esc(b.jam) + ')' + (b.ikutDiperbaiki && b.ikutDiperbaiki.length ? '<br><small>Ikut terbentuk untuk relawan lain pada tanggal itu: ' + esc(b.ikutDiperbaiki.join(', ')) + '</small>' : '') + '</li>'; }).join('');
     const selaras = (r.selarasJam || []).map(function (s) { return '<li>Selaraskan jam ' + esc(s.tanggal) + ': ' + esc(s.jamTercatat || s.dari || '') + ' &rarr; ' + esc(s.jamTerkini || s.ke || '') + '</li>'; }).join('');
     const gt = {}, ut = []; (r.tidakBisaDiperbaiki || []).forEach(function (t) { const k = t.kode; if (!gt[k]) { gt[k] = { kode: k, penjelasan: t.penjelasan, tgl: [] }; ut.push(k); } gt[k].tgl.push(t.tanggal); });
-    const tidak = ut.map(function (k) { const g = gt[k], t = g.tgl.length > 3 ? g.tgl[0] + ' s.d. ' + g.tgl[g.tgl.length - 1] + ' (' + g.tgl.length + ' hari)' : g.tgl.join(', '); return '<li><b>' + esc(t) + '</b> · ' + esc(g.kode) + ' — ' + esc(g.penjelasan) + '</li>'; }).join('');
+    const tidak = ut.map(function (k) { const g = gt[k], t = g.tgl.length > 3 ? g.tgl[0] + ' s.d. ' + g.tgl[g.tgl.length - 1] + ' (' + g.tgl.length + ' hari)' : g.tgl.join(', '); return '<li><b>' + esc(t) + '</b> · ' + esc(lbl(g.kode)) + ' — ' + esc(g.penjelasan) + '</li>'; }).join('');
     let html = '<div style="margin-top:10px;padding:10px;border:1px dashed #b8c2d0;border-radius:8px;font-size:13px">'
       + '<b>' + (r.jalankan ? 'Hasil penerapan' : 'Hasil uji-coba (belum ada yang diubah)') + '</b>'
       + (bentuk ? '<ul style="margin:6px 0 0 18px;padding:0">' + bentuk + '</ul>' : '') + (selaras ? '<ul style="margin:6px 0 0 18px;padding:0">' + selaras + '</ul>' : '')
@@ -112,13 +115,21 @@
   async function audit() {
     $('dgAudit').innerHTML = '<p>Memeriksa semua relawan aktif…</p>';
     let r; try { r = await api('auditKetersediaanAbsenAdmin'); } catch (e) { $('dgAudit').innerHTML = '<p style="color:#b23a3a">' + esc(e.message) + '</p>'; return; }
-    const chips = Object.keys(r.ringkasan || {}).map(function (k) { return '<span style="margin:0 6px 6px 0;display:inline-block">' + badge(k + ': ' + r.ringkasan[k], KODE_WARNA[k] || 'abu') + '</span>'; }).join('');
+    const chips = Object.keys(r.ringkasan || {}).map(function (k) { return '<span style="margin:0 6px 6px 0;display:inline-block">' + badge(lbl(k) + ': ' + r.ringkasan[k], KODE_WARNA[k] || 'abu') + '</span>'; }).join('');
+    const divisiAda = Array.from(new Set(r.bermasalah.map(function (b) { return b.divisi || ''; }).filter(Boolean))).sort();
     $('dgAudit').innerHTML = '<h4 style="margin:14px 0 6px">Ringkasan seluruh relawan aktif <small style="font-weight:400;color:#55606f">(' + esc(r.sekarang) + ')</small></h4><div>' + chips + '</div>'
-      + '<p style="margin:6px 0"><b>' + r.jumlahBermasalah + '</b> relawan perlu tindakan.</p>'
-      + (r.bermasalah.length ? '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Nama</th><th>Divisi</th><th>Kondisi</th><th>Penyebab utama</th><th></th></tr></thead><tbody>'
-        + r.bermasalah.map(function (b) { return '<tr><td>' + esc(b.nama) + '</td><td>' + esc(b.divisi) + '</td><td>' + esc(b.judul) + '</td><td>' + esc(b.sebabUtama || (b.jamBasi ? 'JAM_LAMA' : '')) + '</td><td><button type="button" class="btn-mini" data-periksa="' + esc(b.id) + '">Periksa</button></td></tr>'; }).join('') + '</tbody></table></div>'
+      + '<p style="margin:6px 0"><b id="dgJml">' + r.jumlahBermasalah + '</b> relawan perlu tindakan.</p>'
+      + (r.bermasalah.length ? '<div style="margin:0 0 8px"><select id="dgDivisi" aria-label="Divisi" style="padding:8px;border:1px solid #d5dbe3;border-radius:8px"><option value="">Semua Divisi</option>' + divisiAda.map(function (d) { return '<option value="' + esc(d) + '">' + esc(d) + '</option>'; }).join('') + '</select></div><div id="dgTabel"></div>'
         : '<p style="color:#1a7a4c">Semua relawan aktif punya jadwal yang dapat dipakai absen.</p>');
-    $('dgAudit').querySelectorAll('[data-periksa]').forEach(function (b) { b.addEventListener('click', function () { $('dgCari').value = b.getAttribute('data-periksa'); cari(b.getAttribute('data-periksa')); window.scrollTo({ top: 0, behavior: 'smooth' }); }); });
+    function gambarTabel() {
+      const dv = $('dgDivisi') ? $('dgDivisi').value : '', daftar = r.bermasalah.filter(function (b) { return !dv || b.divisi === dv; });
+      $('dgJml').textContent = daftar.length;
+      $('dgTabel').innerHTML = daftar.length ? '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Nama</th><th>Divisi</th><th>Kondisi</th><th>Penyebab utama</th><th></th></tr></thead><tbody>'
+        + daftar.map(function (b) { return '<tr><td>' + esc(b.nama) + '</td><td>' + esc(b.divisi) + '</td><td>' + esc(b.judul) + '</td><td>' + esc(lbl(b.sebabUtama || (b.jamBasi ? 'JAM_LAMA' : ''))) + '</td><td><button type="button" class="btn-mini" data-periksa="' + esc(b.id) + '">Periksa</button></td></tr>'; }).join('') + '</tbody></table></div>'
+        : '<p style="color:#1a7a4c">Tidak ada relawan bermasalah di divisi ini.</p>';
+      $('dgTabel').querySelectorAll('[data-periksa]').forEach(function (b) { b.addEventListener('click', function () { $('dgCari').value = b.getAttribute('data-periksa'); cari(b.getAttribute('data-periksa')); window.scrollTo({ top: 0, behavior: 'smooth' }); }); });
+    }
+    if ($('dgDivisi')) { $('dgDivisi').addEventListener('change', gambarTabel); gambarTabel(); }
   }
 
   /* ============ TAB 2: HARI SHIFT MALAM ============ */

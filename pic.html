@@ -2,24 +2,28 @@
 <html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#14634a">
+<meta name="theme-color" content="#14304F">
 <title>Portal PIC — SPPG Jeungjing</title>
 <link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>:root{
-  --g:#14634a; --g2:#0e4d39; --gl:#e6f3ee; --ink:#1c2420; --mut:#5b6760; --line:#d8e0db; --bg:#f4f7f5; --card:#fff;
-  --red:#b3261e; --redl:#fdecea; --amb:#8a5a00; --ambl:#fff4d6;
+  /* Warna standar Portal SPPG Jeungjing (sama dengan portal pengelola dan relawan) */
+  --navy:#14304F; --navy2:#0A1D33; --g:#127CB4; --g2:#0C5D89; --gl:#E6F3FB; --ink:#17222E; --mut:#5B6876; --line:#E1E8F0; --bg:#F6F9FC; --card:#fff;
+  --ok:#1E8E5A; --okl:#E5F5EC; --red:#C6403F; --redl:#FBEAEA; --amb:#8A5A00; --ambl:#FBF0D9;
   --hamil:#c2185b; --hamill:#fde7f0; --busui:#b45309; --busuil:#fff0dc; --balita:#1d4ed8; --balital:#e5edff;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 button,input{font:inherit;color:inherit}
 .wrap{max-width:560px;margin:0 auto;padding:16px 16px 120px}
-header.top{background:var(--g);color:#fff;padding:18px 16px 16px}
+header.top{background:#fff;color:var(--navy);padding:14px 16px 12px;border-bottom:1px solid var(--line)}
 header.top .in{max-width:560px;margin:0 auto}
-header.top small{opacity:.85;display:block;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
-header.top h1{margin:2px 0 0;font-size:22px;line-height:1.2}
-header.top p{margin:6px 0 0;opacity:.9;font-size:15px}
+header.top small{color:var(--mut);display:block;font-size:13px;letter-spacing:.03em}
+header.top h1{margin:2px 0 0;font-size:21px;line-height:1.25;color:var(--navy)}
+header.top p{margin:6px 0 0;color:var(--mut);font-size:15px}
 .note{border-radius:12px;padding:10px 12px;font-size:14px;margin:12px 0;background:var(--gl);color:var(--g2)}
 .note.warn{background:var(--ambl);color:var(--amb)}
 h2{font-size:18px;margin:22px 0 10px}
@@ -53,14 +57,14 @@ h2{font-size:18px;margin:22px 0 10px}
 .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:5}
 .bar .in{max-width:560px;margin:0 auto;display:flex;gap:10px}
 .bar .in .btn{flex:1}
-.back{background:none;border:0;color:#fff;font-size:16px;padding:0 0 8px;cursor:pointer;opacity:.95}
+.back{background:none;border:0;color:var(--g2);font-size:16px;font-weight:700;padding:0 0 6px;cursor:pointer}
 .sec-h{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g);margin:22px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--gl)}
 .fld{margin:0 0 16px}
 .fld label{display:block;font-weight:700;margin-bottom:2px}
 .fld .hint{color:var(--mut);font-size:14px;margin-bottom:6px}
 .fld input[type=text]{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:19px;background:#fff;min-height:54px}
 .fld input.up{text-transform:uppercase}
-.fld input:focus{outline:3px solid #9bd3bf;border-color:var(--g)}
+.fld input:focus{outline:3px solid #9fd0ea;border-color:var(--g)}
 .fld.bad input{border-color:var(--red);background:var(--redl)}
 .fld.good input{border-color:#4ba283}
 .msg{font-size:14px;margin-top:6px;min-height:0}
@@ -77,16 +81,16 @@ h2{font-size:18px;margin:22px 0 10px}
 .dlg .acts{margin-top:16px}
 .dlg .acts .btn{flex:1}
 
-.kat.pos{border-color:var(--g)} .kat.pos .ic{background:var(--gl)}
+.kat.pos{border-color:var(--line)} .kat.pos .ic{background:var(--gl)}
 
 .ban{border-radius:12px;padding:12px 14px;margin:12px 0;background:var(--ambl);color:var(--amb);font-size:15px}
 .ban b{display:block;margin-bottom:2px}
 .tag.stale{background:var(--ambl);color:var(--amb);margin-left:6px}
 .tag.cat{background:var(--redl);color:var(--red);margin-left:6px}
 .fld input[type=password],.fld input[type=tel],.fld input[type=email]{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:19px;background:#fff;min-height:54px}
-.fld input[type=password]:focus,.fld input[type=tel]:focus,.fld input[type=email]:focus{outline:3px solid #9bd3bf;border-color:var(--g)}
+.fld input[type=password]:focus,.fld input[type=tel]:focus,.fld input[type=email]:focus{outline:3px solid #9fd0ea;border-color:var(--g)}
 header.top .in{position:relative}
-.keluar{position:absolute;right:0;top:0;z-index:2;background:none;border:0;color:#fff;font-size:15px;padding:8px 0 8px 12px;min-height:40px;cursor:pointer;text-decoration:underline}
+.keluar{display:none}
 
 /* Portal PIC terpadu (25 Nov 2026) */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
@@ -107,7 +111,7 @@ header.top .in{position:relative}
 .faq{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 14px;margin:0 0 10px}
 .faq summary{font-weight:700;min-height:48px;display:flex;align-items:center;cursor:pointer}
 .faq p{margin:0 0 12px;color:var(--mut);font-size:16px}
-.btn:focus-visible,.tab:focus-visible,.chip:focus-visible,.kat:focus-visible,.faq summary:focus-visible{outline:3px solid #9bd3bf;outline-offset:2px}
+.btn:focus-visible,.tab:focus-visible,.chip:focus-visible,.kat:focus-visible,.faq summary:focus-visible{outline:3px solid #9fd0ea;outline-offset:2px}
 
 /* Pendataan satuan pendidikan + navigasi (25 Nov 2026) */
 .svgi{display:inline-flex;align-items:center;justify-content:center;line-height:0}
@@ -129,7 +133,7 @@ body.ada-nav .wrap{padding-bottom:200px}
 .rk{border-radius:12px;padding:10px;text-align:center;background:#fff;border:2px solid var(--line)}
 .rk b{display:block;font-size:24px}.rk span{font-size:13px;color:var(--mut)}
 .rk.ok{border-color:#4ba283}.rk.wrn{border-color:#d9a400}.rk.err{border-color:var(--red)}
-textarea:focus{outline:3px solid #9bd3bf;border-color:var(--g)}
+textarea:focus{outline:3px solid #9fd0ea;border-color:var(--g)}
 @media (max-width:899px){ .tabbar.formnav{display:none} }
 @media (min-width:900px){
   body.ada-nav,body.ada-nav-desk{padding-left:230px}
@@ -141,7 +145,78 @@ textarea:focus{outline:3px solid #9bd3bf;border-color:var(--g)}
   body.ada-nav .wrap{padding-bottom:120px}
   .wrap,header.top .in,.bar .in{max-width:720px}
 }
-}
+
+/* Tampilan Portal PIC mengikuti portal (25 Nov 2026) */
+.brand{position:sticky;top:0;z-index:12;background:linear-gradient(140deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;box-shadow:0 2px 12px rgba(10,29,51,.18)}
+.brand-in{max-width:720px;margin:0 auto;min-height:64px;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand-mid{display:flex;align-items:center;gap:9px;min-width:0}
+.brand-mid img{width:34px;height:34px;border-radius:50%;background:#fff;flex:none}
+.brand-text{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.brand-text strong{font-size:13.5px;font-weight:800;letter-spacing:.08em;white-space:nowrap}
+.brand-text span{font-size:11.5px;color:rgba(255,255,255,.8);letter-spacing:.04em}
+.brand-right{display:flex;gap:8px;flex:none}
+.ib{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0;font-weight:800;font-size:15px}
+.ib.av{background:var(--g)}
+.ib .svgi svg{width:20px;height:20px}
+.ib .dot{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:99px;background:var(--red);color:#fff;font-size:10.5px;font-weight:800;place-items:center;border:1.5px solid var(--navy2);padding:0 3px;line-height:1}
+.ib:focus-visible{outline:3px solid #9fd0ea;outline-offset:2px}
+.brand-login .brand-in{justify-content:center}
+h2.tengah{text-align:center;margin:6px 0 14px;font-size:21px;color:var(--navy)}
+h2{color:var(--navy)}
+.hero{background:linear-gradient(140deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;border-radius:18px;padding:18px 18px 16px;margin:0 0 14px}
+.hero small{opacity:.8;font-size:13px;letter-spacing:.03em}
+.hero h1{margin:2px 0 4px;font-size:24px;line-height:1.2}
+.hero p{margin:0;font-size:15.5px;opacity:.95}
+.hero .hari{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.25);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:15px}
+.hero .hari .tgl{font-weight:700}
+.hero .hari .kb{border-radius:999px;padding:3px 12px;font-size:13.5px;font-weight:700;background:#fff;color:var(--ok)}
+.hero .hari .kb.libur{color:var(--red)} .hero .hari .kb.operasional-khusus{color:#0A5C8C} .hero .hari .kb.belum-diatur{color:var(--amb)}
+.hero .hari .ket{flex-basis:100%;opacity:.92;font-size:14.5px}
+select.sel{width:100%;min-height:48px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font-size:16px;background:#fff;color:var(--ink);font-family:inherit}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:0 0 12px}
+.kep{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 6px;margin-bottom:10px}
+.angka{font-size:30px;font-weight:800;color:var(--navy);line-height:1.1}
+.dari{color:var(--mut);font-size:15px}
+.kep .cs{margin-left:auto}
+.prog{height:12px;border-radius:99px;background:#E8EEF4;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--g);border-radius:99px;transition:width .3s}
+.prog.ok i{background:var(--ok)}
+.meta{color:var(--mut);font-size:14px;margin-top:6px}
+.cs{display:inline-block;font-size:12px;font-weight:700;border-radius:99px;padding:3px 10px;background:#EEF2F6;color:var(--mut);white-space:nowrap}
+.cs.sebagian{background:var(--ambl);color:var(--amb)} .cs.lengkap{background:var(--okl);color:var(--ok)} .cs.tanpa-target{background:var(--gl);color:var(--g2)}
+.graf{margin-top:14px;display:grid;gap:8px}
+.gr{display:grid;grid-template-columns:108px 1fr 44px;align-items:center;gap:8px;font-size:14px}
+.gl{color:var(--mut)} .gn{text-align:right}
+.gb{height:10px;border-radius:99px;background:#EEF2F6;overflow:hidden;display:block}
+.gb i{display:block;height:100%;border-radius:99px;background:var(--g)}
+.gb i.hamil{background:var(--hamil)} .gb i.busui{background:var(--busui)} .gb i.balita{background:var(--balita)}
+.tag.ok{background:var(--okl);color:var(--ok);margin-left:6px}
+.table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+table.tb{width:100%;border-collapse:collapse;font-size:15px}
+table.tb th{text-align:left;background:var(--gl);color:var(--navy);padding:8px 10px;font-size:13px;white-space:nowrap}
+table.tb td{padding:9px 10px;border-top:1px solid var(--line);vertical-align:top}
+table.tb tbody tr{cursor:pointer} table.tb tbody tr:active{background:var(--gl)}
+table.tb .tag{margin:0;white-space:nowrap}
+.seg button .svgi{vertical-align:middle;margin-right:4px}
+.item.notif.baru{border-left-color:var(--g);background:#F3FAFE}
+.item.notif .isi{margin:8px 0 0;white-space:pre-wrap;font-size:16px}
+.pbanner{height:104px;border-radius:16px;background:linear-gradient(135deg,var(--navy) 0%,var(--g2) 60%,var(--g) 100%);position:relative;margin:0 0 44px}
+.pbanner::after{content:"";position:absolute;inset:0;border-radius:16px;background:radial-gradient(circle at 85% 20%,rgba(255,255,255,.18),transparent 45%)}
+.ib.av.berfoto,.pav.berfoto{background-size:cover;background-position:center;color:transparent}
+.pbanner.berfoto{background-size:cover;background-position:center}.pbanner.berfoto::after{background:none}
+.fotoaksi{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px;align-items:center}.fotoaksi .msg{flex-basis:100%;margin:2px 0 0}
+.pav{position:absolute;left:18px;bottom:-34px;width:76px;height:76px;border-radius:50%;background:var(--g);color:#fff;border:4px solid var(--bg);display:grid;place-items:center;font-size:30px;font-weight:800;z-index:1}
+.pnama{margin:-30px 0 14px 108px;min-height:44px;display:flex;flex-direction:column;justify-content:center}
+.pnama b{font-size:19px;color:var(--navy);word-break:break-word} .pnama span{color:var(--mut);font-size:14px}
+.fld textarea{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:18px;background:#fff;font-family:inherit;resize:vertical}
+.fld input[type=date]{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:19px;background:#fff;min-height:54px;font-family:inherit}
+.tag.cat{margin-left:6px}
+.inst-h .cs{flex:none}
+.pmg{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px}
+.pmk{border-radius:12px;padding:10px;text-align:center;background:var(--gl)}
+.pmk b{display:block;font-size:24px;color:var(--navy)} .pmk span{font-size:13px;color:var(--mut)}
+.pmk.hamil{background:var(--hamill)} .pmk.busui{background:var(--busuil)} .pmk.balita{background:var(--balital)}
+@media (max-width:420px){.gr{grid-template-columns:84px 1fr 40px}.angka{font-size:26px}}
 </style></head>
 <body><div id="app"></div><div id="toast" role="status"></div><div id="modal"></div>
 <script>window.P3B_MODE="pic";</script>
@@ -149,7 +224,7 @@ textarea:focus{outline:3px solid #9bd3bf;border-color:var(--g)}
 <script src="core/common.js?v=20261014a"></script>
 <script src="core/core-3b.js?v=20261124b"></script>
 <script src="core/core-sekolah.js?v=20261125b"></script>
-<script src="modules/pendataan3b/portal-pic.js?v=20261125d"></script>
-<script src="modules/pendataan3b/pendataan-sekolah.js?v=20261125b"></script>
-<script src="modules/pendataan3b/pendataan-3b.js?v=20261125d"></script>
+<script src="modules/pendataan3b/portal-pic.js?v=20261125g"></script>
+<script src="modules/pendataan3b/pendataan-sekolah.js?v=20261125c"></script>
+<script src="modules/pendataan3b/pendataan-3b.js?v=20261125g"></script>
 </body></html>

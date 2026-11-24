@@ -427,7 +427,7 @@
     panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261124b',
     panelPergiliran: 'modules/admin/admin-pergiliran.js?v=20261124b',   // 22 Nov 2026 (Tahap 3): SIMSDM menyusun kebutuhan & mengajukan pergiliran
     panelPenetapanPergiliran: 'modules/admin/admin-pergiliran-sikop.js?v=20261124b',
-    panelPendataan3B: 'modules/admin/admin-pendataan-3b.js?v=20261125d',
+    panelPendataan3B: 'modules/admin/admin-pendataan-3b.js?v=20261125g',
     panelVerifikasiWa: 'modules/admin/admin-verifikasi-wa.js?v=20261125d',   // 24 Nov 2026: Verifikasi WhatsApp + antrean pendaftaran   // 24 Nov 2026: Pendataan 3B (SIPIKA)   // SIKOP menetapkan
     panelPengajuanKebutuhanAdmin: 'modules/admin/admin-pengajuan-kebutuhan.js?v=20261023a',
     panelReturBarangAdmin: 'modules/admin/admin-retur-barang.js?v=20261023a',

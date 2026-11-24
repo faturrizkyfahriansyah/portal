@@ -1,4 +1,4 @@
-// SPPG JEUNGJING — SIPIKA: Pendataan satuan pendidikan (Admin, 25 Nov 2026). Dimuat oleh admin-pendataan-3b.js ke panel yang sama.
+// SPPG JEUNGJING — SIPIKA: Pendataan satuan pendidikan (Admin, 25 Nov 2026). Dimuat oleh admin-pendataan-3b.js ke tab "Satuan pendidikan" pada halaman Pendataan BNBA.
 // Lihat/hapus data yang diisi PIC sekolah dan UNDUH file Excel berformat contoh (DARUL UMMAH), dibuat di browser dari template + data server.
 // Data berisi NISN/NIK: hanya Admin (Staff ditolak server). Unduhan dicatat di server (siapa, kapan, berapa baris).
 (function () {
@@ -14,26 +14,32 @@
   let data = null, sibuk = false;
 
   const root = document.createElement('div'); root.id = 'skAdmin';
-  root.innerHTML = '<h3 style="margin:28px 0 4px">Pendataan satuan pendidikan</h3><p class="pg-sub">Data siswa, guru, dan tendik per sekolah, diisi PIC sekolah lewat <b>pic.html</b>, lalu diunduh sebagai file Excel berformat contoh. <b>Berisi NISN/NIK: jangan dibagikan.</b></p>'
+  root.innerHTML = '<p class="pg-sub" style="margin-top:0">Data siswa, guru, dan tendik per sekolah, diisi PIC lewat Portal PIC, lalu diunduh sebagai file Excel berformat contoh. <b>Berisi NISN/NIK: jangan dibagikan.</b></p>'
     + '<div id="skDaftar" class="panel-block"></div><div id="skData"></div>';
-  panel.appendChild(root);
+  ($('bnSek') || panel).appendChild(root);
 
   async function muat() {
     $('skDaftar').innerHTML = '<p class="pg-sub">Memuat…</p>';
     try { data = await api('getDaftarSekolah3BAdmin'); } catch (e) { $('skDaftar').innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return; }
+    if (window.bnRingkasSekolah) window.bnRingkasSekolah(data.sekolah);
     gambar();
   }
   function gambar() {
     const el = $('skDaftar');
     if (!data.sekolah.length) { el.innerHTML = '<p class="pg-sub">Belum ada satuan pendidikan aktif di SIPANDU.</p>'; return; }
-    let h = '<div class="pg-aksi" style="margin-bottom:8px"><button type="button" class="btn-mini primary" id="skSemua">Unduh semua sekolah (ZIP)</button></div><div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Satuan pendidikan</th><th>PIC</th><th>Data</th><th>Aksi</th></tr></thead><tbody>';
+    const ang = function (n) { return String(n || 0).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
+    let h = '<div class="pg-aksi" style="margin-bottom:8px"><button type="button" class="btn-mini primary" id="skSemua">Unduh semua sekolah</button></div><div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Satuan pendidikan</th><th>PIC dan password</th><th>Terisi dari target</th><th>Aksi</th></tr></thead><tbody>';
     data.sekolah.forEach(function (s) {
-      const j = s.jumlah;
-      h += '<tr data-sk="' + esc(s.id) + '"><td><b>' + esc(s.nama) + '</b><br><small>' + esc(s.jenis) + '</small></td><td>' + (s.pic.length ? esc(s.pic.join(', ')) : '<small>belum ada PIC</small>') + '</td>'
-        + '<td>Siswa ' + j.siswa + ' · Guru ' + j.guru + ' · Tendik ' + j.tendik + '<br><small>' + (j.perluKonfirmasi ? '<b>' + j.perluKonfirmasi + ' NISN menunggu konfirmasi PIC</b>' : 'tidak ada yang tertunda') + '</small></td>'
+      const j = s.jumlah, t = s.target || 0, pr = t > 0 ? Math.min(100, Math.round(j.siswa * 100 / t)) : 0;
+      h += '<tr data-sk="' + esc(s.id) + '"><td><b>' + esc(s.nama) + '</b><br><small>' + esc(s.jenis) + '</small></td>'
+        + '<td>' + ((s.picDetail || []).length && window.bnBarisPic ? s.picDetail.map(window.bnBarisPic).join('') : '<small>Belum ada PIC di SIPANDU.</small>') + '</td>'
+        + '<td><b>Siswa ' + ang(j.siswa) + (t ? ' dari ' + ang(t) : '') + '</b><br><small>Guru ' + j.guru + ' · Tendik ' + j.tendik + '</small>'
+        + (t ? '<div style="height:9px;border-radius:99px;background:#E8EEF4;overflow:hidden;min-width:120px;margin-top:4px"><div style="height:100%;width:' + pr + '%;background:' + (j.siswa >= t ? '#1E8E5A' : '#127CB4') + '"></div></div><small>' + (j.siswa >= t ? 'Lengkap' : 'Kurang ' + ang(t - j.siswa)) + ' · ' + pr + '%</small>' : '<br><small>Jumlah harus diisi: belum diatur</small>')
+        + '<br><small>' + (j.perluKonfirmasi ? '<b>' + j.perluKonfirmasi + ' NISN menunggu konfirmasi PIC</b>' : 'tidak ada yang tertunda') + '</small></td>'
         + '<td><button type="button" class="btn-mini" data-lihat="' + esc(s.id) + '">Lihat data</button> <button type="button" class="btn-mini primary" data-unduh="' + esc(s.id) + '"' + (j.total ? '' : ' disabled') + '>Unduh Excel</button></td></tr>';
     });
     el.innerHTML = h + '</tbody></table></div>';
+    if (window.bnPasangPassword) window.bnPasangPassword(el, muat);
     $('skSemua').addEventListener('click', function () { unduh(null); });
     el.querySelectorAll('[data-unduh]').forEach(function (b) { b.addEventListener('click', function () { unduh(b.dataset.unduh); }); });
     el.querySelectorAll('[data-lihat]').forEach(function (b) { b.addEventListener('click', function () { lihat(b.dataset.lihat); }); });
@@ -50,7 +56,7 @@
   /* ---------- unduh ---------- */
   function muatJsZip() {
     if (window.JSZip) return Promise.resolve();
-    return new Promise(function (ok, gagal) { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = ok; s.onerror = function () { gagal(new Error('Pustaka Excel gagal dimuat. Periksa koneksi internet.')); }; document.head.appendChild(s); });
+    return new Promise(function (ok, gagal) { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = ok; s.onerror = function () { gagal(new Error('Alat pembuat file Excel gagal dimuat. Periksa koneksi internet.')); }; document.head.appendChild(s); });
   }
   async function buatXlsx(records) {
     const buf = await (await fetch(TPL + '?v=20261125b')).arrayBuffer();

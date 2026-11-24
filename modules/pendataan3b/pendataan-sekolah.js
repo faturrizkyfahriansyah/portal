@@ -22,9 +22,8 @@
   function topbar(judul, kecil, kembali) {
     var S = K().S;
     return h('header', { class: 'top' }, h('div', { class: 'in' },
-      h('button', { class: 'keluar', text: 'Keluar', onclick: function () { K().keluar(); } }),
       kembali ? h('button', { class: 'back', onclick: kembali.fn }, K().ikon('kiri', 18), kembali.label) : null,
-      h('small', { text: kecil || ('Satuan pendidikan • ' + (S.pic ? S.pic.nama : '')) }), h('h1', { text: judul })));
+      h('small', { text: kecil || ('Pendataan • ' + (S.pic ? S.pic.nama : '')) }), h('h1', { text: judul })));
   }
   function nomorTersamar(n) { return n || ''; }
 
@@ -69,7 +68,12 @@
     var r = Q.ring || { siswa: 0, guru: 0, tendik: 0, total: 0, perluKonfirmasi: 0, tidakMenerima: 0 }, a = app();
     a.appendChild(topbar(Q.nama, null, { label: 'Beranda', fn: function () { var S = K().S; if (window.PortalPic) window.PortalPic.segar(); S.view = 'beranda'; S.idi = ''; S.nmPos = ''; K().simpanSesi(); rerender(); window.scrollTo(0, 0); } }));
     var wrap = h('div', { class: 'wrap', id: 'sekolahDaftar' });
-    wrap.appendChild(h('div', { class: 'tip', style: 'margin-top:0', text: 'Isi data siswa, guru, dan tenaga kependidikan yang menerima makan bergizi. Admin SPPG akan mengunduhnya sebagai file Excel.' }));
+    var P = window.PortalPic;
+    if (P && P.kartuKemajuan) {
+      var rt = P.ringkasanTempat(Q.idi), sw = r.siswa || 0;
+      wrap.appendChild(P.kartuKemajuan(rt ? Object.assign({}, rt, { terisi: sw, kurang: Math.max(0, (rt.target || 0) - sw), persen: rt.target > 0 ? Math.min(100, Math.round(sw * 100 / rt.target)) : 0, status: rt.target > 0 ? (sw >= rt.target ? 'LENGKAP' : (sw > 0 ? 'SEBAGIAN' : 'BELUM')) : (sw > 0 ? 'TANPA_TARGET' : 'BELUM') }) : null));
+    }
+    wrap.appendChild(h('div', { class: 'tip', style: 'margin-top:0', text: 'Isi data siswa, guru, dan tenaga kependidikan yang menerima makan bergizi.' }));
     if (r.perluKonfirmasi) {
       wrap.appendChild(h('div', { class: 'ban', role: 'status' }, h('b', { text: r.perluKonfirmasi + ' NISN perlu diperiksa' }),
         h('span', { text: 'Angka 0 di depan NISN hilang saat disalin dari Excel, jadi dilengkapi otomatis. Periksa NISN-nya, lalu ketuk "Sudah benar". Data ini belum ikut diunduh Admin.' }),
