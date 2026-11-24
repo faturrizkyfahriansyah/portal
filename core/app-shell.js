@@ -43,7 +43,8 @@ function initShell(opts) {
   // Menutup drawer otomatis saat sebuah link menu diklik (khusus mobile),
   // supaya pengguna tidak perlu menutup manual setiap pindah halaman.
   if (sidebar) {
-    sidebar.querySelectorAll('a.shell-nav-link').forEach((link) => {
+    // 22 Nov 2026 (Tahap 2): di Portal Pengelola menu berupa <button>, bukan <a>, jadi drawer tidak pernah menutup sendiri di HP. Tombol Keluar tidak ikut.
+    sidebar.querySelectorAll('a.shell-nav-link, nav button.shell-nav-link:not(.shell-nav-link--danger)').forEach((link) => {
       link.addEventListener('click', () => { if (window.innerWidth < 1080) closeDrawer(); });
     });
   }

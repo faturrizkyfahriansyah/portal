@@ -122,8 +122,36 @@ function renderStatus() {
   el.stateForm.style.display = 'none';
   el.stateSelesai.style.display = 'none';
 
+  // 10 Nov 2026 (Manajemen Pergiliran): jadwal hari ini berstatus LIBUR PERGILIRAN -> tampilkan keterangan, tanpa tombol/form absen.
+  if (!el.stateKosong.dataset.asli) el.stateKosong.dataset.asli = el.stateKosong.innerHTML;
+  if (s.liburPergiliran) {
+    el.stateKosong.innerHTML = '<div style="text-align:center;padding:18px 8px;"><div style="font-size:30px;line-height:1;">ℹ</div><h3 style="margin:8px 0 4px;">Libur Pergiliran</h3><p style="margin:0;font-size:14px;">Hari ini Anda mendapat giliran libur. Tidak perlu absen, dan tidak ada insentif untuk hari ini.</p><p style="margin:8px 0 0;font-size:12px;opacity:.75;">Jika ini keliru, hubungi Admin SPPG.</p></div>';
+    el.stateKosong.style.display = 'block';
+    return;
+  }
+  el.stateKosong.innerHTML = el.stateKosong.dataset.asli;
+  // 25 Nov 2026: penjelasan jelas bila belum/tidak bisa absen (jadwal belum dibuat / presensi belum dibuka / sudah lewat) -- dari diagnosa server.
+  const dg = s.diagnosa;
+  const dgTahan = dg && !dg.bisaAbsen && ['BELUM_DIBUKA', 'KEDALUWARSA', 'TIDAK_ADA_JADWAL', 'RELAWAN_TIDAK_AKTIF'].indexOf(dg.kode) !== -1 && !(s.masuk && s.masuk.sudah);
+  if (dgTahan) {
+    const warna = dg.kode === 'BELUM_DIBUKA' ? '#8a5a00' : '#b23a3a';
+    el.stateKosong.innerHTML = '<div id="diagnosaAbsen" style="text-align:center;padding:18px 8px;">'
+      + '<div style="font-size:30px;line-height:1;" aria-hidden="true">' + (dg.kode === 'BELUM_DIBUKA' ? '⏳' : 'ℹ') + '</div>'
+      + '<h3 style="margin:8px 0 4px;color:' + warna + ';">' + escapeHtml(dg.judul || 'Belum bisa absen') + '</h3>'
+      + '<p style="margin:0 0 8px;font-size:14px;line-height:1.5;">' + escapeHtml(dg.pesan || '') + '</p>'
+      + (dg.bukaPada ? '<p style="margin:0 0 8px;font-size:13px;color:#55606f;">Jendela absen: <b>' + escapeHtml(dg.bukaPada) + '</b> sampai <b>' + escapeHtml(dg.berakhirPada || '') + '</b></p>' : '')
+      + '<button type="button" class="absensi-gps-retry" id="btnPeriksaLagiAbsen">Periksa lagi</button>'
+      + (dg.kodeBantuan ? '<p style="margin:10px 0 0;font-size:12px;color:#55606f;">Kode bantuan untuk Admin/Koordinator: <b>' + escapeHtml(dg.kodeBantuan) + '</b></p>' : '')
+      + '</div>';
+    const tb = document.getElementById('btnPeriksaLagiAbsen'); if (tb) tb.addEventListener('click', function () { muatStatusAbsensi(); });
+    el.stateKosong.style.display = 'block';
+    return;
+  }
   if (!s.operasional.ada) {
     el.stateKosong.style.display = 'block';
+    if (dg && !dg.bisaAbsen && dg.pesan && dg.kode !== 'SELESAI') {
+      const p = document.getElementById('pesanKosong'); if (p) p.textContent = dg.pesan + (dg.kodeBantuan ? ' (Kode bantuan: ' + dg.kodeBantuan + ')' : '');
+    }
     return;
   }
 

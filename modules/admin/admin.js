@@ -351,7 +351,7 @@
   // Barang/Hak Akses di dalamnya tetap Admin-only lewat requireStokAdmin_
   // & SipanduHakAkses.gs yang tidak disentuh.
   const PANEL_KHUSUS_ADMIN = [
-    'panelRelawan', 'panelAkun', 'panelDivisi', 'panelRoleAkses', 'panelPengelolaSppg',
+    'panelRelawan', 'panelAkun', 'panelDivisi', 'panelRoleAkses', 'panelPengelolaSppg', 'panelPergiliran', 'panelPenetapanPergiliran', 'panelPendataan3B', 'panelVerifikasiWa',
     'panelPeriode', 'panelKalender', 'panelLokasi', 'panelShift',
     'panelNotifikasiAdmin', 'panelInformasi', 'panelPengumuman', 'panelDokumen',
     'panelLaporan', 'panelWebsitePublik', 'panelPengaturan'
@@ -408,13 +408,18 @@
     // SEMUA panel dipastikan ambil salinan terbaru, bukan cache lama.
     panelShift: 'modules/admin/admin-shift.js?v=20261024c',
     panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261105c',
+    panelDiagnosaAbsen: 'modules/admin/admin-diagnosa-absen.js?v=20261125a',   // 25 Nov 2026: Cek Absen & Hari Shift Malam
     panelLaporan: 'modules/admin/admin-laporan.js?v=20261104d',
     panelProfilRelawan: 'modules/admin/admin-profil-relawan.js?v=20261023a',
     panelMenuHariIni: 'modules/admin/admin-menu-hari-ini.js?v=20261023a',
     panelPenerimaManfaatOps: 'modules/admin/admin-penerima-manfaat-ops.js?v=20261023a',
     panelManajemenHakAkses: 'modules/admin/admin-manajemen-hak-akses.js?v=20261105e',
     panelRoleAkses: 'modules/admin/admin-role.js?v=20261023a',
-    panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261104a',
+    panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261124b',
+    panelPergiliran: 'modules/admin/admin-pergiliran.js?v=20261124b',   // 22 Nov 2026 (Tahap 3): SIMSDM menyusun kebutuhan & mengajukan pergiliran
+    panelPenetapanPergiliran: 'modules/admin/admin-pergiliran-sikop.js?v=20261124b',
+    panelPendataan3B: 'modules/admin/admin-pendataan-3b.js?v=20261125b',
+    panelVerifikasiWa: 'modules/admin/admin-verifikasi-wa.js?v=20261124b',   // 24 Nov 2026: Verifikasi WhatsApp + antrean pendaftaran   // 24 Nov 2026: Pendataan 3B (SIPIKA)   // SIKOP menetapkan
     panelPengajuanKebutuhanAdmin: 'modules/admin/admin-pengajuan-kebutuhan.js?v=20261023a',
     panelReturBarangAdmin: 'modules/admin/admin-retur-barang.js?v=20261023a',
     // 2 baris di bawah SEBELUMNYA tidak py versi SAMA SEKALI -- berarti

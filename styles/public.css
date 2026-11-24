@@ -242,3 +242,26 @@ a { color: inherit; }
   .pub-stats { grid-template-columns: 1fr 1fr; }
   .pub-two-col { grid-template-columns: 1fr; }
 }
+
+
+/* ---- 25 Nov 2026: perapihan Struktur Personel & Yayasan/Mitra ---- */
+.pub-struktur-card ol { text-align: left; }
+.pub-struktur-card:not(.divisi) ol { list-style: none; padding-left: 0; text-align: center; margin-top: 2px; }
+.pub-struktur-card:not(.divisi) ol li { margin-bottom: 2px; font-size: 14.5px; color: var(--pub-navy); font-family: var(--pub-serif); font-weight: 600; }
+.pub-struktur-card.divisi ol { columns: 1; }
+.pub-struktur-card.divisi .peran { padding-bottom: 6px; border-bottom: 1px solid var(--pub-line); margin-bottom: 8px; }
+.pub-struktur-card .jumlah { float: right; font-weight: 600; color: var(--pub-ink-soft); text-transform: none; letter-spacing: 0; }
+.pub-struktur-tier.is-kosong, .pub-struktur-divider.is-kosong { display: none; }
+.pub-struktur-card[hidden] { display: none; }
+@media (max-width: 640px) {
+  .pub-struktur-card, .pub-struktur-card.divisi { flex: 1 1 100%; max-width: none; }
+  .pub-struktur-tier { gap: 10px; }
+}
+.pub-naungan { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.pub-naungan > div { background: var(--pub-white); border: 1.5px solid var(--pub-line); border-radius: 14px; padding: 18px 20px; }
+.pub-naungan h3 { font-family: var(--pub-serif); font-size: 18px; color: var(--pub-navy); margin: 0 0 6px; }
+.pub-naungan p { margin: 0; color: var(--pub-ink-soft); font-size: 14.5px; line-height: 1.6; }
+@media (max-width: 640px) { .pub-naungan { grid-template-columns: 1fr; } }
+.pub-sidebar a:focus-visible, .pub-btn:focus-visible, .pub-menu-btn:focus-visible { outline: 3px solid var(--pub-turmeric, #d79a2b); outline-offset: 2px; }
+
+.pub-menu-kosong { margin: 0; padding: 18px 20px; border: 1.5px dashed var(--pub-line); border-radius: 14px; color: var(--pub-ink-soft); font-size: 14.5px; grid-column: 1 / -1; }

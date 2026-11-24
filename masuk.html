@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#12294d">
+<title>Masuk — SPPG Jeungjing</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/style.css?v=20260903b">
+<link rel="stylesheet" href="styles/portal.css?v=20261001g">
+<link rel="stylesheet" href="styles/rebrand.css?v=20260903b">
+<link rel="manifest" href="manifest.json">
+<style>
+  /* Satu formulir masuk (25 Nov 2026): rapi, mudah dibaca, jempol-friendly di HP. */
+  .masuk-sub{margin:0 0 14px;color:#55606f;font-size:14.5px;line-height:1.5}
+  .masuk-pesan{display:none;margin:0 0 12px;padding:10px 12px;border-radius:10px;font-size:14px;line-height:1.45;background:#fdecea;color:#8b2a22;border:1px solid #f3c6c1}
+  .masuk-pesan.is-on{display:block}
+  .masuk-hint{margin:6px 0 0;font-size:12.5px;color:#6b7280;line-height:1.45}
+  .masuk-tautan{margin:16px 0 0;padding-top:14px;border-top:1px solid #e6eaf0;text-align:center;font-size:14.5px;line-height:1.8}
+  .masuk-tautan a{font-weight:700;color:#12294d;text-decoration:none;border-bottom:1px solid rgba(18,41,77,.35)}
+  .masuk-tautan a:hover,.masuk-tautan a:focus-visible{border-bottom-color:#12294d}
+  .masuk-lain a{text-decoration:none}
+  .masuk-lain{margin:18px 0 0;text-align:center;font-size:13px;color:#6b7280;line-height:1.9}
+  .masuk-lain a{color:#12294d;font-weight:600;margin:0 4px;white-space:nowrap}
+  .masuk-sesi{margin:0 0 12px;padding:10px 12px;border-radius:10px;font-size:14px;background:#eef6f1;color:#1f6b45;border:1px solid #cfe7d8;display:none}
+  .masuk-sesi a{font-weight:700}
+  #btnMasuk[disabled]{opacity:.6;cursor:progress}
+</style>
+</head>
+<body>
+<div class="sppg-page-bg">
+
+  <section class="sppg-hero" style="padding:38px 22px 56px;">
+    <div class="sppg-motif" aria-hidden="true"></div>
+    <div class="sppg-hero-inner">
+      <div class="sppg-hero-logos" style="margin-bottom:16px;">
+        <img src="assets/logo-bgn.png" alt="Logo Badan Gizi Nasional" style="height:50px;">
+        <img src="assets/logo.png" alt="Logo SPPG Jeungjing" style="height:50px;">
+      </div>
+      <h1 style="font-size:clamp(20px,4.5vw,26px);">SPPG JEUNGJING</h1>
+      <p style="font-size:13.5px;">Satuan Pelayanan Pemenuhan Gizi</p>
+    </div>
+  </section>
+
+  <main class="auth-main" style="margin-top:-34px;position:relative;z-index:2;">
+
+    <section class="auth-card" id="cardMasuk">
+      <h2>Masuk ke Portal</h2>
+      <p class="masuk-sub">Satu pintu untuk semua akun. Sistem mengenali jenis akun Anda otomatis.</p>
+      <div class="masuk-sesi" id="infoSesiPengelola">Anda masih tercatat masuk sebagai pengelola. <a href="admin.html">Lanjut ke Panel Pengelola</a></div>
+
+      <form id="formMasuk" novalidate>
+        <div class="masuk-pesan" id="pesanMasuk" role="alert" aria-live="assertive"></div>
+        <div class="form-card">
+          <label for="inputIdentitas" class="form-label">Username atau No. HP</label>
+          <input type="text" id="inputIdentitas" class="form-input" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+        </div>
+        <div class="form-card">
+          <label for="inputSandi" class="form-label" id="labelSandi">Password atau PIN</label>
+          <div class="password-field">
+            <input type="password" id="inputSandi" class="form-input" autocomplete="current-password" required>
+            <button type="button" class="password-toggle" id="toggleSandi" aria-controls="inputSandi">TAMPILKAN</button>
+          </div>
+          <p class="masuk-hint" id="hintSandi">Relawan, Pengelola, dan Staff: username dan password. PIC Posyandu atau satuan pendidikan: No. HP dan PIN 6 angka.</p>
+        </div>
+        <button type="submit" id="btnMasuk" class="btn-submit">Masuk</button>
+      </form>
+
+      <p class="masuk-tautan">
+        <span id="linkVerifikasi" style="display:none"><a href="verifikasi.html">Lupa password/PIN atau daftar akun baru →</a><br></span>
+        <span id="linkBantuan"><a href="https://wa.me/6285694765370?text=Halo%20Admin%2C%20saya%20butuh%20bantuan%20masuk%20ke%20Portal%20SPPG%20Jeungjing." target="_blank" rel="noopener">Belum punya akun atau lupa password? Hubungi Admin</a></span>
+      </p>
+    </section>
+
+    <section class="auth-card is-hidden" id="cardGantiPassword" style="margin-top:14px;">
+      <h2>Buat Password Baru</h2>
+      <p class="auth-sub">Ini login pertama Anda. Buat password baru sebelum melanjutkan.</p>
+      <form id="formGanti" novalidate>
+        <div class="masuk-pesan" id="pesanGanti" role="alert" aria-live="assertive"></div>
+        <div class="form-card">
+          <label for="inputBaru" class="form-label">Password Baru</label>
+          <div class="password-field">
+            <input type="password" id="inputBaru" class="form-input" autocomplete="new-password" minlength="6" required>
+            <button type="button" class="password-toggle" id="toggleBaru" aria-controls="inputBaru">TAMPILKAN</button>
+          </div>
+        </div>
+        <div class="form-card">
+          <label for="inputUlang" class="form-label">Ulangi Password Baru</label>
+          <input type="password" id="inputUlang" class="form-input" autocomplete="new-password" minlength="6" required>
+        </div>
+        <button type="submit" id="btnGanti" class="btn-submit">Simpan &amp; Lanjutkan</button>
+      </form>
+    </section>
+
+    <p class="masuk-lain">Punya tautan lama? Halaman khusus tetap bisa dipakai:
+      <a href="login.html">Relawan</a>·<a href="admin.html">Pengelola &amp; Staff</a>·<a href="pic.html">PIC</a>
+    </p>
+    <p style="text-align:center;margin-top:10px;"><a href="portal.html" class="admin-link">← Kembali ke beranda</a></p>
+  </main>
+
+  <div class="toast is-hidden" id="errorToast" role="alert"></div>
+  <div class="loading-overlay is-hidden" id="loadingOverlay"><div class="spinner"></div><p id="loadingText">Memproses...</p></div>
+
+  <footer class="site-footer">
+    <p><strong>PORTAL SPPG JEUNGJING</strong></p>
+    <p class="credit">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
+  </footer>
+</div>
+
+<script src="core/config.js?v=20260903b"></script>
+<script src="core/common.js?v=20261014a"></script>
+<script src="core/auth-relawan.js?v=20260903b"></script>
+<script src="core/auth-admin.js?v=20260918a"></script>
+<script src="modules/authentication/masuk.js?v=20261125a"></script>
+</body>
+</html>

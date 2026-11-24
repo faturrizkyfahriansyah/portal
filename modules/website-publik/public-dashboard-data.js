@@ -30,16 +30,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const m = json.success ? json.data : null;
       if (m) {
         const urutan = ['karbohidrat', 'laukHewani', 'laukNabati', 'sayur', 'buah', 'pelengkap'];
-        gridMenu.innerHTML = urutan
+        const isi = urutan
           .filter((k) => m[k]) // lewati field kosong (mis. pelengkap sering tidak diisi)
           .map((k) => `<div class="pub-menu-item"><div class="ico">${IKON[k]}</div><div class="label">${escapeHtmlPublik_(m[k])}</div><div class="val">${LABEL_KATEGORI[k]}</div></div>`)
           .join('');
+        gridMenu.innerHTML = isi || '<p class="pub-menu-kosong">Menu hari ini belum tersedia.</p>';   // 25 Nov 2026: tidak pernah kosong tanpa penjelasan
       } else {
-        gridMenu.innerHTML = '<p style="color:var(--pub-text-muted,#777);">Menu hari ini belum tersedia di database siklus menu.</p>';
+        gridMenu.innerHTML = '<p class="pub-menu-kosong">Menu hari ini belum tersedia.</p>';
       }
     } catch (e) {
-      // Diam -- konten HTML asli (hardcoded) tetap tampil kalau fetch gagal total,
-      // drpd halaman publik kosong total krn masalah jaringan sesaat.
+      // 25 Nov 2026: gagal memuat -> JANGAN menampilkan menu contoh bawaan HTML (bisa keliru); beri penjelasan netral.
+      gridMenu.innerHTML = '<p class="pub-menu-kosong">Menu hari ini belum dapat dimuat. Coba muat ulang halaman.</p>';
     }
   }
 

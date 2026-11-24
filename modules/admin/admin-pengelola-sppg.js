@@ -44,7 +44,7 @@
       '<label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">Nama<input id="ubNama" value="' + esc(p.nama) + '" style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;"></label>' +
       '<label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">Jabatan<select id="ubJabatan" style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;">' + opsiJabatan(p.jabatan || 'PENGELOLA') + '</select></label>' +
       '<label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">Role<select id="ubRole" style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;"><option value="ADMIN"' + (p.role === 'ADMIN' ? ' selected' : '') + '>Admin</option><option value="STAFF"' + (p.role === 'STAFF' ? ' selected' : '') + '>Staff</option></select></label></div>' +
-      '<div style="font-size:12px;color:var(--color-text-muted,#55606f);margin-bottom:8px;">Mengubah jabatan mengubah role akses akun ini. Hak akses tiap role diatur di Manajemen Hak Akses.</div>' +
+      '<div style="font-size:12px;color:var(--color-text-muted,#55606f);margin-bottom:8px;">Mengubah jabatan mengubah role akses akun ini. Hak akses tiap role diatur di Hak Akses dan Role.</div>' +
       '<button class="btn-mini primary" id="ubSimpan" type="button">Simpan</button> <button class="btn-mini" id="ubBatal" type="button">Batal</button></div>';
     $('ubBatal').addEventListener('click', function () { box.innerHTML = ''; });
     $('ubSimpan').addEventListener('click', async function () {

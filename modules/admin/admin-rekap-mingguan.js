@@ -53,7 +53,7 @@
   }
   const jumlah = function (arr, k) { return arr.reduce(function (s, r) { return s + (Number(r[k]) || 0); }, 0); };
 
-  const KODE = { H: ['✓', 'Hadir'], T: ['T', 'Terlambat'], I: ['I', 'Izin'], S: ['S', 'Sakit'], A: ['A', 'Alfa'], C: ['C', 'Cuti'], B: ['·', 'Belum waktunya'] };
+  const KODE = { H: ['✓', 'Hadir'], T: ['T', 'Terlambat'], I: ['I', 'Izin'], S: ['S', 'Sakit'], A: ['A', 'Alfa'], C: ['C', 'Cuti'], B: ['·', 'Belum waktunya'], L: ['LP', 'Libur Pergiliran'] };
   const NAMA_HARI = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'], BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   const urutanDivisi = function (a, b) { return String(a.divisi).localeCompare(String(b.divisi)) || String(a.namaRelawan).localeCompare(String(b.namaRelawan)); };
   /** Daftar kolom hari: dari backend (dengan status kalender) atau, bila kosong, dari rentang (maks 93 hari). */
@@ -76,7 +76,7 @@
     const f = function (n) { return Number(n || 0).toLocaleString('id-ID'); };
     $('rmgTotalInsentif').textContent = rupiah(jumlah(baris, 'totalInsentif'));
     $('rmgTotalHadir').textContent = f(jumlah(baris, 'hadir') + jumlah(baris, 'terlambat')); $('rmgTotalTerlambat').textContent = f(jumlah(baris, 'terlambat')); $('rmgTotalIzin').textContent = f(jumlah(baris, 'izin'));
-    $('rmgTotalSakit').textContent = f(jumlah(baris, 'sakit')); $('rmgTotalAlfa').textContent = f(jumlah(baris, 'tidakHadir')); $('rmgTotalCuti').textContent = f(hitungCuti);
+    $('rmgTotalSakit').textContent = f(jumlah(baris, 'sakit')); $('rmgTotalAlfa').textContent = f(jumlah(baris, 'tidakHadir')); $('rmgTotalCuti').textContent = f(hitungCuti); if ($('rmgTotalLP')) $('rmgTotalLP').textContent = f(jumlah(baris, 'liburPergiliran'));
     $('tabelRekapMingguan').classList.toggle('rmg-rapat', hari.length > 14);
     const kolomTotal = 4 + hari.length + 4;
     thead.innerHTML = '<tr><th>No</th><th style="text-align:left;">Nama</th><th>Divisi</th><th>No. Rekening</th>' + hari.map(function (h) {
@@ -143,7 +143,7 @@
     const jumlahKol = function (k) { return { v: jumlah(baris, k), s: { b: 1, f: 'b', fl: 'E8EDF5', h: 'center' } }; };
     const barisTotal = [{ v: 'TOTAL', s: t }, { v: '', s: t }, { v: '', s: t }, { v: '', s: t }].concat(hari.map(function () { return { v: '', s: t }; })).concat([jumlahKol('hadir'), jumlahKol('terlambat'), jumlahKol('izin'), jumlahKol('sakit'), jumlahKol('tidakHadir'), { v: jumlah(baris, 'hadir') + jumlah(baris, 'terlambat'), s: { b: 1, f: 'b', fl: 'E8EDF5', h: 'center' } }, jumlahKol('totalHariKerja'), { v: '', s: t }, { v: jumlah(baris, 'totalInsentif'), s: tebalRp }]);
     const barisHadir = [{ v: 'Hadir per hari', s: { f: 'b', fl: 'F3F5F9', b: 1 } }, { v: '', s: { fl: 'F3F5F9', b: 1 } }, { v: '', s: { fl: 'F3F5F9', b: 1 } }, { v: '', s: { fl: 'F3F5F9', b: 1 } }].concat(hadirHari);
-    const keterangan = [[], [{ v: 'Keterangan: ✓ Hadir · T Terlambat · I Izin · S Sakit · A Alfa · C Cuti · · Belum waktunya · abu-abu = Libur. H/T/I/S/A = jumlah hari. Dibayar = Hadir + Terlambat.', s: { f: 'i' } }]];
+    const keterangan = [[], [{ v: 'Keterangan: ✓ Hadir · T Terlambat · I Izin · S Sakit · A Alfa · C Cuti · LP Libur Pergiliran (bukan hari kerja, tidak dibayar, bukan alfa) · · Belum waktunya · abu-abu = Libur. H/T/I/S/A = jumlah hari. Dibayar = Hadir + Terlambat.', s: { f: 'i' } }]];
     const kolom = [5, 30, 20, 16].concat(hari.map(function () { return hari.length > 14 ? 5.5 : 7.5; })).concat([5, 5, 5, 5, 5, 8, 11, 14, 17]);
     const awalData = 3, akhirData = awalData + isi.length - 1;
     Xlsx.unduh('rekap-mingguan-' + hasilTerakhir.tanggalAwal + '-sd-' + hasilTerakhir.tanggalAkhir + '.xlsx', { lembar: [{ nama: 'Rekap Mingguan', kolom: kolom, tinggiBaris: { 1: 24, 2: 34 }, bekuBaris: 2, bekuKolom: 4,

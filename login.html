@@ -52,6 +52,7 @@
         </p>
         <button type="submit" id="btnLogin" class="btn-submit">Masuk</button>
       </form>
+      <p id="linkOtpRelawan" style="display:none;text-align:center;margin:14px 0 0;font-size:14.5px;line-height:1.7"><a href="verifikasi.html?jenis=relawan&amp;mode=lupa" style="font-weight:700">Lupa password? Minta kode lewat WhatsApp</a><br><a href="verifikasi.html?jenis=relawan&amp;mode=daftar" style="font-weight:700">Belum punya akun? Daftar</a></p>
     </section>
 
     <section class="auth-card is-hidden" id="cardGantiPassword" style="margin-top:14px;">
@@ -74,7 +75,8 @@
       </form>
     </section>
 
-    <p style="text-align:center;margin-top:16px;">
+    <p style="text-align:center;margin-top:16px;line-height:2;">
+      <a href="masuk.html" class="admin-link">Pengelola, Staff, atau PIC? Masuk lewat formulir umum</a><br>
       <a href="portal.html" class="admin-link">← Kembali ke Halaman Portal</a>
     </p>
   </main>
@@ -96,5 +98,6 @@
 <script src="core/common.js?v=20260903b"></script>
 <script src="core/auth-relawan.js?v=20260903b"></script>
 <script src="modules/authentication/login.js?v=20260903b"></script>
+<script>/* 24 Nov 2026: tautan kode WhatsApp tampil hanya bila layanan HIDUP */try{apiPost("getStatusOtp",{}).then(function(r){var e=document.getElementById("linkOtpRelawan");if(e&&r&&r.aktif)e.style.display="";}).catch(function(){});}catch(e){}</script>
 </body>
 </html>

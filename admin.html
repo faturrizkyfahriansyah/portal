@@ -52,7 +52,9 @@
       <button type="submit" class="btn-submit" id="btnLogin">Masuk</button>
     </form>
     <button type="button" class="link-button" id="btnLupaPassword">Lupa Password?</button>
+    <p id="linkOtpStaff" style="display:none;margin:8px 0;font-size:14px;text-align:center">Staff: <a href="verifikasi.html?jenis=staff&amp;mode=lupa" style="font-weight:700">lupa password lewat kode WhatsApp</a> · <a href="verifikasi.html?jenis=staff&amp;mode=daftar" style="font-weight:700">daftar akun Staff</a></p>
     <a href="absensi.html" class="admin-link">&larr; Kembali ke halaman absensi</a>
+    <a href="masuk.html" class="admin-link">Bukan pengelola? Masuk lewat formulir umum (Relawan / PIC)</a>
   </div>
 
   <div class="login-card is-hidden" id="cardResetPassword" style="margin-top:14px;">
@@ -116,13 +118,11 @@
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelKartuQr"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M7 6V4h4v2"/><rect x="7" y="9.5" width="5" height="5"/><path d="M15 10h2M15 13h2"/></svg></span><span>Kartu Identitas Relawan</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDivisi"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span><span>Kelola Divisi</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn menu-disembunyikan" data-panel="panelRoleAkses"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 8-7 9-4-1-7-4.5-7-9V7l7-4z"/></svg></span><span>Role ASN &amp; Kepala SPPG</span></button>
-      <!-- Manajemen Hak Akses Terpadu (16 Okt 2026, diminta Admin) --
-           SATU tabel Role+Petugas Stok sekaligus, utk semua relawan.
-           TIDAK menggantikan panel di atas (itu tetap ada) -- ini
-           pelengkap utk lihat/ubah banyak relawan skaligus tanpa buka
-           profil satu-satu. -->
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelManajemenHakAkses"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><span>Manajemen Hak Akses</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPengelolaSppg"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.2"/><circle cx="17" cy="7" r="2.6"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M14.5 14.7c2.6.4 4.5 2.3 4.5 5.3"/></svg></span><span>Pengelola SPPG</span></button>
+      <!-- 24 Nov 2026: Verifikasi WhatsApp + antrean pendaftaran mandiri (Super Admin). -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelVerifikasiWa"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 10l2 2 4-4"/></svg></span><span>Verifikasi WA &amp; Pendaftaran</span></button>
+      <!-- 22 Nov 2026 (Tahap 3, R6/R7): TAHAP 1 alur dua tahap -- SIMSDM menyusun kebutuhan tenaga (berbasis PM), merekomendasikan dan MENGAJUKAN pergiliran. Tidak mengubah jadwal. -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPergiliran"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></span><span>Kebutuhan &amp; Pergiliran</span></button>
 
       <p class="shell-nav-group-title">SIPRES</p>
       <p class="shell-nav-group-desc">Sistem Informasi Presensi — rekap kehadiran dan pemantauan absensi relawan.</p>
@@ -139,6 +139,12 @@
            bukan soal menyusun jadwal/penugasan (SIKOP). Panel & fungsi
            backend-nya TIDAK berubah, cuma lokasi menu & labelnya. -->
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelJadwalIndividu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><span>Koreksi Presensi</span></button>
+      <!-- 25 Nov 2026: alat Admin untuk relawan yang tidak bisa absen + aturan hari kehadiran shift malam (menu baru; tidak mengubah menu lama). -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDiagnosaAbsen"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M11 8v3l2 1"/></svg></span><span>Cek Absen &amp; Shift Malam</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelLaporan"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg></span><span>Laporan</span></button>
+      <!-- 22 Nov 2026 (Tahap 2, R5): PINTASAN ke Rekap Biaya & Insentif. Menu aslinya tetap di SIPANDU (bukan modul hitung ganda); tombol ini hanya membuka panel yang sama.
+           Sengaja BUKAN admin-tab-btn supaya sistem tab dan penguncian akses tidak berubah. -->
+      <button type="button" class="shell-nav-link" id="pintasRekapBiayaSipres" onclick="var b=document.querySelector('.admin-tab-btn[data-panel=panelSipanduBiaya]');if(b&&b.style.display!=='none')b.click();"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></span><span>Rekap Biaya &amp; Insentif</span></button>
 
       <p class="shell-nav-group-title">SIKOP</p>
       <p class="shell-nav-group-desc">Sistem Informasi Koordinasi Penugasan — periode kerja, kalender, dan jadwal.</p>
@@ -147,6 +153,8 @@
       <button type="button" class="shell-nav-link admin-tab-btn menu-disembunyikan" data-panel="panelKalender"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/><circle cx="8.5" cy="14.5" r="1.2"/><circle cx="12" cy="14.5" r="1.2"/><circle cx="15.5" cy="14.5" r="1.2"/></svg></span><span>Kalender per Periode (lama)</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelLokasi"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg></span><span>Master Lokasi SPPG</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelShift"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Jadwal &amp; Penugasan</span></button>
+      <!-- 22 Nov 2026 (Tahap 3, R7): TAHAP 2 -- SIKOP menetapkan pergiliran yang diajukan SIMSDM (kewenangan Tetapkan Jadwal). SIPRES membaca hasilnya. -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPenetapanPergiliran"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Penetapan Pergiliran</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelJadwal" style="display:none;"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span><span>Jadwal &amp; Penugasan (lama)</span></button>
 
       <p class="shell-nav-group-title">SIRAGA</p>
@@ -162,7 +170,8 @@
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelInformasi"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.01"/></svg></span><span>Informasi</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPengumuman"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg></span><span>Pengumuman</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDokumen"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span><span>Dokumen</span></button>
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelLaporan"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg></span><span>Laporan</span></button>
+      <!-- 24 Nov 2026: Pendataan 3B (data NIK Ibu Hamil/Menyusui/Balita per Posyandu; PIC mengisi lewat pic.html). Khusus Admin. -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPendataan3B"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Pendataan 3B</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelBantuan"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1.5 1-1.5 2.2"/><path d="M12 17v.01"/></svg></span><span>Bantuan</span></button>
 
       <!-- Grup "SIPANDU" diganti nama jadi "Operasional Produksi"
@@ -175,7 +184,7 @@
            tombolnya (menuju panelHakAksesSipandu, TIDAK berubah) yang
            sekarang bertuliskan "Operasional Produksi". -->
       <p class="shell-nav-group-title">SIPANDU</p>
-      <p class="shell-nav-group-desc">Hak akses, menu harian, dan data penerima manfaat.</p>
+      <p class="shell-nav-group-desc">Penerima manfaat (PM), menu, pagu, rekap biaya dan insentif, serta operasional produksi.</p>
       <!-- 3 Nov 2026: SIPANDU memakai DATABASE BARU (SipanduV2.gs). Dua menu di bawah menggantikan "Penerima Manfaat (lama)" setelah peralihan. -->
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduMaster"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg></span><span>Master Instansi &amp; PIC</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduPm"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21v-1a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v1"/><path d="M17 11a3 3 0 1 0 0-6M22 21v-1a5 5 0 0 0-4-4.9"/></svg></span><span>Manajemen PM</span></button>
@@ -206,6 +215,9 @@
 
       <p class="shell-nav-group-title">Pengaturan</p>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPengaturan"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></span><span>Pengaturan</span></button>
+      <!-- 22 Nov 2026 (Tahap 2, R1): dipindah dari grup SIMSDM ke Pengaturan dan diberi nama "Hak Akses dan Role". Panel (panelManajemenHakAkses), fungsi, dan pemetaan modul akses TIDAK berubah.
+           Catatan lama: SATU tabel Role + Petugas Stok sekaligus untuk semua relawan (16 Okt 2026). -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelManajemenHakAkses"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><span>Hak Akses dan Role</span></button>
     </nav>
     <button type="button" class="shell-nav-link shell-nav-link--danger" id="btnLogout" style="margin:0 10px 8px;width:calc(100% - 20px);"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span><span>Keluar</span></button>
     <button type="button" class="shell-sidebar-collapse-toggle" id="shellCollapseToggle"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg> Ciutkan Menu</button>
@@ -214,7 +226,7 @@
          yg sesungguhnya jalan di browser, tanpa menebak lagi apakah
          deploy sudah masuk atau belum. Diperbarui manual tiap kali
          admin.html diubah -- lihat juga console.log di bawah. -->
-    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-18c (tampilan Rekap dirapikan)</span></div>
+    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-24b (navigasi, pergiliran, Pendataan 3B, verifikasi WhatsApp)</span></div>
   </aside>
     <div class="shell-main">
   <header class="shell-topbar">
@@ -497,7 +509,7 @@
   <div class="admin-panel" id="panelManajemenHakAkses">
     <div class="shell-page-head">
       <div class="shell-page-head-icon" style="background:#0B2D6B;"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-      <div><h1 style="font-size:18px;margin:0;color:#0B2D6B;">Manajemen Hak Akses</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Kelola pengguna, role, dan izin akses ke setiap modul Portal SPPG Jeungjing.</p></div>
+      <div><h1 style="font-size:18px;margin:0;color:#0B2D6B;">Hak Akses dan Role</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Kelola pengguna, role, dan izin akses ke setiap modul Portal SPPG Jeungjing.</p></div>
     </div>
 
     <!-- Tombol migrasi -- cuma tampil kalau migrasi BELUM pernah
@@ -666,8 +678,8 @@
       <select id="rmgStatus" aria-label="Status"><option value="">Semua Status</option><option value="H">Hadir</option><option value="T">Terlambat</option><option value="I">Izin</option><option value="S">Sakit</option><option value="A">Alfa</option><option value="C">Cuti</option></select>
       <button class="btn-mini" id="btnTampilkanRekap" type="button">Tampilkan</button><button class="btn-mini export" id="btnExportRekapMingguan" type="button">Export Excel</button>
     </div>
-    <div class="rmg-chips" id="rmgChips"><span class="rmg-chip"><b id="rmgTotalInsentif">–</b> Total Insentif</span><span class="rmg-chip"><b id="rmgTotalHadir">–</b> Hadir</span><span class="rmg-chip"><b id="rmgTotalTerlambat">–</b> Terlambat</span><span class="rmg-chip"><b id="rmgTotalIzin">–</b> Izin</span><span class="rmg-chip"><b id="rmgTotalSakit">–</b> Sakit</span><span class="rmg-chip"><b id="rmgTotalAlfa">–</b> Alfa</span><span class="rmg-chip"><b id="rmgTotalCuti">–</b> Cuti</span></div>
-    <div class="rmg-legenda" id="rmgLegenda"><span><i class="rmg-H">✓</i> Hadir</span><span><i class="rmg-T">T</i> Terlambat</span><span><i class="rmg-I">I</i> Izin</span><span><i class="rmg-S">S</i> Sakit</span><span><i class="rmg-A">A</i> Alfa</span><span><i class="rmg-C">C</i> Cuti</span><span><i class="rmg-B" style="background:#fff;border:1px solid #e3e7ee;">·</i> Belum waktunya</span><span><i style="background:#e6e8ec;color:#6b7280;">&nbsp;</i> Libur</span></div>
+    <div class="rmg-chips" id="rmgChips"><span class="rmg-chip"><b id="rmgTotalInsentif">–</b> Total Insentif</span><span class="rmg-chip"><b id="rmgTotalHadir">–</b> Hadir</span><span class="rmg-chip"><b id="rmgTotalTerlambat">–</b> Terlambat</span><span class="rmg-chip"><b id="rmgTotalIzin">–</b> Izin</span><span class="rmg-chip"><b id="rmgTotalSakit">–</b> Sakit</span><span class="rmg-chip"><b id="rmgTotalAlfa">–</b> Alfa</span><span class="rmg-chip"><b id="rmgTotalCuti">–</b> Cuti</span><span class="rmg-chip"><b id="rmgTotalLP">–</b> Libur Pergiliran</span></div>
+    <div class="rmg-legenda" id="rmgLegenda"><span><i class="rmg-H">✓</i> Hadir</span><span><i class="rmg-T">T</i> Terlambat</span><span><i class="rmg-I">I</i> Izin</span><span><i class="rmg-S">S</i> Sakit</span><span><i class="rmg-A">A</i> Alfa</span><span><i class="rmg-C">C</i> Cuti</span><span><i class="rmg-B" style="background:#fff;border:1px solid #e3e7ee;">·</i> Belum waktunya</span><span><i style="background:#e6e8ec;color:#6b7280;">&nbsp;</i> Libur</span><span><i class="rmg-L">LP</i> Libur Pergiliran</span></div>
     <div class="table-wrap">
       <table class="rmg-tabel" id="tabelRekapMingguan">
         <thead id="theadRekapMingguan"><tr><th>No</th><th>Nama</th><th>Divisi</th><th>No. Rekening</th><th>Hari Kerja</th><th>Tarif/Hari</th><th>Total Insentif</th></tr></thead>
@@ -1714,6 +1726,9 @@
   <!-- PEMERIKSAAN JADWAL INDIVIDU (Pengembangan Portal, poin 4-5) -->
   <div class="admin-panel" id="panelJadwalIndividu"><div class="empty-state">Memuat…</div></div>
 
+  <!-- 25 Nov 2026: Cek Absen & Hari Shift Malam (SIPRES) -->
+  <div class="admin-panel" id="panelDiagnosaAbsen"><div class="empty-state">Memuat…</div></div>
+
   <!-- JADWAL & PENUGASAN -->
   <div class="admin-panel" id="panelJadwal">
     <div class="shell-page-head">
@@ -1848,6 +1863,10 @@
   </div>
 
   <!-- DOKUMEN -->
+  <div class="admin-panel" id="panelPergiliran"><div class="empty-state">Memuat…</div></div>
+  <div class="admin-panel" id="panelPenetapanPergiliran"><div class="empty-state">Memuat…</div></div>
+  <div class="admin-panel" id="panelPendataan3B"><div class="empty-state">Memuat…</div></div>
+  <div class="admin-panel" id="panelVerifikasiWa"><div class="empty-state">Memuat…</div></div>
   <div class="admin-panel" id="panelPengelolaSppg">
     <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Pengelola SPPG</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Kelola lebih dari satu akun Pengelola/Admin Portal.</p></div>
     <div class="inline-form" style="margin-top:14px;flex-wrap:wrap;">
@@ -2361,11 +2380,12 @@
 <script src="core/config.js?v=20260903c"></script>
 <script src="core/common.js?v=20261014a"></script>
 <script src="core/NavigasiTerpusat.js"></script>
-<script src="core/app-shell.js?v=20260903c"></script>
+<script src="core/app-shell.js?v=20261124b"></script>
+<script src="core/core-3b.js?v=20261124b"></script>
 <script src="core/auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="core/ringkasan-pm.js?v=20261102a"></script>
-<script src="modules/admin/admin.js?v=20261105e"></script>
+<script src="modules/admin/admin.js?v=20261124b"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="modules/admin/admin-kartu-qr.js?v=20261023a"></script>
 <script src="modules/admin/admin-sipres-monitoring.js?v=20260922a"></script>
@@ -2394,5 +2414,6 @@
 <script src="modules/admin/admin-target-widget.js"></script>
 <script src="modules/admin/admin-sipandu-akses.js"></script>
 <script>document.addEventListener('DOMContentLoaded', function () { initShell({ storageKey: 'sppgSidebarCollapsedAdmin' }); });</script>
+<script>/* 24 Nov 2026: tautan kode WhatsApp untuk Staff tampil hanya bila layanan HIDUP */(function(){try{if(typeof apiPost!=="function")return;apiPost("getStatusOtp",{}).then(function(r){var e=document.getElementById("linkOtpStaff");if(e&&r&&r.aktif)e.style.display="";}).catch(function(){});}catch(e){}})();</script>
 </body>
 </html>

@@ -20,3 +20,25 @@
 .dp-chip b { margin-right: 4px; }
 @media (max-width: 640px) { .dp-item { flex-wrap: wrap; } .dp-item .btn-mini { margin-left: auto; } }
 @media (prefers-color-scheme: dark) { .dp-chip { background: rgba(255, 255, 255, .08); } }
+
+/* Libur Pergiliran di Rekap Mingguan (10 Nov 2026) */
+.table-wrap .rmg-tabel td.rmg-L, .rmg-legenda i.rmg-L { background: #e9e4f5; color: #5b3fa0; font-size: 10.5px; }
+
+/* Manajemen Pergiliran (10 Nov 2026) */
+.pg-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 12px; }
+.pg-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.pg-bar label { font-size: 12px; display: flex; gap: 6px; align-items: center; }
+.pg-badge { font-size: 12px; padding: 3px 9px; border-radius: 999px; background: rgba(46, 125, 50, .12); color: #2e7d32; }
+.pg-sub { font-size: 13px; color: var(--color-text-muted, #667085); margin: 6px 0; }
+.pg-alert { margin: 6px 0; padding: 8px 12px; border-radius: 8px; background: rgba(224, 161, 0, .12); border-left: 4px solid #e0a100; font-size: 12.5px; }
+.pg-hari { margin: 10px 0; }
+.pg-hari-judul { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.pg-div { border: 1px solid var(--color-border, #e3e8ef); border-left-width: 4px; border-radius: 8px; padding: 7px 10px; margin: 5px 0; }
+.pg-div.kuning { border-left-color: #e0a100; } .pg-div.merah { border-left-color: #d64545; background: rgba(214, 69, 69, .05); }
+.pg-div-head { font-size: 12.5px; margin-bottom: 4px; } .pg-div-head span { color: var(--color-text-muted, #667085); }
+.pg-chip { display: inline-block; margin: 2px 4px 2px 0; padding: 3px 9px; border-radius: 999px; background: #e9e4f5; color: #5b3fa0; font-size: 12px; }
+.pg-chip a { color: #9a3b3b; text-decoration: none; margin-left: 4px; font-weight: 700; }
+.pg-warn { font-size: 12px; color: #8a6400; margin-top: 3px; } .pg-err { font-size: 12.5px; color: #b3261e; margin-top: 3px; }
+.pg-valid { margin: 10px 0; padding: 8px 12px; border: 1px solid var(--color-border, #e3e8ef); border-radius: 8px; }
+.pg-aksi { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.pg-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px 12px; } .pg-form label { font-size: 12px; display: flex; flex-direction: column; gap: 3px; }
