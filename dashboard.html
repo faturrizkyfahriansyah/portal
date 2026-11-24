@@ -130,7 +130,7 @@
 
             <!-- KARTU IDENTITAS RELAWAN -->
             <div style="padding:20px 22px 24px;background:var(--color-navy,#12294d);margin-top:-1px;">
-              <p style="margin:0;font-size:13.5px;opacity:.85;">Selamat Datang,</p>
+              <p style="margin:0;font-size:13.5px;opacity:.85;" id="heroSapaan">Selamat datang,</p>
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 8px;">
                 <h2 style="margin:0;font-size:22px;font-weight:800;" id="heroNamaRelawan">–</h2>
                 <span style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px;" id="heroStatusAkun">● AKUN AKTIF</span>
@@ -145,95 +145,59 @@
             </div>
           </section>
 
-          <!-- ABSEN SEKARANG -->
+          <!-- 1) PRESENSI: tombol besar + status hari ini ringkas -->
           <a href="absensi.html" class="btn-submit" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;margin-top:12px;">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             ABSEN SEKARANG
           </a>
+          <p id="kalimatPresensi" style="margin:8px 2px 0;font-size:13px;color:#55606f;text-align:center;">&nbsp;</p>
+          <div class="card-item" style="padding:14px 16px;margin-top:10px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
+              <div><p style="margin:0;font-size:11px;color:#55606f;">MASUK</p><p style="margin:2px 0 0;font-size:15px;font-weight:800;" id="ringkasJamMasuk">–</p></div>
+              <div><p style="margin:0;font-size:11px;color:#55606f;">PULANG</p><p style="margin:2px 0 0;font-size:15px;font-weight:800;" id="ringkasJamPulang">–</p></div>
+              <div><p style="margin:0;font-size:11px;color:#55606f;">STATUS</p><p style="margin:2px 0 0;font-size:15px;font-weight:800;" id="ringkasStatusHariIni">–</p></div>
+            </div>
+            <button type="button" class="btn-outline" id="btnToggleDetailPresensi" style="width:100%;margin-top:12px;">Rincian presensi ▾</button>
+            <div id="detailPresensiWrap" class="is-hidden" style="margin-top:12px;border-top:1px solid #e8ebef;padding-top:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12.5px;">
+                <div><p style="margin:0;color:#55606f;">Tanggal</p><p style="margin:2px 0 0;font-weight:700;" id="detailTanggal">–</p></div>
+                <div><p style="margin:0;color:#55606f;">Lama bertugas</p><p style="margin:2px 0 0;font-weight:700;" id="detailDurasi">–</p></div>
+              </div>
+              <p style="margin:12px 0 0;font-size:12.5px;color:#55606f;" id="patokanRadiusInfo"></p>
+              <a href="riwayat.html" style="display:inline-block;margin-top:10px;font-size:13px;font-weight:700;color:#127CB4;text-decoration:none;">Lihat riwayat presensi</a>
+            </div>
+          </div>
 
-          <!-- JADWAL SAYA -->
+          <!-- 2) JADWAL HARI INI -->
           <section style="margin-top:16px;">
-            <p class="section-title">Jadwal Saya</p>
+            <p class="section-title">Jadwal Hari Ini</p>
             <div id="jadwalSayaHariIni"></div>
           </section>
 
-          <!-- MENU HARI INI (BARU, 15 Okt 2026) -- tampil di dashboard
-               UTAMA, semua relawan, bukan cuma role ASN di Monitoring.
-               Sumber data SAMA dgn Monitoring (getMenuHariIniSiklus_),
-               cuma pintu aksesnya baru (getMenuHariIniDashboard, tanpa
-               gerbang role). -->
+          <!-- 3) HARI INI DI DAPUR: menu + penerima manfaat -->
           <section style="margin-top:16px;" id="dbMenuWrap">
             <p class="section-title">Menu Hari Ini</p>
             <div class="card-item" style="padding:16px;" id="dbMenuIsi">
               <p style="margin:0;font-size:12.5px;color:#55606f;">Memuat...</p>
             </div>
           </section>
-
-          <!-- RINGKASAN PENERIMA MANFAAT (BARU, 15 Okt 2026) -- sama spt
-               di atas, dashboard utama bukan cuma Monitoring ASN. -->
-          <section style="margin-top:16px;" id="dbPmWrap">
+          <section style="margin-top:12px;" id="dbPmWrap">
             <p class="section-title">Penerima Manfaat Hari Ini</p>
             <div class="card-item" style="padding:16px;" id="dbPmIsi">
               <p style="margin:0;font-size:12.5px;color:#55606f;">Memuat...</p>
             </div>
           </section>
 
-          <!-- RINGKASAN SIPRES -->
+          <!-- 4) INFORMASI PENTING -->
           <section style="margin-top:16px;">
-            <p class="section-title">Ringkasan SIPRES</p>
-            <p style="margin:-8px 0 12px;font-size:12.5px;color:#55606f;">Sistem Presensi dan Catatan Kehadiran</p>
+            <p class="section-title">Informasi Penting</p>
+            <div id="infoPentingList"><p class="empty-state">Memuat informasi...</p></div>
+          </section>
 
-            <!-- KEHADIRAN HARI INI -->
+          <!-- 5) KEHADIRAN SAYA (periode berjalan) -->
+          <section style="margin-top:16px;">
+            <p class="section-title">Kehadiran Saya</p>
             <div class="card-item" style="padding:16px;">
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;">
-                <div><p style="margin:0;font-size:11px;color:#55606f;">MASUK</p><p style="margin:2px 0 0;font-size:15px;font-weight:800;" id="ringkasJamMasuk">–</p></div>
-                <div><p style="margin:0;font-size:11px;color:#55606f;">PULANG</p><p style="margin:2px 0 0;font-size:15px;font-weight:800;" id="ringkasJamPulang">–</p></div>
-                <div><p style="margin:0;font-size:11px;color:#55606f;">STATUS</p><p style="margin:2px 0 0;font-size:15px;font-weight:800;" id="ringkasStatusHariIni">–</p></div>
-              </div>
-              <button type="button" class="btn-outline" id="btnToggleDetailPresensi" style="width:100%;margin-top:14px;">Detail Presensi ▾</button>
-
-              <!-- DETAIL PRESENSI (collapsible) -->
-              <div id="detailPresensiWrap" class="is-hidden" style="margin-top:14px;border-top:1px solid #e8ebef;padding-top:14px;">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12.5px;margin-bottom:14px;">
-                  <div><p style="margin:0;color:#55606f;">Tanggal</p><p style="margin:2px 0 0;font-weight:700;" id="detailTanggal">–</p></div>
-                  <div><p style="margin:0;color:#55606f;">Jam Masuk</p><p style="margin:2px 0 0;font-weight:700;" id="detailJamMasuk">–</p></div>
-                  <div><p style="margin:0;color:#55606f;">Jam Pulang</p><p style="margin:2px 0 0;font-weight:700;" id="detailJamPulang">–</p></div>
-                  <div><p style="margin:0;color:#55606f;">Durasi Kerja</p><p style="margin:2px 0 0;font-weight:700;" id="detailDurasi">–</p></div>
-                </div>
-
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                  <p style="margin:0;font-size:12.5px;font-weight:700;">LOKASI MASUK</p>
-                  <p style="margin:0;font-size:11.5px;color:#55606f;" id="radiusLokasiMasuk">Radius Presensi –</p>
-                </div>
-                <div id="petaLokasiMasuk" style="width:100%;height:130px;border-radius:12px;overflow:hidden;background:#eef0f3;margin-bottom:14px;"></div>
-
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                  <p style="margin:0;font-size:12.5px;font-weight:700;">LOKASI PULANG</p>
-                  <p style="margin:0;font-size:11.5px;color:#55606f;" id="radiusLokasiPulang">Radius Presensi –</p>
-                </div>
-                <div id="petaLokasiPulang" style="width:100%;height:130px;border-radius:12px;overflow:hidden;background:#eef0f3;margin-bottom:14px;"></div>
-
-                <!-- TITIK PATOKAN & RADIUS DIIZINKAN -->
-                <div style="background:#f7f8fa;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;">
-                  <p style="margin:0 0 6px;font-weight:700;">Titik Patokan SPPG</p>
-                  <div id="patokanRadiusInfo" style="color:#55606f;line-height:1.7;"></div>
-                </div>
-
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                  <div>
-                    <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-align:center;">SWAFOTO MASUK</p>
-                    <div id="swafotoMasukWrap" style="border-radius:10px;overflow:hidden;background:#eef0f3;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;"><span style="font-size:11px;color:#8a93a3;">Belum tersedia</span></div>
-                  </div>
-                  <div>
-                    <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-align:center;">SWAFOTO PULANG</p>
-                    <div id="swafotoPulangWrap" style="border-radius:10px;overflow:hidden;background:#eef0f3;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;"><span style="font-size:11px;color:#8a93a3;">Belum tersedia</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- RINGKASAN KEHADIRAN — 4 kategori, grid 2x2, TIDAK warna-warni -->
-            <div class="card-item" style="padding:16px;margin-top:12px;">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
                 <div style="text-align:center;"><p style="margin:0;font-size:11px;color:#55606f;">TOTAL HADIR</p><p style="margin:4px 0 0;font-size:19px;font-weight:800;color:#1a7a4c;" id="totalHadirPeriode">…</p></div>
                 <div style="text-align:center;"><p style="margin:0;font-size:11px;color:#55606f;">TERLAMBAT</p><p style="margin:4px 0 0;font-size:19px;font-weight:800;color:var(--sppg-gold,#c9962c);" id="totalTerlambatPeriode">…</p></div>
@@ -242,25 +206,6 @@
               </div>
               <a href="riwayat.html" class="btn-outline" style="display:block;width:100%;margin-top:16px;text-align:center;text-decoration:none;">Lihat Riwayat Presensi</a>
             </div>
-          </section>
-
-          <!-- MENU UTAMA — 6 shortcut -->
-          <section style="margin-top:16px;">
-            <p class="section-title">Menu Utama</p>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-              <a href="profil.html" class="card-item" style="padding:14px 6px;text-align:center;text-decoration:none;color:inherit;"><p style="margin:6px 0 0;font-size:11px;font-weight:700;">Profil Saya</p></a>
-              <a href="absensi.html" class="card-item" style="padding:14px 6px;text-align:center;text-decoration:none;color:inherit;"><p style="margin:6px 0 0;font-size:11px;font-weight:700;">SIPRES</p></a>
-              <a href="sipandu.html" class="card-item" style="padding:14px 6px;text-align:center;text-decoration:none;color:inherit;"><p style="margin:6px 0 0;font-size:11px;font-weight:700;">SIPANDU</p></a>
-              <a href="siraga.html" class="card-item" style="padding:14px 6px;text-align:center;text-decoration:none;color:inherit;"><p style="margin:6px 0 0;font-size:11px;font-weight:700;">SIRAGA</p></a>
-              <a href="monitoring.html" class="card-item" style="padding:14px 6px;text-align:center;text-decoration:none;color:inherit;"><p style="margin:6px 0 0;font-size:11px;font-weight:700;">Monitoring</p></a>
-              <button type="button" id="btnMenuLainnya" class="card-item" style="padding:14px 6px;text-align:center;background:none;border:1px solid var(--sppg-line,#e5e8ec);cursor:pointer;font-family:inherit;"><div style="font-size:22px;">•••</div><p style="margin:6px 0 0;font-size:11px;font-weight:700;">Lainnya</p></button>
-            </div>
-          </section>
-
-          <!-- INFORMASI PENTING -->
-          <section style="margin-top:16px;">
-            <p class="section-title">Informasi Penting</p>
-            <div id="infoPentingList"><p class="empty-state">Memuat informasi...</p></div>
           </section>
 
         </div>

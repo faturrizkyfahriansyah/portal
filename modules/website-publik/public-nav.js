@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         json.data.forEach(m => {
           const a = document.createElement('a');
           a.href = m.halaman;
-          a.textContent = m.label;
+          a.textContent = (m.label === 'Profil SPPG' || m.label === 'Profil') ? 'Tentang Kami' : m.label;   // 25 Nov 2026: nama menu Tentang Kami
           nav.insertBefore(a, cta);
         });
       }

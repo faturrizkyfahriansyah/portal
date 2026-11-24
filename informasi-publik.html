@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Informasi — SPPG Jeungjing</title>
+<meta name="description" content="Informasi layanan, kabar terbaru, dan pertanyaan umum SPPG Jeungjing.">
 <link rel="icon" href="assets/logo.png">
-<link rel="stylesheet" href="styles/public.css?v=20261125a">
+<link rel="stylesheet" href="styles/public.css?v=20261125f">
 </head>
-<body class="pub-body" data-halaman-publik="informasi-publik">
+<body class="pub-body" data-halaman-publik="informasi">
 
   <header class="pub-header">
     <div class="pub-header-inner">
@@ -29,7 +30,7 @@
     </button>
     <nav>
       <a href="index.html">Beranda</a>
-      <a href="profil-sppg.html">Profil SPPG</a>
+      <a href="profil-sppg.html">Tentang Kami</a>
       <a href="penerima-manfaat.html">Penerima Manfaat</a>
       <a href="menu-hari-ini.html">Menu Hari Ini</a>
       <a href="informasi-publik.html">Informasi</a>
@@ -37,35 +38,49 @@
       <a href="portal.html" class="pub-sidebar-cta">Portal SPPG Jeungjing →</a>
     </nav>
   </aside>
-
+  <div id="situsGagal" class="pub-gagal" hidden><div class="pub-wrap">Sebagian isi halaman belum dapat dimuat. Coba muat ulang halaman.</div></div>
   <section class="pub-hero" style="padding:44px 0 40px;">
     <div class="pub-wrap">
       <div class="pub-hero-inner">
-        <p class="pub-eyebrow-plain">Kabar Terbaru</p>
+        <p class="pub-eyebrow-plain">Informasi</p>
         <h1 style="font-size:clamp(28px,5vw,42px);">Informasi</h1>
-        <p class="lede" data-konten="deskripsi_halaman">Kabar, kegiatan, dan pengumuman resmi dari SPPG Jeungjing.</p>
+        <p class="lede">Layanan, kabar terbaru, dan jawaban atas pertanyaan yang sering diajukan.</p>
       </div>
     </div>
   </section>
-
   <section class="pub-section alt">
     <div class="pub-wrap">
-      <div class="pub-info-list">
-        <div class="pub-info-row">
-          <time>—</time>
-          <div>
-            <h3>Informasi akan tampil di sini</h3>
-            <p>Kabar dan pengumuman terbaru dari SPPG Jeungjing akan diperbarui secara berkala oleh Admin.</p>
-          </div>
-        </div>
+      <div class="pub-section-head">
+        <p class="pub-eyebrow-plain">Layanan</p>
+        <h2>Informasi layanan</h2>
       </div>
+      <div class="pub-info-list" id="layananList"></div>
+    </div>
+  </section>
+  <section class="pub-section " id="kabarSection">
+    <div class="pub-wrap">
+      <div class="pub-section-head">
+        <p class="pub-eyebrow-plain">Kabar Terbaru</p>
+        <h2>Kabar dan pengumuman</h2>
+      </div>
+      <div class="pub-info-list" id="kabarSemua"></div>
+    </div>
+  </section>
+  <section class="pub-section alt">
+    <div class="pub-wrap">
+      <div class="pub-section-head">
+        <p class="pub-eyebrow-plain">Pertanyaan Umum</p>
+        <h2>Pertanyaan yang sering diajukan</h2>
+      </div>
+      <div id="faqList"></div>
     </div>
   </section>
 
   <footer class="pub-footer">
     <div class="pub-wrap">
       <strong>SPPG JEUNGJING</strong>
-      <p style="margin:10px 0 0;">Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang – Banten, 15730</p>
+      <p id="footAlamat" style="margin:10px 0 0;">Kp. Kecok, RT.004, Desa Jeungjing, Kecamatan Cisoka, Kabupaten Tangerang, Banten 15730</p>
+      <p id="footKontak" class="pub-foot-kontak"></p>
       <hr class="rule">
       <p class="fine">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
     </div>
@@ -73,6 +88,6 @@
 
   <script src="modules/website-publik/public-nav.js"></script>
   <script src="core/config.js"></script>
-  <script src="modules/website-publik/public-konten.js"></script>
+  <script src="modules/website-publik/public-situs.js?v=20261125f"></script>
 </body>
 </html>

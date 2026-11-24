@@ -15,6 +15,15 @@
 <link rel="stylesheet" href="styles/portal.css?v=20261001g">
 <link rel="stylesheet" href="styles/app-shell.css?v=20260903c">
 <link rel="stylesheet" href="styles/rebrand.css?v=20260903c">
+<style>
+  .btn-submit.btn-proses:disabled,.btn-submit.btn-ok:disabled{opacity:1}
+  .btn-submit.btn-proses,.btn-outline.btn-proses{background:#55606f;color:#fff;border-color:#55606f}
+  .btn-submit.btn-ok,.btn-outline.btn-ok{background:#1f7a3f;color:#fff;border-color:#1f7a3f}
+  .btn-submit.btn-gagal,.btn-outline.btn-gagal{background:#b3261e;color:#fff;border-color:#b3261e}
+  .btn-proses::before{content:'';display:inline-block;width:13px;height:13px;margin-right:8px;border:2.5px solid #fff;border-top-color:transparent;border-radius:50%;vertical-align:-2px;animation:putarSimpan .8s linear infinite}
+  @keyframes putarSimpan{to{transform:rotate(360deg)}}
+  .pesan-simpan{margin:8px 0 0;font-size:13.5px;font-weight:600;color:#b3261e;line-height:1.4}.pesan-simpan:empty{display:none}
+</style>
 </head>
 <body>
 <div class="shell">
@@ -108,7 +117,13 @@
 
         <div id="profilMain" style="display:none;">
 
-          <section class="panel-block" style="margin-bottom:14px;text-align:center;">
+          <!-- Latar profil: gedung SPPG (gambar yang sudah ada di aset) -->
+          <div id="latarProfil" style="height:128px;border-radius:16px;overflow:hidden;position:relative;background:#14304F;">
+            <img src="assets/ilustrasi-gedung-sppg-web.png" alt="Gedung SPPG Jeungjing" style="width:100%;height:100%;object-fit:cover;object-position:center 38%;display:block;">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,29,51,0) 40%,rgba(10,29,51,.55) 100%);"></div>
+          </div>
+
+          <section class="panel-block" style="margin:-44px 14px 14px;position:relative;text-align:center;">
             <div id="fotoProfilPratinjau" style="width:88px;height:88px;border-radius:50%;background:#eef2f8;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto 10px;color:var(--color-navy);font-weight:800;font-size:26px;">—</div>
             <input type="file" id="inputFotoProfil" accept="image/*" style="font-size:12.5px;">
             <p style="font-size:11.5px;color:var(--color-text-muted);margin:6px 0 10px;">JPG/PNG/WEBP, maks. 5MB.</p>
@@ -143,8 +158,8 @@
           </section>
           <form class="panel-block is-hidden form-edit-bagian" id="formDataPribadi" data-bagian="dataPribadi" style="margin-bottom:14px;">
             <div class="form-group">
-              <label for="inputNik">NIK</label>
-              <input type="text" id="inputNik" class="form-input" placeholder="16 digit NIK" maxlength="16" inputmode="numeric">
+              <label for="inputNik">NIK (wajib)</label>
+              <input type="text" id="inputNik" class="form-input" placeholder="16 digit NIK" maxlength="16" inputmode="numeric" required>
             </div>
             <div class="form-group">
               <label for="inputTempatLahir">Tempat Lahir</label>

@@ -265,3 +265,29 @@ a { color: inherit; }
 .pub-sidebar a:focus-visible, .pub-btn:focus-visible, .pub-menu-btn:focus-visible { outline: 3px solid var(--pub-turmeric, #d79a2b); outline-offset: 2px; }
 
 .pub-menu-kosong { margin: 0; padding: 18px 20px; border: 1.5px dashed var(--pub-line); border-radius: 14px; color: var(--pub-ink-soft); font-size: 14.5px; grid-column: 1 / -1; }
+
+/* ===== 25 Nov 2026: website publik berbasis data portal ===== */
+.pub-prosa { max-width: 760px; margin: 0; color: var(--pub-ink-soft); font-size: 16px; line-height: 1.75; }
+.pub-catat { display: block; font-style: normal; font-size: 12.5px; color: var(--pub-ink-soft); margin: 4px 0 0; }
+.pub-status { display: inline-block; padding: 5px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.pub-status.buka { background: #E4F0E7; color: #25573A; }
+.pub-status.libur { background: #F6E6C8; color: #7A5410; }
+.pub-gagal { background: #F6E6C8; color: #5E410B; font-size: 14px; padding: 10px 0; }
+.pub-gagal[hidden], .pub-status[hidden], [hidden].pub-struktur-card { display: none !important; }
+.pub-btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.pub-btn[hidden] { display: none !important; }
+.pub-foot-kontak { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0 0; font-size: 13.5px; }
+.pub-foot-kontak a { color: inherit; opacity: .9; }
+.pub-foot-kontak:empty { display: none; }
+.pub-koor { color: var(--pub-turmeric-deep); font-weight: 700; font-size: 12px; }
+.pub-naungan-nama { font-weight: 700; color: var(--pub-navy); }
+.pub-naungan > div[hidden] { display: none !important; }
+.pub-tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--pub-leaf); margin-bottom: 2px; }
+.pub-faq { border: 1px solid var(--pub-line); background: var(--pub-white); border-radius: 12px; margin-bottom: 10px; }
+.pub-faq summary { cursor: pointer; padding: 14px 18px; font-weight: 700; color: var(--pub-navy); }
+.pub-faq p { margin: 0; padding: 0 18px 16px; color: var(--pub-ink-soft); font-size: 14.5px; line-height: 1.65; }
+.pub-contact-item small { display: block; }
+.pub-contact-item a { text-decoration: underline; text-underline-offset: 3px; }
+.pub-benef-card .pub-catat { margin-top: 6px; }
+section[hidden] { display: none !important; }
+.pub-map-frame iframe { display: block; }

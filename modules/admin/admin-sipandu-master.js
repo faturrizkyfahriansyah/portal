@@ -1,4 +1,4 @@
-// SPPG JEUNGJING — ADMIN: SIPANDU › Master Instansi & PIC (panelSipanduMaster)
+// SPPG JEUNGJING — ADMIN: SIPANDU › Manajemen Instansi & PIC (panelSipanduMaster)
 // BARU 3 Nov 2026. Membaca/menulis DATABASE SIPANDU BARU lewat SipanduV2.gs.
 // Pola aditif seperti admin-rekap-mingguan.js: tidak mengubah admin.js. Memakai ambilSesiAdmin & apiPost (common).
 (function () {
@@ -38,6 +38,23 @@
     return '<label style="display:flex;flex-direction:column;gap:3px;font-size:12px;">' + label + '<select id="' + id + '" style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;font-size:13px;">' +
       opsi.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(nilai) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>';
   };
+  /** Nama jenis untuk Admin: SEKOLAH ditampilkan sebagai "Satuan Pendidikan" (kode di database tetap). */
+  const namaJenis = function (kode, nama) { return String(kode || '').toUpperCase() === 'SEKOLAH' ? 'Satuan Pendidikan' : (nama || kode || ''); };
+  /** Tombol simpan memberi tahu prosesnya di tombol itu sendiri (Admin 25 Nov 2026): Menyimpan… -> Tersimpan (centang) / Belum tersimpan + alasan tepat di bawah tombol. */
+  async function simpanDiTombol(btn, kerja, teksOk, lanjut) {
+    const asli = btn.dataset.asli || btn.textContent; btn.dataset.asli = asli; btn.setAttribute('data-ts-skip', '1');
+    let m = btn.parentElement.querySelector('.spm-pesan-simpan'); if (!m) { m = document.createElement('div'); m.className = 'spm-pesan-simpan'; m.setAttribute('role', 'alert'); m.style.cssText = 'font-size:13px;font-weight:600;color:#b23a3a;margin-top:8px;'; btn.parentElement.appendChild(m); }
+    m.textContent = ''; btn.disabled = true; btn.style.cssText = 'opacity:1;background:#55606f;color:#fff;border-color:#55606f;'; btn.textContent = 'Menyimpan…';
+    try {
+      await kerja();
+      btn.style.cssText = 'opacity:1;background:#1f7a3f;color:#fff;border-color:#1f7a3f;'; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:5px"><path d="M4 12.5l5 5L20 6.5"/></svg>'; btn.appendChild(document.createTextNode(teksOk || 'Tersimpan'));
+      await new Promise(function (r) { setTimeout(r, 600); });
+      if (lanjut) await lanjut();
+    } catch (err) {
+      btn.disabled = false; btn.style.cssText = 'background:#b23a3a;color:#fff;border-color:#b23a3a;'; btn.textContent = 'Belum tersimpan. Ketuk untuk coba lagi';
+      m.textContent = err.message || 'Gagal menyimpan.';
+    }
+  }
   const grid = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:10px 0;';
 
   // ------------------------------- INSTANSI -------------------------------
@@ -58,7 +75,7 @@
     const kata = $('spmCari').value.toLowerCase(), st = $('spmStatus').value;
     const baris = data.instansi.filter(function (r) { return (!st || r.status === st) && (!kata || (r.nama + ' ' + r.npsn + ' ' + r.namaPic).toLowerCase().indexOf(kata) >= 0); });
     $('spmTbody').innerHTML = baris.length ? baris.map(function (r) {
-      return '<tr' + (r.status === 'AKTIF' ? '' : ' style="opacity:.62;"') + '><td>' + esc(r.nama) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + esc(r.idInstansi) + '</div></td><td>' + esc(r.jenis) + '</td><td>' + esc(r.npsn || '—') + '</td>' +
+      return '<tr' + (r.status === 'AKTIF' ? '' : ' style="opacity:.62;"') + '><td>' + esc(r.nama) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + esc(r.idInstansi) + '</div></td><td>' + esc(namaJenis(r.jenis, r.jenis)) + '</td><td>' + esc(r.npsn || '—') + '</td>' +
         '<td>' + esc([r.desa, r.kecamatan].filter(Boolean).join(', ') || '—') + '</td><td>' + (r.namaPic ? esc(r.namaPic) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + esc(r.jabatanPic) + '</div>' : '<span style="color:#c0392b;">belum ada</span>') + '</td>' +
         '<td>' + siswaTeks(r) + '</td><td style="font-size:12px;">' + esc(ringkasAcuan(r)) + '</td><td><b style="color:' + (r.status === 'AKTIF' ? '#1a7a4c' : '#b23a3a') + ';">' + esc(r.status) + '</b></td>' +
         '<td style="white-space:nowrap;"><button class="btn-mini" data-aksi="ubah" data-id="' + esc(r.idInstansi) + '" type="button">Ubah</button> <button class="btn-mini" data-aksi="gantipic" data-id="' + esc(r.idInstansi) + '" type="button">Ganti PIC</button> ' +
@@ -93,7 +110,7 @@
     r = r || { idInstansi: '', nama: '', jenis: data.jenis[0] ? data.jenis[0].kode : '', npsn: '', alamat: '', desa: '', kecamatan: '', kabupaten: '', provinsi: '', lintang: '', bujur: '', jumlahSiswa: null, urutan: null, status: 'AKTIF', keterangan: '', acuanPk: null, acuanPb: null, acuanBalita: null, acuanBumil: null, acuanBusui: null, acuanNoKendaraan: '' };
     const nv = function (v) { return v === null || v === undefined ? '' : v; };
     $('spmForm').innerHTML = '<div class="admin-stat-card" style="padding:14px;text-align:left;margin-bottom:12px;"><b>' + (r.idInstansi ? 'Ubah ' + esc(r.idInstansi) : 'Instansi baru') + '</b><div style="' + grid + '">' +
-      input('fiNama', 'Nama instansi *', r.nama) + pilih('fiJenis', 'Jenis *', data.jenis.map(function (j) { return [j.kode, j.nama]; }), r.jenis) + input('fiNpsn', 'NPSN (bila ada)', r.npsn) +
+      input('fiNama', 'Nama instansi *', r.nama) + pilih('fiJenis', 'Jenis (Satuan Pendidikan atau Posyandu) *', data.jenis.map(function (j) { return [j.kode, namaJenis(j.kode, j.nama)]; }), r.jenis) + input('fiNpsn', 'NPSN (bila ada)', r.npsn) +
       input('fiUrut', 'Urutan tampil', r.urutan === null ? '' : r.urutan, 'number', 'min="0"') +
       pilih('fiStatus', 'Status', [['AKTIF', 'AKTIF'], ['NONAKTIF', 'NONAKTIF']], r.status) + input('fiKet', 'Keterangan', r.keterangan) + '</div>' +
       '<div style="font-size:12px;font-weight:700;margin-top:10px;">Alamat tempat <span style="font-weight:400;color:var(--color-text-muted,#55606f);">(dikunci untuk PIC; PIC hanya bisa melaporkan bila ada yang salah)</span></div><div id="fiWilayah" style="max-width:420px;margin-top:6px;"></div>' +
@@ -116,15 +133,13 @@
     const saranDesa = Array.from(new Set((data.instansi || []).map(function (x) { return x.desa; }).concat((data.pic || []).map(function (x) { return x.desa; })).filter(Boolean)));
     const wil = window.SPPGWilayah ? window.SPPGWilayah.pasang($('fiWilayah'), { desa: r.desa, kecamatan: r.kecamatan, kabupaten: r.kabupaten, provinsi: r.provinsi }, { awalan: 'fiw', saranDesa: saranDesa }) : null;
     $('fiBatal').addEventListener('click', function () { $('spmForm').innerHTML = ''; });
-    $('fiSimpan').addEventListener('click', async function () {
-      try {
-        pesan('Menyimpan…');
+    $('fiSimpan').addEventListener('click', function () {
+      simpanDiTombol($('fiSimpan'), function () {
         const kg = kelompok(), nilaiKel = function (aktifKel, id) { return aktifKel ? $(id).value : ''; };   // kelompok yang tidak relevan dikosongkan
-        await api('simpanInstansiV2', { idInstansi: r.idInstansi, nama: $('fiNama').value, jenis: $('fiJenis').value, npsn: $('fiNpsn').value, alamat: $('fiAlamat').value, desa: wil ? wil.ambil().desa : '',
+        return api('simpanInstansiV2', { idInstansi: r.idInstansi, nama: $('fiNama').value, jenis: $('fiJenis').value, npsn: $('fiNpsn').value, alamat: $('fiAlamat').value, desa: wil ? wil.ambil().desa : '',
                                         kecamatan: wil ? wil.ambil().kecamatan : '', kabupaten: wil ? wil.ambil().kabupaten : '', provinsi: wil ? wil.ambil().provinsi : '', lintang: $('fiLintang').value, bujur: $('fiBujur').value, jumlahSiswa: nilaiKel(kg.sekolah, 'fiSiswa'), urutan: $('fiUrut').value, status: $('fiStatus').value, keterangan: $('fiKet').value,
                                         acuanPk: nilaiKel(kg.sekolah, 'fiAcPk'), acuanPb: nilaiKel(kg.sekolah, 'fiAcPb'), acuanBalita: nilaiKel(kg.posyandu, 'fiAcBalita'), acuanBumil: nilaiKel(kg.posyandu, 'fiAcBumil'), acuanBusui: nilaiKel(kg.posyandu, 'fiAcBusui'), acuanNoKendaraan: $('fiAcKend').value });
-        await muat(true); pesan('Instansi tersimpan.');
-      } catch (err) { pesan(err.message || 'Gagal menyimpan.', true); }
+      }, 'Instansi tersimpan', async function () { await muat(true); pesan('Instansi tersimpan.'); });
     });
   }
   function formGantiPic(r) {
@@ -135,12 +150,8 @@
       input('gpTanggal', 'Berlaku mulai *', hariIni(), 'date') + input('gpKet', 'Keterangan', '') + '</div>' +
       '<button class="btn-mini primary" id="gpSimpan" type="button">Simpan</button> <button class="btn-mini" id="gpBatal" type="button">Batal</button></div>';
     $('gpBatal').addEventListener('click', function () { $('spmForm').innerHTML = ''; });
-    $('gpSimpan').addEventListener('click', async function () {
-      try {
-        pesan('Menyimpan…');
-        await api('tugaskanPicV2', { idInstansi: r.idInstansi, idPic: $('gpPic').value, tanggalMulai: $('gpTanggal').value, keterangan: $('gpKet').value });
-        await muat(true); pesan('PIC diperbarui.');
-      } catch (err) { pesan(err.message || 'Gagal menyimpan.', true); }
+    $('gpSimpan').addEventListener('click', function () {
+      simpanDiTombol($('gpSimpan'), function () { return api('tugaskanPicV2', { idInstansi: r.idInstansi, idPic: $('gpPic').value, tanggalMulai: $('gpTanggal').value, keterangan: $('gpKet').value }); }, 'PIC diperbarui', async function () { await muat(true); pesan('PIC diperbarui.'); });
     });
   }
 
@@ -151,7 +162,7 @@
       '<div class="table-wrap"><table><thead><tr><th>Nama</th><th>Jabatan</th><th>No. HP</th><th>No. Rekening</th><th>Instansi</th><th>Status</th><th></th></tr></thead><tbody>' +
       (data.pic.length ? data.pic.map(function (p) {
         const nama = p.instansiAktif.map(function (id) { const i = data.instansi.filter(function (x) { return x.idInstansi === id; })[0]; return i ? i.nama : id; }).join(', ');
-        return '<tr><td>' + esc(p.nama) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + (p.namaPanggilan ? esc(p.namaPanggilan) + ' · ' : '') + esc(p.idPic) + '</div></td><td>' + esc(p.jabatan || '—') + '</td><td>' + esc(p.nomorHp || '—') + '</td><td>' + esc(p.nomorRekening || '—') + '</td>' +
+        return '<tr><td>' + esc(p.nama) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + (p.username ? esc(p.username) + ' · ' : '') + esc(p.idPic) + '</div></td><td>' + esc(p.jabatan || '—') + '</td><td>' + esc(p.nomorHp || '—') + '</td><td>' + esc(p.nomorRekening || '—') + '</td>' +
           '<td>' + esc(nama || '—') + '</td><td>' + esc(p.status) + '</td><td><button class="btn-mini" data-id="' + esc(p.idPic) + '" type="button">Ubah</button></td></tr>';
       }).join('') : '<tr><td colspan="7"><div class="empty-state">Belum ada PIC.</div></td></tr>') + '</tbody></table></div>';
     $('spmTambahPic').addEventListener('click', function () { formPic(null); });
@@ -164,30 +175,55 @@
     p = p || { idPic: '', nama: '', namaPanggilan: '', jabatan: '', tempatLahir: '', tanggalLahir: '', jenisKelamin: '', alamat: '', desa: '', kecamatan: '', kabupaten: '', provinsi: '', nomorHp: '', namaRekening: '', nomorRekening: '', status: 'AKTIF', keterangan: '' };
     const judul = function (t) { return '<div style="font-weight:600;font-size:13px;margin:12px 0 0;">' + t + '</div>'; };
     const tersamar = /•/.test(p.tanggalLahir || '');
+    const punya = (p.instansiAktif || []).map(function (id) { return data.instansi.filter(function (x) { return x.idInstansi === id; })[0]; }).filter(Boolean);
+    const jenisAwal = punya[0] ? punya[0].jenis : '';
     $('spmForm').innerHTML = '<div class="admin-stat-card" style="padding:14px;text-align:left;margin-bottom:12px;"><b>' + (p.idPic ? 'Ubah ' + esc(p.idPic) : 'PIC baru') + '</b>' +
       judul('Data diri') + '<div style="' + grid + '">' +
-      input('fpNama', 'Nama lengkap *', p.nama) + input('fpPanggilan', 'Nama panggilan', p.namaPanggilan) + input('fpJabatan', 'Jabatan', p.jabatan) +
+      input('fpNama', 'Nama lengkap *', p.nama) + input('fpJabatan', 'Jabatan', p.jabatan) +
       input('fpTempat', 'Tempat lahir', p.tempatLahir) + input('fpTglLahir', 'Tanggal lahir', p.tanggalLahir, tersamar ? 'text' : 'date', tersamar ? '' : 'max="' + new Date().toISOString().slice(0, 10) + '"') +
       pilih('fpJk', 'Jenis kelamin', [['', '— pilih —'], ['Laki-laki', 'Laki-laki'], ['Perempuan', 'Perempuan']], p.jenisKelamin) +
       input('fpHp', 'No. HP', p.nomorHp) + '</div>' +
       judul('Alamat') + '<div id="fpWilayah" style="max-width:420px;margin-top:6px;"></div><div style="' + grid + '">' + input('fpAlamat', 'Alamat (jalan, RT/RW, kampung)', p.alamat) + '</div>' +
       judul('Rekening') + '<div style="' + grid + '">' +
       input('fpNamaRek', 'Nama pemilik rekening', p.namaRekening) + input('fpRek', 'No. rekening', p.nomorRekening) + '</div>' +
+      judul('Instansi yang dipegang (wajib)') + '<div style="' + grid + '">' +
+      pilih('fpJenisIns', 'Jenis *', [['', '— pilih jenis —']].concat(data.jenis.map(function (j) { return [j.kode, namaJenis(j.kode, j.nama)]; })), jenisAwal) +
+      '<div id="fpInsWadah">' + pilih('fpInstansi', 'Instansi *', [['', '— pilih jenis dulu —']], '') + '</div></div>' +
+      '<div id="fpInsInfo" style="font-size:12px;color:var(--color-text-muted,#55606f);margin:-4px 0 6px;"></div>' +
       judul('Status') + '<div style="' + grid + '">' +
       pilih('fpStatus', 'Status', [['AKTIF', 'AKTIF'], ['NONAKTIF', 'NONAKTIF']], p.status) + input('fpKet', 'Keterangan', p.keterangan) + '</div>' +
       '<button class="btn-mini primary" id="fpSimpan" type="button">Simpan</button> <button class="btn-mini" id="fpBatal" type="button">Batal</button></div>';
     const saranDesaP = Array.from(new Set((data.instansi || []).map(function (x) { return x.desa; }).concat((data.pic || []).map(function (x) { return x.desa; })).filter(Boolean)));
     const wilP = window.SPPGWilayah ? window.SPPGWilayah.pasang($('fpWilayah'), { desa: p.desa, kecamatan: p.kecamatan, kabupaten: p.kabupaten, provinsi: p.provinsi }, { awalan: 'fpw', saranDesa: saranDesaP }) : null;
+    const isiInstansi = function () {
+      const jenis = $('fpJenisIns').value, pilihan = $('fpInstansi') ? $('fpInstansi').value : '';
+      const daftar = data.instansi.filter(function (i) { return i.jenis === jenis && (i.status === 'AKTIF' || (p.instansiAktif || []).indexOf(i.idInstansi) >= 0); });
+      const awal = pilihan || (punya[0] && punya[0].jenis === jenis ? punya[0].idInstansi : '');
+      $('fpInsWadah').innerHTML = pilih('fpInstansi', 'Instansi *', [['', jenis ? (daftar.length ? '— pilih instansi —' : 'Belum ada instansi jenis ini') : '— pilih jenis dulu —']].concat(daftar.map(function (i) { return [i.idInstansi, i.nama + (i.namaPic && i.namaPic !== p.nama ? ' (PIC sekarang: ' + i.namaPic + ')' : '')]; })), awal);
+      $('fpInstansi').addEventListener('change', infoInstansi); infoInstansi();
+    };
+    const infoInstansi = function () {
+      const id = $('fpInstansi').value, i = data.instansi.filter(function (x) { return x.idInstansi === id; })[0], el = $('fpInsInfo'); let t = '';
+      if (i && (p.instansiAktif || []).indexOf(id) < 0) {
+        if (i.namaPic) t += 'PIC lama ' + i.namaPic + ' digantikan (riwayat tetap tersimpan). ';
+        if (punya.length === 1) t += 'PIC ini dipindahkan dari ' + punya[0].nama + '.'; else if (punya.length > 1) t += 'PIC ini memegang ' + punya.length + ' instansi; yang baru ditambahkan, yang lama tetap.';
+      } else if (p.idPic && punya.length > 1) t = 'PIC ini memegang ' + punya.map(function (x) { return x.nama; }).join(', ') + '.';
+      el.textContent = t;
+    };
+    $('fpJenisIns').addEventListener('change', function () { if ($('fpInstansi')) $('fpInstansi').value = ''; isiInstansi(); }); isiInstansi();
     $('fpBatal').addEventListener('click', function () { $('spmForm').innerHTML = ''; });
-    $('fpSimpan').addEventListener('click', async function () {
-      try {
-        pesan('Menyimpan…');
-        await api('simpanPicV2', { idPic: p.idPic, nama: $('fpNama').value, namaPanggilan: $('fpPanggilan').value, jabatan: $('fpJabatan').value,
+    $('fpSimpan').addEventListener('click', function () {
+      const btn = $('fpSimpan');
+      if ($('fpStatus').value === 'AKTIF' && !$('fpInstansi').value && !punya.length) {
+        let m = btn.parentElement.querySelector('.spm-pesan-simpan'); if (!m) { m = document.createElement('div'); m.className = 'spm-pesan-simpan'; m.setAttribute('role', 'alert'); m.style.cssText = 'font-size:13px;font-weight:600;color:#b23a3a;margin-top:8px;'; btn.parentElement.appendChild(m); }
+        m.textContent = 'Pilih jenis dan instansi dulu. Setiap PIC wajib punya instansi.'; $('fpJenisIns').focus(); return;
+      }
+      simpanDiTombol(btn, function () {
+        return api('simpanPicV2', { idPic: p.idPic, idInstansi: $('fpInstansi').value, nama: $('fpNama').value, namaPanggilan: p.namaPanggilan || '', jabatan: $('fpJabatan').value,
           tempatLahir: $('fpTempat').value, tanggalLahir: $('fpTglLahir').value, jenisKelamin: $('fpJk').value, alamat: $('fpAlamat').value,
           desa: wilP ? wilP.ambil().desa : '', kecamatan: wilP ? wilP.ambil().kecamatan : '', kabupaten: wilP ? wilP.ambil().kabupaten : '', provinsi: wilP ? wilP.ambil().provinsi : '',
           nomorHp: $('fpHp').value, namaRekening: $('fpNamaRek').value, nomorRekening: $('fpRek').value, status: $('fpStatus').value, keterangan: $('fpKet').value });
-        await muat(true); pesan('PIC tersimpan.');
-      } catch (err) { pesan(err.message || 'Gagal menyimpan.', true); }
+      }, 'PIC tersimpan', async function () { await muat(true); pesan('PIC tersimpan.'); });
     });
   }
 

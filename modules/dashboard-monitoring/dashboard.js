@@ -50,15 +50,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const main = document.getElementById('dashboardMain');
 
-  // ---- MENU UTAMA: tombol "Lainnya" -- dipasang PALING AWAL, TIDAK
-  // bergantung pada berhasil/gagalnya pemuatan data Dashboard di bawah.
-  const btnLainnya = document.getElementById('btnMenuLainnya');
-  if (btnLainnya) {
-    btnLainnya.addEventListener('click', () => {
-      const burger = document.querySelector('.shell-topbar-burger');
-      if (burger) burger.click();
-    });
-  }
+  // Sapaan sesuai jam (WIB)
+  (function () {
+    const el = document.getElementById('heroSapaan'); if (!el) return;
+    let jam = 8; try { jam = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' })).getHours(); } catch (e) { /* pakai bawaan */ }
+    el.textContent = (jam < 11 ? 'Selamat pagi,' : jam < 15 ? 'Selamat siang,' : jam < 18 ? 'Selamat sore,' : 'Selamat malam,');
+  })();
 
   // ============================================================
   // MENU HARI INI & RINGKASAN PENERIMA MANFAAT (BARU, 15 Okt 2026) --
@@ -180,56 +177,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (p.masuk && p.masuk.sudah) statusHariIni = 'Sedang Bertugas';
     document.getElementById('ringkasStatusHariIni').textContent = statusHariIni;
 
-    // ---- DETAIL PRESENSI (toggle) ----
+    // ---- KALIMAT PRESENSI (satu kalimat jelas) ----
+    const kal = document.getElementById('kalimatPresensi');
+    if (kal) {
+      let k = 'Anda belum presensi masuk hari ini.';
+      if (p.masuk && p.masuk.sudah && p.masuk.isIzinSakit) k = 'Hari ini tercatat: ' + (p.masuk.keterangan || 'izin/sakit') + '.';
+      else if (p.masuk && p.masuk.sudah && p.pulang && p.pulang.sudah) k = 'Presensi hari ini sudah lengkap. Terima kasih.';
+      else if (p.masuk && p.masuk.sudah) k = 'Anda sudah masuk pukul ' + p.masuk.jam + '. Jangan lupa presensi pulang.';
+      kal.textContent = k;
+    }
+
+    // ---- RINCIAN PRESENSI (diringkas; peta dan swafoto tidak lagi dimuat di beranda) ----
     document.getElementById('detailTanggal').textContent = p.operasional && p.operasional.tanggal ? p.operasional.tanggal : tglFormatDariP0;
-    document.getElementById('detailJamMasuk').textContent = (p.masuk && p.masuk.sudah) ? p.masuk.jam : '–';
-    document.getElementById('detailJamPulang').textContent = (p.pulang && p.pulang.sudah) ? p.pulang.jam : '—';
     document.getElementById('detailDurasi').textContent = p.durasi || '–';
-
-    const radiusTeks = p.lokasiSppg ? ('Radius Presensi ' + p.lokasiSppg.radiusMeter + ' meter') : 'Radius Presensi –';
-    document.getElementById('radiusLokasiMasuk').textContent = radiusTeks;
-    document.getElementById('radiusLokasiPulang').textContent = radiusTeks;
-
     const patokanWrap = document.getElementById('patokanRadiusInfo');
     if (p.lokasiSppg) {
       const radiusDiizinkan = p.lokasiSppg.radiusMeter;
       const jarakMasuk = (p.masuk && p.masuk.sudah && p.masuk.jarakMeter != null) ? Math.round(p.masuk.jarakMeter) : null;
-      let html = `<p style="margin:0;">Radius Diizinkan: <strong>${radiusDiizinkan} m</strong></p>`;
-      if (jarakMasuk != null) {
-        const valid = jarakMasuk <= radiusDiizinkan;
-        html += `<p style="margin:2px 0 0;">Jarak Aktual (saat Masuk): <strong>${jarakMasuk} m</strong></p>`;
-        html += `<p style="margin:2px 0 0;color:${valid ? '#1a7a4c' : '#b23a3a'};">${jarakMasuk} m ${valid ? '≤' : '>'} ${radiusDiizinkan} m — presensi ${valid ? 'valid' : 'di luar radius'}</p>`;
-      }
-      patokanWrap.innerHTML = html;
+      patokanWrap.textContent = jarakMasuk != null
+        ? 'Jarak saat masuk ' + jarakMasuk + ' m dari titik SPPG (batas ' + radiusDiizinkan + ' m): ' + (jarakMasuk <= radiusDiizinkan ? 'di dalam batas.' : 'di luar batas.')
+        : 'Presensi harus dilakukan dalam jarak ' + radiusDiizinkan + ' m dari titik SPPG.';
     } else {
-      patokanWrap.innerHTML = '<p style="margin:0;">Data lokasi acuan belum diatur Admin.</p>';
+      patokanWrap.textContent = 'Titik lokasi SPPG belum diatur pengelola.';
     }
-
-    if (p.masuk && p.masuk.sudah && p.masuk.fotoUrl) {
-      document.getElementById('swafotoMasukWrap').innerHTML = `<img src="${p.masuk.fotoUrl}" alt="Swafoto masuk" style="width:100%;height:100%;object-fit:cover;">`;
-    }
-    if (p.pulang && p.pulang.sudah && p.pulang.fotoUrl) {
-      document.getElementById('swafotoPulangWrap').innerHTML = `<img src="${p.pulang.fotoUrl}" alt="Swafoto pulang" style="width:100%;height:100%;object-fit:cover;">`;
-    }
-
-    let petaSudahDimuat = false;
-    document.getElementById('btnToggleDetailPresensi').addEventListener('click', async function () {
+    document.getElementById('btnToggleDetailPresensi').addEventListener('click', function () {
       const wrap = document.getElementById('detailPresensiWrap');
-      const sedangTerbuka = !wrap.classList.contains('is-hidden');
-      if (sedangTerbuka) {
-        wrap.classList.add('is-hidden');
-        this.textContent = 'Detail Presensi ▾';
-        return;
-      }
-      wrap.classList.remove('is-hidden');
-      this.textContent = 'Detail Presensi ▴';
-
-      if (!petaSudahDimuat) {
-        petaSudahDimuat = true;
-        await pastikanLeafletTermuat_();
-        tampilkanPeta_('petaLokasiMasuk', p.masuk && p.masuk.sudah ? p.masuk.latitude : null, p.masuk && p.masuk.sudah ? p.masuk.longitude : null);
-        tampilkanPeta_('petaLokasiPulang', p.pulang && p.pulang.sudah ? p.pulang.latitude : null, p.pulang && p.pulang.sudah ? p.pulang.longitude : null);
-      }
+      const terbuka = !wrap.classList.contains('is-hidden');
+      wrap.classList.toggle('is-hidden', terbuka);
+      this.textContent = terbuka ? 'Rincian presensi ▾' : 'Rincian presensi ▴';
     });
 
     // P0 selesai — tampilkan Dashboard SEKARANG. Ringkasan Kehadiran &

@@ -134,7 +134,7 @@
   }
   function kartuBelum(teks) {
     return '<div class="admin-stat-card accent-warning" style="padding:16px;text-align:left;"><b>Database SIPANDU baru belum disambungkan</b><div style="font-size:13px;margin-top:6px;">' + esc(teks || '') +
-      ' Tarif ini disimpan di database SIPANDU. Sambungkan lewat menu SIPANDU › Master Instansi &amp; PIC (panduan langkahnya ada di sana), lalu muat ulang.</div></div>';
+      ' Tarif ini disimpan di database SIPANDU. Sambungkan lewat menu SIPANDU › Manajemen Instansi &amp; PIC (panduan langkahnya ada di sana), lalu muat ulang.</div></div>';
   }
   async function tabLain(kat) {
     const isi = $('mtIsi'); isi.innerHTML = '<div class="empty-state">Memuat…</div>';

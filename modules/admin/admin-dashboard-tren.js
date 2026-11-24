@@ -14,7 +14,7 @@
   const api = function (aksi) { return apiGet(aksi, { token: window.sppgAdminToken }); };
 
   const gaya = document.createElement('style');
-  gaya.textContent = '.dt-ik{background:linear-gradient(140deg,#14304F,#0A1D33);color:#fff;border-radius:16px;padding:16px 18px;margin:0 0 16px}.dt-ik h2{margin:0 0 4px;font-size:19px}.dt-ik .tg{font-size:14px;opacity:.92;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}'
+  gaya.textContent = '.dt-ik{background:linear-gradient(180deg,rgba(10,29,51,.55) 0%,rgba(10,29,51,.82) 100%),url(assets/ilustrasi-gedung-sppg-web.png) center 30%/cover no-repeat,#0A1D33;color:#fff;border-radius:16px;padding:16px 18px;margin:0 0 16px}.dt-ik h2{margin:0 0 4px;font-size:19px}.dt-ik .tg{font-size:14px;opacity:.92;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}'
     + '.dt-kb{border-radius:999px;padding:2px 12px;background:#fff;font-weight:700;font-size:13px;color:#1E8E5A}.dt-kb.libur{color:#C6403F}.dt-kb.operasional_khusus{color:#0A5C8C}.dt-kb.belum_diatur{color:#8A5A00}'
     + '.dt-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}.dt-kpi button{all:unset;box-sizing:border-box;cursor:pointer;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:10px 12px;display:block}.dt-kpi button:focus-visible{outline:3px solid #9fd0ea}'
     + '.dt-kpi b{display:block;font-size:24px;line-height:1.15}.dt-kpi span{font-size:12.5px;opacity:.9}'

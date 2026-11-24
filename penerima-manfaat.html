@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Penerima Manfaat — SPPG Jeungjing</title>
+<meta name="description" content="Jumlah penerima manfaat layanan makanan bergizi SPPG Jeungjing.">
 <link rel="icon" href="assets/logo.png">
-<link rel="stylesheet" href="styles/public.css?v=20261125a">
+<link rel="stylesheet" href="styles/public.css?v=20261125f">
 </head>
-<body class="pub-body">
+<body class="pub-body" data-halaman-publik="penerima">
 
   <header class="pub-header">
     <div class="pub-header-inner">
@@ -29,7 +30,7 @@
     </button>
     <nav>
       <a href="index.html">Beranda</a>
-      <a href="profil-sppg.html">Profil SPPG</a>
+      <a href="profil-sppg.html">Tentang Kami</a>
       <a href="penerima-manfaat.html">Penerima Manfaat</a>
       <a href="menu-hari-ini.html">Menu Hari Ini</a>
       <a href="informasi-publik.html">Informasi</a>
@@ -37,7 +38,7 @@
       <a href="portal.html" class="pub-sidebar-cta">Portal SPPG Jeungjing →</a>
     </nav>
   </aside>
-
+  <div id="situsGagal" class="pub-gagal" hidden><div class="pub-wrap">Sebagian isi halaman belum dapat dimuat. Coba muat ulang halaman.</div></div>
   <section class="pub-hero" style="padding:44px 0 40px;">
     <div class="pub-wrap">
       <div class="pub-hero-inner">
@@ -47,55 +48,43 @@
       </div>
     </div>
   </section>
-
   <section class="pub-section alt">
     <div class="pub-wrap">
-      <!-- Ringkasan total -- diisi dari database, TIDAK ada angka hard-code -->
-      <div id="pmTotalWrap" style="text-align:center;margin-bottom:28px;">
-        <p style="font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--pub-ink-soft);margin:0 0 6px;">Total Penerima Manfaat</p>
-        <p id="pmTotalAngka" style="font-size:clamp(32px,7vw,52px);font-weight:800;color:var(--pub-navy);margin:0;">—</p>
-        <div id="pmSubtotalWrap" style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-top:14px;font-size:13.5px;color:var(--pub-ink-soft);"></div>
+      <p id="pmKosong" class="pub-menu-kosong">Memuat data penerima manfaat…</p>
+      <div id="pmIsi" hidden>
+        <div style="text-align:center;margin-bottom:26px;">
+          <p class="pub-catat" id="pmKet" style="margin:0 0 6px;"></p>
+          <p style="font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--pub-ink-soft);margin:0 0 6px;">Total penerima manfaat</p>
+          <p id="pmTotal" style="font-family:var(--pub-serif);font-size:clamp(34px,8vw,56px);font-weight:600;color:var(--pub-navy);margin:0;"></p>
+        </div>
+        <div class="pub-benef-grid" id="pmRingkas"></div>
       </div>
-
-      <!-- Fallback lama (4 kartu) -- tetap ada sbg cadangan kalau data rinci belum tersedia sama sekali -->
-      <div class="pub-benef-grid" id="pubBenefGrid" data-fallback-rendered="1" style="display:none;">
-        <div class="pub-benef-card"><b>—</b><span>Peserta Didik</span></div>
-        <div class="pub-benef-card"><b>—</b><span>Ibu Hamil</span></div>
-        <div class="pub-benef-card"><b>—</b><span>Ibu Menyusui</span></div>
-        <div class="pub-benef-card"><b>—</b><span>Balita</span></div>
+    </div>
+  </section>
+  <section class="pub-section " id="pmSekolahSection">
+    <div class="pub-wrap">
+      <div class="pub-section-head">
+        <p class="pub-eyebrow-plain">Satuan pendidikan</p>
+        <h2>Satuan pendidikan yang dilayani</h2>
       </div>
-
-      <!-- Tabel rinci -- SATU tabel gabungan (bukan 2 tabel terpisah), scroll horizontal di layar sempit -->
-      <div id="pmTabelWrap" style="overflow-x:auto;border:1px solid var(--pub-line);border-radius:12px;">
-        <table style="width:100%;border-collapse:collapse;min-width:640px;font-size:13.5px;">
-          <thead>
-            <tr style="background:var(--pub-cream-soft);">
-              <th style="text-align:left;padding:12px 14px;">Orientasi</th>
-              <th style="text-align:left;padding:12px 14px;">Nama</th>
-              <th style="text-align:right;padding:12px 10px;">PK</th>
-              <th style="text-align:right;padding:12px 10px;">PB</th>
-              <th style="text-align:right;padding:12px 10px;">Bumil</th>
-              <th style="text-align:right;padding:12px 10px;">Busui</th>
-              <th style="text-align:right;padding:12px 10px;">Balita</th>
-              <th style="text-align:right;padding:12px 14px;">Jumlah</th>
-            </tr>
-          </thead>
-          <tbody id="pmTabelBody">
-            <tr><td colspan="8" style="padding:20px;text-align:center;color:var(--pub-ink-soft);">Memuat data...</td></tr>
-          </tbody>
-        </table>
+      <div class="pub-info-list" id="pmSekolah"></div>
+    </div>
+  </section>
+  <section class="pub-section alt" id="pmPosyanduSection">
+    <div class="pub-wrap">
+      <div class="pub-section-head">
+        <p class="pub-eyebrow-plain">Posyandu</p>
+        <h2>Posyandu yang dilayani</h2>
       </div>
-
-      <p style="color:var(--pub-ink-soft);margin-top:28px;max-width:620px;font-size:13.5px;">
-        Data jumlah penerima manfaat akan diperbarui secara berkala. Data pribadi penerima manfaat tidak dipublikasikan — informasi di halaman ini bersifat ringkasan/agregat.
-      </p>
+      <p id="pmPosyandu" class="pub-prosa"></p>
     </div>
   </section>
 
   <footer class="pub-footer">
     <div class="pub-wrap">
       <strong>SPPG JEUNGJING</strong>
-      <p style="margin:10px 0 0;">Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang – Banten, 15730</p>
+      <p id="footAlamat" style="margin:10px 0 0;">Kp. Kecok, RT.004, Desa Jeungjing, Kecamatan Cisoka, Kabupaten Tangerang, Banten 15730</p>
+      <p id="footKontak" class="pub-foot-kontak"></p>
       <hr class="rule">
       <p class="fine">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
     </div>
@@ -103,64 +92,6 @@
 
   <script src="modules/website-publik/public-nav.js"></script>
   <script src="core/config.js"></script>
-  <script>
-    (async function () {
-      const totalAngka = document.getElementById('pmTotalAngka');
-      const subtotalWrap = document.getElementById('pmSubtotalWrap');
-      const tabelWrap = document.getElementById('pmTabelWrap');
-      const tabelBody = document.getElementById('pmTabelBody');
-      const grid = document.getElementById('pubBenefGrid');
-
-      function formatRibuan(n) { return Number(n || 0).toLocaleString('id-ID'); }
-
-      try {
-        const url = GOOGLE_APPS_SCRIPT_WEB_APP_URL + '?action=getPenerimaManfaatPublik';
-        const res = await fetch(url);
-        const json = await res.json();
-        if (!json.success || !json.data || !json.data.data || !json.data.data.length) {
-          // Belum ada data rinci sama sekali -- coba tampilkan fallback lama (4 kartu ringkasan kategori),
-          // supaya halaman tidak kosong total selama masa transisi.
-          tabelWrap.style.display = 'none';
-          totalAngka.parentElement.style.display = 'none';
-          try {
-            const urlLama = GOOGLE_APPS_SCRIPT_WEB_APP_URL + '?action=getDataPenerimaanPublik';
-            const resLama = await fetch(urlLama);
-            const jsonLama = await resLama.json();
-            if (jsonLama.success && jsonLama.data && jsonLama.data.length) {
-              grid.style.display = 'grid';
-              grid.innerHTML = jsonLama.data.map(d => `<div class="pub-benef-card"><b>${d.jumlah || '—'}</b><span>${d.kategori}</span></div>`).join('');
-            } else {
-              grid.style.display = 'grid'; // 4 kartu asli (dash) tetap tampil sbg fallback paling akhir
-            }
-          } catch (e2) { grid.style.display = 'grid'; }
-          return;
-        }
-
-        const { data, ringkasan } = json.data;
-        totalAngka.textContent = formatRibuan(ringkasan.total);
-        subtotalWrap.innerHTML = `
-          <span><strong>${formatRibuan(ringkasan.totalPesertaDidik)}</strong> Peserta Didik</span>
-          <span><strong>${formatRibuan(ringkasan.totalB3)}</strong> 3B (Bumil/Busui/Balita)</span>`
-          + (data[0] && data[0].tanggalData ? `<span style="opacity:.8;">Data PM harian per ${data[0].tanggalData}</span>` : '');
-
-        tabelBody.innerHTML = data.map(d => `
-          <tr style="border-top:1px solid var(--pub-line);">
-            <td style="padding:11px 14px;">${d.kategori === 'PESERTA_DIDIK' ? 'Peserta Didik' : (d.kategori === '3B' ? '3B' : '(tidak dikenal)')}</td>
-            <td style="padding:11px 14px;">${d.instansi}</td>
-            <td style="text-align:right;padding:11px 10px;">${d.kategori === 'PESERTA_DIDIK' ? formatRibuan(d.pk) : '—'}</td>
-            <td style="text-align:right;padding:11px 10px;">${d.kategori === 'PESERTA_DIDIK' ? formatRibuan(d.pb) : '—'}</td>
-            <td style="text-align:right;padding:11px 10px;">${d.kategori === '3B' ? formatRibuan(d.bumil) : '—'}</td>
-            <td style="text-align:right;padding:11px 10px;">${d.kategori === '3B' ? formatRibuan(d.busui) : '—'}</td>
-            <td style="text-align:right;padding:11px 10px;">${d.kategori === '3B' ? formatRibuan(d.balita) : '—'}</td>
-            <td style="text-align:right;padding:11px 14px;font-weight:700;">${formatRibuan(d.jumlah)}</td>
-          </tr>`).join('');
-      } catch (e) {
-        // Gagal ambil data -- tampilkan fallback 4 kartu asli (dash), jangan biarkan halaman blank.
-        tabelWrap.style.display = 'none';
-        totalAngka.parentElement.style.display = 'none';
-        grid.style.display = 'grid';
-      }
-    })();
-  </script>
+  <script src="modules/website-publik/public-situs.js?v=20261125f"></script>
 </body>
 </html>

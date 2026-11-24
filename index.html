@@ -6,7 +6,7 @@
 <title>SPPG Jeungjing — Mendukung Program Makanan Bergizi Gratis</title>
 <meta name="description" content="SPPG Jeungjing mendukung Program Makanan Bergizi Gratis (MBG) di Desa Jeungjing, Kecamatan Cisoka, Kabupaten Tangerang.">
 <link rel="icon" href="assets/logo.png">
-<link rel="stylesheet" href="styles/public.css?v=20261125a">
+<link rel="stylesheet" href="styles/public.css?v=20261125f">
 </head>
 <body class="pub-body" data-halaman-publik="beranda">
 
@@ -30,7 +30,7 @@
     </button>
     <nav>
       <a href="index.html">Beranda</a>
-      <a href="profil-sppg.html">Profil SPPG</a>
+      <a href="profil-sppg.html">Tentang Kami</a>
       <a href="penerima-manfaat.html">Penerima Manfaat</a>
       <a href="menu-hari-ini.html">Menu Hari Ini</a>
       <a href="informasi-publik.html">Informasi</a>
@@ -38,13 +38,14 @@
       <a href="portal.html" class="pub-sidebar-cta">Portal SPPG Jeungjing →</a>
     </nav>
   </aside>
-
+  <div id="situsGagal" class="pub-gagal" hidden><div class="pub-wrap">Sebagian isi halaman belum dapat dimuat. Coba muat ulang halaman.</div></div>
   <section class="pub-hero">
     <div class="pub-wrap">
       <div class="pub-hero-inner">
         <p class="pub-eyebrow-plain">Satuan Pelayanan Pemenuhan Gizi</p>
-        <h1 data-konten="hero_judul">Mendukung Program<br>Makanan Bergizi Gratis</h1>
-        <p class="lede" data-konten="hero_deskripsi">SPPG Jeungjing menyiapkan dan mendistribusikan makanan bergizi setiap hari untuk mendukung tumbuh kembang anak-anak dan kesehatan ibu di Desa Jeungjing, Kecamatan Cisoka.</p>
+        <h1>Mendukung Program<br>Makanan Bergizi Gratis</h1>
+        <p class="lede">SPPG Jeungjing menyiapkan dan mendistribusikan makanan bergizi untuk mendukung tumbuh kembang anak-anak dan kesehatan ibu di Desa Jeungjing, Kecamatan Cisoka, dan sekitarnya.</p>
+        <p><span id="statusHariIni" class="pub-status" hidden></span></p>
         <div class="pub-hero-actions">
           <a href="profil-sppg.html" class="pub-btn pub-btn-primary">Tentang Kami</a>
           <a href="menu-hari-ini.html" class="pub-btn pub-btn-outline">Lihat Menu Hari Ini</a>
@@ -55,34 +56,28 @@
       <img src="assets/ilustrasi-gedung-sppg-web.png" alt="Gedung SPPG Jeungjing">
     </div>
   </section>
-
-  <section class="pub-section alt">
+  <section class="pub-section alt" id="ringkasanSection">
     <div class="pub-wrap">
       <div class="pub-section-head">
         <p class="pub-eyebrow-plain">Ringkasan</p>
-        <h2>Melayani Desa Jeungjing dan sekitarnya</h2>
-        <p>SPPG Jeungjing beroperasi setiap hari kerja, menyiapkan makanan bergizi langsung dari dapur menuju satuan pendidikan dan kelompok penerima manfaat di wilayah layanan.</p>
+        <h2>SPPG Jeungjing dalam angka</h2>
+        <p>Angka di bawah diambil otomatis dari data operasional SPPG Jeungjing.</p>
       </div>
-      <div class="pub-stats">
-        <div class="pub-stat"><b>5</b><span>Hari operasional per minggu</span></div>
-        <div class="pub-stat"><b>1</b><span>Dapur produksi di Desa Jeungjing</span></div>
-        <div class="pub-stat"><b>50+</b><span>Relawan yang bertugas</span></div>
-      </div>
+      <div class="pub-benef-grid" id="ringkasanGrid"></div>
     </div>
   </section>
-
-  <section class="pub-section">
+  <section class="pub-section ">
     <div class="pub-wrap">
       <div class="pub-section-head">
         <p class="pub-eyebrow-plain">Hari ini</p>
         <h2>Menu Hari Ini</h2>
-        <p>Susunan menu bergizi seimbang yang sedang disiapkan dan didistribusikan hari ini.</p>
+        <p>Susunan menu bergizi yang disiapkan dan didistribusikan hari ini.</p>
       </div>
-      <div class="pub-menu-grid"><p class="pub-menu-kosong">Memuat menu hari ini…</p></div>
+      <p class="pub-catat" id="menuTanggal"></p>
+      <div class="pub-menu-grid" id="menuGrid"><p class="pub-menu-kosong">Memuat menu hari ini…</p></div>
       <p style="margin-top:20px;"><a href="menu-hari-ini.html" class="pub-btn pub-btn-outline">Lihat Detail Menu →</a></p>
     </div>
   </section>
-
   <section class="pub-section alt">
     <div class="pub-wrap">
       <div class="pub-section-head">
@@ -90,53 +85,37 @@
         <h2>Penerima Manfaat</h2>
         <p>Kelompok yang menerima manfaat langsung dari layanan SPPG Jeungjing.</p>
       </div>
-      <div class="pub-benef-grid">
-        <div class="pub-benef-card"><b>—</b><span>Peserta Didik</span></div>
-        <div class="pub-benef-card"><b>—</b><span>Ibu Hamil</span></div>
-        <div class="pub-benef-card"><b>—</b><span>Ibu Menyusui</span></div>
-        <div class="pub-benef-card"><b>—</b><span>Balita</span></div>
-      </div>
+      <div class="pub-benef-grid" id="benefGrid"><p class="pub-menu-kosong">Memuat…</p></div>
       <p style="margin-top:20px;"><a href="penerima-manfaat.html" class="pub-btn pub-btn-outline">Selengkapnya →</a></p>
     </div>
   </section>
-
-  <section class="pub-section">
+  <section class="pub-section " id="kabarSection">
     <div class="pub-wrap">
       <div class="pub-section-head">
         <p class="pub-eyebrow-plain">Kabar Terbaru</p>
         <h2>Informasi</h2>
       </div>
-      <div class="pub-info-list" id="infoTerbaruList">
-        <div class="pub-info-row">
-          <time>—</time>
-          <div>
-            <h3>Informasi akan tampil di sini</h3>
-            <p>Kabar dan pengumuman terbaru dari SPPG Jeungjing akan diperbarui secara berkala.</p>
-          </div>
-        </div>
-      </div>
+      <div class="pub-info-list" id="kabarList"></div>
       <p style="margin-top:20px;"><a href="informasi-publik.html" class="pub-btn pub-btn-outline">Lihat Semua Informasi →</a></p>
     </div>
   </section>
-
   <section class="pub-section alt">
     <div class="pub-wrap pub-two-col">
       <div>
         <p class="pub-eyebrow-plain">Lokasi</p>
         <h2 style="font-family:var(--pub-serif);font-size:26px;color:var(--pub-navy);margin:0 0 14px;">SPPG Jeungjing</h2>
-        <p style="color:var(--pub-ink-soft);margin:0 0 20px;">Kp. Kecok, RT.004, Desa Jeungjing, Kecamatan Cisoka, Kabupaten Tangerang, Banten 15730</p>
-        <a href="kontak.html" class="pub-btn pub-btn-primary">Hubungi Kami</a>
+        <p id="lokasiAlamat" style="color:var(--pub-ink-soft);margin:0 0 20px;">Kp. Kecok, RT.004, Desa Jeungjing, Kecamatan Cisoka, Kabupaten Tangerang, Banten 15730</p>
+        <p class="pub-btn-row"><a href="kontak.html" class="pub-btn pub-btn-primary">Hubungi Kami</a> <a data-situs="tautan-peta" href="#" target="_blank" rel="noopener" class="pub-btn pub-btn-outline" hidden>Buka di Google Maps</a></p>
       </div>
-      <div class="pub-map-frame">
-        <iframe src="https://www.google.com/maps?q=Jeungjing,Cisoka,Tangerang&output=embed" width="100%" height="100%" style="border:0;" loading="lazy"></iframe>
-      </div>
+      <div class="pub-map-frame" id="lokasiPeta"><p class="pub-menu-kosong">Memuat peta…</p></div>
     </div>
   </section>
 
   <footer class="pub-footer">
     <div class="pub-wrap">
       <strong>SPPG JEUNGJING</strong>
-      <p style="margin:10px 0 0;">Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang – Banten, 15730</p>
+      <p id="footAlamat" style="margin:10px 0 0;">Kp. Kecok, RT.004, Desa Jeungjing, Kecamatan Cisoka, Kabupaten Tangerang, Banten 15730</p>
+      <p id="footKontak" class="pub-foot-kontak"></p>
       <hr class="rule">
       <p class="fine">© 2026 SPPG Jeungjing · Developed by Fatur Rizky Fahriansyah</p>
     </div>
@@ -144,7 +123,6 @@
 
   <script src="modules/website-publik/public-nav.js"></script>
   <script src="core/config.js"></script>
-  <script src="modules/website-publik/public-konten.js"></script>
-  <script src="modules/website-publik/public-dashboard-data.js?v=20261125a"></script>
+  <script src="modules/website-publik/public-situs.js?v=20261125f"></script>
 </body>
 </html>

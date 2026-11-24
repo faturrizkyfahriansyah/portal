@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Data Pribadi (view)
       isiAtauBelumDiisi_(document.getElementById('vNik'), profil.nik);
+      if (!profil.nik) document.getElementById('vNik').textContent = 'Wajib diisi — lengkapi lewat tombol Ubah';
       isiAtauBelumDiisi_(document.getElementById('vTempatLahir'), profil.tempatLahir);
       isiAtauBelumDiisi_(document.getElementById('vTanggalLahir'), formatTanggalIndo_(profil.tanggalLahir));
       isiAtauBelumDiisi_(document.getElementById('vJenisKelamin'), profil.jenisKelamin);
@@ -231,31 +232,60 @@ document.addEventListener('DOMContentLoaded', async () => {
   // kalau tersimpan:false (race, terkunci pas mau simpan) tampilkan modal;
   // kalau sukses -> pesan berhasil, tutup mode edit, muat ulang profil.
   // ---------------------------------------------------------------
+  // Status simpan DI TOMBOL itu sendiri (permintaan Admin 25 Nov 2026): Menyimpan... -> Tersimpan (centang) / Belum tersimpan + alasan tepat di bawah tombol.
+  const IKON_CENTANG_ = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-3px;margin-right:6px"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+  function pesanInline_(tombol) {
+    // pesan tepat di bawah tombol (atau di bawah baris tombol Batal/Simpan)
+    const baris = (tombol.parentElement && tombol.parentElement.style.display === 'flex') ? tombol.parentElement : tombol;
+    let el = baris.nextElementSibling;
+    if (!el || !el.classList.contains('pesan-simpan')) { el = document.createElement('div'); el.className = 'pesan-simpan'; el.setAttribute('role', 'alert'); el.setAttribute('aria-live', 'polite'); baris.insertAdjacentElement('afterend', el); }
+    return el;
+  }
+  function statusTombol_(tombol, keadaan, teks) {
+    tombol.classList.remove('btn-proses', 'btn-ok', 'btn-gagal');
+    tombol.setAttribute('data-ts-skip', '1');   // status simpan diurus di sini
+    if (!tombol.dataset.teksAsli) tombol.dataset.teksAsli = tombol.textContent;
+    if (keadaan === 'proses') { tombol.classList.add('btn-proses'); tombol.disabled = true; tombol.textContent = teks || 'Menyimpan...'; pesanInline_(tombol).textContent = ''; }
+    else if (keadaan === 'ok') { tombol.classList.add('btn-ok'); tombol.disabled = true; tombol.innerHTML = IKON_CENTANG_; tombol.appendChild(document.createTextNode(teks || 'Tersimpan')); }
+    else if (keadaan === 'gagal') { tombol.classList.add('btn-gagal'); tombol.disabled = false; tombol.textContent = 'Belum tersimpan. Ketuk untuk coba lagi'; }
+    else { tombol.disabled = false; tombol.textContent = tombol.dataset.teksAsli; }
+  }
+  function galatInline_(tombol, teks) {
+    statusTombol_(tombol, 'reset'); const el = pesanInline_(tombol); el.textContent = teks;
+    try { el.scrollIntoView({ block: 'nearest' }); } catch (e) { /* abaikan */ }
+  }
+  const jeda_ = (ms) => new Promise((r) => setTimeout(r, ms));
+
   async function simpanBagian_(bagian, endpoint, payload, tombolSimpan) {
-    const teksAsli = tombolSimpan.textContent;
-    tombolSimpan.disabled = true;
-    tombolSimpan.textContent = 'Menyimpan...';
+    statusTombol_(tombolSimpan, 'proses');
+    let gagal = false;
     try {
       const hasil = await apiPost(endpoint, payload);
       if (hasil && hasil.tersimpan === false) {
+        statusTombol_(tombolSimpan, 'reset');
         tampilkanModalTerkunci_(hasil.tanggalBolehLagi);
       } else {
+        statusTombol_(tombolSimpan, 'ok', 'Tersimpan');
         showSuccess('✓ Perubahan berhasil disimpan');
+        await jeda_(600);
         tutupModeEdit_(bagian);
       }
       await muatProfil(); // ambil ulang data terbaru, apa pun hasilnya
     } catch (err) {
       // Gagal sungguhan (validasi/jaringan) -- form TETAP terbuka, data yg
-      // sudah diketik user TIDAK hilang, supaya bisa langsung diperbaiki.
-      showError(err.message || 'Perubahan belum tersimpan. Silakan coba kembali.');
+      // sudah diketik user TIDAK hilang; alasannya tampil tepat di bawah tombol.
+      gagal = true;
+      statusTombol_(tombolSimpan, 'gagal');
+      const el = pesanInline_(tombolSimpan); el.textContent = err.message || 'Perubahan belum tersimpan. Silakan coba kembali.';
+      try { el.scrollIntoView({ block: 'nearest' }); } catch (e) { /* abaikan */ }
     } finally {
-      tombolSimpan.disabled = false;
-      tombolSimpan.textContent = teksAsli;
+      if (!gagal) statusTombol_(tombolSimpan, 'reset');
     }
   }
 
   document.getElementById('formDataPribadi').addEventListener('submit', (e) => {
     e.preventDefault();
+    if (!/^\d{16}$/.test(document.getElementById('inputNik').value.replace(/[\s.\-]/g, ''))) { galatInline_(document.getElementById('btnSimpanDataPribadi'), 'NIK wajib diisi: 16 angka sesuai KTP.'); document.getElementById('inputNik').focus(); return; }
     simpanBagian_('dataPribadi', 'updateDataPribadiRelawan', {
       token: sesi.token,
       nik: document.getElementById('inputNik').value.trim(),
@@ -280,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     if (wilayahForm) {
       const kurang = wilayahForm.pesanKurang();
-      if (kurang) { showError(kurang); return; }
+      if (kurang) { galatInline_(document.getElementById('btnSimpanAlamat'), kurang); return; }
       const w = wilayahForm.ambil();
       simpanBagian_('alamat', 'simpanAlamatBertingkatRelawan', {
         token: sesi.token, alamat: document.getElementById('inputAlamat').value.trim(), desa: w.desa, kecamatan: w.kecamatan, kabupaten: w.kabupaten, provinsi: w.provinsi
@@ -297,7 +327,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     const hubungan = document.getElementById('inputKdHubungan').value;
     if (hubungan === 'Lainnya' && !document.getElementById('inputKdHubunganLainnya').value.trim()) {
-      showError('Isi kolom "Hubungan Lainnya".');
+      galatInline_(document.getElementById('btnSimpanKontakDarurat'), 'Isi kolom "Hubungan Lainnya".');
       return;
     }
     simpanBagian_('kontakDarurat', 'updateKontakDaruratRelawan', {
@@ -316,30 +346,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!info.boleh) { tampilkanModalTerkunci_(info.tanggalBolehLagi); return; }
 
     const berkas = document.getElementById('inputFotoProfil').files[0];
-    if (!berkas) { showError('Pilih foto dulu.'); return; }
+    if (!berkas) { galatInline_(document.getElementById('btnSimpanFoto'), 'Pilih foto dulu.'); return; }
     const tombol = document.getElementById('btnSimpanFoto');
-    const teksAsli = tombol.textContent;
+    let gagal = false;
     try {
-      tombol.disabled = true;
-      tombol.textContent = 'Menyimpan...';
+      statusTombol_(tombol, 'proses');
       showLoading('Menyiapkan foto...');
       const dataUrl = await perkecilGambar_(berkas, 400);
       const hasil = await apiPost('simpanFotoProfilRelawan', { token: sesi.token, fotoBase64: dataUrl }, 45000);
       hideLoading();
       if (hasil && hasil.tersimpan === false) {
+        statusTombol_(tombol, 'reset');
         tampilkanModalTerkunci_(hasil.tanggalBolehLagi);
       } else {
+        statusTombol_(tombol, 'ok', 'Foto tersimpan');
         showSuccess('✓ Perubahan berhasil disimpan');
         document.getElementById('fotoProfilPratinjau').innerHTML =
           `<img src="${hasil.fotoProfilUrl}" alt="Foto profil" style="width:100%;height:100%;object-fit:cover;">`;
+        await jeda_(600);
       }
       await muatProfil();
     } catch (err) {
       hideLoading();
-      showError(err.message || 'Perubahan belum tersimpan. Silakan coba kembali.');
+      gagal = true;
+      statusTombol_(tombol, 'gagal');
+      const el = pesanInline_(tombol); el.textContent = err.message || 'Foto belum tersimpan. Silakan coba kembali.';
     } finally {
-      tombol.disabled = false;
-      tombol.textContent = teksAsli;
+      if (!gagal) statusTombol_(tombol, 'reset');
     }
   });
 

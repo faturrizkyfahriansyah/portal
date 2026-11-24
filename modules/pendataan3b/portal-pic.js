@@ -71,11 +71,12 @@
   }
   function merek() {
     var bell = h('button', { class: 'ib', id: 'btnLonceng', 'aria-label': 'Pemberitahuan', title: 'Pemberitahuan', onclick: function () { pindah('notifikasi'); } }, K().ikon('lonceng', 20), h('span', { class: 'dot', id: 'dotNotif', style: 'display:none' }));
+    var bantu = h('button', { class: 'ib', id: 'btnBantuanHeader', 'aria-label': 'Bantuan', title: 'Bantuan', onclick: function () { pindah('bantuan'); } }, K().ikon('bantuan', 20));
     var av = h('button', { class: 'ib av', id: 'btnAvatar', 'aria-label': 'Profil saya', title: 'Profil saya', text: inisial(), onclick: function () { pindah('profil'); } });
     var el = h('div', { class: 'brand', id: 'merekPic' }, h('div', { class: 'brand-in' },
       h('div', { class: 'brand-mid' }, h('img', { src: 'assets/logo-bgn.png', alt: 'Logo Badan Gizi Nasional' }), h('img', { src: 'assets/logo.png', alt: 'Logo SPPG Jeungjing' }),
         h('div', { class: 'brand-text' }, h('strong', { text: 'SPPG JEUNGJING' }), h('span', { text: 'Portal PIC' }))),
-      h('div', { class: 'brand-right' }, bell, av)));
+      h('div', { class: 'brand-right' }, bell, bantu, av)));
     return el;
   }
   /** Dipanggil setiap layar PIC selesai digambar: pasang header di paling atas. */
@@ -89,7 +90,7 @@
   }
   function navbawah() {
     var tabs = [['beranda', 'beranda', 'Beranda'], ['pendataan', 'pendataan', 'Pendataan'], ['harian', 'harian', 'Menu & PM'], ['insentif', 'insentif', 'Insentif'], ['profil', 'profil', 'Profil']];
-    var v = K().S.view, aktif = (v === 'home' || v === 'sekolah' || v === 'pendataan') ? 'pendataan' : (P.tab === 'instansi' ? 'beranda' : (P.tab === 'notifikasi' || P.tab === 'menu' ? '' : (P.tab === 'pengaduan' || P.tab === 'bantuan' ? 'profil' : (P.tab === 'pemutakhiran' ? 'pendataan' : P.tab))));
+    var v = K().S.view, aktif = (v === 'home' || v === 'sekolah' || v === 'pendataan') ? 'pendataan' : (P.tab === 'instansi' ? 'beranda' : (P.tab === 'notifikasi' || P.tab === 'menu' ? '' : (P.tab === 'pengaduan' || P.tab === 'bantuan' || P.tab === 'pengaturan' ? 'profil' : (P.tab === 'pemutakhiran' ? 'pendataan' : P.tab))));
     var nav = h('nav', { class: 'tabbar', id: 'navUtama', 'aria-label': 'Menu utama' });
     tabs.forEach(function (t) {
       nav.appendChild(h('button', { class: 'tab', 'data-tab': t[0], 'aria-current': aktif === t[0] ? 'page' : null, onclick: function () { pindah(t[0]); } }, h('span', { class: 'ti' }, K().ikon(t[1], 24)), h('span', { text: t[2] })));
@@ -397,8 +398,8 @@
   function terapkanFoto() {
     var F = P.foto || {};
     function pasangBg(el, url) { if (!el) return; if (url) { el.style.backgroundImage = 'url("' + url + '")'; el.classList.add('berfoto'); } else { el.style.backgroundImage = ''; el.classList.remove('berfoto'); } }
-    pasangBg(document.getElementById('btnAvatar'), F.profil); pasangBg(document.querySelector('#pbanner .pav'), F.profil); pasangBg(document.getElementById('pbanner'), F.latar);
-    var h1 = document.getElementById('btnHapusProfil'), h2 = document.getElementById('btnHapusLatar'); if (h1) h1.style.display = F.profil ? '' : 'none'; if (h2) h2.style.display = F.latar ? '' : 'none';
+    pasangBg(document.getElementById('btnAvatar'), F.profil); pasangBg(document.querySelector('#pbanner .pav'), F.profil);
+    var h1 = document.getElementById('btnHapusProfil'); if (h1) h1.style.display = F.profil ? '' : 'none';
   }
   async function muatFoto() {
     if (P.foto) { terapkanFoto(); return; } if (P.fotoMemuat) return; P.fotoMemuat = true;
@@ -436,9 +437,8 @@
     }
     return h('div', { class: 'fotoaksi', id: 'fotoAksi' },
       h('button', { class: 'btn sm sec', id: 'btnFotoProfil', text: 'Ganti foto profil', onclick: function () { pilih('profil'); } }),
-      h('button', { class: 'btn sm sec', id: 'btnFotoLatar', text: 'Ganti foto latar', onclick: function () { pilih('latar'); } }),
       h('button', { class: 'btn sm sec', id: 'btnHapusProfil', style: 'display:none', text: 'Hapus foto profil', onclick: function () { hapus('profil'); } }),
-      h('button', { class: 'btn sm sec', id: 'btnHapusLatar', style: 'display:none', text: 'Hapus foto latar', onclick: function () { hapus('latar'); } }), pesan);
+      pesan);
   }
 
   /* ---------- Profil ---------- */
@@ -449,21 +449,24 @@
     status(wrap);
     if (R) {
       var tempat = (R.instansi || []).map(function (x) { return namaTempat(x); }).join(', ');
-      wrap.appendChild(h('div', { class: 'pbanner', id: 'pbanner' }, h('div', { class: 'pav', text: (R.panggilan ? String(R.panggilan) : namaSapa(R.nama)).trim().charAt(0).toUpperCase() || '?' })));
+      wrap.appendChild(h('div', { class: 'pbanner', id: 'pbanner' }, h('div', { class: 'pav', text: namaSapa(R.nama).trim().charAt(0).toUpperCase() || '?' })));
       wrap.appendChild(h('div', { class: 'pnama' }, h('b', { text: R.nama }), h('span', { text: [R.jabatan, tempat ? 'Penanggung jawab ' + tempat : ''].filter(Boolean).join(' • ') || 'Penanggung jawab' })));
       wrap.appendChild(barisFoto()); terapkanFoto();
       if (!R.lengkap) wrap.appendChild(h('div', { class: 'ban' }, h('b', { text: 'Profil belum lengkap' }), h('span', { text: 'Lengkapi data diri di bawah ini.' })));
       wrap.appendChild(h('h2', { text: 'Data diri' }));
       wrap.appendChild(formDiri(R));
+      wrap.appendChild(h('h2', { text: 'Akun dan kontak' }));
+      wrap.appendChild(formAkun(R));
       wrap.appendChild(h('h2', { text: 'Data dari pengelola' }));
       var kartu = h('div', { class: 'item' });
-      [['Nama lengkap', R.nama], ['Jabatan', R.jabatan || '-'], ['Nomor HP', R.nomorHp || '-'], ['Rekening', (R.rekening || '-') + (R.namaRekening ? ' a.n. ' + R.namaRekening : '')], ['Terakhir masuk', waktu(R.terakhirMasuk)]].forEach(function (b) {
+      [['Nama lengkap', R.nama], ['Jabatan', R.jabatan || '-'], ['Terakhir masuk', waktu(R.terakhirMasuk)]].forEach(function (b) {
         kartu.appendChild(h('div', { class: 'mrow' }, h('span', { class: 'ml', text: b[0] }), h('span', { text: b[1] })));
       });
       wrap.appendChild(kartu);
       wrap.appendChild(h('div', { class: 'tip', text: R.catatan }));
-      wrap.appendChild(h('h2', { text: 'Bantuan' }));
-      wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnBantuan', text: 'Bantuan dan pertanyaan', onclick: function () { pindah('bantuan'); } }));
+      wrap.appendChild(h('h2', { text: 'Lainnya' }));
+      wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnPengaturan', text: 'Pengaturan', onclick: function () { pindah('pengaturan'); } }));
+      wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnBantuan', style: 'margin-top:8px', text: 'Bantuan dan pertanyaan', onclick: function () { pindah('bantuan'); } }));
       wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnPengProfil', style: 'margin-top:8px', text: 'Pengaduan dan saran', onclick: function () { bukaPengaduan(null); } }));
       wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnPemutakhiranProfil', style: 'margin-top:8px', text: 'Pemutakhiran data', onclick: function () { pindah('pemutakhiran'); } }));
       wrap.appendChild(h('h2', { text: 'Keamanan' }));
@@ -473,10 +476,22 @@
     }
     pasang(topbar('Profil saya'), wrap);
   }
+  /* Tombol simpan memberi tahu prosesnya DI TOMBOL ITU SENDIRI (permintaan Admin 25 Nov 2026): Menyimpan… -> Tersimpan (centang) atau Gagal + pesan tepat di bawahnya. */
+  var IKON_CENTANG = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-4px;margin-right:6px"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+  function mulai(btn) { btn.className = btn.className.replace(/\s*\b(ok|gagal|proses)\b/g, '') + ' proses'; btn.disabled = true; btn.textContent = 'Menyimpan…'; btn.setAttribute('aria-live', 'polite'); }
+  function ok(btn, teks, lanjut) {
+    btn.className = btn.className.replace(/\s*\bproses\b/g, '') + ' ok'; btn.disabled = true; btn.innerHTML = IKON_CENTANG; btn.appendChild(document.createTextNode(teks));
+    setTimeout(function () { if (lanjut) lanjut(); }, 600);
+  }
+  function gagal(btn, msg, e, teksAsli) {
+    btn.className = btn.className.replace(/\s*\b(proses|ok)\b/g, '') + ' gagal'; btn.disabled = false; btn.textContent = 'Belum tersimpan. Ketuk untuk coba lagi';
+    msg.textContent = (e && e.message) || 'Belum tersimpan. Periksa sambungan internet.';
+    try { msg.scrollIntoView({ block: 'nearest' }); } catch (x) { /* abaikan */ }
+  }
   /** Formulir data diri yang boleh dilengkapi PIC sendiri. */
   function formDiri(R) {
     var F = P.formDiri = P.formDiri || { jk: R.jenisKelamin || '' };
-    var pang = fld('dPanggilan', 'Nama panggilan', 'Nama yang dipakai untuk menyapa Anda.', { maxlength: '40' }, R.panggilan);
+    var nik = fld('dNik', 'NIK (wajib)', '16 angka sesuai KTP.', { maxlength: '16', inputmode: 'numeric', autocomplete: 'off' }, R.nik);
     var tmp = fld('dTempat', 'Tempat lahir', null, { maxlength: '60' }, R.tempatLahir);
     var tgl = fld('dTanggal', 'Tanggal lahir', null, { type: 'date' }, R.tanggalLahir); tgl.el.value = R.tanggalLahir || '';
     var alm = h('textarea', { id: 'dAlamat', rows: '3', maxlength: '300', autocomplete: 'off', placeholder: 'Contoh: Kp. Kecok RT 04 RW 02' }); alm.value = R.alamat || '';
@@ -488,15 +503,38 @@
     var msg = h('div', { class: 'msg err', role: 'alert', 'aria-live': 'polite' }), btn = h('button', { class: 'btn block', id: 'btnSimpanDiri', text: 'Simpan data diri' });
     btn.addEventListener('click', async function () {
       msg.textContent = '';
+      if (!/^\d{16}$/.test(String(nik.el.value || '').replace(/[\s.\-]/g, ''))) { msg.textContent = 'NIK wajib diisi: 16 angka sesuai KTP.'; nik.el.focus(); return; }
       if (wil && wil.pesanKurang()) { msg.textContent = wil.pesanKurang(); return; }
-      btn.disabled = true; btn.textContent = 'Menyimpan…';
+      mulai(btn);
       try {
         var w = wil ? wil.ambil() : {};
-        await K().api('simpanProfilPic3B', { idInstansi: '', namaPanggilan: pang.el.value, tempatLahir: tmp.el.value, tanggalLahir: tgl.el.value, jenisKelamin: F.jk, alamat: alm.value, desa: w.desa || '', kecamatan: w.kecamatan || '', kabupaten: w.kabupaten || '', provinsi: w.provinsi || '' });
-        P.profil = null; P.formDiri = null; P.beranda = null; K().toast('Data diri tersimpan.'); K().render();
-      } catch (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Simpan data diri'; }
+        await K().api('simpanProfilPic3B', { idInstansi: '', nik: nik.el.value, tempatLahir: tmp.el.value, tanggalLahir: tgl.el.value, jenisKelamin: F.jk, alamat: alm.value, desa: w.desa || '', kecamatan: w.kecamatan || '', kabupaten: w.kabupaten || '', provinsi: w.provinsi || '' });
+        ok(btn, 'Data diri tersimpan', function () { P.profil = null; P.formDiri = null; P.beranda = null; K().render(); });
+      } catch (e) { gagal(btn, msg, e, 'Simpan data diri'); }
     });
-    return h('div', { class: 'item', id: 'formDiri' }, pang.blok, tmp.blok, tgl.blok, h('div', { class: 'fld' }, h('label', { text: 'Jenis kelamin' }), seg), wil ? wadahWil : null, h('div', { class: 'fld' }, h('label', { for: 'dAlamat', text: wil ? 'Alamat (jalan, RT/RW, kampung)' : 'Alamat' }), alm), msg, btn);
+    return h('div', { class: 'item', id: 'formDiri' }, nik.blok, tmp.blok, tgl.blok, h('div', { class: 'fld' }, h('label', { text: 'Jenis kelamin' }), seg), wil ? wadahWil : null, h('div', { class: 'fld' }, h('label', { for: 'dAlamat', text: wil ? 'Alamat (jalan, RT/RW, kampung)' : 'Alamat' }), alm), btn, msg);
+  }
+  /** Username login, nomor HP, dan rekening. Yang sudah tersimpan hanya bisa diubah dengan password dan dibatasi 30 hari sekali. */
+  function formAkun(R) {
+    var usr = fld('aUsername', 'Username untuk masuk', 'Huruf kecil, angka, titik atau garis bawah (4-30). Bisa dipakai masuk bersama password.', { maxlength: '30', autocapitalize: 'none', autocomplete: 'off' }, R.username);
+    var hp = fld('aHp', 'Nomor HP', R.sisaHariHp > 0 ? 'Nomor HP bisa diubah lagi ' + R.sisaHariHp + ' hari lagi.' : 'Dipakai untuk masuk dan menerima kode WhatsApp.', { type: 'tel', maxlength: '16', inputmode: 'tel', autocomplete: 'off' }, R.nomorHp);
+    var nr = fld('aNamaRek', 'Nama pemilik rekening', null, { maxlength: '80', autocomplete: 'off' }, R.namaRekening);
+    var rek = fld('aRek', 'Nomor rekening', R.rekeningTerisi ? 'Tersimpan: ' + R.rekening + (R.sisaHariRek > 0 ? '. Bisa diubah lagi ' + R.sisaHariRek + ' hari lagi.' : '. Ketik nomor baru bila ingin mengubah.') : 'Belum diisi. Isi bila perlu.', { inputmode: 'numeric', maxlength: '25', autocomplete: 'off' }, '');
+    var pw = inputPin('aPassword', 'Password Anda', 'Hanya diperlukan untuk mengubah nomor HP atau rekening yang sudah tersimpan.');
+    var msg = h('div', { class: 'msg err', role: 'alert', 'aria-live': 'polite' }), btn = h('button', { class: 'btn block', id: 'btnSimpanAkun', text: 'Simpan akun dan kontak' });
+    btn.addEventListener('click', async function () {
+      msg.textContent = '';
+      var isi = { username: usr.el.value.trim() };
+      if (hp.el.value.trim() && hp.el.value.trim() !== String(R.nomorHp || '').trim()) isi.nomorHp = hp.el.value.trim();
+      if (rek.el.value.trim()) { isi.nomorRekening = rek.el.value.trim(); isi.namaRekening = nr.el.value.trim(); }
+      if (pw.el.value) isi.password = pw.el.value;
+      mulai(btn);
+      try {
+        await K().api('simpanAkunPic3B', Object.assign({ idInstansi: '' }, isi));
+        ok(btn, 'Tersimpan', function () { P.profil = null; K().render(); });
+      } catch (e) { gagal(btn, msg, e, 'Simpan akun dan kontak'); }
+    });
+    return h('div', { class: 'item', id: 'formAkun' }, usr.blok, hp.blok, nr.blok, rek.blok, pw.blok, btn, msg);
   }
   /* Kolom password + ikon mata (gambar garis, bukan emoji). */
   function kolomSandi(el) {
@@ -521,13 +559,13 @@
       if (!a.el.value) { msg.textContent = 'Isi password lama.'; return; }
       if (b.el.value.length < 8) { msg.textContent = 'Password baru minimal 8 karakter.'; return; }
       if (b.el.value !== c.el.value) { msg.textContent = 'Password baru dan ulangannya tidak sama.'; return; }
-      btn.disabled = true; btn.textContent = 'Menyimpan…';
+      mulai(btn);
       try {
         var d = await K().api('gantiPinPic3B', { idInstansi: '', passwordLama: a.el.value, passwordBaru: b.el.value });
-        K().S.token = d.token; K().simpanSesi(); P.gantiPin = false; P.profil = null; K().toast('Password berhasil diganti.'); K().render();
-      } catch (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Simpan password baru'; }
+        K().S.token = d.token; K().simpanSesi(); ok(btn, 'Password berhasil diganti', function () { P.gantiPin = false; P.profil = null; K().render(); });
+      } catch (e) { gagal(btn, msg, e, 'Simpan password baru'); }
     });
-    return h('div', { class: 'item' }, a.blok, b.blok, c.blok, msg, btn, h('button', { class: 'btn sec block', style: 'margin-top:10px', text: 'Batal', onclick: function () { P.gantiPin = false; K().render(); } }));
+    return h('div', { class: 'item' }, a.blok, b.blok, c.blok, btn, msg, h('button', { class: 'btn sec block', style: 'margin-top:10px', text: 'Batal', onclick: function () { P.gantiPin = false; K().render(); } }));
   }
 
   function bukaInstansi(id) { P.idi = id; P.data = null; P.form = null; P.tab = 'instansi'; K().S.view = 'instansi'; K().simpanSesi(); K().render(); window.scrollTo(0, 0); }
@@ -557,15 +595,32 @@
     status(wrap);
     if (D) {
       var d = D.dasar, p = D.profil;
-      var alamatTeks = (window.SPPGWilayah ? window.SPPGWilayah.teks(d) : [d.alamat, d.desa, d.kecamatan, d.kabupaten, d.provinsi].filter(Boolean).join(', ')) || 'Belum diisi pengelola';
-      var koord = (d.lintang !== '' && d.lintang !== undefined && d.bujur !== '' && d.bujur !== undefined) ? d.lintang + ', ' + d.bujur : '';
+            var koord = (d.lintang !== '' && d.lintang !== undefined && d.bujur !== '' && d.bujur !== undefined) ? d.lintang + ', ' + d.bujur : '';
       var kunci = h('div', { class: 'item', id: 'dataResmi', style: 'margin-top:12px' },
-        h('div', { class: 'sec-h', style: 'margin:0 0 8px', text: 'Data tempat (diatur pengelola)' }),
+        h('div', { class: 'sec-h', style: 'margin:0 0 8px', text: 'Data tempat' }),
         h('div', { class: 'mrow' }, h('span', { class: 'ml', text: 'Nama' }), h('span', { text: namaTempat(d) })),
-        h('div', { class: 'mrow' }, h('span', { class: 'ml', text: 'Alamat' }), h('span', { text: alamatTeks })),
         h('div', { class: 'mrow' }, h('span', { class: 'ml', text: 'Koordinat' }), h('span', null, koord ? koord + ' ' : 'Belum diisi pengelola', koord ? h('a', { href: tautanPeta(koord), target: '_blank', rel: 'noopener', text: 'Lihat peta' }) : null)),
-        h('button', { class: 'btn sm sec', id: 'btnLaporDataTempat', style: 'margin-top:8px', text: 'Ada yang salah? Laporkan', onclick: function () { bukaPengaduan({ kat: 'DATA_TEMPAT', idi: P.idi }); } }));
+        h('button', { class: 'btn sm sec', id: 'btnLaporDataTempat', style: 'margin-top:8px', text: 'Nama atau koordinat salah? Laporkan', onclick: function () { bukaPengaduan({ kat: 'DATA_TEMPAT', idi: P.idi }); } }));
       wrap.appendChild(kunci);
+      /* Alamat resmi: diisi PIC sendiri (keputusan Admin 25 Nov 2026). */
+      var almAwal = P.formAlamat || { alamat: d.alamat || '', desa: d.desa || '', kecamatan: d.kecamatan || '', kabupaten: d.kabupaten || '', provinsi: d.provinsi || '' };
+      var wadahA = h('div', { id: 'aWilayah' }), wilA = window.SPPGWilayah ? window.SPPGWilayah.pasang(wadahA, { desa: almAwal.desa, kecamatan: almAwal.kecamatan, kabupaten: almAwal.kabupaten, provinsi: almAwal.provinsi }, { awalan: 'aw' }) : null;
+      var almJalan = h('textarea', { id: 'aAlamat', rows: '3', maxlength: '300', autocomplete: 'off', placeholder: 'Contoh: Kp. Kecok RT 04 RW 02' }); almJalan.value = almAwal.alamat;
+      var almMsg = h('div', { class: 'msg err', role: 'alert', 'aria-live': 'polite' }), almBtn = h('button', { class: 'btn block', id: 'btnSimpanAlamatTempat', text: 'Simpan alamat resmi' });
+      almBtn.addEventListener('click', async function () {
+        almMsg.textContent = '';
+        if (wilA && wilA.pesanKurang()) { almMsg.textContent = wilA.pesanKurang(); return; }
+        mulai(almBtn);
+        try {
+          var w = wilA ? wilA.ambil() : {};
+          var r = await K().api('simpanAlamatTempatPic3B', { idInstansi: P.idi, alamat: almJalan.value, desa: w.desa || '', kecamatan: w.kecamatan || '', kabupaten: w.kabupaten || '', provinsi: w.provinsi || '' });
+          ok(almBtn, r.berubah ? 'Alamat resmi tersimpan' : 'Tidak ada yang berubah', function () { P.data = Object.assign({}, D, { dasar: r.dasar || d }); P.formAlamat = null; P.beranda = null; K().render(); });
+        } catch (e) { gagal(almBtn, almMsg, e, 'Simpan alamat resmi'); }
+      });
+      wrap.appendChild(h('div', { class: 'item', id: 'formAlamatTempat', style: 'margin-top:12px' },
+        h('div', { class: 'sec-h', style: 'margin:0 0 8px', text: 'Alamat resmi tempat' }),
+        h('div', { class: 'hint', text: 'Diisi oleh PIC. Alamat ini dipakai untuk pengantaran makanan.' }),
+        wilA ? wadahA : null, h('div', { class: 'fld' }, h('label', { for: 'aAlamat', text: wilA ? 'Alamat (jalan, RT/RW, kampung)' : 'Alamat' }), almJalan), almBtn, almMsg));
       wrap.appendChild(h('div', { class: 'tip', style: 'margin-top:12px', text: 'Isi data di bawah supaya pengantaran makanan lancar.' }));
       var f = {
         kontakHp: fld('kontakHp', 'Nomor HP PIC yang bisa dihubungi', 'Untuk koordinasi pengantaran makanan.', { type: 'tel', inputmode: 'tel', placeholder: '08xxxxxxxxxx' }, p.kontakHp),
@@ -588,13 +643,13 @@
       ['cadN', 'cadH', 'cat'].forEach(function (k) { wrap.appendChild(f[k].blok); });
       var msg = h('div', { class: 'msg err', role: 'alert', 'aria-live': 'polite' }), btn = h('button', { class: 'btn block', id: 'btnSimpanInstansi', text: 'Simpan data' });
       btn.addEventListener('click', async function () {
-        msg.textContent = ''; btn.disabled = true; btn.textContent = 'Menyimpan…';
+        msg.textContent = ''; mulai(btn);
         try {
           var r = await K().api('simpanDataInstansiPic3B', { idInstansi: P.idi, kontakHp: f.kontakHp.el.value, email: f.email.el.value, jamTerimaMakan: f.jam.el.value, titikAntar: f.titik.el.value, lokasi: f.lokasi.el.value, picCadanganNama: f.cadN.el.value, picCadanganHp: f.cadH.el.value, catatan: f.cat.el.value });
-          P.data = Object.assign({}, D, { profil: r.profil, lengkap: r.lengkap }); P.beranda = null; K().toast(r.berubah ? 'Data tersimpan.' : 'Tidak ada yang berubah.'); K().render();
-        } catch (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Simpan data'; }
+          ok(btn, r.berubah ? 'Data tersimpan' : 'Tidak ada yang berubah', function () { P.data = Object.assign({}, D, { profil: r.profil, lengkap: r.lengkap }); P.beranda = null; K().render(); });
+        } catch (e) { gagal(btn, msg, e, 'Simpan data'); }
       });
-      wrap.appendChild(msg); wrap.appendChild(btn);
+      wrap.appendChild(btn); wrap.appendChild(msg);
       if (p.diubahPada) wrap.appendChild(h('div', { class: 'meta', style: 'margin-top:10px;color:var(--mut);font-size:14px', text: 'Terakhir disimpan: ' + waktu(p.diubahPada) }));
     }
     pasang(topbar(D ? (D.dasar.posyandu ? 'Data Posyandu' : 'Data satuan pendidikan') : 'Data', D ? namaTempat(D.dasar) : ' '), wrap);
@@ -633,16 +688,21 @@
         var jml = pm ? fld('pengJml', F.kat === 'PM_TAMBAH' ? 'Ditambah berapa PM?' : 'Dikurangi berapa PM?', 'Isi angka saja.', { inputmode: 'numeric', maxlength: '4' }, F.jml) : null; if (jml) box.appendChild(jml.blok);
         var contoh = { INSENTIF: 'Contoh: insentif tanggal 23 belum masuk atau jumlahnya berbeda.', PM_TAMBAH: 'Contoh: ada 5 ibu hamil baru yang ikut.', PM_KURANG: 'Contoh: 3 balita sudah pindah.', DATA_TEMPAT: 'Contoh: alamat atau nama tempat salah.', MAKANAN: 'Contoh: makanan terlambat datang.', SARAN: 'Tulis kritik atau saran Anda.', LAINNYA: 'Tulis yang ingin disampaikan.' }[F.kat];
         var ps = h('textarea', { id: 'pengPesan', rows: '4', maxlength: '600', placeholder: contoh, autocomplete: 'off' }); ps.value = F.pesan || '';
+        /* Simpan isian saat diketik supaya tidak hilang bila halaman digambar ulang (mis. daftar pengaduan baru selesai dimuat). */
+        ps.addEventListener('input', function () { F.pesan = ps.value; });
+        if (sel) sel.addEventListener('change', function () { F.idi = sel.value; });
+        if (tgl) tgl.el.addEventListener('input', function () { F.tgl = tgl.el.value; });
+        if (jml) jml.el.addEventListener('input', function () { F.jml = jml.el.value; });
         box.appendChild(h('div', { class: 'fld' }, h('label', { for: 'pengPesan', text: 'Pesan' }), ps));
         var msg = h('div', { class: 'msg err', role: 'alert', 'aria-live': 'polite' }), btn = h('button', { class: 'btn block', id: 'btnKirimPeng', text: 'Kirim' });
         btn.addEventListener('click', async function () {
-          msg.textContent = ''; btn.disabled = true; btn.textContent = 'Mengirim…';
+          msg.textContent = ''; mulai(btn); btn.textContent = 'Mengirim…';
           try {
             F.pesan = ps.value; await K().api('kirimPengaduanPic3B', { kategori: F.kat, idInstansi: sel ? sel.value : (F.idi || ''), tanggal: tgl ? tgl.el.value : '', jumlah: jml ? jml.el.value : '', pesan: ps.value });
-            var kata = (KAT_PENG.filter(function (k) { return k[0] === F.kat; })[0] || [0, ''])[1]; F.selesai = kata; P.peng = null; K().toast('Pengaduan terkirim.'); K().render();
-          } catch (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Kirim'; }
+            var kata = (KAT_PENG.filter(function (k) { return k[0] === F.kat; })[0] || [0, ''])[1]; F.selesai = kata; ok(btn, 'Terkirim', function () { P.peng = null; K().render(); });
+          } catch (e) { gagal(btn, msg, e, 'Kirim'); btn.textContent = 'Belum terkirim. Ketuk untuk coba lagi'; }
         });
-        box.appendChild(msg); box.appendChild(btn); wrap.appendChild(box);
+        box.appendChild(btn); box.appendChild(msg); wrap.appendChild(box);
       }
     }
     wrap.appendChild(h('h2', { text: 'Pengaduan saya' }));
@@ -667,10 +727,14 @@
   /* ---------- Bantuan ---------- */
   var FAQ = [
     ['Lupa password?', 'Di layar masuk, ketuk "Lupa password?". Kode dikirim lewat WhatsApp.'],
-    ['Mau ganti password?', 'Buka Profil, lalu ketuk "Ganti password".'],
-    ['Nama atau alamat tempat salah?', 'Buka Data tempat, lalu ketuk "Ada yang salah? Laporkan".'],
+    ['Mau ganti password?', 'Buka Profil, lalu ketuk "Ganti password". Atau lewat Pengaturan.'],
+    ['Mau mengubah alamat tempat?', 'Buka Beranda, ketuk "Data tempat" pada tempat Anda, lalu isi "Alamat resmi tempat" dan ketuk Simpan.'],
+    ['Nama atau koordinat tempat salah?', 'Nama dan koordinat diatur pengelola. Di Data tempat, ketuk "Nama atau koordinat salah? Laporkan".'],
     ['Bagaimana mengisi data penerima manfaat?', 'Buka Pendataan, pilih tempat, isi formulir, lalu Simpan.'],
     ['Bisa ditempel dari Excel?', 'Bisa. Di Pendataan, ketuk "Tempel banyak data dari Excel". Tulis NISN lengkap 10 angka.'],
+    ['Di mana melihat menu dan jumlah PM harian?', 'Buka tab "Menu & PM". Menu dan jumlah penerima manfaat per hari tampil di sana.'],
+    ['Insentif saya kurang tepat?', 'Buka tab Insentif untuk melihat perhitungannya. Bila masih keliru, ketuk "Sampaikan pengaduan atau saran" di halaman ini.'],
+    ['Cara mengganti foto profil?', 'Buka Profil, lalu ketuk "Ganti foto profil".'],
     ['Apakah data saya aman?', 'Hanya Anda dan pengelola yang bisa melihat data tempat Anda. Jangan berikan password kepada siapa pun.']
   ];
   function renderBantuan() {
@@ -685,14 +749,41 @@
     pasang(topbar('Bantuan'), wrap);
   }
 
+  /* ---------- Pengaturan ---------- */
+  var KEY_UKURAN = 'pic.ukuranTeks.v1';
+  function ukuranTeks() { try { return localStorage.getItem(KEY_UKURAN) === 'besar' ? 'besar' : 'normal'; } catch (e) { return 'normal'; } }
+  function terapkanUkuran() { try { document.documentElement.style.zoom = ukuranTeks() === 'besar' ? '1.12' : ''; } catch (e) { /* abaikan */ } }
+  function renderPengaturan() {
+    var wrap = h('div', { class: 'wrap', id: 'pengaturanPic' });
+    wrap.appendChild(h('h2', { text: 'Tampilan' }));
+    var seg = h('div', { class: 'seg', id: 'segUkuran', role: 'group', 'aria-label': 'Ukuran tulisan' });
+    [['normal', 'Normal'], ['besar', 'Besar']].forEach(function (u) {
+      seg.appendChild(h('button', { type: 'button', 'data-u': u[0], 'aria-pressed': String(ukuranTeks() === u[0]), text: u[1], onclick: function () {
+        try { localStorage.setItem(KEY_UKURAN, u[0]); } catch (e) { /* tanpa penyimpanan: berlaku untuk sesi ini saja */ }
+        terapkanUkuran(); Array.prototype.forEach.call(seg.children, function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-u') === u[0])); });
+      } }));
+    });
+    wrap.appendChild(h('div', { class: 'item' }, h('div', { class: 'nm', text: 'Ukuran tulisan' }), h('div', { class: 'meta', style: 'margin:4px 0 10px', text: 'Pilih Besar bila tulisan terasa kecil.' }), seg));
+    wrap.appendChild(h('h2', { text: 'Keamanan' }));
+    wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnPengGantiPassword', text: 'Ganti password', onclick: function () { P.gantiPin = true; pindah('profil'); } }));
+    wrap.appendChild(h('h2', { text: 'Pemberitahuan' }));
+    wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnPengNotif', text: 'Lihat pemberitahuan dari pengelola', onclick: function () { pindah('notifikasi'); } }));
+    wrap.appendChild(h('h2', { text: 'Bantuan' }));
+    wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnPengBantuan', text: 'Bantuan dan pertanyaan', onclick: function () { pindah('bantuan'); } }));
+    wrap.appendChild(h('a', { class: 'btn sec block', id: 'btnPengWa', href: WA_ADMIN, target: '_blank', rel: 'noopener', style: 'display:block;text-align:center;text-decoration:none;line-height:1.9;margin-top:8px', text: 'Hubungi Admin lewat WhatsApp' }));
+    wrap.appendChild(h('div', { class: 'item', style: 'margin-top:16px' }, h('div', { class: 'meta', text: 'Portal PIC SPPG Jeungjing. Data Anda hanya bisa dilihat Anda dan pengelola.' })));
+    wrap.appendChild(h('button', { class: 'btn del block', id: 'btnPengKeluar', style: 'margin-top:14px', text: 'Keluar', onclick: function () { K().keluar(); } }));
+    pasang(topbar('Pengaturan'), wrap);
+  }
+
   window.PortalPic = {
     reset: reset,
     render: function () {
-      var v = K().S.view; if (v === 'pilih') v = 'beranda';
+      terapkanUkuran(); var v = K().S.view; if (v === 'pilih') v = 'beranda';
       P.tab = v;
-      if (v === 'menu') renderMenu(); else if (v === 'pendataan') renderPendataan(); else if (v === 'profil') renderProfil(); else if (v === 'instansi') renderInstansi(); else if (v === 'pemutakhiran') renderPemutakhiran(); else if (v === 'pengaduan') renderPengaduan(); else if (v === 'harian') renderHarian(); else if (v === 'insentif') renderInsentif(); else if (v === 'bantuan') renderBantuan(); else if (v === 'notifikasi') renderNotifikasi(); else renderBeranda();
+      if (v === 'menu') renderMenu(); else if (v === 'pendataan') renderPendataan(); else if (v === 'profil') renderProfil(); else if (v === 'pengaturan') renderPengaturan(); else if (v === 'instansi') renderInstansi(); else if (v === 'pemutakhiran') renderPemutakhiran(); else if (v === 'pengaduan') renderPengaduan(); else if (v === 'harian') renderHarian(); else if (v === 'insentif') renderInsentif(); else if (v === 'bantuan') renderBantuan(); else if (v === 'notifikasi') renderNotifikasi(); else renderBeranda();
     },
-    tampil: function (v) { return ['beranda', 'pilih', 'menu', 'harian', 'insentif', 'pendataan', 'pemutakhiran', 'pengaduan', 'profil', 'instansi', 'bantuan', 'notifikasi'].indexOf(v) >= 0; },
+    tampil: function (v) { return ['beranda', 'pilih', 'menu', 'harian', 'insentif', 'pendataan', 'pemutakhiran', 'pengaduan', 'profil', 'instansi', 'bantuan', 'pengaturan', 'notifikasi'].indexOf(v) >= 0; },
     bukaInstansi: bukaInstansi,
     bukaPengaduan: bukaPengaduan,
     segar: segar,
