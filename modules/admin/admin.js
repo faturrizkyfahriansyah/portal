@@ -175,24 +175,33 @@
   };
 
   // ===== LOGIN / LOGOUT =====
+  // Ikon mata (SVG garis, bukan emoji): mata = sandi tersembunyi, mata dicoret = terlihat.
+  function ikonMata(btn, tampil) {
+    const g = '<path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/>' + (tampil ? '<path d="M3 3l18 18"/>' : '');
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + g + '</svg>';
+    const t = tampil ? 'Sembunyikan password' : 'Tampilkan password'; btn.setAttribute('aria-label', t); btn.setAttribute('title', t);
+  }
   el.toggleAdminPw.addEventListener('click', () => {
     const tampil = el.inputPassword.type === 'password';
     el.inputPassword.type = tampil ? 'text' : 'password';
-    el.toggleAdminPw.textContent = tampil ? 'SEMBUNYIKAN' : 'TAMPILKAN';
+    ikonMata(el.toggleAdminPw, tampil);
   });
 
   // ===== LUPA PASSWORD (Tahap 5) =====
   el.toggleResetPw.addEventListener('click', () => {
     const tampil = el.resetPasswordBaru.type === 'password';
     el.resetPasswordBaru.type = tampil ? 'text' : 'password';
-    el.toggleResetPw.textContent = tampil ? 'SEMBUNYIKAN' : 'TAMPILKAN';
+    ikonMata(el.toggleResetPw, tampil);
   });
 
-  el.btnLupaPassword.addEventListener('click', () => {
+  // "Lupa password?" kini menuju verifikasi.html (kode lewat WhatsApp; Staff). Akun Admin utama tetap memakai kode manual dari
+  // pengelola sistem: kartu reset ini dibuka lewat tautan admin.html#reset (dari halaman verifikasi).
+  function bukaKartuReset() {
     el.cardLogin.classList.add('is-hidden');
     el.cardResetPassword.classList.remove('is-hidden');
     el.resetError.textContent = '';
-  });
+  }
+  if (location.hash === '#reset') bukaKartuReset();
 
   el.btnBatalReset.addEventListener('click', () => {
     el.cardResetPassword.classList.add('is-hidden');
@@ -407,8 +416,8 @@
     // walau sebagian filenya sendiri belum tentu berubah isi -- supaya
     // SEMUA panel dipastikan ambil salinan terbaru, bukan cache lama.
     panelShift: 'modules/admin/admin-shift.js?v=20261024c',
-    panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261105c',
-    panelDiagnosaAbsen: 'modules/admin/admin-diagnosa-absen.js?v=20261125a',   // 25 Nov 2026: Cek Absen & Hari Shift Malam
+    panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261125c',
+    panelDiagnosaAbsen: 'modules/admin/admin-diagnosa-absen.js?v=20261125c',   // 25 Nov 2026: Cek Absen & Hari Shift Malam
     panelLaporan: 'modules/admin/admin-laporan.js?v=20261104d',
     panelProfilRelawan: 'modules/admin/admin-profil-relawan.js?v=20261023a',
     panelMenuHariIni: 'modules/admin/admin-menu-hari-ini.js?v=20261023a',
@@ -418,8 +427,8 @@
     panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261124b',
     panelPergiliran: 'modules/admin/admin-pergiliran.js?v=20261124b',   // 22 Nov 2026 (Tahap 3): SIMSDM menyusun kebutuhan & mengajukan pergiliran
     panelPenetapanPergiliran: 'modules/admin/admin-pergiliran-sikop.js?v=20261124b',
-    panelPendataan3B: 'modules/admin/admin-pendataan-3b.js?v=20261125b',
-    panelVerifikasiWa: 'modules/admin/admin-verifikasi-wa.js?v=20261124b',   // 24 Nov 2026: Verifikasi WhatsApp + antrean pendaftaran   // 24 Nov 2026: Pendataan 3B (SIPIKA)   // SIKOP menetapkan
+    panelPendataan3B: 'modules/admin/admin-pendataan-3b.js?v=20261125d',
+    panelVerifikasiWa: 'modules/admin/admin-verifikasi-wa.js?v=20261125d',   // 24 Nov 2026: Verifikasi WhatsApp + antrean pendaftaran   // 24 Nov 2026: Pendataan 3B (SIPIKA)   // SIKOP menetapkan
     panelPengajuanKebutuhanAdmin: 'modules/admin/admin-pengajuan-kebutuhan.js?v=20261023a',
     panelReturBarangAdmin: 'modules/admin/admin-retur-barang.js?v=20261023a',
     // 2 baris di bawah SEBELUMNYA tidak py versi SAMA SEKALI -- berarti
@@ -1253,6 +1262,7 @@
         <td data-label="Aksi" style="white-space:nowrap;">
           <button type="button" class="btn-mini primary btn-lihat-profil">Lihat Profil</button>
           <button type="button" class="btn-mini toggle-status" data-status="${status}">${status === 'AKTIF' ? 'Nonaktifkan' : 'Aktifkan'}</button>
+          ${status === 'AKTIF' ? '' : '<button type="button" class="btn-mini btn-hapus-relawan" style="color:var(--color-danger,#c0392b);">Hapus</button>'}
         </td>
       </tr>`;
     }).join('');
@@ -1265,12 +1275,44 @@
       btn.addEventListener('click', async () => {
         const id = btn.closest('tr').dataset.id;
         const newStatus = btn.dataset.status === 'AKTIF' ? 'NONAKTIF' : 'AKTIF';
+        if (newStatus === 'NONAKTIF' && !confirm('Nonaktifkan relawan ini? Dia tidak bisa masuk lagi ke aplikasi. Riwayat absensi dan pembayarannya tetap tersimpan.')) return;
         showLoading('Memperbarui status...');
         try {
           await apiPost('updateRelawan', { token: authToken, id, status: newStatus });
           await muatUlangRelawan();
         } catch (err) {
           showError(err.message || 'Gagal memperbarui status.');
+        } finally {
+          hideLoading();
+        }
+      });
+    });
+
+    // Hapus permanen (25c): hanya untuk relawan NONAKTIF. Server memberi pratinjau dulu; baru dihapus setelah Admin menyetujui.
+    el.tbodyRelawan.querySelectorAll('.btn-hapus-relawan').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const tr = btn.closest('tr'), id = tr.dataset.id, nama = (tr.querySelector('.cell-nama') || {}).textContent || id;
+        showLoading('Memeriksa data...');
+        let p;
+        try { p = await apiPost('hapusRelawanPermanen', { token: authToken, id }); }
+        catch (err) { hideLoading(); showError(err.message || 'Gagal memeriksa data relawan.'); return; }
+        hideLoading();
+        if (!p.bisaDihapus) { showError('Belum bisa dihapus. ' + (p.halangan || []).join(' ')); return; }
+        const d = p.akanDihapus || {}, t = p.tetapTersimpan || {}, baris = [];
+        baris.push('Data pribadi, akun masuk' + (d.fotoProfil ? ', dan foto' : ''));
+        if (d.jadwalMendatang) baris.push(d.jadwalMendatang + ' jadwal yang akan datang');
+        if (d.pengajuanMenunggu) baris.push(d.pengajuanMenunggu + ' pengajuan izin yang menunggu');
+        baris.push('Notifikasi dan akses aplikasi');
+        const teks = 'Hapus ' + nama + ' (' + id + ') selamanya?\n\nYang DIHAPUS:\n- ' + baris.join('\n- ') +
+          '\n\nYang TETAP ADA (untuk laporan dan pembayaran periode lama):\n- Riwayat absensi' + (t.riwayatAbsensi ? ' (' + t.riwayatAbsensi + ' hari)' : '') + ' dan tarif, hanya berisi nama dan ID\n\nTidak bisa dibatalkan.';
+        if (!confirm(teks)) return;
+        showLoading('Menghapus...');
+        try {
+          await apiPost('hapusRelawanPermanen', { token: authToken, id, konfirmasi: true });
+          await muatUlangRelawan();
+          showSuccess(nama + ' sudah dihapus.');
+        } catch (err) {
+          showError(err.message || 'Gagal menghapus.');
         } finally {
           hideLoading();
         }

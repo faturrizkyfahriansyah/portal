@@ -46,15 +46,14 @@
       <input type="text" id="inputUsername" placeholder="Username" autocomplete="username" required>
       <div class="password-field-wrap">
         <input type="password" id="inputPassword" placeholder="Password" autocomplete="current-password" required>
-        <button type="button" class="password-toggle-admin" id="toggleAdminPw">TAMPILKAN</button>
+        <button type="button" class="password-toggle-admin" id="toggleAdminPw" style="line-height:0;display:inline-flex;align-items:center" aria-label="Tampilkan password" title="Tampilkan password"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
       <p class="login-error" id="loginError"></p>
       <button type="submit" class="btn-submit" id="btnLogin">Masuk</button>
     </form>
-    <button type="button" class="link-button" id="btnLupaPassword">Lupa Password?</button>
-    <p id="linkOtpStaff" style="display:none;margin:8px 0;font-size:14px;text-align:center">Staff: <a href="verifikasi.html?jenis=staff&amp;mode=lupa" style="font-weight:700">lupa password lewat kode WhatsApp</a> · <a href="verifikasi.html?jenis=staff&amp;mode=daftar" style="font-weight:700">daftar akun Staff</a></p>
+    <a class="link-button" id="btnLupaPassword" href="verifikasi.html" style="text-decoration:none">Lupa password?</a>
     <a href="absensi.html" class="admin-link">&larr; Kembali ke halaman absensi</a>
-    <a href="masuk.html" class="admin-link">Bukan pengelola? Masuk lewat formulir umum (Relawan / PIC)</a>
+    <a href="masuk.html" class="admin-link">Bukan pengelola? Masuk di sini</a>
   </div>
 
   <div class="login-card is-hidden" id="cardResetPassword" style="margin-top:14px;">
@@ -65,7 +64,7 @@
       <input type="text" id="resetKode" placeholder="Kode reset 6 digit" inputmode="numeric" maxlength="6" required>
       <div class="password-field-wrap">
         <input type="password" id="resetPasswordBaru" placeholder="Password baru (min. 8 karakter)" autocomplete="new-password" minlength="8" required>
-        <button type="button" class="password-toggle-admin" id="toggleResetPw">TAMPILKAN</button>
+        <button type="button" class="password-toggle-admin" id="toggleResetPw" style="line-height:0;display:inline-flex;align-items:center" aria-label="Tampilkan password" title="Tampilkan password"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
       <p class="login-error" id="resetError"></p>
       <button type="submit" class="btn-submit" id="btnResetPassword">Simpan Password Baru</button>
@@ -120,7 +119,7 @@
       <button type="button" class="shell-nav-link admin-tab-btn menu-disembunyikan" data-panel="panelRoleAkses"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 8-7 9-4-1-7-4.5-7-9V7l7-4z"/></svg></span><span>Role ASN &amp; Kepala SPPG</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPengelolaSppg"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.2"/><circle cx="17" cy="7" r="2.6"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M14.5 14.7c2.6.4 4.5 2.3 4.5 5.3"/></svg></span><span>Pengelola SPPG</span></button>
       <!-- 24 Nov 2026: Verifikasi WhatsApp + antrean pendaftaran mandiri (Super Admin). -->
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelVerifikasiWa"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 10l2 2 4-4"/></svg></span><span>Verifikasi WA &amp; Pendaftaran</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelVerifikasiWa"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 10l2 2 4-4"/></svg></span><span>Lupa Password (WhatsApp)</span></button>
       <!-- 22 Nov 2026 (Tahap 3, R6/R7): TAHAP 1 alur dua tahap -- SIMSDM menyusun kebutuhan tenaga (berbasis PM), merekomendasikan dan MENGAJUKAN pergiliran. Tidak mengubah jadwal. -->
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelPergiliran"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></span><span>Kebutuhan &amp; Pergiliran</span></button>
 
@@ -138,13 +137,11 @@
            diminta Admin) -- ini soal MENGOREKSI DATA ABSENSI (SIPRES),
            bukan soal menyusun jadwal/penugasan (SIKOP). Panel & fungsi
            backend-nya TIDAK berubah, cuma lokasi menu & labelnya. -->
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelJadwalIndividu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><span>Koreksi Presensi</span></button>
-      <!-- 25 Nov 2026: alat Admin untuk relawan yang tidak bisa absen + aturan hari kehadiran shift malam (menu baru; tidak mengubah menu lama). -->
-      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelDiagnosaAbsen"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M11 8v3l2 1"/></svg></span><span>Cek Absen &amp; Shift Malam</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelJadwalIndividu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><span>Koreksi &amp; Cek Absen</span></button>
+      <!-- 25 Nov 2026 (c): menu ini DISATUKAN dengan Koreksi Presensi (dua tab di dalam panel); tombolnya sengaja disembunyikan, bukan dihapus. Alat Admin untuk relawan yang tidak bisa absen + aturan hari kehadiran shift malam (menu baru; tidak mengubah menu lama). -->
+      <button type="button" class="shell-nav-link admin-tab-btn menu-disembunyikan" data-panel="panelDiagnosaAbsen"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M11 8v3l2 1"/></svg></span><span>Cek Absen &amp; Shift Malam</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelLaporan"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg></span><span>Laporan</span></button>
-      <!-- 22 Nov 2026 (Tahap 2, R5): PINTASAN ke Rekap Biaya & Insentif. Menu aslinya tetap di SIPANDU (bukan modul hitung ganda); tombol ini hanya membuka panel yang sama.
-           Sengaja BUKAN admin-tab-btn supaya sistem tab dan penguncian akses tidak berubah. -->
-      <button type="button" class="shell-nav-link" id="pintasRekapBiayaSipres" onclick="var b=document.querySelector('.admin-tab-btn[data-panel=panelSipanduBiaya]');if(b&&b.style.display!=='none')b.click();"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></span><span>Rekap Biaya &amp; Insentif</span></button>
+      <!-- 25 Nov 2026 (c): pintasan Rekap Biaya & Insentif di SIPRES dihapus atas permintaan Admin -- cukup satu, di SIPANDU. -->
 
       <p class="shell-nav-group-title">SIKOP</p>
       <p class="shell-nav-group-desc">Sistem Informasi Koordinasi Penugasan — periode kerja, kalender, dan jadwal.</p>
@@ -2385,7 +2382,7 @@
 <script src="core/auth-admin.js?v=20260918a"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="core/ringkasan-pm.js?v=20261102a"></script>
-<script src="modules/admin/admin.js?v=20261124b"></script>
+<script src="modules/admin/admin.js?v=20261125e"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="modules/admin/admin-kartu-qr.js?v=20261023a"></script>
 <script src="modules/admin/admin-sipres-monitoring.js?v=20260922a"></script>
@@ -2393,7 +2390,7 @@
 <script src="core/xlsx-mini.js?v=20261104d"></script>
 <script src="modules/admin/admin-rekap-mingguan.js?v=20261105d"></script>
 <script src="modules/admin/admin-dashboard-perhatian.js?v=20261110a"></script>
-<script src="modules/admin/admin-sipandu-master.js?v=20261104c"></script>
+<script src="modules/admin/admin-sipandu-master.js?v=20261125d"></script>
 <script src="modules/admin/admin-sipandu-pm.js?v=20261104d"></script>
 <script src="modules/admin/admin-sipandu-impor.js?v=20261104a"></script>
 <script src="modules/admin/admin-sipandu-menu.js?v=20261104e"></script>
@@ -2414,6 +2411,5 @@
 <script src="modules/admin/admin-target-widget.js"></script>
 <script src="modules/admin/admin-sipandu-akses.js"></script>
 <script>document.addEventListener('DOMContentLoaded', function () { initShell({ storageKey: 'sppgSidebarCollapsedAdmin' }); });</script>
-<script>/* 24 Nov 2026: tautan kode WhatsApp untuk Staff tampil hanya bila layanan HIDUP */(function(){try{if(typeof apiPost!=="function")return;apiPost("getStatusOtp",{}).then(function(r){var e=document.getElementById("linkOtpStaff");if(e&&r&&r.aktif)e.style.display="";}).catch(function(){});}catch(e){}})();</script>
 </body>
 </html>

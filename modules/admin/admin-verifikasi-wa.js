@@ -10,28 +10,35 @@
   const info = function (m) { if (typeof showSuccess === 'function') showSuccess(m); else alert(m); };
   let antre = null, sibuk = false;
 
-  panel.innerHTML = '<div class="shell-page-head"><div><h2 class="shell-page-title">Verifikasi WhatsApp &amp; Pendaftaran</h2><p class="shell-page-sub">Kode verifikasi lewat WhatsApp untuk lupa password/PIN dan pendaftaran mandiri. Pendaftaran Relawan dan Staff <b>harus disetujui Super Admin</b>. Akun Admin akses penuh tidak ikut kode WhatsApp.</p></div></div>'
-    + '<h4 style="margin:12px 0 6px">Status layanan</h4><div id="vwStatus" class="panel-block"></div>'
-    + '<h4 style="margin:16px 0 6px">Antrean pendaftaran <span id="vwJml"></span></h4><div id="vwAntre" class="panel-block"></div>'
-    + '<h4 style="margin:16px 0 6px">Riwayat keputusan</h4><div id="vwRiw" class="panel-block"></div>';
+  panel.innerHTML = '<div class="shell-page-head"><div><h2 class="shell-page-title">Lupa Password lewat WhatsApp</h2><p class="shell-page-sub">Saat relawan, staff, atau PIC lupa password, kode dikirim ke WhatsApp mereka. Pendaftaran akun baru dilakukan lewat chat WhatsApp Admin.</p></div></div>'
+    + '<h4 style="margin:12px 0 6px">Status</h4><div id="vwStatus" class="panel-block"></div>'
+    + '<div id="vwBagianAntre" style="display:none"><h4 style="margin:16px 0 6px">Pendaftaran menunggu persetujuan <span id="vwJml"></span></h4><div id="vwAntre" class="panel-block"></div>'
+    + '<h4 style="margin:16px 0 6px">Riwayat keputusan</h4><div id="vwRiw" class="panel-block"></div></div>'
+    + '<p id="vwKosong" style="display:none;color:#55606f;font-size:14px;margin:14px 0">Tidak ada pendaftaran lama yang menunggu. Pendaftaran akun baru sekarang lewat WhatsApp Admin.</p>';
 
   function baris(k, v, ok) { return '<tr><td style="padding:4px 10px 4px 0;color:#55606f">' + k + '</td><td><b style="color:' + (ok === true ? '#1a7a4c' : ok === false ? '#b23a3a' : 'inherit') + '">' + v + '</b></td></tr>'; }
 
   async function muatStatus() {
     const el = $('vwStatus'); el.innerHTML = '<p>Memuat…</p>';
     let s; try { s = await api('getStatusOtpAdmin'); } catch (e) { el.innerHTML = '<p style="color:#b23a3a">' + esc(e.message) + '</p>'; return; }
+    const sebab = [];
+    if (!s.aktif) { if (!s.saklarHidup) sebab.push('layanan dimatikan'); if (!s.kunciTerisi || !s.senderTerisi) sebab.push('pengaturan pengirim WhatsApp belum lengkap'); }
     el.innerHTML = '<table style="font-size:14px;border-collapse:collapse">'
-      + baris('Layanan kode WhatsApp', s.aktif ? 'HIDUP' : 'MATI', s.aktif)
+      + baris('Lupa password lewat WhatsApp', s.aktif ? 'Aktif' : 'Belum aktif', s.aktif)
+      + baris('Pesan terkirim hari ini', s.hariIni + ' dari batas ' + s.batasHarian)
+      + (s.modul3BSiap ? '' : baris('PIC', 'belum bisa memakai fitur ini', false))
+      + '</table>'
+      + (sebab.length ? '<p style="font-size:13px;color:#8a5a00;margin:8px 0">Belum aktif karena ' + sebab.join(' dan ') + '. Hubungi pengembang sistem.</p>' : '')
+      + (s.modul3BSiap ? '' : '<p style="font-size:13px;color:#8a5a00;margin:8px 0">Hubungi pengembang sistem agar PIC bisa membuat password lewat WhatsApp.</p>')
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><input id="vwUji" type="tel" placeholder="Nomor WhatsApp Anda" style="padding:8px;border:1px solid #d5dbe3;border-radius:8px;min-width:220px"> <button type="button" class="btn-mini primary" id="vwUjiBtn">Kirim pesan percobaan</button></div>'
+      + '<p style="font-size:12px;color:#55606f;margin:4px 0 0">Pesan percobaan ikut dihitung dalam batas pesan harian.</p>'
+      + '<details style="margin-top:12px"><summary style="cursor:pointer;font-size:13px;color:#55606f">Detail teknis (untuk pengembang)</summary><table style="font-size:13px;border-collapse:collapse;margin-top:6px">'
       + baris('Sakelar OTP_WA_AKTIF', s.saklarHidup ? 'menyala (1)' : 'mati (bukan 1)', s.saklarHidup)
       + baris('Kunci API MPWA', s.kunciTerisi ? 'terisi' : 'KOSONG', s.kunciTerisi)
       + baris('MPWA_SENDER', s.senderTerisi ? esc(s.senderSamar) : 'KOSONG', s.senderTerisi)
       + baris('Alamat MPWA', esc(s.baseUrl))
-      + baris('Pesan terkirim hari ini', s.hariIni + ' dari batas ' + s.batasHarian)
-      + baris('Modul 3B (untuk PIN PIC)', s.modul3BSiap ? 'siap' : 'belum disiapkan (jalankan siapkan3B)', s.modul3BSiap)
-      + '</table>'
-      + '<p style="font-size:13px;color:#55606f;margin:8px 0">Kunci dan nomor pengirim diisi langsung di <b>Apps Script &rsaquo; Project Settings &rsaquo; Script Properties</b> (bukan di sini). Mematikan cepat: ubah <b>OTP_WA_AKTIF</b> menjadi 0.</p>'
-      + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="vwUji" type="tel" placeholder="Nomor HP Anda untuk uji kirim" style="padding:8px;border:1px solid #d5dbe3;border-radius:8px;min-width:220px"> <button type="button" class="btn-mini primary" id="vwUjiBtn">Uji kirim pesan</button></div>'
-      + '<p style="font-size:12px;color:#55606f;margin:4px 0 0">Uji kirim memakai kuota harian dan bisa dipakai walau layanan masih MATI (asal kunci dan pengirim terisi).</p>';
+      + baris('Modul 3B', s.modul3BSiap ? 'siap' : 'belum disiapkan (jalankan siapkan3B)', s.modul3BSiap)
+      + '</table><p style="font-size:12px;color:#55606f;margin:6px 0 0">Kunci dan nomor pengirim diisi di Apps Script &rsaquo; Project Settings &rsaquo; Script Properties, bukan di halaman ini.</p></details>';
     $('vwUjiBtn').addEventListener('click', async function () {
       const hp = $('vwUji').value.trim(); if (!hp) { lapor('Isi nomor HP untuk uji.'); return; }
       this.disabled = true; try { const r = await api('kirimUjiOtpAdmin', { nomorHp: hp }); info(r.pesan); muatStatus(); } catch (e) { lapor(e.message); this.disabled = false; }
@@ -43,6 +50,7 @@
     $('vwAntre').innerHTML = '<p>Memuat…</p>';
     try { antre = await api('getAntreanPendaftaranAdmin'); } catch (e) { $('vwAntre').innerHTML = '<p style="color:#b23a3a">' + esc(e.message) + '</p>'; return; }
     const menunggu = antre.daftar.filter(function (x) { return x.status === 'MENUNGGU'; }), selesai = antre.daftar.filter(function (x) { return x.status !== 'MENUNGGU'; });
+    const adaIsi = menunggu.length > 0 || selesai.length > 0; $('vwBagianAntre').style.display = adaIsi ? '' : 'none'; $('vwKosong').style.display = adaIsi ? 'none' : '';
     $('vwJml').textContent = menunggu.length ? '(' + menunggu.length + ' menunggu)' : '';
     $('vwAntre').innerHTML = menunggu.length ? menunggu.map(kartu).join('') : '<p style="color:#55606f">Tidak ada pendaftaran yang menunggu.</p>';
     $('vwRiw').innerHTML = selesai.length ? '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Waktu</th><th>Jenis</th><th>Nama</th><th>HP</th><th>Username</th><th>Keputusan</th><th>Oleh</th><th>Hasil</th></tr></thead><tbody>'

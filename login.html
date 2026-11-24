@@ -44,15 +44,12 @@
           <label for="inputPassword" class="form-label">Password</label>
           <div class="password-field">
             <input type="password" id="inputPassword" class="form-input" autocomplete="current-password" required>
-            <button type="button" class="password-toggle" id="toggleLoginPw">TAMPILKAN</button>
+            <button type="button" class="password-toggle" id="toggleLoginPw" style="line-height:0;display:inline-flex;align-items:center" aria-label="Tampilkan password" title="Tampilkan password"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
         </div>
-        <p style="text-align:right;margin:-8px 0 14px;">
-          <a href="https://wa.me/6285694765370?text=Halo%20Admin%2C%20saya%20lupa%20password%20akun%20Portal%20SPPG%20Jeungjing." target="_blank" rel="noopener" style="font-size:12.5px;color:#6b7280;">Lupa Password?</a>
-        </p>
         <button type="submit" id="btnLogin" class="btn-submit">Masuk</button>
       </form>
-      <p id="linkOtpRelawan" style="display:none;text-align:center;margin:14px 0 0;font-size:14.5px;line-height:1.7"><a href="verifikasi.html?jenis=relawan&amp;mode=lupa" style="font-weight:700">Lupa password? Minta kode lewat WhatsApp</a><br><a href="verifikasi.html?jenis=relawan&amp;mode=daftar" style="font-weight:700">Belum punya akun? Daftar</a></p>
+      <p style="text-align:center;margin:14px 0 0;font-size:14.5px;line-height:1.8"><a href="verifikasi.html" style="font-weight:700">Lupa password?</a> &nbsp;·&nbsp; <a href="https://wa.me/6285694765370?text=Halo%20Admin%2C%20saya%20ingin%20daftar%20akun%20Portal%20SPPG%20Jeungjing." target="_blank" rel="noopener" style="font-weight:700">Daftar lewat WhatsApp</a></p>
     </section>
 
     <section class="auth-card is-hidden" id="cardGantiPassword" style="margin-top:14px;">
@@ -64,7 +61,7 @@
           <label for="inputPasswordBaru" class="form-label">Password Baru</label>
           <div class="password-field">
             <input type="password" id="inputPasswordBaru" class="form-input" autocomplete="new-password" minlength="6" required>
-            <button type="button" class="password-toggle" id="toggleNewPw">TAMPILKAN</button>
+            <button type="button" class="password-toggle" id="toggleNewPw" style="line-height:0;display:inline-flex;align-items:center" aria-label="Tampilkan password" title="Tampilkan password"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
         </div>
         <div class="form-card">
@@ -97,7 +94,6 @@
 <script src="core/config.js?v=20260903b"></script>
 <script src="core/common.js?v=20260903b"></script>
 <script src="core/auth-relawan.js?v=20260903b"></script>
-<script src="modules/authentication/login.js?v=20260903b"></script>
-<script>/* 24 Nov 2026: tautan kode WhatsApp tampil hanya bila layanan HIDUP */try{apiPost("getStatusOtp",{}).then(function(r){var e=document.getElementById("linkOtpRelawan");if(e&&r&&r.aktif)e.style.display="";}).catch(function(){});}catch(e){}</script>
+<script src="modules/authentication/login.js?v=20261125c"></script>
 </body>
 </html>

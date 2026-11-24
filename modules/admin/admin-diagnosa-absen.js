@@ -15,10 +15,35 @@
   const KODE_WARNA = { DAPAT_ABSEN: 'ok', SEDANG_BERJALAN: 'ok', BELUM_DIBUKA: 'kuning', LIBUR_PERGILIRAN: 'abu', SELESAI: 'abu', RELAWAN_TIDAK_AKTIF: 'abu', KEDALUWARSA: 'salah', TIDAK_ADA_JADWAL: 'salah' };
   const OBJ = { tampil: 'cek' };
 
-  panel.innerHTML = '<div class="shell-page-head"><div><h2 class="shell-page-title">Cek Absen &amp; Hari Shift Malam</h2><p class="shell-page-sub">Cari tahu kenapa relawan tidak bisa absen, perbaiki jadwalnya, dan rapikan hari kehadiran shift malam.</p></div></div>'
+  // Satu menu "Koreksi & Cek Absen": dua tab di atas panel (25 Nov 2026). Tombol menu lama tetap ada (disembunyikan) agar hak akses dan tautan lama tidak berubah.
+  function stripGabung(aktif) {
+    const ada = function (id) { const b = document.querySelector('.admin-tab-btn[data-panel="' + id + '"]'); return b && b.style.display !== 'none'; };
+    const t = function (id, teks) { return ada(id) ? '<button type="button" class="btn-mini' + (aktif === id ? ' primary' : '') + '" data-ke="' + id + '" role="tab" aria-selected="' + (aktif === id) + '">' + teks + '</button>' : ''; };
+    return '<div role="tablist" class="tab-gabung" style="display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap">' + t('panelJadwalIndividu', 'Koreksi Presensi') + t('panelDiagnosaAbsen', 'Cek Absen &amp; Shift Malam') + '</div>';
+  }
+  // Menu "Koreksi & Cek Absen" tetap tersorot saat tab Cek Absen terbuka (tombol aslinya disembunyikan).
+  (function () {
+    const cek = document.querySelector('.admin-tab-btn[data-panel="panelDiagnosaAbsen"]'), utama = document.querySelector('.admin-tab-btn[data-panel="panelJadwalIndividu"]');
+    if (!cek || !utama || typeof MutationObserver === 'undefined') return;
+    const sinkron = function () { if (cek.classList.contains('active') && !utama.classList.contains('active')) utama.classList.add('active'); };
+    new MutationObserver(sinkron).observe(cek, { attributes: true, attributeFilter: ['class'] }); sinkron();
+  })();
+  function pasangStrip() {
+    panel.querySelectorAll('.tab-gabung [data-ke]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const id = b.getAttribute('data-ke'); if (id === panel.id) return;
+        const tujuan = document.querySelector('.admin-tab-btn[data-panel="' + id + '"]'); if (!tujuan) return;
+        tujuan.click();
+        const utama = document.querySelector('.admin-tab-btn[data-panel="panelJadwalIndividu"]'); if (utama) utama.classList.add('active');   // sorot menu yang terlihat
+      });
+    });
+  }
+
+  panel.innerHTML = stripGabung('panelDiagnosaAbsen') + '<div class="shell-page-head"><div><h2 class="shell-page-title">Cek Absen &amp; Hari Shift Malam</h2><p class="shell-page-sub">Cari tahu kenapa relawan tidak bisa absen, perbaiki jadwalnya, dan rapikan hari kehadiran shift malam.</p></div></div>'
     + '<div role="tablist" style="display:flex;gap:6px;margin:8px 0 12px;flex-wrap:wrap"><button type="button" class="btn-mini primary" data-tab="cek" role="tab">Cek relawan tidak bisa absen</button><button type="button" class="btn-mini" data-tab="malam" role="tab">Hari kehadiran shift malam</button></div>'
     + '<div id="dgCek"></div><div id="dgMalam" style="display:none"></div>';
 
+  pasangStrip();
   panel.querySelectorAll('[data-tab]').forEach(function (b) {
     b.addEventListener('click', function () {
       OBJ.tampil = b.getAttribute('data-tab');

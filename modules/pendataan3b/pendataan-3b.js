@@ -1,5 +1,5 @@
 // SPPG JEUNGJING — Pendataan Penerima Manfaat 3B (halaman PIC Posyandu, 24 Nov 2026).
-// PIC masuk dengan nomor HP + PIN (diatur Admin). Data disimpan di server (spreadsheet 3B terpisah); NIK di daftar disamarkan.
+// PIC masuk dengan nomor HP + password (25c; PIN 6 angka lama tetap sah). Data disimpan di server (spreadsheet 3B terpisah); NIK di daftar disamarkan.
 // Validasi memakai Core3B (sama dengan server). Server tetap memeriksa ulang semua aturan.
 (function () {
   var C = window.Core3B, app = document.getElementById('app');
@@ -83,14 +83,25 @@
   }
 
   /* ---------- layar masuk ---------- */
+  /* Kolom password + ikon mata (gambar garis, bukan emoji). */
+  function kolomSandi(el) {
+    var btn = h('button', { type: 'button', style: 'position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;padding:8px;min-width:44px;min-height:44px;line-height:0;color:#55606f;cursor:pointer' });
+    function ikon(tampil) {
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/>' + (tampil ? '<path d="M3 3l18 18"/>' : '') + '</svg>';
+      var t = tampil ? 'Sembunyikan password' : 'Tampilkan password'; btn.setAttribute('aria-label', t); btn.setAttribute('title', t);
+    }
+    ikon(false); el.style.paddingRight = '54px';
+    btn.addEventListener('click', function () { var t = el.type === 'password'; el.type = t ? 'text' : 'password'; ikon(t); });
+    return h('div', { style: 'position:relative' }, el, btn);
+  }
   function renderLogin() {
     var hp = h('input', { type: 'tel', id: 'hp', inputmode: 'tel', autocomplete: 'tel', placeholder: '08xxxxxxxxxx' });
-    var pin = h('input', { type: 'password', id: 'pin', inputmode: 'numeric', maxlength: '6', autocomplete: 'current-password', placeholder: '6 angka' });
+    var pin = h('input', { type: 'password', id: 'pin', autocomplete: 'current-password', maxlength: '72' });
     var msg = h('div', { class: 'msg err', 'aria-live': 'polite' });
     var btn = h('button', { class: 'btn block', text: 'Masuk', onclick: go });
     async function go() {
       msg.textContent = ''; var nomor = hp.value.trim(), p = pin.value.trim();
-      if (!nomor || !/^\d{6}$/.test(p)) { msg.textContent = 'Isi nomor HP dan PIN 6 angka.'; return; }
+      if (!nomor || p.length < 6) { msg.textContent = 'Isi nomor HP dan password.'; return; }
       btn.disabled = true; btn.textContent = 'Memeriksa…';
       try {
         var d = await apiPost('loginPic3B', { nomorHp: nomor, pin: p });
@@ -100,17 +111,15 @@
         else { S.idi = ''; S.view = 'pilih'; simpanSesi(); render(); }
       } catch (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Masuk'; pin.value = ''; }
     }
-    pin.addEventListener('input', function () { pin.value = pin.value.replace(/\D/g, '').slice(0, 6); });
     pin.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') go(); });
     app.appendChild(h('header', { class: 'top' }, h('div', { class: 'in' }, h('small', { text: 'Portal SPPG • PIC' }), h('h1', { text: MODE_PIC ? 'Portal PIC' : 'Pendataan Penerima Manfaat 3B' }), h('p', { text: MODE_PIC ? 'Masuk sebagai PIC Posyandu atau satuan pendidikan' : 'Masuk sebagai PIC Posyandu' }))));
     app.appendChild(h('div', { class: 'wrap' },
-      h('div', { class: 'note', text: 'Halaman ini berisi data pribadi (NIK). Jangan berikan PIN Anda kepada orang lain.' }),
+      h('div', { class: 'note', text: 'Halaman ini berisi data pribadi (NIK). Jangan berikan password Anda kepada orang lain.' }),
       h('div', { class: 'fld' }, h('label', { for: 'hp', text: 'Nomor HP' }), h('div', { class: 'hint', text: 'Nomor HP yang terdaftar sebagai PIC di SPPG.' }), hp),
-      h('div', { class: 'fld' }, h('label', { for: 'pin', text: 'PIN' }), h('div', { class: 'hint', text: 'PIN 6 angka dari Admin SPPG. Lupa PIN? Minta Admin mengatur ulang.' }), pin),
+      h('div', { class: 'fld' }, h('label', { for: 'pin', text: 'Password' }), kolomSandi(pin)),
       msg, btn,
-      h('p', { id: 'linkOtpPic', style: 'display:none;text-align:center;margin-top:18px;font-size:16px;font-weight:700' }, h('a', { href: 'verifikasi.html?jenis=pic&mode=lupa', text: 'Belum punya PIN atau lupa PIN? Minta kode lewat WhatsApp' })),
+      h('p', { style: 'text-align:center;margin-top:18px;font-size:16px;font-weight:700' }, h('a', { href: 'verifikasi.html', text: 'Lupa password?' }), ' · ', h('a', { href: 'https://wa.me/6285694765370?text=' + encodeURIComponent('Halo Admin, saya ingin daftar akun Portal SPPG Jeungjing.'), target: '_blank', rel: 'noopener', text: 'Daftar lewat WhatsApp' })),
       h('p', { style: 'text-align:center;margin-top:18px;font-size:14px' }, h('a', { href: 'masuk.html', text: 'Bukan akun PIC? Pilih jenis akun lain' }))));
-    apiPost('getStatusOtp', {}).then(function (r) { var e = document.getElementById('linkOtpPic'); if (e && r && r.aktif) e.style.display = ''; }).catch(function () { /* tautan tetap tersembunyi */ });
   }
   function renderPilih() {
     var wrap = h('div', { class: 'wrap' }, h('h2', { text: 'Tanggung jawab Anda' }));

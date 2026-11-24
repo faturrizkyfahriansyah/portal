@@ -1,5 +1,5 @@
 // SPPG JEUNGJING — SIPIKA: Pendataan 3B (Admin, 24 Nov 2026).
-// Kelola PIN PIC, kode kelompok MPM, putaran pemutakhiran, lihat/hapus data, dan UNDUH file template MPM (dibuat di browser dari data server).
+// Kelola password PIC, kode kelompok MPM, putaran pemutakhiran, lihat/hapus data, dan UNDUH file template MPM (dibuat di browser dari data server).
 // Data berisi NIK: hanya Admin (Staff ditolak server). Unduhan dicatat di server (siapa, kapan, berapa baris).
 (function () {
   const $ = function (id) { return document.getElementById(id); };
@@ -28,20 +28,20 @@
   }
   function gambarPos() {
     const el = $('p3Pos'); let h = '<div class="pg-aksi" style="margin-bottom:8px"><button type="button" class="btn-mini primary" id="p3Semua">Unduh semua Posyandu (ZIP)</button></div>';
-    h += '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Posyandu</th><th>Kode kelompok MPM</th><th>PIC dan PIN</th><th>Data</th><th>Aksi</th></tr></thead><tbody>';
+    h += '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Posyandu</th><th>Kode kelompok MPM</th><th>PIC dan password</th><th>Data</th><th>Aksi</th></tr></thead><tbody>';
     data.posyandu.forEach(function (p) {
       h += '<tr' + (p.aktif ? '' : ' style="opacity:.55"') + '><td><b>' + esc(p.nama) + '</b>' + (p.aktif ? '' : '<br><small>NONAKTIF</small>') + '</td>'
         + '<td>' + (p.kodeKelompok ? esc(p.kodeKelompok) : '<small>belum diisi</small>') + ' <button type="button" class="btn-mini" data-kode="' + esc(p.id) + '">Ubah</button></td><td>'
         + (p.pic.length ? p.pic.map(function (c) {
-          return '<div style="margin-bottom:4px"><b>' + esc(c.nama) + '</b> · ' + (c.adaHp ? esc(c.hp) : '<span class="pg-err">HP belum diisi di SIPANDU</span>') + '<br><small>PIN: ' + (c.pinStatus === 'DIATUR' ? 'sudah diatur ' + dmy(c.pinDiaturPada) : '<b>belum diatur</b>') + (c.terkunci ? ' · <b style="color:#b3261e">TERKUNCI</b>' : '') + '</small> '
-            + '<button type="button" class="btn-mini" data-pin="' + esc(c.idPic) + '"' + (c.adaHp ? '' : ' disabled') + '>' + (c.pinStatus === 'DIATUR' ? 'Atur ulang PIN' : 'Buat PIN') + '</button></div>'; }).join('') : '<small>Belum ada PIC di SIPANDU.</small>') + '</td>'
+          return '<div style="margin-bottom:4px"><b>' + esc(c.nama) + '</b> · ' + (c.adaHp ? esc(c.hp) : '<span class="pg-err">HP belum diisi di SIPANDU</span>') + '<br><small>Password: ' + (c.pinStatus === 'DIATUR' ? 'sudah dibuat ' + dmy(c.pinDiaturPada) : '<b>belum diatur</b>') + (c.terkunci ? ' · <b style="color:#b3261e">TERKUNCI</b>' : '') + '</small> '
+            + '<button type="button" class="btn-mini" data-pin="' + esc(c.idPic) + '"' + (c.adaHp ? '' : ' disabled') + '>' + (c.pinStatus === 'DIATUR' ? 'Atur ulang password' : 'Buat password') + '</button></div>'; }).join('') : '<small>Belum ada PIC di SIPANDU.</small>') + '</td>'
         + '<td>Bumil ' + p.jumlah['Ibu Hamil'] + ' · Busui ' + p.jumlah['Ibu Menyusui'] + ' · Balita ' + p.jumlah['Balita'] + '<br><small>' + (p.jumlah.perluDiperbarui ? '<b>' + p.jumlah.perluDiperbarui + ' perlu diperbarui</b>' : 'semua terbarui') + '</small></td>'
         + '<td><button type="button" class="btn-mini" data-lihat="' + esc(p.id) + '">Lihat data</button> <button type="button" class="btn-mini primary" data-unduh="' + esc(p.id) + '"' + (p.jumlah.total ? '' : ' disabled') + '>Unduh Excel</button></td></tr>';
     });
     h += '</tbody></table></div>';
     if (data.picLainnya && data.picLainnya.length) {
-      h += '<h5 style="margin:14px 0 4px">PIC satuan pendidikan / instansi lain</h5><div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>PIC</th><th>Instansi</th><th>PIN</th></tr></thead><tbody>'
-        + data.picLainnya.map(function (c) { return '<tr><td><b>' + esc(c.nama) + '</b><br><small>' + (c.adaHp ? esc(c.hp) : 'HP belum diisi') + '</small></td><td>' + esc(c.instansi.join(', ')) + '</td><td>' + (c.pinStatus === 'DIATUR' ? 'diatur ' + dmy(c.pinDiaturPada) : '<b>belum diatur</b>') + ' <button type="button" class="btn-mini" data-pin="' + esc(c.idPic) + '"' + (c.adaHp ? '' : ' disabled') + '>' + (c.pinStatus === 'DIATUR' ? 'Atur ulang PIN' : 'Buat PIN') + '</button></td></tr>'; }).join('')
+      h += '<h5 style="margin:14px 0 4px">PIC satuan pendidikan / instansi lain</h5><div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>PIC</th><th>Instansi</th><th>Password</th></tr></thead><tbody>'
+        + data.picLainnya.map(function (c) { return '<tr><td><b>' + esc(c.nama) + '</b><br><small>' + (c.adaHp ? esc(c.hp) : 'HP belum diisi') + '</small></td><td>' + esc(c.instansi.join(', ')) + '</td><td>' + (c.pinStatus === 'DIATUR' ? 'diatur ' + dmy(c.pinDiaturPada) : '<b>belum diatur</b>') + ' <button type="button" class="btn-mini" data-pin="' + esc(c.idPic) + '"' + (c.adaHp ? '' : ' disabled') + '>' + (c.pinStatus === 'DIATUR' ? 'Atur ulang password' : 'Buat password') + '</button></td></tr>'; }).join('')
         + '</tbody></table></div>';
     }
     el.innerHTML = h;
@@ -52,8 +52,8 @@
       const p = data.posyandu.filter(function (x) { return x.id === b.dataset.kode; })[0], k = prompt('Kode kelompok MPM untuk ' + p.nama + ' (dari layar Kelompok Penerima Manfaat MPM, kolom Kode). Kosongkan untuk menghapus:', p.kodeKelompok || '');
       if (k === null) return; try { await api('simpanKodeKelompok3BAdmin', { idInstansi: p.id, kode: k.trim() }); info('Kode disimpan.'); } catch (e) { lapor(e.message); } muat(); }); });
     el.querySelectorAll('[data-pin]').forEach(function (b) { b.addEventListener('click', async function () {
-      if (!confirm('Buat/atur ulang PIN untuk PIC ini? PIN lama (bila ada) tidak berlaku lagi dan sesi PIC otomatis berakhir.')) return;
-      try { const r = await api('aturPin3BAdmin', { idPic: b.dataset.pin }); alert('PIN untuk ' + r.nama + ' (HP ' + r.nomorHp + '):\n\n' + r.pin + '\n\n' + r.catatan); } catch (e) { lapor(e.message); } muat(); }); });
+      if (!confirm('Buat password sementara untuk PIC ini? Password lama (bila ada) tidak berlaku lagi dan PIC harus masuk ulang.')) return;
+      try { const r = await api('aturPin3BAdmin', { idPic: b.dataset.pin }); alert('Password sementara untuk ' + r.nama + ' (HP ' + r.nomorHp + '):\n\n' + r.pin + '\n\n' + r.catatan); } catch (e) { lapor(e.message); } muat(); }); });
   }
   function gambarPeng() {
     const p = data.pengaturan, el = $('p3Peng');

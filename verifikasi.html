@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#12294d">
-<title>Verifikasi WhatsApp — SPPG Jeungjing</title>
+<title>Lupa Password — SPPG Jeungjing</title>
 <link rel="icon" href="assets/logo.png">
 <style>
 :root{--navy:#12294d;--gold:#c9962c;--g:#14634a;--gl:#e6f3ee;--ink:#1c2430;--mut:#5b6573;--line:#d9dee6;--bg:#f4f6f9;--red:#b3261e;--redl:#fdecea;--amb:#8a5a00;--ambl:#fff4d6}
@@ -30,9 +30,13 @@ h2{font-size:19px;margin:6px 0 10px}
 a.balik{display:block;text-align:center;margin-top:16px;color:var(--navy);font-weight:600}
 .hp{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
 .langkah{display:flex;gap:6px;margin:0 0 14px}.langkah i{flex:1;height:6px;border-radius:3px;background:var(--line)}.langkah i.on{background:var(--navy)}
-.ok-ic{font-size:52px;text-align:center;margin:10px 0}
+.ok-ic{text-align:center;margin:10px 0;color:var(--g);line-height:0}
+.pw{position:relative}.pw input{padding-right:56px}
+.mata{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:48px;height:48px;border:0;background:none;color:var(--mut);cursor:pointer;display:grid;place-items:center;border-radius:12px}
+.mata:focus-visible{outline:3px solid #b9c8e6}
+.mata svg{display:block}
 </style></head><body>
-<header><img src="assets/logo-bgn.png" alt=""><img src="assets/logo.png" alt=""><h1>Verifikasi lewat WhatsApp</h1><p>Lupa password / PIN, atau daftar akun baru</p></header>
+<header><img src="assets/logo-bgn.png" alt=""><img src="assets/logo.png" alt=""><h1>Lupa Password</h1><p>Kode dikirim lewat WhatsApp</p></header>
 <main id="app"></main>
 <script src="core/config.js?v=20260903b"></script>
 <script src="core/common.js?v=20261014a"></script>
@@ -41,12 +45,12 @@ a.balik{display:block;text-align:center;margin-top:16px;color:var(--navy);font-w
   'use strict';
   var app = document.getElementById('app');
   var WA_ADMIN = 'https://wa.me/6285694765370?text=' + encodeURIComponent('Halo Admin, saya butuh bantuan akun Portal SPPG Jeungjing.');
-  var JENIS = {
-    RELAWAN: { nama: 'Relawan', masuk: 'login.html', ic: '👷' },
-    STAFF: { nama: 'Staff', masuk: 'admin.html', ic: '🧑‍💼' },
-    PIC: { nama: 'PIC', masuk: 'pic.html', ic: '📋' }
-  };
-  var S = { jenis: '', tujuan: '', hp: '', username: '', token: '', langkah: 0, jeda: 0, timer: null, divisi: [] };
+  var WA_DAFTAR = 'https://wa.me/6285694765370?text=' + encodeURIComponent('Halo Admin, saya ingin daftar akun Portal SPPG Jeungjing.');
+  // Satu alur untuk Relawan, Staff, dan PIC: server mengenali jenis akun dari nomor WhatsApp.
+  var JENIS = { RELAWAN: { nama: 'Relawan', pin: false }, STAFF: { nama: 'Staff', pin: false }, PIC: { nama: 'PIC', pin: false } };
+  var S = { jenis: '', opsi: [], hp: '', token: '', jeda: 0, timer: null };
+  var SVG = 'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  var MATA = '<path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/>';
 
   function h(tag, a, kids) {
     var e = document.createElement(tag); a = a || {};
@@ -58,63 +62,53 @@ a.balik{display:block;text-align:center;margin-top:16px;color:var(--navy);font-w
   function judul(t) { return h('h2', { text: t }); }
   function bar(n) { var w = h('div', { class: 'langkah' }); for (var i = 1; i <= 3; i++) w.appendChild(h('i', { class: i <= n ? 'on' : '' })); return w; }
   function adminLink() { return h('p', { style: 'text-align:center;font-size:14px;color:#5b6573' }, ['Butuh bantuan? ', h('a', { href: WA_ADMIN, target: '_blank', rel: 'noopener', text: 'Hubungi Admin lewat WhatsApp', style: 'color:#12294d;font-weight:700' })]); }
-  function kembali(href, teks) { return h('a', { class: 'balik', href: href || 'masuk.html', text: teks || '← Kembali ke pilihan akun' }); }
-  function judulJenis() { return JENIS[S.jenis].nama + (S.tujuan === 'DAFTAR' ? ' · Daftar akun baru' : S.jenis === 'PIC' ? ' · Buat / lupa PIN' : ' · Lupa password'); }
-
-  /* ---- 0. pilih ---- */
-  function pilih() {
-    bersih(); S.token = ''; S.langkah = 0;
-    app.appendChild(judul('Apa yang Anda perlukan?'));
-    var kar = function (jenis, tujuan, ic, judulK, ket, kls) { return h('button', { class: 'kartu ' + (kls || ''), type: 'button', onclick: function () { mulai(jenis, tujuan); } }, [h('div', { class: 'ic', text: ic }), h('div', {}, [h('b', { text: judulK }), h('span', { text: ket })])]); };
-    app.appendChild(kar('RELAWAN', 'RESET', '🔑', 'Relawan: lupa password', 'Minta kode lewat WhatsApp, lalu buat password baru.'));
-    app.appendChild(kar('RELAWAN', 'DAFTAR', '📝', 'Relawan: daftar akun baru', 'Setelah diverifikasi, pendaftaran menunggu persetujuan Admin.'));
-    app.appendChild(kar('STAFF', 'RESET', '🔑', 'Staff: lupa password', 'Untuk akun Staff (Admin Operasional).', 'stf'));
-    app.appendChild(kar('STAFF', 'DAFTAR', '📝', 'Staff: daftar akun baru', 'Menunggu persetujuan Super Admin.', 'stf'));
-    app.appendChild(kar('PIC', 'RESET', '📋', 'PIC: buat atau lupa PIN', 'Untuk PIC Posyandu dan satuan pendidikan yang sudah ditugaskan.', 'pic'));
-    app.appendChild(h('div', { class: 'note warn', text: 'Akun Admin (akses penuh) tidak memakai kode WhatsApp. Hubungi pengelola sistem untuk reset.' }));
-    app.appendChild(adminLink()); app.appendChild(kembali());
+  function kembali(href, teks) { return h('a', { class: 'balik', href: href || 'masuk.html', text: teks || '← Kembali ke halaman masuk' }); }
+  // Kolom sandi dengan ikon mata (SVG garis, bukan emoji).
+  function kolomSandi(input) {
+    var btn = h('button', { type: 'button', class: 'mata', 'aria-label': 'Tampilkan password', title: 'Tampilkan password' });
+    function gambar(tampil) { btn.innerHTML = '<svg ' + SVG + ' width="24" height="24">' + MATA + (tampil ? '<path d="M3 3l18 18"/>' : '') + '</svg>'; var t = tampil ? 'Sembunyikan password' : 'Tampilkan password'; btn.setAttribute('aria-label', t); btn.setAttribute('title', t); }
+    gambar(false);
+    btn.addEventListener('click', function () { var t = input.type === 'password'; input.type = t ? 'text' : 'password'; gambar(t); });
+    return h('div', { class: 'pw' }, [input, btn]);
   }
-  function mulai(jenis, tujuan) { S.jenis = jenis; S.tujuan = jenis === 'PIC' ? 'RESET' : tujuan; S.hp = ''; S.username = ''; formHp(); }
 
-  /* ---- 1. nomor HP ---- */
+  /* ---- 1. nomor WhatsApp ---- */
   function formHp(pesan) {
-    bersih(); S.langkah = 1;
+    bersih(); S.token = ''; S.jenis = ''; S.opsi = [];
     var hp = h('input', { type: 'tel', id: 'hp', inputmode: 'tel', autocomplete: 'tel', placeholder: '08xxxxxxxxxx', value: S.hp }),
-      un = h('input', { type: 'text', id: 'un', autocomplete: 'username', autocapitalize: 'none', value: S.username }),
       jebak = h('input', { type: 'text', name: 'website', tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true' }),
       msg = h('div', { class: 'msg err', 'aria-live': 'polite', text: pesan || '' }),
       btn = h('button', { class: 'btn', type: 'button', text: 'Kirim kode ke WhatsApp', onclick: kirim });
     function kirim() {
-      msg.textContent = ''; var nomor = hp.value.trim(); if (!nomor) { msg.textContent = 'Isi nomor HP.'; return; }
+      msg.textContent = ''; var nomor = hp.value.trim(); if (!nomor) { msg.textContent = 'Isi nomor WhatsApp.'; return; }
       btn.disabled = true; btn.textContent = 'Mengirim…';
-      apiPost('otpMinta', { jenis: S.jenis, tujuan: S.tujuan, nomorHp: nomor, username: un.value.trim(), website: jebak.value }).then(function (r) {
-        S.hp = nomor; S.username = un.value.trim(); S.jeda = (r && r.jedaDetik) || 60; formKode(r && r.pesan);
+      apiPost('otpMinta', { nomorHp: nomor, website: jebak.value }).then(function (r) {
+        S.hp = nomor; S.jeda = (r && r.jedaDetik) || 60; formKode(r && r.pesan);
       }).catch(function (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Kirim kode ke WhatsApp'; });
     }
-    app.appendChild(bar(1)); app.appendChild(judul(judulJenis()));
-    var f = [
-      h('div', { class: 'fld' }, [h('label', { for: 'hp', text: 'Nomor WhatsApp' }), h('div', { class: 'hint', text: S.tujuan === 'DAFTAR' ? 'Nomor yang aktif di WhatsApp. Kode akan dikirim ke sini.' : S.jenis === 'PIC' ? 'Nomor HP yang terdaftar sebagai PIC di SPPG.' : 'Nomor HP yang tercatat pada akun Anda.' }), hp])
-    ];
-    if (S.tujuan === 'RESET' && S.jenis !== 'PIC') f.push(h('div', { class: 'fld' }, [h('label', { for: 'un', text: 'Username (boleh dikosongkan)' }), h('div', { class: 'hint', text: 'Isi bila satu nomor HP dipakai lebih dari satu akun.' }), un]));
-    f.push(h('div', { class: 'hp', 'aria-hidden': 'true' }, [h('label', { text: 'Jangan isi kolom ini' }), jebak]));
-    f.forEach(function (x) { app.appendChild(x); });
-    if (S.jenis === 'PIC') app.appendChild(h('div', { class: 'note', text: 'PIC memakai PIN 6 angka yang dibuat sendiri setelah nomor diverifikasi. Nomor harus sudah ditugaskan sebagai PIC oleh Admin.' }));
-    if (S.tujuan === 'DAFTAR') app.appendChild(h('div', { class: 'note', text: 'Pendaftaran tidak langsung aktif. Admin memeriksa dulu dan menyetujui.' }));
-    app.appendChild(msg); app.appendChild(btn); app.appendChild(h('button', { class: 'btn link', type: 'button', text: '← Pilih yang lain', onclick: pilih })); app.appendChild(adminLink());
+    app.appendChild(bar(1)); app.appendChild(judul('Masukkan nomor WhatsApp'));
+    app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'hp', text: 'Nomor WhatsApp' }), h('div', { class: 'hint', text: 'Nomor yang terdaftar di akun Anda. Kode dikirim ke sini.' }), hp]));
+    app.appendChild(h('div', { class: 'hp', 'aria-hidden': 'true' }, [h('label', { text: 'Jangan isi kolom ini' }), jebak]));
+    app.appendChild(msg); app.appendChild(btn); app.appendChild(adminLink());
+    app.appendChild(h('p', { style: 'text-align:center;font-size:13.5px;color:#5b6573' }, ['Akun Admin utama tidak memakai kode WhatsApp. ', h('a', { href: 'admin.html#reset', text: 'Pakai kode dari pengelola sistem', style: 'color:#12294d;font-weight:600' })]));
+    app.appendChild(kembali());
     hp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') kirim(); });
   }
 
   /* ---- 2. kode ---- */
   function formKode(pesanServer) {
-    bersih(); S.langkah = 2;
+    bersih();
     var kode = h('input', { type: 'text', id: 'kode', class: 'kode', inputmode: 'numeric', autocomplete: 'one-time-code', maxlength: '6', placeholder: '••••••' }),
       msg = h('div', { class: 'msg err', 'aria-live': 'polite' }), btn = h('button', { class: 'btn', type: 'button', text: 'Periksa kode', onclick: cek }),
       ulang = h('button', { class: 'btn sec', type: 'button', disabled: 'disabled', text: 'Kirim ulang kode', onclick: function () { formHp(); } });
     function cek() {
       msg.textContent = ''; var k = kode.value.trim(); if (!/^\d{6}$/.test(k)) { msg.textContent = 'Isi 6 angka kode dari WhatsApp.'; return; }
       btn.disabled = true; btn.textContent = 'Memeriksa…';
-      apiPost('otpVerifikasi', { jenis: S.jenis, tujuan: S.tujuan, nomorHp: S.hp, kode: k }).then(function (r) { S.token = r.token; formIsi(); })
-        .catch(function (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Periksa kode'; kode.value = ''; if (/hangus|kedaluwarsa/i.test(e.message)) ulang.disabled = false; });
+      apiPost('otpVerifikasi', { nomorHp: S.hp, kode: k }).then(function (r) {
+        S.token = r.token; S.opsi = (r.opsi || []).filter(function (j) { return JENIS[j]; });
+        if (!S.opsi.length) { formHp('Akun tidak dapat diubah lewat jalur ini. Hubungi Admin.'); return; }
+        if (S.opsi.length === 1) { S.jenis = S.opsi[0]; formIsi(); } else formPilih();
+      }).catch(function (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Periksa kode'; kode.value = ''; if (/hangus|kedaluwarsa/i.test(e.message)) ulang.disabled = false; });
     }
     kode.addEventListener('input', function () { kode.value = kode.value.replace(/\D/g, '').slice(0, 6); if (kode.value.length === 6) cek(); });
     app.appendChild(bar(2)); app.appendChild(judul('Masukkan kode dari WhatsApp'));
@@ -126,73 +120,55 @@ a.balik{display:block;text-align:center;margin-top:16px;color:var(--navy);font-w
     app.appendChild(adminLink()); setTimeout(function () { kode.focus(); }, 50);
   }
 
-  /* ---- 3. isi ---- */
+  /* ---- 2b. satu nomor dipakai beberapa jenis akun: pilih (hanya tampil setelah kode benar) ---- */
+  function formPilih() {
+    bersih(); app.appendChild(bar(2)); app.appendChild(judul('Akun mana yang diubah?'));
+    app.appendChild(h('div', { class: 'note', text: 'Nomor ini dipakai lebih dari satu jenis akun. Pilih salah satu.' }));
+    S.opsi.forEach(function (j) { app.appendChild(h('button', { class: 'btn sec', type: 'button', text: JENIS[j].nama, onclick: function () { S.jenis = j; formIsi(); } })); });
+  }
+
+  /* ---- 3. sandi baru ---- */
   function formIsi(pesan) {
-    bersih(); S.langkah = 3;
-    if (S.tujuan === 'DAFTAR') return formDaftar(pesan);
-    var pic = S.jenis === 'PIC';
+    bersih();
+    var pic = JENIS[S.jenis].pin;
     var p1 = h('input', { type: 'password', id: 'p1', autocomplete: 'new-password', inputmode: pic ? 'numeric' : 'text', maxlength: pic ? '6' : '72' }), p2 = h('input', { type: 'password', id: 'p2', autocomplete: 'new-password', inputmode: pic ? 'numeric' : 'text', maxlength: pic ? '6' : '72' }),
-      lihat = h('input', { type: 'checkbox', id: 'lihat' }), msg = h('div', { class: 'msg err', 'aria-live': 'polite', text: pesan || '' }), btn = h('button', { class: 'btn', type: 'button', text: pic ? 'Simpan PIN' : 'Simpan password', onclick: simpan });
+      msg = h('div', { class: 'msg err', 'aria-live': 'polite', text: pesan || '' }), btn = h('button', { class: 'btn', type: 'button', text: pic ? 'Simpan PIN' : 'Simpan password', onclick: simpan });
     if (pic) [p1, p2].forEach(function (x) { x.addEventListener('input', function () { x.value = x.value.replace(/\D/g, '').slice(0, 6); }); });
-    lihat.addEventListener('change', function () { p1.type = p2.type = lihat.checked ? 'text' : 'password'; });
     function simpan() {
       msg.textContent = ''; if (p1.value !== p2.value) { msg.textContent = 'Pengulangan tidak sama.'; return; }
       if (pic && !/^\d{6}$/.test(p1.value)) { msg.textContent = 'PIN harus 6 angka.'; return; } if (!pic && p1.value.length < 8) { msg.textContent = 'Password minimal 8 karakter.'; return; }
       btn.disabled = true; btn.textContent = 'Menyimpan…';
-      var body = { tokenOtp: S.token }; if (pic) body.pinBaru = p1.value; else { body.passwordBaru = p1.value; body.sandiUlang = p2.value; }
+      var body = { tokenOtp: S.token, jenis: S.jenis }; if (pic) body.pinBaru = p1.value; else { body.passwordBaru = p1.value; body.sandiUlang = p2.value; }
       apiPost('otpAtur', body).then(function (r) { selesai(r && r.pesan); }).catch(function (e) {
         msg.textContent = e.message; btn.disabled = false; btn.textContent = pic ? 'Simpan PIN' : 'Simpan password';
-        if (/berakhir/i.test(e.message)) setTimeout(function () { formHp('Verifikasi sudah berakhir. Minta kode baru.'); }, 1800);
+        if (/berakhir/i.test(e.message)) setTimeout(function () { S.hp = ''; formHp('Verifikasi sudah berakhir. Minta kode baru.'); }, 1800);
       });
     }
     app.appendChild(bar(3)); app.appendChild(judul(pic ? 'Buat PIN baru' : 'Buat password baru'));
     app.appendChild(h('div', { class: 'note', text: 'Nomor sudah terverifikasi. ' + (pic ? 'Pilih 6 angka yang tidak berurutan atau berulang. Jangan bagikan PIN.' : 'Minimal 8 karakter. Jangan sama dengan username.') }));
-    app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'p1', text: pic ? 'PIN baru (6 angka)' : 'Password baru' }), p1])); app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'p2', text: 'Ulangi' }), p2]));
-    app.appendChild(h('label', { style: 'display:flex;gap:8px;align-items:center;margin:0 0 12px;font-size:15px' }, [lihat, 'Tampilkan'])); app.appendChild(msg); app.appendChild(btn);
-  }
-  function formDaftar(pesan) {
-    var staff = S.jenis === 'STAFF', val = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
-    var nama = h('input', { type: 'text', id: 'nama', autocomplete: 'name' }), un = h('input', { type: 'text', id: 'dun', autocapitalize: 'none', autocomplete: 'username' }),
-      p1 = h('input', { type: 'password', id: 'dp1', autocomplete: 'new-password' }), p2 = h('input', { type: 'password', id: 'dp2', autocomplete: 'new-password' }),
-      cat = h('input', { type: 'text', id: 'cat', maxlength: '200' }), div = h('select', { id: 'div' }, [h('option', { value: '', text: 'Pilih divisi…' })].concat(S.divisi.map(function (d) { return h('option', { value: d, text: d }); })));
-    var msg = h('div', { class: 'msg err', 'aria-live': 'polite', text: pesan || '' }), btn = h('button', { class: 'btn', type: 'button', text: 'Kirim pendaftaran', onclick: kirim });
-    function kirim() {
-      msg.textContent = ''; if (p1.value !== p2.value) { msg.textContent = 'Pengulangan password tidak sama.'; return; }
-      if (nama.value.trim().length < 3) { msg.textContent = 'Isi nama lengkap.'; return; } if (!staff && !div.value) { msg.textContent = 'Pilih divisi.'; return; }
-      btn.disabled = true; btn.textContent = 'Mengirim…';
-      apiPost('pendaftaranKirim', { tokenOtp: S.token, nama: nama.value.trim(), divisi: div.value, username: un.value.trim(), password: p1.value, passwordUlang: p2.value, catatan: cat.value.trim() })
-        .then(function (r) { selesai(r && r.pesan, true); }).catch(function (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Kirim pendaftaran'; if (/berakhir/i.test(e.message)) setTimeout(function () { formHp('Verifikasi sudah berakhir. Minta kode baru.'); }, 1800); });
-    }
-    app.appendChild(bar(3)); app.appendChild(judul('Lengkapi pendaftaran'));
-    app.appendChild(h('div', { class: 'note', text: 'Nomor sudah terverifikasi. Lengkapi data berikut. Anda baru bisa masuk setelah Admin menyetujui.' }));
-    app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'nama', text: 'Nama lengkap' }), nama]));
-    if (!staff) app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'div', text: 'Divisi' }), div]));
-    app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'dun', text: 'Username' }), h('div', { class: 'hint', text: staff ? '3-40 karakter: huruf, angka, titik, garis bawah, strip.' : '4-40 karakter: huruf kecil, angka, titik, garis bawah.' }), un]));
-    app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'dp1', text: 'Password' }), h('div', { class: 'hint', text: 'Minimal 8 karakter.' }), p1])); app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'dp2', text: 'Ulangi password' }), p2]));
-    app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'cat', text: 'Catatan untuk Admin (boleh kosong)' }), h('div', { class: 'hint', text: staff ? 'Mis. jabatan dan atasan Anda.' : 'Mis. nama koordinator Anda.' }), cat]));
+    app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'p1', text: pic ? 'PIN baru (6 angka)' : 'Password baru' }), kolomSandi(p1)])); app.appendChild(h('div', { class: 'fld' }, [h('label', { for: 'p2', text: 'Ulangi' }), p2]));
     app.appendChild(msg); app.appendChild(btn);
   }
 
   /* ---- 4. selesai ---- */
-  function selesai(pesan, daftar) {
+  function selesai(pesan) {
     bersih();
-    app.appendChild(h('div', { class: 'ok-ic', text: daftar ? '📨' : '✅' })); app.appendChild(h('h2', { text: daftar ? 'Pendaftaran terkirim' : 'Berhasil', style: 'text-align:center' }));
-    app.appendChild(h('div', { class: 'note', text: pesan || (daftar ? 'Pendaftaran menunggu persetujuan Admin.' : 'Tersimpan.') }));
-    if (daftar) app.appendChild(h('div', { class: 'note warn', text: 'Anda belum bisa masuk sebelum Admin menyetujui. Bila lama, hubungi Admin dan sebutkan nomor HP yang didaftarkan.' }));
-    else app.appendChild(h('a', { href: JENIS[S.jenis].masuk, class: 'btn', style: 'display:block;text-align:center;text-decoration:none;line-height:24px', text: 'Masuk sekarang' }));
-    app.appendChild(kembali('portal.html', '← Kembali ke beranda')); S.token = '';
+    var ok = h('div', { class: 'ok-ic' }); ok.innerHTML = '<svg ' + SVG + ' width="56" height="56"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-7"/></svg>';
+    app.appendChild(ok); app.appendChild(h('h2', { text: 'Berhasil', style: 'text-align:center' }));
+    app.appendChild(h('div', { class: 'note', text: pesan || 'Tersimpan.' }));
+    app.appendChild(h('a', { href: 'masuk.html', class: 'btn', style: 'display:block;text-align:center;text-decoration:none;line-height:24px', text: 'Masuk sekarang' }));
+    S.token = '';
   }
 
   /* ---- mulai ---- */
   function awal() {
+    // Pendaftaran tidak lagi lewat halaman ini: dialihkan ke WhatsApp Admin (tautan lama ?mode=daftar tetap berguna).
+    if (/(^|[?&])mode=daftar(&|$)/i.test(location.search)) { location.replace(WA_DAFTAR); return; }
     app.appendChild(h('div', { class: 'note', text: 'Memeriksa layanan…' }));
     apiPost('getStatusOtp', {}).then(function (r) {
       bersih();
-      if (!r || !r.aktif) { app.appendChild(h('div', { class: 'note warn', text: 'Layanan kode verifikasi WhatsApp belum aktif. Silakan hubungi Admin.' })); app.appendChild(adminLink()); app.appendChild(kembali()); return; }
-      apiGet('getDivisi', {}).then(function (d) { S.divisi = Array.isArray(d) ? d : []; }).catch(function () { S.divisi = []; }).then(function () {
-        var q = new URLSearchParams(location.search), j = (q.get('jenis') || '').toUpperCase(), m = (q.get('mode') || '').toLowerCase();
-        if (JENIS[j]) mulai(j, m === 'daftar' ? 'DAFTAR' : 'RESET'); else pilih();
-      });
+      if (!r || !r.aktif) { app.appendChild(h('div', { class: 'note warn', text: 'Layanan kode WhatsApp belum aktif. Silakan hubungi Admin.' })); app.appendChild(adminLink()); app.appendChild(kembali()); return; }
+      formHp();
     }).catch(function (e) { bersih(); app.appendChild(h('div', { class: 'note err', text: e.message })); app.appendChild(adminLink()); });
   }
   awal();

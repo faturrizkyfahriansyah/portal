@@ -33,11 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePasswordVisibility('inputPasswordBaru', this);
   });
 
+  // Ikon mata (SVG garis, bukan emoji)
+  function ikonMata(btn, tampil) {
+    const g = '<path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/>' + (tampil ? '<path d="M3 3l18 18"/>' : '');
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + g + '</svg>';
+    const t = tampil ? 'Sembunyikan password' : 'Tampilkan password'; btn.setAttribute('aria-label', t); btn.setAttribute('title', t);
+  }
+
   function togglePasswordVisibility(inputId, btn) {
     const input = document.getElementById(inputId);
     const tampil = input.type === 'password';
     input.type = tampil ? 'text' : 'password';
-    btn.textContent = tampil ? 'SEMBUNYIKAN' : 'TAMPILKAN';
+    ikonMata(btn, tampil);
   }
 
   loginForm.addEventListener('submit', async (e) => {

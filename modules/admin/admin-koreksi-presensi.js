@@ -18,8 +18,26 @@
   const STATUS_FORM = { H: 'HADIR', T: 'HADIR', I: 'IZIN', S: 'SAKIT', C: 'CUTI', A: 'ALFA', B: 'HADIR' };
   let data = null, mulai = false, urut = 0, terbuka = null;
 
+
+  // Satu menu "Koreksi & Cek Absen": dua tab di atas panel (25 Nov 2026). Tombol menu lama tetap ada (disembunyikan) agar hak akses dan tautan lama tidak berubah.
+  function stripGabung(aktif) {
+    const ada = function (id) { const b = document.querySelector('.admin-tab-btn[data-panel="' + id + '"]'); return b && b.style.display !== 'none'; };
+    const t = function (id, teks) { return ada(id) ? '<button type="button" class="btn-mini' + (aktif === id ? ' primary' : '') + '" data-ke="' + id + '" role="tab" aria-selected="' + (aktif === id) + '">' + teks + '</button>' : ''; };
+    return '<div role="tablist" class="tab-gabung" style="display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap">' + t('panelJadwalIndividu', 'Koreksi Presensi') + t('panelDiagnosaAbsen', 'Cek Absen &amp; Shift Malam') + '</div>';
+  }
+  function pasangStrip() {
+    panel.querySelectorAll('.tab-gabung [data-ke]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const id = b.getAttribute('data-ke'); if (id === panel.id) return;
+        const tujuan = document.querySelector('.admin-tab-btn[data-panel="' + id + '"]'); if (!tujuan) return;
+        tujuan.click();
+        const utama = document.querySelector('.admin-tab-btn[data-panel="panelJadwalIndividu"]'); if (utama) utama.classList.add('active');   // sorot menu yang terlihat
+      });
+    });
+  }
+
   panel.innerHTML =
-    '<div class="shell-page-head"><div class="shell-page-head-icon"></div><div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Koreksi Presensi</h1></div></div>' +
+    stripGabung('panelJadwalIndividu') + '<div class="shell-page-head"><div class="shell-page-head-icon"></div><div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Koreksi Presensi</h1></div></div>' +
     '<div class="filter-bar" id="kpFilter"><select id="kpMode" aria-label="Rentang"><option value="1">Harian</option><option value="7">Mingguan</option></select>' +
     '<label style="font-size:12px;">Mulai <input type="date" id="kpAwal"></label>' +
     '<select id="kpDivisi" aria-label="Divisi"><option value="">Semua Divisi</option></select><select id="kpRelawan" aria-label="Relawan"><option value="">Semua Relawan</option></select>' +
@@ -27,6 +45,7 @@
     '<div class="rmg-chips" id="kpChips"></div><div id="kpPesan" style="font-size:13px;margin:4px 0;"></div>' +
     '<div class="table-wrap"><table class="rmg-tabel" id="kpTabel"><thead id="kpThead"></thead><tbody id="kpTbody"></tbody></table></div>' +
     '<div id="kpAksi" class="admin-stat-card" style="display:none;padding:14px;text-align:left;margin-top:12px;"></div>';
+  pasangStrip();
 
   function pesan(t, galat) { const p = $('kpPesan'); p.textContent = t || ''; p.style.color = galat ? '#c0392b' : '#2e7d32'; }
   function bolehTombol(sel) {

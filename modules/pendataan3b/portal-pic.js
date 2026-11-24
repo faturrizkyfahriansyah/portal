@@ -127,7 +127,7 @@
     status(wrap);
     if (R) {
       var kartu = h('div', { class: 'item' }, h('div', { class: 'nm', text: R.nama }));
-      [['Jabatan', R.jabatan || '-'], ['Nomor HP', R.nomorHp || '-'], ['Rekening', R.rekening || '-'], ['PIN diatur', waktu(R.pinDiaturPada)], ['Terakhir masuk', waktu(R.terakhirMasuk)]].forEach(function (b) {
+      [['Jabatan', R.jabatan || '-'], ['Nomor HP', R.nomorHp || '-'], ['Rekening', R.rekening || '-'], ['Password diatur', waktu(R.pinDiaturPada)], ['Terakhir masuk', waktu(R.terakhirMasuk)]].forEach(function (b) {
         kartu.appendChild(h('div', { class: 'mrow' }, h('span', { class: 'ml', text: b[0] }), h('span', { text: b[1] })));
       });
       wrap.appendChild(kartu);
@@ -135,28 +135,39 @@
       wrap.appendChild(h('h2', { text: 'Tanggung jawab' }));
       (R.instansi || []).forEach(function (x) { wrap.appendChild(h('div', { class: 'item' }, h('div', { class: 'nm', text: x.nama }), h('div', { class: 'meta', text: x.jenisLabel }))); });
       wrap.appendChild(h('h2', { text: 'Keamanan' }));
-      if (!P.gantiPin) wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnGantiPin', text: 'Ganti PIN', onclick: function () { P.gantiPin = true; K().render(); } }));
+      if (!P.gantiPin) wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnGantiPin', text: 'Ganti password', onclick: function () { P.gantiPin = true; K().render(); } }));
       else wrap.appendChild(formPin());
     }
     pasang(topbar('Profil PIC'), wrap);
   }
+  /* Kolom password + ikon mata (gambar garis, bukan emoji). */
+  function kolomSandi(el) {
+    var btn = h('button', { type: 'button', style: 'position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;padding:8px;min-width:44px;min-height:44px;line-height:0;color:#55606f;cursor:pointer' });
+    function ikon(tampil) {
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/>' + (tampil ? '<path d="M3 3l18 18"/>' : '') + '</svg>';
+      var t = tampil ? 'Sembunyikan password' : 'Tampilkan password'; btn.setAttribute('aria-label', t); btn.setAttribute('title', t);
+    }
+    ikon(false); el.style.paddingRight = '54px';
+    btn.addEventListener('click', function () { var t = el.type === 'password'; el.type = t ? 'text' : 'password'; ikon(t); });
+    return h('div', { style: 'position:relative' }, el, btn);
+  }
   function inputPin(id, label, hint) {
-    var el = h('input', { type: 'password', id: id, inputmode: 'numeric', maxlength: '6', autocomplete: id === 'pinLama' ? 'current-password' : 'new-password', placeholder: '6 angka' });
-    el.addEventListener('input', function () { el.value = el.value.replace(/\D/g, '').slice(0, 6); });
-    return { el: el, blok: h('div', { class: 'fld' }, h('label', { for: id, text: label }), hint ? h('div', { class: 'hint', text: hint }) : null, el) };
+    var el = h('input', { type: 'password', id: id, maxlength: '72', autocomplete: id === 'pinLama' ? 'current-password' : 'new-password' });
+    return { el: el, blok: h('div', { class: 'fld' }, h('label', { for: id, text: label }), hint ? h('div', { class: 'hint', text: hint }) : null, kolomSandi(el)) };
   }
   function formPin() {
-    var a = inputPin('pinLama', 'PIN lama'), b = inputPin('pinBaru', 'PIN baru', '6 angka. Jangan 123456 atau angka kembar.'), c = inputPin('pinUlang', 'Ulangi PIN baru');
-    var msg = h('div', { class: 'msg err', role: 'alert', 'aria-live': 'polite' }), btn = h('button', { class: 'btn block', id: 'btnSimpanPin', text: 'Simpan PIN baru' });
+    var a = inputPin('pinLama', 'Password lama'), b = inputPin('pinBaru', 'Password baru', 'Minimal 8 karakter.'), c = inputPin('pinUlang', 'Ulangi password baru');
+    var msg = h('div', { class: 'msg err', role: 'alert', 'aria-live': 'polite' }), btn = h('button', { class: 'btn block', id: 'btnSimpanPin', text: 'Simpan password baru' });
     btn.addEventListener('click', async function () {
       msg.textContent = '';
-      if (!/^\d{6}$/.test(a.el.value) || !/^\d{6}$/.test(b.el.value)) { msg.textContent = 'PIN lama dan PIN baru harus 6 angka.'; return; }
-      if (b.el.value !== c.el.value) { msg.textContent = 'PIN baru dan ulangannya tidak sama.'; return; }
+      if (!a.el.value) { msg.textContent = 'Isi password lama.'; return; }
+      if (b.el.value.length < 8) { msg.textContent = 'Password baru minimal 8 karakter.'; return; }
+      if (b.el.value !== c.el.value) { msg.textContent = 'Password baru dan ulangannya tidak sama.'; return; }
       btn.disabled = true; btn.textContent = 'Menyimpan…';
       try {
-        var d = await K().api('gantiPinPic3B', { idInstansi: '', pinLama: a.el.value, pinBaru: b.el.value });
-        K().S.token = d.token; K().simpanSesi(); P.gantiPin = false; P.profil = null; K().toast('PIN berhasil diganti.'); K().render();
-      } catch (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Simpan PIN baru'; }
+        var d = await K().api('gantiPinPic3B', { idInstansi: '', passwordLama: a.el.value, passwordBaru: b.el.value });
+        K().S.token = d.token; K().simpanSesi(); P.gantiPin = false; P.profil = null; K().toast('Password berhasil diganti.'); K().render();
+      } catch (e) { msg.textContent = e.message; btn.disabled = false; btn.textContent = 'Simpan password baru'; }
     });
     return h('div', { class: 'item' }, a.blok, b.blok, c.blok, msg, btn, h('button', { class: 'btn sec block', style: 'margin-top:10px', text: 'Batal', onclick: function () { P.gantiPin = false; K().render(); } }));
   }
@@ -225,12 +236,12 @@
 
   /* ---------- Bantuan ---------- */
   var FAQ = [
-    ['Lupa PIN?', 'Di layar masuk, ketuk "Belum punya PIN atau lupa PIN?" untuk meminta kode lewat WhatsApp. Bila tidak bisa, hubungi Admin SPPG untuk mengatur ulang PIN.'],
-    ['Mau ganti PIN?', 'Buka tab Profil, lalu ketuk "Ganti PIN". Anda perlu PIN yang lama.'],
+    ['Lupa password?', 'Di layar masuk, ketuk "Lupa password?" untuk meminta kode lewat WhatsApp. Bila tidak bisa, hubungi Admin SPPG untuk mengatur ulang password.'],
+    ['Mau ganti password?', 'Buka tab Profil, lalu ketuk "Ganti password". Anda perlu password yang lama.'],
     ['Nama atau alamat instansi salah?', 'Data resmi instansi dikelola Admin SPPG. Hubungi Admin lewat tombol di bawah, sebutkan nama instansi dan bagian yang salah.'],
     ['Bagaimana mengisi data siswa, guru, atau tendik?', 'Buka menu Pendataan. Isi lewat formulir, atau salin dari Excel lalu tempel di "Tempel dari Excel". Ketik NISN lengkap 10 angka, termasuk angka 0 di depan.'],
     ['Kapan menu berubah?', 'Menu hari ini berganti ke menu besok mulai sore hari. Menu resmi ditetapkan Admin SPPG.'],
-    ['Apakah data saya aman?', 'Hanya Anda dan Admin SPPG yang bisa melihat data instansi Anda. Jangan berikan PIN kepada siapa pun.']
+    ['Apakah data saya aman?', 'Hanya Anda dan Admin SPPG yang bisa melihat data instansi Anda. Jangan berikan password kepada siapa pun.']
   ];
   function renderBantuan() {
     var wrap = h('div', { class: 'wrap', id: 'bantuanPic' });

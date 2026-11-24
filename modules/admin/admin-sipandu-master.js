@@ -147,7 +147,7 @@
       '<div class="table-wrap"><table><thead><tr><th>Nama</th><th>Jabatan</th><th>No. HP</th><th>No. Rekening</th><th>Instansi</th><th>Status</th><th></th></tr></thead><tbody>' +
       (data.pic.length ? data.pic.map(function (p) {
         const nama = p.instansiAktif.map(function (id) { const i = data.instansi.filter(function (x) { return x.idInstansi === id; })[0]; return i ? i.nama : id; }).join(', ');
-        return '<tr><td>' + esc(p.nama) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + esc(p.idPic) + '</div></td><td>' + esc(p.jabatan || '—') + '</td><td>' + esc(p.nomorHp || '—') + '</td><td>' + esc(p.nomorRekening || '—') + '</td>' +
+        return '<tr><td>' + esc(p.nama) + '<div style="font-size:11px;color:var(--color-text-muted,#55606f);">' + (p.namaPanggilan ? esc(p.namaPanggilan) + ' · ' : '') + esc(p.idPic) + '</div></td><td>' + esc(p.jabatan || '—') + '</td><td>' + esc(p.nomorHp || '—') + '</td><td>' + esc(p.nomorRekening || '—') + '</td>' +
           '<td>' + esc(nama || '—') + '</td><td>' + esc(p.status) + '</td><td><button class="btn-mini" data-id="' + esc(p.idPic) + '" type="button">Ubah</button></td></tr>';
       }).join('') : '<tr><td colspan="7"><div class="empty-state">Belum ada PIC.</div></td></tr>') + '</tbody></table></div>';
     $('spmTambahPic').addEventListener('click', function () { formPic(null); });
@@ -157,16 +157,27 @@
     });
   }
   function formPic(p) {
-    p = p || { idPic: '', nama: '', jabatan: '', nomorHp: '', nomorRekening: '', status: 'AKTIF', keterangan: '' };
-    $('spmForm').innerHTML = '<div class="admin-stat-card" style="padding:14px;text-align:left;margin-bottom:12px;"><b>' + (p.idPic ? 'Ubah ' + esc(p.idPic) : 'PIC baru') + '</b><div style="' + grid + '">' +
-      input('fpNama', 'Nama PIC *', p.nama) + input('fpJabatan', 'Jabatan', p.jabatan) + input('fpHp', 'No. HP', p.nomorHp) + input('fpRek', 'No. Rekening (sensitif)', p.nomorRekening) +
+    p = p || { idPic: '', nama: '', namaPanggilan: '', jabatan: '', tempatLahir: '', tanggalLahir: '', jenisKelamin: '', alamat: '', nomorHp: '', namaRekening: '', nomorRekening: '', status: 'AKTIF', keterangan: '' };
+    const judul = function (t) { return '<div style="font-weight:600;font-size:13px;margin:12px 0 0;">' + t + '</div>'; };
+    const tersamar = /•/.test(p.tanggalLahir || '');
+    $('spmForm').innerHTML = '<div class="admin-stat-card" style="padding:14px;text-align:left;margin-bottom:12px;"><b>' + (p.idPic ? 'Ubah ' + esc(p.idPic) : 'PIC baru') + '</b>' +
+      judul('Data diri') + '<div style="' + grid + '">' +
+      input('fpNama', 'Nama lengkap *', p.nama) + input('fpPanggilan', 'Nama panggilan', p.namaPanggilan) + input('fpJabatan', 'Jabatan', p.jabatan) +
+      input('fpTempat', 'Tempat lahir', p.tempatLahir) + input('fpTglLahir', 'Tanggal lahir', p.tanggalLahir, tersamar ? 'text' : 'date', tersamar ? '' : 'max="' + new Date().toISOString().slice(0, 10) + '"') +
+      pilih('fpJk', 'Jenis kelamin', [['', '— pilih —'], ['Laki-laki', 'Laki-laki'], ['Perempuan', 'Perempuan']], p.jenisKelamin) +
+      input('fpHp', 'No. HP', p.nomorHp) + input('fpAlamat', 'Alamat', p.alamat) + '</div>' +
+      judul('Rekening') + '<div style="' + grid + '">' +
+      input('fpNamaRek', 'Nama pemilik rekening', p.namaRekening) + input('fpRek', 'No. rekening', p.nomorRekening) + '</div>' +
+      judul('Status') + '<div style="' + grid + '">' +
       pilih('fpStatus', 'Status', [['AKTIF', 'AKTIF'], ['NONAKTIF', 'NONAKTIF']], p.status) + input('fpKet', 'Keterangan', p.keterangan) + '</div>' +
       '<button class="btn-mini primary" id="fpSimpan" type="button">Simpan</button> <button class="btn-mini" id="fpBatal" type="button">Batal</button></div>';
     $('fpBatal').addEventListener('click', function () { $('spmForm').innerHTML = ''; });
     $('fpSimpan').addEventListener('click', async function () {
       try {
         pesan('Menyimpan…');
-        await api('simpanPicV2', { idPic: p.idPic, nama: $('fpNama').value, jabatan: $('fpJabatan').value, nomorHp: $('fpHp').value, nomorRekening: $('fpRek').value, status: $('fpStatus').value, keterangan: $('fpKet').value });
+        await api('simpanPicV2', { idPic: p.idPic, nama: $('fpNama').value, namaPanggilan: $('fpPanggilan').value, jabatan: $('fpJabatan').value,
+          tempatLahir: $('fpTempat').value, tanggalLahir: $('fpTglLahir').value, jenisKelamin: $('fpJk').value, alamat: $('fpAlamat').value,
+          nomorHp: $('fpHp').value, namaRekening: $('fpNamaRek').value, nomorRekening: $('fpRek').value, status: $('fpStatus').value, keterangan: $('fpKet').value });
         await muat(true); pesan('PIC tersimpan.');
       } catch (err) { pesan(err.message || 'Gagal menyimpan.', true); }
     });
