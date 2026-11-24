@@ -215,9 +215,10 @@
             <button type="button" class="btn-outline btn-ubah-bagian" id="btnUbahAlamat" data-bagian="alamat" style="width:100%;margin-top:10px;">Ubah Alamat</button>
           </section>
           <form class="panel-block is-hidden form-edit-bagian" id="formAlamat" data-bagian="alamat" style="margin-bottom:14px;">
+            <div id="inputWilayah"></div>
             <div class="form-group">
-              <label for="inputAlamat">Alamat Lengkap</label>
-              <textarea id="inputAlamat" class="form-input" rows="3" placeholder="Alamat tempat tinggal"></textarea>
+              <label for="inputAlamat">Alamat (jalan, RT/RW, kampung)</label>
+              <textarea id="inputAlamat" class="form-input" rows="3" placeholder="Contoh: Kp. Kecok RT 04 RW 02"></textarea>
             </div>
             <div style="display:flex;gap:8px;margin-top:4px;">
               <button type="button" class="btn-outline btn-batal-bagian" data-bagian="alamat" style="flex:1;">Batal</button>
@@ -345,9 +346,10 @@
 
 <script src="core/config.js?v=20260903c"></script>
 <script src="core/common.js?v=20260903c"></script>
+<script src="core/wilayah.js?v=20261125a"></script>
 <script src="core/auth-relawan.js?v=20260903c"></script>
 <script src="core/NavigasiTerpusat.js"></script>
 <script src="core/app-shell.js?v=20260903c"></script>
-<script src="modules/relawan/profil.js?v=20260903c"></script>
+<script src="modules/relawan/profil.js?v=20261125a"></script>
 </body>
 </html>

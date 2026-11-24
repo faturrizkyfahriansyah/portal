@@ -42,6 +42,8 @@
     tempel: 'M9 4h6v3H9zM7 5.5H5V21h14V5.5h-2M12 11v6M9 14l3 3 3-3',
     kiri: 'M15 5l-7 7 7 7',
     pemutakhiran: 'M20 11a8 8 0 0 0-14.5-4M4 4v4h4M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4',
+    harian: 'M7 3v7M4.5 3v4.5a2.5 2.5 0 0 0 5 0V3M7 10v11M17 21V3c-2.2 1-3.5 3.5-3.5 7.5V13H17',
+    insentif: 'M3 7h16a2 2 0 0 1 2 2v10H5a2 2 0 0 1-2-2zM3 7l2.5-3H17M16 14h2.5',
     lonceng: 'M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6M10 21h4',
     tabel: 'M3 5h18v14H3zM3 10h18M9 5v14',
     kartu: 'M4 5h16v6H4zM4 14h16v5H4z'

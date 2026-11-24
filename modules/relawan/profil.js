@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.addEventListener('click', () => tutupModeEdit_(btn.dataset.bagian));
   });
 
+  let alamatBertingkat = null, wilayahForm = null;
   function isiFormDariProfil_(bagian) {
     if (!profilTerakhir) return;
     const p = profilTerakhir;
@@ -108,6 +109,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('inputEmail').value = p.email || '';
     } else if (bagian === 'alamat') {
       document.getElementById('inputAlamat').value = p.alamat || '';
+      const wd = document.getElementById('inputWilayah');
+      if (wd && window.SPPGWilayah && alamatBertingkat) wilayahForm = window.SPPGWilayah.pasang(wd, alamatBertingkat, { awalan: 'rw' }); else if (wd) { wd.textContent = ''; wilayahForm = null; }
     } else if (bagian === 'kontakDarurat') {
       const kd = p.kontakDarurat || {};
       document.getElementById('inputKdNama').value = kd.nama || '';
@@ -153,8 +156,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       isiAtauBelumDiisi_(document.getElementById('vNoHp'), profil.noHp);
       isiAtauBelumDiisi_(document.getElementById('vEmail'), profil.email);
 
-      // Alamat (view)
-      isiAtauBelumDiisi_(document.getElementById('vAlamat'), profil.alamat);
+      // Alamat (view): desa, kecamatan, kabupaten, provinsi + alamat jalan. Server lama tanpa fitur ini: tampil alamat biasa.
+      alamatBertingkat = null;
+      try { alamatBertingkat = await apiPost('getAlamatBertingkatRelawan', { token: sesi.token }); } catch (e) { alamatBertingkat = null; }
+      isiAtauBelumDiisi_(document.getElementById('vAlamat'), alamatBertingkat && window.SPPGWilayah ? window.SPPGWilayah.teks(alamatBertingkat) : profil.alamat);
 
       // Kontak Darurat (view) -- tombol berubah label tergantung sudah ada data atau belum
       const kd = profil.kontakDarurat || {};
@@ -273,6 +278,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('formAlamat').addEventListener('submit', (e) => {
     e.preventDefault();
+    if (wilayahForm) {
+      const kurang = wilayahForm.pesanKurang();
+      if (kurang) { showError(kurang); return; }
+      const w = wilayahForm.ambil();
+      simpanBagian_('alamat', 'simpanAlamatBertingkatRelawan', {
+        token: sesi.token, alamat: document.getElementById('inputAlamat').value.trim(), desa: w.desa, kecamatan: w.kecamatan, kabupaten: w.kabupaten, provinsi: w.provinsi
+      }, document.getElementById('btnSimpanAlamat'));
+      return;
+    }
     simpanBagian_('alamat', 'updateAlamatRelawan', {
       token: sesi.token,
       alamat: document.getElementById('inputAlamat').value.trim()

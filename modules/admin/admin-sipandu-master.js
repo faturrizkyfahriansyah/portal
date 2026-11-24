@@ -90,13 +90,15 @@
     catch (err) { pesan(err.message || 'Gagal mengubah status.', true); }
   }
   function formInstansi(r) {
-    r = r || { idInstansi: '', nama: '', jenis: data.jenis[0] ? data.jenis[0].kode : '', npsn: '', alamat: '', desa: '', kecamatan: '', jumlahSiswa: null, urutan: null, status: 'AKTIF', keterangan: '', acuanPk: null, acuanPb: null, acuanBalita: null, acuanBumil: null, acuanBusui: null, acuanNoKendaraan: '' };
+    r = r || { idInstansi: '', nama: '', jenis: data.jenis[0] ? data.jenis[0].kode : '', npsn: '', alamat: '', desa: '', kecamatan: '', kabupaten: '', provinsi: '', lintang: '', bujur: '', jumlahSiswa: null, urutan: null, status: 'AKTIF', keterangan: '', acuanPk: null, acuanPb: null, acuanBalita: null, acuanBumil: null, acuanBusui: null, acuanNoKendaraan: '' };
     const nv = function (v) { return v === null || v === undefined ? '' : v; };
     $('spmForm').innerHTML = '<div class="admin-stat-card" style="padding:14px;text-align:left;margin-bottom:12px;"><b>' + (r.idInstansi ? 'Ubah ' + esc(r.idInstansi) : 'Instansi baru') + '</b><div style="' + grid + '">' +
       input('fiNama', 'Nama instansi *', r.nama) + pilih('fiJenis', 'Jenis *', data.jenis.map(function (j) { return [j.kode, j.nama]; }), r.jenis) + input('fiNpsn', 'NPSN (bila ada)', r.npsn) +
-      input('fiAlamat', 'Alamat', r.alamat) + input('fiDesa', 'Desa/Kelurahan', r.desa) + input('fiKec', 'Kecamatan', r.kecamatan) +
       input('fiUrut', 'Urutan tampil', r.urutan === null ? '' : r.urutan, 'number', 'min="0"') +
       pilih('fiStatus', 'Status', [['AKTIF', 'AKTIF'], ['NONAKTIF', 'NONAKTIF']], r.status) + input('fiKet', 'Keterangan', r.keterangan) + '</div>' +
+      '<div style="font-size:12px;font-weight:700;margin-top:10px;">Alamat tempat <span style="font-weight:400;color:var(--color-text-muted,#55606f);">(dikunci untuk PIC; PIC hanya bisa melaporkan bila ada yang salah)</span></div><div id="fiWilayah" style="max-width:420px;margin-top:6px;"></div>' +
+      '<div style="' + grid + '">' + input('fiAlamat', 'Alamat (jalan, RT/RW, kampung)', r.alamat) + input('fiLintang', 'Lintang (koordinat)', r.lintang, 'text', 'inputmode="decimal" placeholder="-6.2088"') + input('fiBujur', 'Bujur (koordinat)', r.bujur, 'text', 'inputmode="decimal" placeholder="106.4500"') + '</div>' +
+      '<div style="font-size:11.5px;color:var(--color-text-muted,#55606f);">Koordinat: buka tempatnya di Google Maps, tekan lama titiknya, salin dua angkanya. Isi keduanya atau kosongkan keduanya.</div>' +
       '<div style="font-size:12px;font-weight:700;margin-top:6px;">Acuan (nilai awal pengisian PM Harian)</div><div style="font-size:11.5px;color:var(--color-text-muted,#55606f);">Dipakai tombol "Isi dari Acuan" di Manajemen PM. <b>Bukan sumber laporan</b>: dashboard, website, kalender, dokumen, dan pagu membaca PM Harian.</div>' +
       '<div id="fiGrupSekolah" style="' + grid + '">' + input('fiAcPk', 'Acuan PK (porsi kecil)', nv(r.acuanPk), 'number', 'min="0"') + input('fiAcPb', 'Acuan PB (porsi besar)', nv(r.acuanPb), 'number', 'min="0"') +
       '<div>' + input('fiSiswa', 'Jumlah siswa (kosong = otomatis PK + PB)', r.jumlahSiswa === null ? '' : r.jumlahSiswa, 'number', 'min="0"') + '<div id="fiSiswaInfo" style="font-size:11.5px;color:#1565c0;margin-top:3px;"></div></div></div>' +
@@ -111,13 +113,15 @@
     };
     const terapkanJenis = function () { const k = kelompok(); $('fiGrupSekolah').style.display = k.sekolah ? '' : 'none'; $('fiGrupPosyandu').style.display = k.posyandu ? '' : 'none'; infoSiswa(); };
     $('fiJenis').addEventListener('change', terapkanJenis); ['fiAcPk', 'fiAcPb', 'fiSiswa'].forEach(function (id) { $(id).addEventListener('input', infoSiswa); }); terapkanJenis();
+    const saranDesa = Array.from(new Set((data.instansi || []).map(function (x) { return x.desa; }).concat((data.pic || []).map(function (x) { return x.desa; })).filter(Boolean)));
+    const wil = window.SPPGWilayah ? window.SPPGWilayah.pasang($('fiWilayah'), { desa: r.desa, kecamatan: r.kecamatan, kabupaten: r.kabupaten, provinsi: r.provinsi }, { awalan: 'fiw', saranDesa: saranDesa }) : null;
     $('fiBatal').addEventListener('click', function () { $('spmForm').innerHTML = ''; });
     $('fiSimpan').addEventListener('click', async function () {
       try {
         pesan('Menyimpan…');
         const kg = kelompok(), nilaiKel = function (aktifKel, id) { return aktifKel ? $(id).value : ''; };   // kelompok yang tidak relevan dikosongkan
-        await api('simpanInstansiV2', { idInstansi: r.idInstansi, nama: $('fiNama').value, jenis: $('fiJenis').value, npsn: $('fiNpsn').value, alamat: $('fiAlamat').value, desa: $('fiDesa').value,
-                                        kecamatan: $('fiKec').value, jumlahSiswa: nilaiKel(kg.sekolah, 'fiSiswa'), urutan: $('fiUrut').value, status: $('fiStatus').value, keterangan: $('fiKet').value,
+        await api('simpanInstansiV2', { idInstansi: r.idInstansi, nama: $('fiNama').value, jenis: $('fiJenis').value, npsn: $('fiNpsn').value, alamat: $('fiAlamat').value, desa: wil ? wil.ambil().desa : '',
+                                        kecamatan: wil ? wil.ambil().kecamatan : '', kabupaten: wil ? wil.ambil().kabupaten : '', provinsi: wil ? wil.ambil().provinsi : '', lintang: $('fiLintang').value, bujur: $('fiBujur').value, jumlahSiswa: nilaiKel(kg.sekolah, 'fiSiswa'), urutan: $('fiUrut').value, status: $('fiStatus').value, keterangan: $('fiKet').value,
                                         acuanPk: nilaiKel(kg.sekolah, 'fiAcPk'), acuanPb: nilaiKel(kg.sekolah, 'fiAcPb'), acuanBalita: nilaiKel(kg.posyandu, 'fiAcBalita'), acuanBumil: nilaiKel(kg.posyandu, 'fiAcBumil'), acuanBusui: nilaiKel(kg.posyandu, 'fiAcBusui'), acuanNoKendaraan: $('fiAcKend').value });
         await muat(true); pesan('Instansi tersimpan.');
       } catch (err) { pesan(err.message || 'Gagal menyimpan.', true); }
@@ -157,7 +161,7 @@
     });
   }
   function formPic(p) {
-    p = p || { idPic: '', nama: '', namaPanggilan: '', jabatan: '', tempatLahir: '', tanggalLahir: '', jenisKelamin: '', alamat: '', nomorHp: '', namaRekening: '', nomorRekening: '', status: 'AKTIF', keterangan: '' };
+    p = p || { idPic: '', nama: '', namaPanggilan: '', jabatan: '', tempatLahir: '', tanggalLahir: '', jenisKelamin: '', alamat: '', desa: '', kecamatan: '', kabupaten: '', provinsi: '', nomorHp: '', namaRekening: '', nomorRekening: '', status: 'AKTIF', keterangan: '' };
     const judul = function (t) { return '<div style="font-weight:600;font-size:13px;margin:12px 0 0;">' + t + '</div>'; };
     const tersamar = /•/.test(p.tanggalLahir || '');
     $('spmForm').innerHTML = '<div class="admin-stat-card" style="padding:14px;text-align:left;margin-bottom:12px;"><b>' + (p.idPic ? 'Ubah ' + esc(p.idPic) : 'PIC baru') + '</b>' +
@@ -165,18 +169,22 @@
       input('fpNama', 'Nama lengkap *', p.nama) + input('fpPanggilan', 'Nama panggilan', p.namaPanggilan) + input('fpJabatan', 'Jabatan', p.jabatan) +
       input('fpTempat', 'Tempat lahir', p.tempatLahir) + input('fpTglLahir', 'Tanggal lahir', p.tanggalLahir, tersamar ? 'text' : 'date', tersamar ? '' : 'max="' + new Date().toISOString().slice(0, 10) + '"') +
       pilih('fpJk', 'Jenis kelamin', [['', '— pilih —'], ['Laki-laki', 'Laki-laki'], ['Perempuan', 'Perempuan']], p.jenisKelamin) +
-      input('fpHp', 'No. HP', p.nomorHp) + input('fpAlamat', 'Alamat', p.alamat) + '</div>' +
+      input('fpHp', 'No. HP', p.nomorHp) + '</div>' +
+      judul('Alamat') + '<div id="fpWilayah" style="max-width:420px;margin-top:6px;"></div><div style="' + grid + '">' + input('fpAlamat', 'Alamat (jalan, RT/RW, kampung)', p.alamat) + '</div>' +
       judul('Rekening') + '<div style="' + grid + '">' +
       input('fpNamaRek', 'Nama pemilik rekening', p.namaRekening) + input('fpRek', 'No. rekening', p.nomorRekening) + '</div>' +
       judul('Status') + '<div style="' + grid + '">' +
       pilih('fpStatus', 'Status', [['AKTIF', 'AKTIF'], ['NONAKTIF', 'NONAKTIF']], p.status) + input('fpKet', 'Keterangan', p.keterangan) + '</div>' +
       '<button class="btn-mini primary" id="fpSimpan" type="button">Simpan</button> <button class="btn-mini" id="fpBatal" type="button">Batal</button></div>';
+    const saranDesaP = Array.from(new Set((data.instansi || []).map(function (x) { return x.desa; }).concat((data.pic || []).map(function (x) { return x.desa; })).filter(Boolean)));
+    const wilP = window.SPPGWilayah ? window.SPPGWilayah.pasang($('fpWilayah'), { desa: p.desa, kecamatan: p.kecamatan, kabupaten: p.kabupaten, provinsi: p.provinsi }, { awalan: 'fpw', saranDesa: saranDesaP }) : null;
     $('fpBatal').addEventListener('click', function () { $('spmForm').innerHTML = ''; });
     $('fpSimpan').addEventListener('click', async function () {
       try {
         pesan('Menyimpan…');
         await api('simpanPicV2', { idPic: p.idPic, nama: $('fpNama').value, namaPanggilan: $('fpPanggilan').value, jabatan: $('fpJabatan').value,
           tempatLahir: $('fpTempat').value, tanggalLahir: $('fpTglLahir').value, jenisKelamin: $('fpJk').value, alamat: $('fpAlamat').value,
+          desa: wilP ? wilP.ambil().desa : '', kecamatan: wilP ? wilP.ambil().kecamatan : '', kabupaten: wilP ? wilP.ambil().kabupaten : '', provinsi: wilP ? wilP.ambil().provinsi : '',
           nomorHp: $('fpHp').value, namaRekening: $('fpNamaRek').value, nomorRekening: $('fpRek').value, status: $('fpStatus').value, keterangan: $('fpKet').value });
         await muat(true); pesan('PIC tersimpan.');
       } catch (err) { pesan(err.message || 'Gagal menyimpan.', true); }

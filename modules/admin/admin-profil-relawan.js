@@ -6,7 +6,7 @@
 (function () {
   function token() { return window.sppgAdminToken; }
   const kontenUtama = document.getElementById('prKontenUtama');
-  let profilSaatIni = null;
+  let profilSaatIni = null, alamatB = null, wilayahAdmin = null;
   let modeEdit = false;
 
   const LABEL_JK = { L: 'Laki-laki', P: 'Perempuan' };
@@ -39,6 +39,7 @@
     kontenUtama.innerHTML = '<div class="empty-state">Memuat profil...</div>';
     try {
       profilSaatIni = await apiPost('getProfilRelawanAdmin', { token: token(), idRelawan });
+      alamatB = null; try { alamatB = await apiPost('getAlamatBertingkatRelawanAdmin', { token: token(), idRelawan }); } catch (e) { alamatB = null; }   // server lama: alamat biasa
       modeEdit = false;
       render();
     } catch (err) {
@@ -195,11 +196,14 @@
   function renderBagianKontak_(p) {
     const el = document.getElementById('prBagianKontak');
     if (!modeEdit) {
-      el.innerHTML = baris_('Nomor HP', p.noHp) + baris_('Email', p.email) + baris_('Alamat', p.alamat);
+      el.innerHTML = baris_('Nomor HP', p.noHp) + baris_('Email', p.email) + baris_('Alamat', alamatB && window.SPPGWilayah ? window.SPPGWilayah.teks(alamatB) : p.alamat);
       return;
     }
     el.innerHTML = fieldEdit_('Nomor HP', 'prNoHp', p.noHp, 'tel') + fieldEdit_('Email', 'prEmail', p.email, 'email') +
-      `<label style="font-size:11px;font-weight:600;display:block;margin:8px 0 3px;">Alamat</label><textarea id="prAlamat" class="input" style="width:100%;padding:7px;border:1px solid var(--color-border);border-radius:8px;min-height:60px;font-family:var(--font-main);">${escapeHtml(p.alamat || '')}</textarea>`;
+      '<div id="prWilayah" style="max-width:420px;margin-top:8px;"></div>' +
+      `<label style="font-size:11px;font-weight:600;display:block;margin:8px 0 3px;">Alamat (jalan, RT/RW, kampung)</label><textarea id="prAlamat" class="input" style="width:100%;padding:7px;border:1px solid var(--color-border);border-radius:8px;min-height:60px;font-family:var(--font-main);">${escapeHtml(p.alamat || '')}</textarea>`;
+    const wd = document.getElementById('prWilayah');
+    wilayahAdmin = (wd && window.SPPGWilayah && alamatB) ? window.SPPGWilayah.pasang(wd, alamatB, { awalan: 'prw' }) : null;
   }
 
   function renderBagianDarurat_(p) {
@@ -289,6 +293,7 @@
         kontakDaruratHubungan: document.getElementById('prKdHubungan').value.trim(),
         kontakDaruratNoHp: document.getElementById('prKdNoHp').value.trim()
       });
+      if (wilayahAdmin) { const w = wilayahAdmin.ambil(); await apiPost('simpanAlamatBertingkatRelawanAdmin', { token: token(), idRelawan: profilSaatIni.id, alamat: document.getElementById('prAlamat').value.trim(), desa: w.desa, kecamatan: w.kecamatan, kabupaten: w.kabupaten, provinsi: w.provinsi }); }
       showSuccess('Profil berhasil disimpan.');
       await muatProfil(profilSaatIni.id); // muat ulang -- kelengkapan % & tampilan otomatis ikut data terbaru
     } catch (err) {

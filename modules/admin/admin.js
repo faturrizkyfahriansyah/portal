@@ -419,7 +419,7 @@
     panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261125c',
     panelDiagnosaAbsen: 'modules/admin/admin-diagnosa-absen.js?v=20261125c',   // 25 Nov 2026: Cek Absen & Hari Shift Malam
     panelLaporan: 'modules/admin/admin-laporan.js?v=20261104d',
-    panelProfilRelawan: 'modules/admin/admin-profil-relawan.js?v=20261023a',
+    panelProfilRelawan: 'modules/admin/admin-profil-relawan.js?v=20261125a',
     panelMenuHariIni: 'modules/admin/admin-menu-hari-ini.js?v=20261023a',
     panelPenerimaManfaatOps: 'modules/admin/admin-penerima-manfaat-ops.js?v=20261023a',
     panelManajemenHakAkses: 'modules/admin/admin-manajemen-hak-akses.js?v=20261105e',
