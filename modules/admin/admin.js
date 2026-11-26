@@ -259,6 +259,7 @@
     // tidak bisa dipakai Staff, supaya tidak ada menu "mati" di UI.
     window.sppgAdminRole = role || 'ADMIN';
     terapkanBatasanRoleStaff_();
+    if (window.SPPGBacaSaja) window.SPPGBacaSaja.pasang();   // 25j: tombol/formulir ubah disembunyikan untuk Staff
     // DIBALIK 23 Okt 2026: penambahan muatUlangPeriode() di sini (sesi
     // sebelumnya) ternyata berdasarkan diagnosis yg KELIRU -- periodeList
     // SUDAH dimuat dgn benar lewat initDashboard() (SUMBER_DASHBOARD,
@@ -350,20 +351,15 @@
     return `<tr><td colspan="${colspan}">${emptyOrErrorHtml(key, pesanKosong)}</td></tr>`;
   }
 
-  // ===== ROLE STAFF (akses monitoring) =====
-  // Panel yang TIDAK ditampilkan untuk role Staff -- semuanya panel yang
-  // berisi pengelolaan data (tulis) atau data sensitif (akun/personel).
-  // Dashboard, Rekap Harian, Rekap 2 Minggu, Bantuan, Stok & Persediaan,
-  // dan SIPANDU SENGAJA TIDAK ada di daftar ini (tetap tampil) -- Stok &
-  // SIPANDU diberi akses penuh untuk Staff (lewat requireStokAccess_ &
-  // requireSipanduPermission_), TAPI pengaturan Kategori/Tambah-Edit
-  // Barang/Hak Akses di dalamnya tetap Admin-only lewat requireStokAdmin_
-  // & SipanduHakAkses.gs yang tidak disentuh.
+  // ===== ROLE STAFF (hanya lihat) =====
+  // 26 Nov 2026 (25j): Staff melihat menu SIMSDM, SIPRES, SIKOP, SIRAGA, SIPIKA dan SIPANDU, tetapi HANYA LIHAT (tidak bisa mengubah).
+  // Penjaga sebenarnya ada di server (Admin.gs: aksi tulis tetap ditolak untuk Staff); core/BacaSaja.js menyembunyikan tombol/formulir ubah.
+  // Panel di bawah TETAP disembunyikan untuk Staff: akun & kata sandi, pengelolaan staf/pengelola, verifikasi WhatsApp, data pribadi
+  // penerima manfaat (BNBA), website publik, pengaturan, dan pengaturan hak akses. (Cek Absen & Shift Malam tetap bisa dibuka Staff lewat tab di Koreksi & Cek Absen: hanya memeriksa.)
   const PANEL_KHUSUS_ADMIN = [
-    'panelRelawan', 'panelAkun', 'panelDivisi', 'panelRoleAkses', 'panelPengelolaSppg', 'panelManajemenStaf', 'panelPergiliran', 'panelPenetapanPergiliran', 'panelPendataan3B', 'panelVerifikasiWa',
-    'panelPeriode', 'panelKalender', 'panelLokasi', 'panelShift',
-    'panelNotifikasiAdmin', 'panelInformasi', 'panelPengumuman', 'panelDokumen',
-    'panelLaporan', 'panelWebsitePublik', 'panelPengaturan'
+    'panelAkun', 'panelRoleAkses', 'panelPengelolaSppg', 'panelManajemenStaf', 'panelVerifikasiWa', 'panelPendataan3B',
+    'panelManajemenHakAkses', 'panelHakAksesSipandu',
+    'panelWebsitePublik', 'panelPengaturan'
   ];
 
   function terapkanBatasanRoleStaff_() {
@@ -377,7 +373,7 @@
     if (brandBlock && !document.getElementById('badgeRoleStaff')) {
       const badge = document.createElement('p');
       badge.id = 'badgeRoleStaff';
-      badge.textContent = 'Staff — akses monitoring';
+      badge.textContent = 'Staff — hanya lihat';
       badge.style.cssText = 'font-size:11px;font-weight:700;color:#b9852f;margin:2px 0 0;';
       brandBlock.appendChild(badge);
     }
@@ -416,16 +412,16 @@
     // walau sebagian filenya sendiri belum tentu berubah isi -- supaya
     // SEMUA panel dipastikan ambil salinan terbaru, bukan cache lama.
     panelShift: 'modules/admin/admin-shift.js?v=20261024c',
-    panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261125c',
-    panelDiagnosaAbsen: 'modules/admin/admin-diagnosa-absen.js?v=20261125f',   // 25 Nov 2026: Cek Absen & Hari Shift Malam
+    panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261126j',
+    panelDiagnosaAbsen: 'modules/admin/admin-diagnosa-absen.js?v=20261126j',   // 25 Nov 2026: Cek Absen & Hari Shift Malam
     panelLaporan: 'modules/admin/admin-laporan.js?v=20261104d',
     panelProfilRelawan: 'modules/admin/admin-profil-relawan.js?v=20261125a',
     panelMenuHariIni: 'modules/admin/admin-menu-hari-ini.js?v=20261023a',
-    panelPenerimaManfaatOps: 'modules/admin/admin-penerima-manfaat-ops.js?v=20261023a',
+    panelPenerimaManfaatOps: 'modules/admin/admin-penerima-manfaat-ops.js?v=20261126j',
     panelManajemenHakAkses: 'modules/admin/admin-manajemen-hak-akses.js?v=20261105e',
     panelRoleAkses: 'modules/admin/admin-role.js?v=20261023a',
     panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261124b',
-    panelManajemenStaf: 'modules/admin/admin-manajemen-staf.js?v=20261126h',   // 25 Nov 2026 (25g): Manajemen Staff
+    panelManajemenStaf: 'modules/admin/admin-manajemen-staf.js?v=20261126j',   // 25 Nov 2026 (25g): Manajemen Staff
     panelPergiliran: 'modules/admin/admin-pergiliran.js?v=20261124b',   // 22 Nov 2026 (Tahap 3): SIMSDM menyusun kebutuhan & mengajukan pergiliran
     panelPenetapanPergiliran: 'modules/admin/admin-pergiliran-sikop.js?v=20261124b',
     panelPendataan3B: 'modules/admin/admin-pendataan-3b.js?v=20261125g',
@@ -440,7 +436,7 @@
     panelDuaMinggu: 'modules/admin/admin-export.js?v=20261104d',   // menambahkan widget Export DI DALAM panel core ini, bukan tab sendiri
     panelRelawan: 'modules/admin/admin-import.js?v=20261023a',     // menambahkan widget Import DI DALAM panel core ini, bukan tab sendiri
     panelKartuQr: 'modules/admin/admin-kartu-qr.js?v=20261105d',
-    panelMasterTarif: 'modules/admin/admin-master-tarif.js?v=20261117b'
+    panelMasterTarif: 'modules/admin/admin-master-tarif.js?v=20261126j'
   };
   const modulTerpuat = new Set();
 
@@ -961,7 +957,7 @@
     const opsi = daftar.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nama)}</option>`).join('');
     el.filterPeriodeDuaMinggu.innerHTML = '<option value="">Pilih periode...</option>' + opsi;
     const aktif = daftar.find(p => String(p.status).toUpperCase() === 'AKTIF');
-    if (aktif) { el.filterPeriodeDuaMinggu.value = aktif.id; muatRekapDuaMinggu(); }
+    if (aktif) { el.filterPeriodeDuaMinggu.value = aktif.id; muatRekapDuaMinggu({ senyap: true }); }   // 26 Nov 2026 (25j): otomatis di latar belakang, tanpa layar "Memuat rekap" yang menutupi dashboard
   }
 
   // Dipertahankan HANYA utk tombol "Muat" manual (el.btnMuatDuaMinggu) --
@@ -1022,20 +1018,25 @@
     }
   });
 
-  async function muatRekapDuaMinggu() {
+  async function muatRekapDuaMinggu(opsi) {
+    // 26 Nov 2026 (25j): dipanggil dari tombol "Muat"/ganti periode = pakai penanda memuat seperti biasa. Dipanggil OTOMATIS saat dashboard dibuka
+    // (opsi.senyap) = diam-diam di latar belakang: tidak ada layar "Memuat rekap..." yang berputar, dashboard langsung bisa dipakai.
+    // (Tombol/dropdown memanggil fungsi ini dengan objek event, jadi hanya { senyap: true } yang dianggap senyap.)
+    const senyap = !!(opsi && opsi.senyap === true);
     const idPeriode = el.filterPeriodeDuaMinggu.value;
-    if (!idPeriode) { showError('Pilih periode dulu.'); return; }
-    showLoading('Memuat rekap...');
+    if (!idPeriode) { if (!senyap) showError('Pilih periode dulu.'); return; }
+    if (!senyap) showLoading('Memuat rekap...');
     try {
       const res = await apiPost('getRekapPenggajianAdmin', { idPeriode, token: authToken });
       cache.rekapDuaMinggu = res.data;
       renderDivisiGridDuaMinggu();
       renderRekapDuaMingguTable();
-      if (res.jumlahBelumLengkap) showError(res.jumlahBelumLengkap + ' relawan belum ada Master Tarif-nya untuk periode ini -- atur dulu di bagian "Atur Tarif per Relawan" di bawah.');
+      if (res.jumlahBelumLengkap && !senyap) showError(res.jumlahBelumLengkap + ' relawan belum ada Master Tarif-nya untuk periode ini -- atur dulu di bagian "Atur Tarif per Relawan" di bawah.');
     } catch (err) {
-      showError(err.message || 'Gagal memuat rekap.');
+      if (senyap) { if (window.console) console.warn('Rekap per periode belum termuat di latar belakang:', err && err.message); }
+      else showError(err.message || 'Gagal memuat rekap.');
     } finally {
-      hideLoading();
+      if (!senyap) hideLoading();
     }
   }
 
@@ -2671,7 +2672,9 @@
     // dideklarasikan (let) di closure ini -> ReferenceError tiap halaman dibuka dgn sesi tersimpan,
     // pemulihan sesi gagal & overlay menggantung. Diekspos sbg FUNGSI pembaca (nilai boolean tidak
     // bisa dibagi antar closure lewat nilai).
-    loginManualSudahBerhasil: function () { return loginManualSudahBerhasil; } };
+    loginManualSudahBerhasil: function () { return loginManualSudahBerhasil; },
+    // 25j: peran dari server ternyata beda dengan yang tersimpan di peramban (mis. akun diubah jadi Staff): terapkan tanpa memuat ulang halaman.
+    terapkanPeranDariServer: function (role) { window.sppgAdminRole = role || 'ADMIN'; terapkanBatasanRoleStaff_(); if (window.SPPGBacaSaja) window.SPPGBacaSaja.pasang(); } };
 })();
 
 // ============================================================
@@ -2785,6 +2788,24 @@
     // dari objek yang diekspos closure utama (lihat window.__sppgAdminInternal).
     const { masukKeDashboard_, initDashboard, el } = window.__sppgAdminInternal || {};
     if (!masukKeDashboard_ || !initDashboard || !el) return; // closure utama belum siap -- biarkan Login tampil
+
+    // 26 Nov 2026 (25j): bila sesi tersimpan SUDAH memuat peran + username (disimpan saat login), dashboard LANGSUNG dibuka tanpa layar "Memeriksa sesi..." yang
+    // berputar; sesi diperiksa di latar belakang. Bila ternyata tidak berlaku lagi, sesi dihapus dan halaman dimuat ulang ke formulir masuk.
+    if (sesi.username && (sesi.role === 'STAFF' || sesi.role === 'ADMIN')) {
+      masukKeDashboard_(sesi.token, sesi.username, sesi.role);
+      initDashboard().catch(function () { /* tiap kartu menampilkan keadaan galatnya sendiri */ });
+      apiGet('validasiSesiAdmin', { token: sesi.token }).then(function (info) {
+        if (info && info.role && info.role !== sesi.role) {
+          simpanSesiAdmin({ token: sesi.token, username: info.username || sesi.username, role: info.role });
+          if (info.role === 'STAFF') window.__sppgAdminInternal.terapkanPeranDariServer('STAFF');   // Admin -> Staff: batasi tampilan langsung
+          else window.location.reload();                                                           // Staff -> Admin: menu yang tersembunyi perlu dimuat ulang
+        }
+      }).catch(function (err) {
+        if (apakahErrorSesiTidakValid(err && err.message)) { hapusSesiAdmin(); window.location.reload(); }
+        /* galat jaringan: biarkan dashboard tetap terbuka; tiap kartu punya tombol "Coba Lagi" */
+      });
+      return;
+    }
 
     showLoading('Memeriksa sesi...');
     let info;

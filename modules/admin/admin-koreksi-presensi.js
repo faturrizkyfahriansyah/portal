@@ -22,7 +22,7 @@
   // Satu menu "Koreksi & Cek Absen": dua tab di atas panel (25 Nov 2026). Tombol menu lama tetap ada (disembunyikan) agar hak akses dan tautan lama tidak berubah.
   function stripGabung(aktif) {
     const ada = function (id) { const b = document.querySelector('.admin-tab-btn[data-panel="' + id + '"]'); return b && b.style.display !== 'none'; };
-    const t = function (id, teks) { return ada(id) ? '<button type="button" class="btn-mini' + (aktif === id ? ' primary' : '') + '" data-ke="' + id + '" role="tab" aria-selected="' + (aktif === id) + '">' + teks + '</button>' : ''; };
+    const t = function (id, teks) { return ada(id) ? '<button type="button" data-staff-ok="1" class="btn-mini' + (aktif === id ? ' primary' : '') + '" data-ke="' + id + '" role="tab" aria-selected="' + (aktif === id) + '">' + teks + '</button>' : ''; };
     return '<div role="tablist" class="tab-gabung" style="display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap">' + t('panelJadwalIndividu', 'Koreksi Presensi') + t('panelDiagnosaAbsen', 'Cek Absen &amp; Shift Malam') + '</div>';
   }
   function pasangStrip() {

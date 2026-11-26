@@ -227,7 +227,7 @@
          yg sesungguhnya jalan di browser, tanpa menebak lagi apakah
          deploy sudah masuk atau belum. Diperbarui manual tiap kali
          admin.html diubah -- lihat juga console.log di bawah. -->
-    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-25h</span></div>
+    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-25j</span></div>
   </aside>
     <div class="shell-main">
   <header class="shell-topbar">
@@ -1875,7 +1875,7 @@
       </select>
       <button type="button" class="btn-mini primary" id="btnTambahPengelola">+ Tambah Pengelola</button>
     </div>
-    <p style="font-size:11.5px;color:var(--color-text-muted);margin:6px 0 0;">Staff = akses monitoring (Dashboard, Rekap Harian, Rekap Per Periode, Bantuan) — tidak bisa mengelola Relawan/Akun/Divisi/Pengaturan/Website Publik dkk. Admin = akses penuh. Pembatasan ini ditegakkan di server, bukan cuma tampilan.</p>
+    <p style="font-size:11.5px;color:var(--color-text-muted);margin:6px 0 0;">Staff = hanya lihat (SIMSDM, SIPRES, SIKOP, SIRAGA, SIPIKA, SIPANDU) — tidak bisa mengubah data, dan menu Akun, Pengelola, Pengaturan, Website Publik tidak tampil. Admin = akses penuh. Pembatasan ini ditegakkan di server, bukan cuma tampilan.</p>
     <div class="table-wrap" style="margin-top:14px;">
       <table>
         <thead><tr><th>Username</th><th>Nama</th><th>Jabatan</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
@@ -2151,7 +2151,7 @@
     <details class="panel-block" style="margin-top:16px;">
       <summary style="cursor:pointer;font-weight:700;color:var(--color-navy);font-size:14px;">Penerima Manfaat — Rinci per Instansi (Peserta Didik / 3B)</summary>
       <div style="margin-top:12px;">
-        <p style="font-size:12px;color:var(--color-text-muted);margin:0 0 10px;">Ini yang tampil sebagai tabel rinci (per sekolah/posyandu) di Website Publik dan Relawan, beda dari ringkasan kategori di atas.</p>
+        <p style="font-size:12px;color:var(--color-text-muted);margin:0 0 10px;">Ini yang tampil sebagai tabel rinci (per satuan pendidikan/posyandu) di Website Publik dan Relawan, beda dari ringkasan kategori di atas.</p>
 
         <div id="pmRekapWrap" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;"></div>
 
@@ -2170,7 +2170,7 @@
             <option value="PESERTA_DIDIK">Peserta Didik</option>
             <option value="3B">3B (Bumil / Busui / Balita)</option>
           </select>
-          <input type="text" id="pmInstansi" placeholder="Nama Sekolah / Nama Posyandu" required>
+          <input type="text" id="pmInstansi" placeholder="Nama Satuan Pendidikan / Nama Posyandu" required>
 
           <div id="pmFieldPesertaDidik" style="display:none;gap:10px;">
             <div style="display:flex;gap:10px;">
@@ -2398,10 +2398,11 @@
 <script src="core/app-shell.js?v=20261124b"></script>
 <script src="core/core-3b.js?v=20261124b"></script>
 <script src="core/auth-admin.js?v=20260918a"></script>
+<script src="core/BacaSaja.js?v=20261126j"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="core/ringkasan-pm.js?v=20261102a"></script>
-<script src="modules/admin/admin.js?v=20261126h"></script>
-<script src="modules/admin/admin-profil-saya.js?v=20261126h"></script>
+<script src="modules/admin/admin.js?v=20261126j"></script>
+<script src="modules/admin/admin-profil-saya.js?v=20261126i"></script>
 <!-- SIPRES QR: dimuat langsung agar panel Kartu QR selalu memiliki modul pengisi data. -->
 <script src="modules/admin/admin-kartu-qr.js?v=20261023a"></script>
 <script src="modules/admin/admin-sipres-monitoring.js?v=20260922a"></script>
@@ -2409,7 +2410,7 @@
 <script src="core/xlsx-mini.js?v=20261104d"></script>
 <script src="modules/admin/admin-rekap-mingguan.js?v=20261105d"></script>
 <script src="modules/admin/admin-dashboard-perhatian.js?v=20261110a"></script>
-<script src="modules/admin/admin-dashboard-tren.js?v=20261125c"></script>
+<script src="modules/admin/admin-dashboard-tren.js?v=20261126j"></script>
 <script src="modules/admin/admin-sipandu-master.js?v=20261125f"></script>
 <script src="modules/admin/admin-situs-publik.js?v=20261125f"></script>
 <script src="modules/admin/admin-sipandu-pm.js?v=20261104d"></script>
@@ -2420,7 +2421,7 @@
 <script src="modules/admin/admin-kalender-operasional.js?v=20261104c"></script>
 <script src="modules/admin/admin-akses-relawan.js?v=20261104a"></script>
 <script src="modules/admin/admin-jadwal-penugasan.js?v=20261104a"></script>
-<script src="modules/admin/admin-jadwal-baru.js?v=20261105c"></script>
+<script src="modules/admin/admin-jadwal-baru.js?v=20261126j"></script>
 <script src="modules/admin/admin-kalender-pm.js?v=20261104c"></script>
 <!-- FASE 2: admin-stok.js, admin-shift.js, admin-role.js, admin-export.js,
      admin-import.js, admin-pengelola-sppg.js, admin-pengaturan.js, dan

@@ -95,8 +95,8 @@
     let b = '';
     if (pm.length) {
       const seri = pm.map(function (x) { return { x: dm(x.tanggal), a: x.tiga, b: x.lain }; });
-      b = batang(seri, { judul: 'Tren penerima manfaat harian', a: 'PM Posyandu (3B)', b: 'porsi sekolah' }) + '<div class="dt-leg"><span><i style="background:' + WARNA.biru + '"></i>Posyandu (balita, ibu hamil, ibu menyusui)</span><span><i style="background:' + WARNA.kuning + '"></i>Sekolah (porsi kecil dan besar)</span></div>'
-        + tabelAngka('PM per hari', ['Tanggal', 'Posyandu', 'Sekolah', 'Total'], pm.map(function (x) { return [dmy(x.tanggal), ang(x.tiga), ang(x.lain), ang(x.total)]; }));
+      b = batang(seri, { judul: 'Tren penerima manfaat harian', a: 'PM Posyandu (3B)', b: 'porsi satuan pendidikan' }) + '<div class="dt-leg"><span><i style="background:' + WARNA.biru + '"></i>Posyandu (balita, ibu hamil, ibu menyusui)</span><span><i style="background:' + WARNA.kuning + '"></i>Satuan Pendidikan (porsi kecil dan besar)</span></div>'
+        + tabelAngka('PM per hari', ['Tanggal', 'Posyandu', 'Satuan Pendidikan', 'Total'], pm.map(function (x) { return [dmy(x.tanggal), ang(x.tiga), ang(x.lain), ang(x.total)]; }));
     } else b = '<p class="dt-kosong">Belum ada PM harian terverifikasi pada 14 hari terakhir.</p>';
     let c = t.divisiPekan.length ? t.divisiPekan.map(function (x) { return hbar(x.divisi, x.persen, warnaPersen(x.persen), x.persen + '%'); }).join('') : '<p class="dt-kosong">Belum ada data pekan ini.</p>';
     const top = function (arr, kata) { return arr.length ? arr.map(function (x) { return '<div class="dt-top"><span>' + esc(x.nama) + '<br><small>' + esc(x.divisi) + '</small></span><b>' + x.jumlah + ' ' + kata + '</b></div>'; }).join('') : '<p class="dt-kosong">Tidak ada.</p>'; };

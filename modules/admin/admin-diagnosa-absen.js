@@ -6,7 +6,8 @@
   const panel = document.getElementById('panelDiagnosaAbsen'); if (!panel) return;
   const $ = function (id) { return document.getElementById(id); };
   const esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  const api = function (aksi, p) { return apiPost(aksi, Object.assign({ token: ambilSesiAdmin().token }, p || {})); };
+  // Pemeriksaan membaca seluruh riwayat presensi dan bisa lebih dari 20 detik (batas bawaan): beri waktu 120 detik agar tidak muncul "Server tidak merespons" padahal server masih bekerja.
+  const api = function (aksi, p) { return apiPost(aksi, Object.assign({ token: ambilSesiAdmin().token }, p || {}), 120000); };
   const staff = function () { return window.sppgAdminRole === 'STAFF'; };
   const lapor = function (m) { if (typeof showError === 'function') showError(m); else alert(m); };
   const info = function (m) { if (typeof showSuccess === 'function') showSuccess(m); else alert(m); };
@@ -58,19 +59,28 @@
 
   /* ============ TAB 1: CEK RELAWAN ============ */
   $('dgCek').innerHTML = '<div class="admin-stat-card" style="padding:12px 14px;text-align:left;margin:0 0 12px">'
-    + '<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="dgCari" type="search" placeholder="Nama atau ID relawan" aria-label="Nama atau ID relawan" style="padding:8px;border:1px solid #d5dbe3;border-radius:8px;flex:1;min-width:200px">'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap"><select id="dgDivisiAtas" aria-label="Divisi" style="padding:8px;border:1px solid #d5dbe3;border-radius:8px;min-width:150px"><option value="">Semua Divisi</option></select><input id="dgCari" type="search" placeholder="Nama atau ID relawan (boleh kosong bila memilih Divisi)" aria-label="Nama atau ID relawan" style="padding:8px;border:1px solid #d5dbe3;border-radius:8px;flex:1;min-width:200px">'
     + '<button type="button" class="btn-mini primary" id="dgCariBtn">Periksa</button><button type="button" class="btn-mini" id="dgAuditBtn">Periksa semua relawan aktif</button></div>'
     + '<p style="font-size:12.5px;color:#55606f;margin:6px 0 0">Pemeriksaan hanya membaca data. Perbaikan selalu diuji-coba dulu sebelum diterapkan.</p></div>'
     + '<div id="dgHasil"></div><div id="dgAudit"></div>';
   $('dgCariBtn').addEventListener('click', function () { cari($('dgCari').value); });
   $('dgCari').addEventListener('keydown', function (e) { if (e.key === 'Enter') cari($('dgCari').value); });
   $('dgAuditBtn').addEventListener('click', audit);
+  const divisiAtas = function () { return $('dgDivisiAtas') ? $('dgDivisiAtas').value : ''; };
+  function muatDivisiAtas() {
+    let ambil; try { ambil = apiGet('getDivisi', { token: ambilSesiAdmin().token }); } catch (e) { return; }
+    Promise.resolve(ambil).then(function (d) { (Array.isArray(d) ? d : []).forEach(function (x) { const o = document.createElement('option'); o.value = x; o.textContent = x; $('dgDivisiAtas').appendChild(o); }); }).catch(function () { /* daftar divisi tidak wajib; pilihan tetap "Semua Divisi" */ });
+  }
+  muatDivisiAtas();
+  $('dgDivisiAtas').addEventListener('change', function () { if (!String($('dgCari').value || '').trim() && divisiAtas()) audit(); else if (String($('dgCari').value || '').trim().length >= 2) cari($('dgCari').value); });
 
   async function cari(q) {
-    q = String(q || '').trim(); if (q.length < 2) { lapor('Ketik minimal 2 huruf nama atau ID relawan.'); return; }
+    q = String(q || '').trim(); if (!q && divisiAtas()) { audit(); return; }
+    if (q.length < 2) { lapor('Ketik minimal 2 huruf nama atau ID relawan, atau pilih Divisi.'); return; }
     $('dgHasil').innerHTML = '<p>Memeriksa…</p>';
     let r; try { r = await api('diagnosaAbsenRelawanAdmin', { cari: q }); } catch (e) { $('dgHasil').innerHTML = '<p style="color:#b23a3a">' + esc(e.message) + '</p>'; return; }
-    if (!r.relawan.length) { $('dgHasil').innerHTML = '<p style="color:#55606f">Tidak ada relawan yang cocok dengan "' + esc(q) + '".</p>'; return; }
+    if (divisiAtas()) r.relawan = r.relawan.filter(function (x) { return x.divisi === divisiAtas(); });
+    if (!r.relawan.length) { $('dgHasil').innerHTML = '<p style="color:#55606f">Tidak ada relawan yang cocok dengan "' + esc(q) + '"' + (divisiAtas() ? ' di divisi ' + esc(divisiAtas()) : '') + '.</p>'; return; }
     $('dgHasil').innerHTML = '<p style="font-size:12.5px;color:#55606f;margin:0 0 6px">Waktu pemeriksaan: ' + esc(r.sekarang) + '</p>' + r.relawan.map(kartu).join('');
     $('dgHasil').querySelectorAll('[data-uji]').forEach(function (b) { b.addEventListener('click', function () { perbaiki(b.getAttribute('data-uji'), false, b); }); });
   }
@@ -116,7 +126,7 @@
     $('dgAudit').innerHTML = '<p>Memeriksa semua relawan aktif…</p>';
     let r; try { r = await api('auditKetersediaanAbsenAdmin'); } catch (e) { $('dgAudit').innerHTML = '<p style="color:#b23a3a">' + esc(e.message) + '</p>'; return; }
     const chips = Object.keys(r.ringkasan || {}).map(function (k) { return '<span style="margin:0 6px 6px 0;display:inline-block">' + badge(lbl(k) + ': ' + r.ringkasan[k], KODE_WARNA[k] || 'abu') + '</span>'; }).join('');
-    const divisiAda = Array.from(new Set(r.bermasalah.map(function (b) { return b.divisi || ''; }).filter(Boolean))).sort();
+    const divisiAda = Array.from(new Set(r.bermasalah.map(function (b) { return b.divisi || ''; }).concat(divisiAtas() ? [divisiAtas()] : []).filter(Boolean))).sort();
     $('dgAudit').innerHTML = '<h4 style="margin:14px 0 6px">Ringkasan seluruh relawan aktif <small style="font-weight:400;color:#55606f">(' + esc(r.sekarang) + ')</small></h4><div>' + chips + '</div>'
       + '<p style="margin:6px 0"><b id="dgJml">' + r.jumlahBermasalah + '</b> relawan perlu tindakan.</p>'
       + (r.bermasalah.length ? '<div style="margin:0 0 8px"><select id="dgDivisi" aria-label="Divisi" style="padding:8px;border:1px solid #d5dbe3;border-radius:8px"><option value="">Semua Divisi</option>' + divisiAda.map(function (d) { return '<option value="' + esc(d) + '">' + esc(d) + '</option>'; }).join('') + '</select></div><div id="dgTabel"></div>'
@@ -129,7 +139,7 @@
         : '<p style="color:#1a7a4c">Tidak ada relawan bermasalah di divisi ini.</p>';
       $('dgTabel').querySelectorAll('[data-periksa]').forEach(function (b) { b.addEventListener('click', function () { $('dgCari').value = b.getAttribute('data-periksa'); cari(b.getAttribute('data-periksa')); window.scrollTo({ top: 0, behavior: 'smooth' }); }); });
     }
-    if ($('dgDivisi')) { $('dgDivisi').addEventListener('change', gambarTabel); gambarTabel(); }
+    if ($('dgDivisi')) { if (divisiAtas()) $('dgDivisi').value = divisiAtas(); $('dgDivisi').addEventListener('change', function () { if ($('dgDivisiAtas')) $('dgDivisiAtas').value = $('dgDivisi').value; gambarTabel(); }); gambarTabel(); }
   }
 
   /* ============ TAB 2: HARI SHIFT MALAM ============ */
@@ -146,7 +156,7 @@
       + '<tr><td style="padding:3px 10px 3px 0;color:#55606f">Perlu diperiksa manual</td><td><b>' + s.perluPeriksaManual + '</b></td></tr>'
       + '<tr><td style="padding:3px 10px 3px 0;color:#55606f">Keamanan (tidak diubah)</td><td><b>' + s.keamananTidakDiubah + '</b></td></tr></table>'
       + '<p style="font-size:12.5px;color:#55606f;margin:8px 0">Urutan aman: <b>1)</b> Uji-coba koreksi &rarr; <b>2)</b> Terapkan koreksi &rarr; <b>3)</b> Aktifkan aturan &rarr; <b>4)</b> Uji-coba lagi (harus 0 sisa).</p>'
-      + '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-mini primary" id="dgUjiMalam">Uji-coba koreksi data lama</button>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn-mini primary" id="dgUjiMalam" data-staff-ok="1">Uji-coba koreksi data lama</button>'
       + '<button type="button" class="btn-mini" id="dgTerapMalam"' + (staff() || !sisa ? ' disabled' : '') + '>Terapkan koreksi</button>'
       + (s.aktif ? '<button type="button" class="btn-mini" id="dgAturMalam"' + (staff() ? ' disabled' : '') + '>Matikan aturan</button>' : '<button type="button" class="btn-mini" id="dgAturMalam"' + (staff() || sisa ? ' disabled' : '') + '>Aktifkan aturan</button>') + '</div>'
       + (staff() ? '<p style="font-size:12.5px;color:#55606f;margin:6px 0 0">Staff hanya dapat melihat.</p>' : (sisa && !s.aktif ? '<p style="font-size:12.5px;color:#8a5a00;margin:6px 0 0">Aturan baru bisa diaktifkan setelah koreksi diterapkan (sisa 0).</p>' : '')) + '</div>';

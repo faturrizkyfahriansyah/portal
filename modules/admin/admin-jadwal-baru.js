@@ -25,7 +25,7 @@
   const root = document.createElement('div'); root.id = 'jbRoot'; panel.insertBefore(root, lama);
   const inp = 'padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;';
   root.innerHTML =
-    '<div class="admin-stat-card" style="padding:14px;text-align:left;margin-bottom:14px;"><div style="font-weight:700;font-size:15px;margin-bottom:10px;">Buat Jadwal</div>' +
+    '<div class="admin-stat-card" data-staff-hide="1" style="padding:14px;text-align:left;margin-bottom:14px;"><div style="font-weight:700;font-size:15px;margin-bottom:10px;">Buat Jadwal</div>' +
     '<div class="filter-bar" style="margin-bottom:8px;"><span style="font-size:12.5px;font-weight:600;">Rentang</span><label class="jb-radio" style="font-size:13px;"><input type="radio" name="jbHari" value="1" checked> Satu hari</label><label class="jb-radio" style="font-size:13px;"><input type="radio" name="jbHari" value="7"> Satu minggu</label><label style="font-size:12px;">Tanggal mulai <input type="date" id="jbAwal"></label></div>' +
     '<div class="filter-bar" style="margin-bottom:8px;"><span style="font-size:12.5px;font-weight:600;">Cakupan</span><label class="jb-radio" style="font-size:13px;"><input type="radio" name="jbCak" value="INDIVIDU" checked> Individu</label><label class="jb-radio" style="font-size:13px;"><input type="radio" name="jbCak" value="DIVISI"> Divisi</label><label class="jb-radio" style="font-size:13px;"><input type="radio" name="jbCak" value="KELOMPOK"> Kelompok</label></div>' +
     '<div class="filter-bar" id="jbPilih" style="margin-bottom:8px;"><select id="jbRelawan" aria-label="Relawan"></select><select id="jbDivisi" aria-label="Divisi" style="display:none;"></select></div>' +

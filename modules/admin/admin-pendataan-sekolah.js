@@ -14,7 +14,7 @@
   let data = null, sibuk = false;
 
   const root = document.createElement('div'); root.id = 'skAdmin';
-  root.innerHTML = '<p class="pg-sub" style="margin-top:0">Data siswa, guru, dan tendik per sekolah, diisi PIC lewat Portal PIC, lalu diunduh sebagai file Excel berformat contoh. <b>Berisi NISN/NIK: jangan dibagikan.</b></p>'
+  root.innerHTML = '<p class="pg-sub" style="margin-top:0">Data siswa, guru, dan tendik per satuan pendidikan, diisi PIC lewat Portal PIC, lalu diunduh sebagai file Excel berformat contoh. <b>Berisi NISN/NIK: jangan dibagikan.</b></p>'
     + '<div id="skDaftar" class="panel-block"></div><div id="skData"></div>';
   ($('bnSek') || panel).appendChild(root);
 
@@ -28,7 +28,7 @@
     const el = $('skDaftar');
     if (!data.sekolah.length) { el.innerHTML = '<p class="pg-sub">Belum ada satuan pendidikan aktif di SIPANDU.</p>'; return; }
     const ang = function (n) { return String(n || 0).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
-    let h = '<div class="pg-aksi" style="margin-bottom:8px"><button type="button" class="btn-mini primary" id="skSemua">Unduh semua sekolah</button></div><div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Satuan pendidikan</th><th>PIC dan password</th><th>Terisi dari target</th><th>Aksi</th></tr></thead><tbody>';
+    let h = '<div class="pg-aksi" style="margin-bottom:8px"><button type="button" class="btn-mini primary" id="skSemua">Unduh semua satuan pendidikan</button></div><div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Satuan pendidikan</th><th>PIC dan password</th><th>Terisi dari target</th><th>Aksi</th></tr></thead><tbody>';
     data.sekolah.forEach(function (s) {
       const j = s.jumlah, t = s.target || 0, pr = t > 0 ? Math.min(100, Math.round(j.siswa * 100 / t)) : 0;
       h += '<tr data-sk="' + esc(s.id) + '"><td><b>' + esc(s.nama) + '</b><br><small>' + esc(s.jenis) + '</small></td>'

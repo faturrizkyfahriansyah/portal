@@ -3,7 +3,7 @@
 //   RELAWAN   -> sesi relawan (auth-relawan.js) -> dashboard.html   (login pertama: buat password baru di halaman ini)
 //   PENGELOLA -> sesi Admin/Staff (auth-admin.js)  -> admin.html
 //   PIC       -> sesi PIC (sessionStorage 'p3b.sesi.v1', sama dengan pic.html) -> pic.html
-// Kata sandi tidak pernah disimpan; halaman lama (login.html, admin.html, pic.html) tetap berfungsi.
+// Kata sandi tidak pernah disimpan; login.html kini mengarahkan ke sini (satu jalur), admin.html dan pic.html tetap berfungsi.
 document.addEventListener('DOMContentLoaded', function () {
   var $ = function (id) { return document.getElementById(id); };
   var kartuMasuk = $('cardMasuk'), kartuGanti = $('cardGantiPassword');
@@ -12,6 +12,19 @@ document.addEventListener('DOMContentLoaded', function () {
   // Sudah masuk sebagai relawan: langsung ke dashboard (sama seperti login.html).
   var sesiRel = ambilSesiRelawan(); if (sesiRel && sesiRel.token) { window.location.href = 'dashboard.html'; return; }
   var notis = ambilDanHapusNotisLogin(); if (notis) tampilPesan('pesanMasuk', notis);
+
+  // 26 Nov 2026 (25j): SATU JALUR MASUK untuk semua akun (login.html kini hanya mengarahkan ke halaman ini; aplikasi PWA dibuka di sini).
+  // Pengelola/Staff yang masih punya sesi: formulir tetap tampil langsung; sesi diperiksa di LATAR BELAKANG (tanpa layar berputar),
+  // bila masih berlaku halaman pindah ke admin.html, bila tidak sesi lama dihapus.
+  (function () {
+    var sa = (typeof ambilSesiAdmin === 'function') ? ambilSesiAdmin() : null;
+    if (!sa || !sa.token || typeof apiGet !== 'function') return;
+    apiGet('validasiSesiAdmin', { token: sa.token }).then(function () {
+      if (!$('inputIdentitas').value && !$('inputSandi').value) window.location.href = 'admin.html';
+    }).catch(function (err) {
+      if (typeof apakahErrorSesiTidakValid === 'function' && apakahErrorSesiTidakValid(err && err.message) && typeof hapusSesiAdmin === 'function') hapusSesiAdmin();
+    });
+  })();
 
 
   function tampilPesan(id, teks) { var e = $(id); e.textContent = teks || ''; e.classList.toggle('is-on', !!teks); }

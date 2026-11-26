@@ -8,7 +8,7 @@
   const elTbodyAktif = document.getElementById('pmoTbodyAktif');
   const elTbodyLibur = document.getElementById('pmoTbodyLibur');
 
-  const LABEL_JENIS = { SEKOLAH: 'Sekolah', POSYANDU: 'Posyandu' };
+  const LABEL_JENIS = { SEKOLAH: 'Satuan Pendidikan', POSYANDU: 'Posyandu' };
 
   async function muat() {
     try {

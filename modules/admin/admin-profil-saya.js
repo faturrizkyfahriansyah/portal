@@ -4,7 +4,7 @@
 //   1) Bila akun memakai password sementara (baru dibuat / direset Super Admin) → layar WAJIB ganti password.
 //   2) Bila profil staff belum lengkap (NIK, nomor HP) → pengingat di atas halaman.
 // Panel "Profil Saya": data diri, nomor HP, data tambahan (tanpa rekening: gaji staff dari BGN), ganti password, bantuan.
-// 25h: data tersimpan tampil + terkunci; tombol "Ubah" membuka isian.
+// 25h: data tersimpan tampil + terkunci; tombol "Ubah" membuka isian. 25i: foto profil (bulat) di atas halaman.
 // Backend: StafBaru.gs (getProfilStafSaya, simpanProfilStafSaya, gantiPasswordPengelola).
 // ============================================================
 (function () {
@@ -15,7 +15,7 @@
   const api = function (aksi, payload) { return apiPost(aksi, Object.assign({ token: token() }, payload || {}), 60000); };
   const KOTAK = 'padding:9px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;font-size:14px;width:100%;box-sizing:border-box;';
   const IKON_CENTANG = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
-  let profil = null, wil = null, jk = '', sudahCek = false, pengingatDitutup = false;
+  let profil = null, wil = null, jk = '', sudahCek = false, pengingatDitutup = false, foto = null;
 
   async function simpanDiTombol(btn, kerja, lanjut) {
     const asli = btn.dataset.asli || btn.textContent; btn.dataset.asli = asli; btn.setAttribute('data-ts-skip', '1');
@@ -91,6 +91,55 @@
   const tombolUbah = function (id) { return '<div style="margin-top:12px;"><button type="button" class="btn-mini" id="' + id + '">Ubah</button></div>'; };
   const tombolSimpan = function (idSimpan, teks, idBatal, bisaBatal) { return '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;"><button type="button" class="btn-mini primary" id="' + idSimpan + '">' + teks + '</button>' + (bisaBatal ? '<button type="button" class="btn-mini" id="' + idBatal + '">Batal</button>' : '') + '</div>'; };
 
+
+  // ---------------------------------------------------------------- foto profil (25i)
+  function terapkanFoto() {
+    const a = $('psyAvatar'); if (!a) return;
+    const adaFoto = !!foto;
+    if (adaFoto) { a.innerHTML = ''; const im = document.createElement('img'); im.src = foto; im.alt = 'Foto profil'; im.style.cssText = 'width:100%;height:100%;object-fit:cover;'; a.appendChild(im); }
+    if ($('psyHapusFoto')) $('psyHapusFoto').style.display = adaFoto ? '' : 'none';
+    if ($('psyGantiFoto')) $('psyGantiFoto').textContent = adaFoto ? 'Ganti foto' : 'Tambah foto';
+  }
+  async function muatFoto() {
+    if (foto !== null || !profil || !profil.adaProfil) { terapkanFoto(); return; }
+    try { const r = await api('getFotoStafSaya'); foto = (r && r.profil) || ''; } catch (e) { foto = ''; }
+    terapkanFoto();
+  }
+  /** Kecilkan di peramban: kotak 320 px, JPEG, dipotong dari tengah. */
+  function kecilkan(file) {
+    return new Promise(function (ok, gagal) {
+      if (!/^image\//.test(file.type)) { gagal(new Error('Pilih berkas gambar (foto).')); return; }
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        const W = 320, c = document.createElement('canvas'); c.width = W; c.height = W;
+        const r = Math.max(W / img.width, W / img.height), w = img.width * r, hh = img.height * r, g = c.getContext('2d');
+        g.fillStyle = '#fff'; g.fillRect(0, 0, W, W); g.drawImage(img, (W - w) / 2, (W - hh) / 2, w, hh); URL.revokeObjectURL(url);
+        let d = c.toDataURL('image/jpeg', 0.8); if (d.length > 380000) d = c.toDataURL('image/jpeg', 0.6); ok(d);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); gagal(new Error('Foto tidak bisa dibuka. Coba foto lain.')); };
+      img.src = url;
+    });
+  }
+  function pesanFoto(teks, galat) { const m = $('psyFotoPesan'); if (!m) return; m.textContent = teks; m.style.color = galat ? '#b23a3a' : '#1f7a3f'; }
+  function pasangFoto() {
+    if (!$('psyGantiFoto')) return;
+    $('psyGantiFoto').addEventListener('click', function () {
+      const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.id = 'psyBerkasFoto'; inp.style.display = 'none';
+      inp.addEventListener('change', async function () {
+        const f = inp.files && inp.files[0]; if (!f) return; pesanFoto('Menyimpan foto…', false);
+        try { const d = await kecilkan(f); await api('simpanFotoStafSaya', { dataUrl: d }); foto = d; terapkanFoto(); pesanFoto('Foto tersimpan.', false); }
+        catch (e) { pesanFoto((e && e.message) || 'Foto gagal disimpan.', true); }
+        if (inp.parentNode) inp.parentNode.removeChild(inp);
+      });
+      document.body.appendChild(inp); inp.click();
+    });
+    $('psyHapusFoto').addEventListener('click', async function () {
+      pesanFoto('Menghapus…', false);
+      try { await api('hapusFotoStafSaya'); foto = ''; if ($('psyAvatar')) { const a = $('psyAvatar'); a.textContent = String(profil.nama || profil.username || '?').trim().split(/\s+/).slice(0, 2).map(function (x) { return x.charAt(0).toUpperCase(); }).join(''); } terapkanFoto(); pesanFoto('Foto dihapus.', false); }
+      catch (e) { pesanFoto((e && e.message) || 'Foto gagal dihapus.', true); }
+    });
+  }
+
   async function muatPanel() {
     const root = $('psyRoot'); if (!root) return;
     root.innerHTML = '<div class="empty-state">Memuat profil…</div>';
@@ -112,9 +161,13 @@
     jk = p.jenisKelamin || '';
     const diriTerkunci = !!p.nikTerisi && !ubah.diri, hpTerkunci = !!p.hpTerisi && !ubah.hp;
     const lainAda = !!(p.nomorInduk || p.email || p.pendidikan || p.daruratNama || p.daruratHp), lainTerkunci = lainAda && !ubah.lain;
-    let h = '<div class="admin-stat-card" style="padding:16px;text-align:left;margin-bottom:14px;"><div style="font-size:16px;font-weight:700;">' + esc(profil.nama || profil.username) + '</div>' +
+    const inisial = String(profil.nama || profil.username || '?').trim().split(/\s+/).slice(0, 2).map(function (x) { return x.charAt(0).toUpperCase(); }).join('');
+    let h = '<div class="admin-stat-card" style="padding:16px;text-align:left;margin-bottom:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">' +
+      '<div id="psyAvatar" aria-label="Foto profil" style="width:76px;height:76px;border-radius:50%;overflow:hidden;background:#16324f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;flex:none;">' + esc(inisial) + '</div>' +
+      '<div style="flex:1;min-width:190px;"><div style="font-size:16px;font-weight:700;">' + esc(profil.nama || profil.username) + '</div>' +
       '<div style="font-size:13px;color:var(--color-text-muted,#55606f);margin-top:2px;">Username: <code>' + esc(profil.username) + '</code>' + (profil.namaJabatan ? ' · ' + esc(profil.namaJabatan) : '') + '</div>' +
-      (profil.adaProfil && profil.perluLengkapi ? '<div style="margin-top:8px;font-size:13px;color:#9a6200;font-weight:600;">Profil belum lengkap: isi NIK dan nomor HP di bawah.</div>' : '') + '</div>';
+      (profil.adaProfil ? '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;"><button type="button" class="btn-mini" id="psyGantiFoto">Ganti foto</button><button type="button" class="btn-mini" id="psyHapusFoto" style="display:none;">Hapus foto</button></div><div id="psyFotoPesan" role="status" aria-live="polite" style="font-size:12px;margin-top:6px;"></div>' : '') +
+      (profil.adaProfil && profil.perluLengkapi ? '<div style="margin-top:8px;font-size:13px;color:#9a6200;font-weight:600;">Profil belum lengkap: isi NIK dan nomor HP di bawah.</div>' : '') + '</div></div>';
     if (profil.adaProfil) {
       // ---- Data diri
       if (diriTerkunci) {
@@ -173,7 +226,7 @@
       '<div style="margin-top:12px;"><button type="button" class="btn-mini primary" id="psySimpanSandi">Ganti password</button></div>');
     h += kartu('Lupa password?', '<div style="font-size:13px;line-height:1.7;">Di halaman masuk, pilih <b>Lupa password</b>, lalu masukkan <b>nomor HP yang tersimpan di profil ini</b>. Kode 6 angka dikirim lewat WhatsApp (bila fitur WhatsApp sudah diaktifkan Admin). Bila belum aktif atau nomor HP belum diisi, hubungi <b>Super Admin</b> untuk dibuatkan password sementara.</div>');
     root.innerHTML = h;
-    pasangAksi();
+    pasangAksi(); pasangFoto(); terapkanFoto(); muatFoto();
   }
 
   function pasangAksi() {

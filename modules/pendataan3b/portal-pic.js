@@ -36,7 +36,7 @@
   function bukaPendataanInstansi(x) {
     if (adalahPosyandu(x)) K().bukaPendataan(x.id, x.nama);
     else if (window.PendataanSekolah) window.PendataanSekolah.buka(x.id, x.nama);
-    else K().toast('Pendataan sekolah belum tersedia.');
+    else K().toast('Pendataan satuan pendidikan belum tersedia.');
   }
 
   async function muat(kunci, aksi, params, simpan) {
@@ -490,6 +490,12 @@
   }
   /** Formulir data diri yang boleh dilengkapi PIC sendiri. */
   function formDiri(R) {
+    /* 25i: data diri yang sudah tersimpan tampil TERKUNCI; ketuk Ubah untuk membuka isian. */
+    if (String(R.nik || '').trim() && !P.ubahDiri) {
+      var alamatPenuh = [R.alamat, R.desa && 'Desa/Kel. ' + R.desa, R.kecamatan && 'Kec. ' + R.kecamatan, R.kabupaten, R.provinsi].filter(Boolean).join(', ');
+      return h('div', { class: 'item', id: 'formDiri' }, blokTerkunci('dNikKunci', 'NIK', R.nik), blokTerkunci('dTempatKunci', 'Tempat lahir', R.tempatLahir || '(belum diisi)'), blokTerkunci('dTanggalKunci', 'Tanggal lahir', R.tanggalLahir || '(belum diisi)'), blokTerkunci('dJkKunci', 'Jenis kelamin', R.jenisKelamin || '(belum diisi)'), blokTerkunci('dAlamatKunci', 'Alamat', alamatPenuh || '(belum diisi)'),
+        h('button', { type: 'button', class: 'btn sec block', id: 'btnUbahDiri', style: 'margin-top:10px', text: 'Ubah data diri', onclick: function () { P.ubahDiri = true; P.formDiri = null; K().render(); } }));
+    }
     var F = P.formDiri = P.formDiri || { jk: R.jenisKelamin || '' };
     var nik = fld('dNik', 'NIK (wajib)', '16 angka sesuai KTP.', { maxlength: '16', inputmode: 'numeric', autocomplete: 'off' }, R.nik);
     var tmp = fld('dTempat', 'Tempat lahir', null, { maxlength: '60' }, R.tempatLahir);
@@ -509,10 +515,11 @@
       try {
         var w = wil ? wil.ambil() : {};
         await K().api('simpanProfilPic3B', { idInstansi: '', nik: nik.el.value, tempatLahir: tmp.el.value, tanggalLahir: tgl.el.value, jenisKelamin: F.jk, alamat: alm.value, desa: w.desa || '', kecamatan: w.kecamatan || '', kabupaten: w.kabupaten || '', provinsi: w.provinsi || '' });
-        ok(btn, 'Data diri tersimpan', function () { P.profil = null; P.formDiri = null; P.beranda = null; K().render(); });
+        ok(btn, 'Data diri tersimpan', function () { P.profil = null; P.formDiri = null; P.ubahDiri = false; P.beranda = null; K().render(); });
       } catch (e) { gagal(btn, msg, e, 'Simpan data diri'); }
     });
-    return h('div', { class: 'item', id: 'formDiri' }, nik.blok, tmp.blok, tgl.blok, h('div', { class: 'fld' }, h('label', { text: 'Jenis kelamin' }), seg), wil ? wadahWil : null, h('div', { class: 'fld' }, h('label', { for: 'dAlamat', text: wil ? 'Alamat (jalan, RT/RW, kampung)' : 'Alamat' }), alm), btn, msg);
+    var batalDiri = String(R.nik || '').trim() ? h('button', { type: 'button', class: 'btn sec block', id: 'btnBatalDiri', style: 'margin-top:8px', text: 'Batal', onclick: function () { P.ubahDiri = false; P.formDiri = null; K().render(); } }) : null;
+    return h('div', { class: 'item', id: 'formDiri' }, nik.blok, tmp.blok, tgl.blok, h('div', { class: 'fld' }, h('label', { text: 'Jenis kelamin' }), seg), wil ? wadahWil : null, h('div', { class: 'fld' }, h('label', { for: 'dAlamat', text: wil ? 'Alamat (jalan, RT/RW, kampung)' : 'Alamat' }), alm), btn, batalDiri, msg);
   }
   /** Username login, nomor HP, dan rekening. Yang sudah tersimpan hanya bisa diubah dengan password dan dibatasi 30 hari sekali. */
   /* 26 Nov 2026 (25h): nomor HP dan rekening yang SUDAH tersimpan tampil dan TERKUNCI (bukan kotak kosong). Ketuk "Ubah" untuk mengganti. */
@@ -642,7 +649,7 @@
       wrap.appendChild(h('div', { class: 'tip', style: 'margin-top:12px', text: 'Isi data di bawah supaya pengantaran makanan lancar.' }));
       var f = {
         kontakHp: fld('kontakHp', 'Nomor HP PIC yang bisa dihubungi', 'Untuk koordinasi pengantaran makanan.', { type: 'tel', inputmode: 'tel', placeholder: '08xxxxxxxxxx' }, p.kontakHp),
-        email: fld('email', d.posyandu ? 'Email (boleh kosong)' : 'Email sekolah (boleh kosong)', 'Contoh: sdn1@sekolah.sch.id', { type: 'email', inputmode: 'email', placeholder: 'nama@contoh.id', maxlength: '80' }, p.email),
+        email: fld('email', d.posyandu ? 'Email (boleh kosong)' : 'Email satuan pendidikan (boleh kosong)', 'Contoh: sdn1@sekolah.sch.id', { type: 'email', inputmode: 'email', placeholder: 'nama@contoh.id', maxlength: '80' }, p.email),
         jam: fld('jamTerimaMakan', 'Jam terima makanan', 'Contoh: 09:30', { inputmode: 'numeric', placeholder: 'JJ:MM', maxlength: '5' }, p.jamTerimaMakan),
         titik: fld('titikAntar', 'Titik antar', d.posyandu ? 'Contoh: teras rumah Ibu Kader / balai RW.' : 'Contoh: gerbang depan / ruang guru / pos satpam.', { maxlength: '120' }, p.titikAntar),
         lokasi: fld('lokasi', 'Lokasi di peta (boleh kosong)', 'Ketuk "Pakai lokasi saya" saat berada di titik antar, atau tempel tautan Google Maps.', { maxlength: '200', placeholder: '-6.917500, 107.619100' }, p.lokasi),

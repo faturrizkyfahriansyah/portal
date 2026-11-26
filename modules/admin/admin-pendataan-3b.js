@@ -207,6 +207,6 @@
   }
   muat();
   // Pendataan satuan pendidikan (25 Nov 2026): bagian tambahan di panel yang sama
-  (function () { function muatSekolah() { const s = document.createElement('script'); s.src = 'modules/admin/admin-pendataan-sekolah.js?v=20261125c'; document.head.appendChild(s); }
+  (function () { function muatSekolah() { const s = document.createElement('script'); s.src = 'modules/admin/admin-pendataan-sekolah.js?v=20261126j'; document.head.appendChild(s); }
     if (window.CoreSekolah) muatSekolah(); else { const c = document.createElement('script'); c.src = 'core/core-sekolah.js?v=20261125b'; c.onload = muatSekolah; document.head.appendChild(c); } })();
 })();
