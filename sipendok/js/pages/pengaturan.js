@@ -21,15 +21,16 @@ export async function render(root, ctx) {
   };
   const ro = (v) => h('input', { class: 'input', value: v, readOnly: true });
   const result = h('div', {}), btnSave = h('button', { class: 'btn', onclick: simpan }, icon('check', 18), 'Simpan pengaturan'), btnCek = h('button', { class: 'btn ghost', onclick: cek }, icon('file', 18), 'Cek template Dokumen Penerimaan');
+  const btnSave2 = h('button', { class: 'btn', onclick: simpan }, icon('check', 18), 'Simpan pengaturan');   // 26 Nov 2026: tombol simpan juga di kartu BAST + Surat Jalan (ditanam di Portal)
   const resultBastSj = h('div', {}), btnCekBastSj = h('button', { class: 'btn ghost', onclick: cekBastSj }, icon('file', 18), 'Cek template BAST + Surat Jalan');
 
   async function simpan() {
-    btnSave.disabled = true; result.replaceChildren();
+    btnSave.disabled = true; btnSave2.disabled = true; result.replaceChildren(); resultBastSj.replaceChildren();
     try {
       const r = await api('pengaturan.save', Object.fromEntries(Object.entries(f).map(([k, el]) => [k, el.value])));
       S.settings = { NAMA_SPPG: r.NAMA_SPPG, KODE_SPPG: r.KODE_SPPG, TAHUN_AKTIF: r.TAHUN_AKTIF, BUAT_PDF: r.BUAT_PDF };
       toast('Pengaturan disimpan.', 'ok');
-    } catch (e) { result.replaceChildren(banner('err', errMsg(e))); } finally { btnSave.disabled = false; }
+    } catch (e) { const b = banner('err', errMsg(e)); (ctx.embed ? resultBastSj : result).replaceChildren(b); } finally { btnSave.disabled = false; btnSave2.disabled = false; }
   }
   async function cek() {
     btnCek.disabled = true; result.replaceChildren(skeleton(1));
@@ -50,7 +51,7 @@ export async function render(root, ctx) {
 
   const u = session.user || {};
   root.append(
-    h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, 'Pengaturan'), h('div', { class: 'sub' }, 'Konfigurasi SIPENDOK (tersimpan di sheet 08_PENGATURAN)'))),
+    ctx.embed ? '' : h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, 'Pengaturan'), h('div', { class: 'sub' }, 'Konfigurasi SIPENDOK (tersimpan di sheet 08_PENGATURAN)'))),
     h('div', { class: 'stack' },
       h('div', { class: 'card' }, h('h2', {}, 'Umum'), h('div', { class: 'form-grid' },
         field('Nama SPPG', f.NAMA_SPPG), field('Kode SPPG (dipakai pada nomor BAST/SJ)', ro(cfg.KODE_SPPG || ''), 'Ubah langsung di sheet bila perlu — jangan di tengah tahun.'),
@@ -76,8 +77,8 @@ export async function render(root, ctx) {
         h('div', { class: 'row wrap', style: { marginTop: '14px' } }, btnSave, btnCek), h('div', { style: { marginTop: '12px' } }, result)),
       h('div', { class: 'card' }, h('h2', {}, 'Generate Dokumen — BAST + Surat Jalan (fitur baru)'), h('div', { class: 'form-grid' },
         field('Template BAST + Surat Jalan (Drive File ID)', f.TEMPLATE_BAST_SJ, 'Satu file .docx berisi BAST dan Surat Jalan dalam satu lembar per kegiatan distribusi — TERPISAH dari template Dokumen Penerimaan di atas.')),
-        h('div', { class: 'row wrap', style: { marginTop: '14px' } }, btnCekBastSj), h('div', { style: { marginTop: '12px' } }, resultBastSj)),
-      h('div', { class: 'card' }, h('h2', {}, 'Aplikasi'), h('dl', { class: 'kv' }, h('dt', {}, 'Pengguna'), h('dd', {}, u.nama || '-'), h('dt', {}, 'Versi backend'), h('dd', {}, S.versi || '-'), h('dt', {}, 'Tarif'), h('dd', {}, 'sheet 04_TARIF')),
+        h('div', { class: 'row wrap', style: { marginTop: '14px' } }, btnCekBastSj, ctx.embed ? btnSave2 : null), h('div', { style: { marginTop: '12px' } }, resultBastSj)),
+      ctx.embed ? null : h('div', { class: 'card' }, h('h2', {}, 'Aplikasi'), h('dl', { class: 'kv' }, h('dt', {}, 'Pengguna'), h('dd', {}, u.nama || '-'), h('dt', {}, 'Versi backend'), h('dd', {}, S.versi || '-'), h('dt', {}, 'Tarif'), h('dd', {}, 'sheet 04_TARIF')),
         h('div', { class: 'row wrap', style: { marginTop: '12px' } },
           window.__installEvt ? h('button', { class: 'btn ghost', onclick: async () => { const e = window.__installEvt; e.prompt(); await e.userChoice; window.__installEvt = null; ctx.go('pengaturan'); } }, icon('download', 18), 'Pasang ke layar utama') : null,
           h('a', { class: 'btn ghost', href: '#/dashboard' }, 'Kembali')))));

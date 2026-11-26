@@ -359,7 +359,8 @@
   const PANEL_KHUSUS_ADMIN = [
     'panelAkun', 'panelRoleAkses', 'panelPengelolaSppg', 'panelManajemenStaf', 'panelVerifikasiWa', 'panelPendataan3B',
     'panelManajemenHakAkses', 'panelHakAksesSipandu',
-    'panelWebsitePublik', 'panelPengaturan'
+    'panelWebsitePublik', 'panelPengaturan',
+    'panelSipendokGenerate', 'panelSipendokArsip'   // 25k: Generate Dokumen dan Arsip (SIPENDOK ditanam di Portal) mengubah data -> khusus pengelola
   ];
 
   function terapkanBatasanRoleStaff_() {

@@ -192,13 +192,15 @@
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduMenu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v8a3 3 0 0 0 3 3v7M7 3v8M10 3v8a3 3 0 0 1-3 3"/><path d="M17 3c-2 2-3 5-3 8s1 4 3 4v6"/></svg></span><span>Manajemen Menu</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduPagu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></span><span>Pagu &amp; Perhitungan</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipanduBiaya"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h.01M8 14h2M12 14h2M16 14h.01M8 18h2M12 18h4"/></svg></span><span>Rekap Biaya &amp; Insentif</span></button>
+      <!-- 26 Nov 2026 (25k): SIPENDOK ditanam di Portal (tanpa aplikasi terhubung). Mesin dokumen tetap di server SIPENDOK; akses mengikuti Hak Akses modul SIPENDOK. -->
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipendokGenerate"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></span><span>Generate Dokumen</span></button>
+      <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelSipendokArsip"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11h14V8"/><path d="M10 12h4"/></svg></span><span>Arsip Dokumen</span></button>
       <button type="button" class="shell-nav-link admin-tab-btn" data-panel="panelHakAksesSipandu"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span><span>Operasional Produksi</span></button>
 
       <p class="shell-nav-group-title">Aplikasi Terhubung</p>
       <p class="shell-nav-group-desc">Aplikasi terpisah dengan backend &amp; database sendiri.</p>
-      <!-- SIPENDOK & SIPOGIM: aplikasi terpisah (frontend+backend sendiri), BUKAN panel internal -- <a> biasa, bukan admin-tab-btn/data-panel, dibuka tab baru supaya sesi Portal Admin tetap aktif. Dipisah dari SIPIKA (sebelumnya tercampur di sana) sesuai audit navigasi. -->
-      <a href="sipendok/index.html" target="_blank" rel="noopener" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h2"/><path d="M5 4h10l4 4v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/></svg></span><span>SIPENDOK ↗</span></a>
-      <p class="shell-nav-group-desc" style="margin-top:-6px;">Sistem Informasi Penerimaan Dokumen</p>
+      <!-- SIPOGIM: aplikasi terpisah (frontend+backend sendiri), BUKAN panel internal -- <a> biasa, bukan admin-tab-btn/data-panel, dibuka tab baru supaya sesi Portal Admin tetap aktif. Dipisah dari SIPIKA (sebelumnya tercampur di sana) sesuai audit navigasi. -->
+      <!-- 26 Nov 2026 (25k): tautan SIPENDOK dihapus; Generate Dokumen, Arsip, Pengaturan template, dan ringkasan harian kini ada di Portal (grup SIPANDU, Pengaturan, Beranda). -->
       <a href="sipogim/beranda.html" target="_blank" rel="noopener" class="shell-nav-link"><span class="icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 22v-6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M22 12h-6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/></svg></span><span>SIPOGIM ↗</span></a>
       <p class="shell-nav-group-desc" style="margin-top:-6px;">Sistem Informasi Gizi &amp; Menu</p>
       <!-- SIPRES QR (Perbaikan G): BEDA dari SIPENDOK/SIPOGIM -- ini BUKAN
@@ -227,7 +229,7 @@
          yg sesungguhnya jalan di browser, tanpa menebak lagi apakah
          deploy sudah masuk atau belum. Diperbarui manual tiap kali
          admin.html diubah -- lihat juga console.log di bawah. -->
-    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-25j</span></div>
+    <div class="shell-sidebar-foot">SPPG JEUNGJING &middot; Portal Pengelola<br>Kp. Kecok, RT.004, Ds. Jeungjing, Kec. Cisoka, Kab. Tangerang - Banten, 15730<br><span style="opacity:0.6;">Versi build: 2026-11-25k</span></div>
   </aside>
     <div class="shell-main">
   <header class="shell-topbar">
@@ -267,6 +269,12 @@
     </section>
 
     <div id="dtTren"></div>
+
+    <!-- 26 Nov 2026 (25k): Penerimaan hari ini dari SIPENDOK (dashboard SIPENDOK dipindah ke Beranda); diisi admin-sipendok.js -->
+    <section class="panel-block" id="spdBeranda" data-staff-hide="1" style="margin-bottom:16px;">
+      <p class="panel-block-title">Penerimaan dan Dokumen Hari Ini</p>
+      <div id="spdViewBeranda"><div class="empty-state">Memuat…</div></div>
+    </section>
 
     <!-- KEHADIRAN RELAWAN HARI INI -->
     <section class="panel-block" style="margin-bottom:16px;">
@@ -1952,6 +1960,11 @@
     <div id="sbiRoot"><div class="empty-state">Memuat…</div></div>
   </div>
 
+  <!-- 26 Nov 2026 (25k): panel SIPENDOK yang ditanam; diisi modules/admin/admin-sipendok.js -->
+  <div class="admin-panel" id="panelSipendokGenerate"><div id="spdViewGenerate"><div class="empty-state">Memuat…</div></div></div>
+
+  <div class="admin-panel" id="panelSipendokArsip"><div id="spdViewArsip"><div class="empty-state">Memuat…</div></div></div>
+
   <div class="admin-panel" id="panelHakAksesSipandu">
     <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">SIPANDU</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Sistem Informasi Pengelolaan Data &amp; Operasional SPPG.</p></div>
 
@@ -2256,7 +2269,7 @@
   </div>
 
   <div class="admin-panel" id="panelPengaturan">
-    <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Pengaturan</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">6 kategori — klik untuk buka.</p></div>
+    <div><h1 style="font-size:18px;margin:0;color:var(--color-navy);">Pengaturan</h1><p style="font-size:13px;margin:2px 0 0;color:var(--color-text-muted);">Klik judul untuk membuka.</p></div>
 
     <!-- 1. PENGATURAN PORTAL -->
     <details class="panel-block" style="margin:14px 0;" open>
@@ -2268,6 +2281,12 @@
         <p style="font-size:12px;color:var(--color-text-muted);margin:0;">Logo BGN, Logo SPPG, dan Foto Gedung diatur lewat file di folder <code>assets/</code> pada GitHub — belum bisa diubah dari sini.</p>
         <button type="button" class="btn-mini primary" id="btnSimpanPortal" style="align-self:flex-start;">Simpan</button>
       </div>
+    </details>
+
+    <!-- 1b. PENGATURAN DOKUMEN (26 Nov 2026, 25k): pengaturan SIPENDOK dipindah ke sini; diisi admin-sipendok.js -->
+    <details class="panel-block" id="spdPengaturanBlok" data-staff-hide="1" style="margin:14px 0;">
+      <summary style="cursor:pointer;font-weight:700;color:var(--color-navy);font-size:14px;">Pengaturan Dokumen (SIPENDOK): template BAST + Surat Jalan, folder, nama dan tahun</summary>
+      <div id="spdViewPengaturan" style="margin-top:12px;"><div class="empty-state">Klik untuk memuat…</div></div>
     </details>
 
     <!-- 2. PENGATURAN PRESENSI -->
@@ -2411,6 +2430,7 @@
 <script src="modules/admin/admin-rekap-mingguan.js?v=20261105d"></script>
 <script src="modules/admin/admin-dashboard-perhatian.js?v=20261110a"></script>
 <script src="modules/admin/admin-dashboard-tren.js?v=20261126j"></script>
+<script src="modules/admin/admin-sipendok.js?v=20261126k"></script>
 <script src="modules/admin/admin-sipandu-master.js?v=20261125f"></script>
 <script src="modules/admin/admin-situs-publik.js?v=20261125f"></script>
 <script src="modules/admin/admin-sipandu-pm.js?v=20261104d"></script>

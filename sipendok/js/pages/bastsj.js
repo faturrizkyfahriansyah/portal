@@ -165,7 +165,7 @@ export async function render(root, ctx) {
             h('div', { class: 'grow' }, b.nama_pm), h('code', {}, b.nomorBast)))) : null,
         h2.gagal.length ? h('div', { style: { marginTop: '8px' } },
           h2.gagal.map((g) => h('div', { class: 'issue error' }, h('span', { class: 'dot' }), h('div', {}, h('b', {}, g.nama_pm), h('div', { class: 'hint' }, g.pesan))))) : null),
-      actions: [{ label: 'Tutup', kind: 'ghost' }, { label: 'Buka Arsip', onClick: () => { location.hash = '#/arsip?tanggal=' + tgl; return false; } }]
+      actions: [{ label: 'Tutup', kind: 'ghost' }, { label: 'Buka Arsip', onClick: (ev, m) => { if (m && m.close) m.close(); ctx.go('arsip?tanggal=' + tgl); return false; } }]
     });
   }
 

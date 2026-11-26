@@ -43,7 +43,7 @@ export function showBusy(text, sub) {
   hideBusy();
   busyEl = h('div', { class: 'busy', role: 'alertdialog', 'aria-busy': 'true' },
     h('div', { class: 'box' }, h('div', { class: 'spinner' }), h('b', {}, text || 'Memproses…'), sub ? h('p', { class: 'muted', style: { margin: '6px 0 0', fontSize: '13px' } }, sub) : null));
-  document.body.append(busyEl);
+  (document.getElementById('modal-root') || document.body).append(busyEl);   // 26 Nov 2026: di dalam wadah .spd supaya gayanya ikut saat ditanam di Portal
 }
 export function hideBusy() { if (busyEl) { busyEl.remove(); busyEl = null; } }
 

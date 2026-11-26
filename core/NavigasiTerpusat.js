@@ -47,14 +47,15 @@ const PETA_HREF_KE_MODUL_ = {
 };
 const PETA_PANEL_KE_MODUL_ = {
   // -- Sisi Admin (data-panel, lihat admin.html) --
-  panelPergiliran: 'SIMSDM', panelPenetapanPergiliran: 'SIKOP', panelRelawan: 'SIMSDM', panelAkun: 'SIMSDM', panelDivisi: 'SIMSDM', panelRoleAkses: 'SIMSDM', panelManajemenHakAkses: 'SIMSDM', panelPengelolaSppg: 'SIMSDM', panelVerifikasiWa: 'SIMSDM', panelProfilRelawan: 'SIMSDM',
+  panelPergiliran: 'SIMSDM', panelPenetapanPergiliran: 'SIKOP', panelRelawan: 'SIMSDM', panelAkun: 'SIMSDM', panelDivisi: 'SIMSDM', panelRoleAkses: 'SIMSDM', panelManajemenHakAkses: 'SIMSDM', panelPengelolaSppg: 'SIMSDM', panelManajemenStaf: 'SIMSDM', panelVerifikasiWa: 'SIMSDM', panelProfilRelawan: 'SIMSDM',
   panelHarian: 'SIPRES', panelRekapMingguan: 'SIPRES', panelSipanduMaster: 'SIPANDU', panelSipanduPm: 'SIPANDU', panelSipanduMenu: 'SIPANDU', panelSipanduPagu: 'SIPANDU', panelSipanduBiaya: 'SIPANDU', panelDuaMinggu: 'SIPRES', panelMasterTarif: 'SIPRES', panelMonitoringPresensi: 'SIPRES', panelPengajuanKetidakhadiranAdmin: 'SIPRES', panelJadwalIndividu: 'SIPRES', panelDiagnosaAbsen: 'SIPRES', panelKartuQr: 'SIMSDM', panelLaporan: 'SIPRES',
   panelPeriode: 'SIKOP', panelKalender: 'SIKOP', panelKalenderOperasional: 'SIKOP', panelLokasi: 'SIKOP', panelJadwal: 'SIKOP', panelShift: 'SIKOP',
   panelStok: 'SIRAGA', panelPengajuanKebutuhanAdmin: 'SIRAGA', panelReturBarangAdmin: 'SIRAGA',
   panelHakAksesSipandu: 'SIPANDU',
   panelInformasi: 'SIPIKA', panelPengumuman: 'SIPIKA', panelNotifikasiAdmin: 'SIPIKA', panelDokumen: 'SIPIKA', panelPenerimaManfaatOps: 'SIPIKA', panelPendataan3B: 'SIPIKA',
   panelWebsitePublik: 'SIPIKA',
-  panelMenuHariIni: 'SIPOGIM'
+  panelMenuHariIni: 'SIPOGIM',
+  panelSipendokGenerate: 'SIPENDOK', panelSipendokArsip: 'SIPENDOK'   // 26 Nov 2026 (25k): SIPENDOK ditanam di Portal; akses mengikuti Hak Akses modul SIPENDOK
 };
 
 /**

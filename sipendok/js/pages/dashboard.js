@@ -47,7 +47,11 @@ export async function render(root, ctx) {
     if (dok) out.push(h('div', { class: 'card' }, h('h2', {}, 'Dokumen penerimaan'),
       h('div', { class: 'row wrap' }, h('div', { class: 'grow muted' }, `${num(dok.JUMLAH_PM)} PM · ${num(dok.TOTAL_PAKET)} paket`), linkBtn('Word', dok.FILE_WORD, 'ghost sm', 'file'), dok.FILE_PDF ? linkBtn('PDF', dok.FILE_PDF, 'ghost sm', 'file') : null)));
 
-    out.push(h('div', { class: 'cta' },
+    // 26 Nov 2026: ditanam di Beranda Portal Pengelola -> input penerimaan tidak dipakai lagi (PM harian sudah di Portal); tombolnya menuju Generate Dokumen dan Arsip Portal.
+    if (ctx.embed) out.push(h('div', { class: 'cta' },
+      h('button', { class: 'btn big gold', type: 'button', onclick: () => ctx.go('bastsj?tanggal=' + tgl) }, icon('bolt', 20), 'GENERATE DOKUMEN'),
+      h('button', { class: 'btn big', type: 'button', onclick: () => ctx.go('arsip') }, icon('archive', 20), 'ARSIP DOKUMEN')));
+    else out.push(h('div', { class: 'cta' },
       h('a', { class: 'btn big', href: `#/penerimaan?tanggal=${tgl}` }, icon('inbox', 20), 'INPUT PENERIMAAN'),
       h('a', { class: 'btn big gold', href: `#/dokumen?tanggal=${tgl}` }, icon('bolt', 20), 'GENERATE SEMUA DOKUMEN')));
     return out;
