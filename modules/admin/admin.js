@@ -360,7 +360,7 @@
   // Barang/Hak Akses di dalamnya tetap Admin-only lewat requireStokAdmin_
   // & SipanduHakAkses.gs yang tidak disentuh.
   const PANEL_KHUSUS_ADMIN = [
-    'panelRelawan', 'panelAkun', 'panelDivisi', 'panelRoleAkses', 'panelPengelolaSppg', 'panelPergiliran', 'panelPenetapanPergiliran', 'panelPendataan3B', 'panelVerifikasiWa',
+    'panelRelawan', 'panelAkun', 'panelDivisi', 'panelRoleAkses', 'panelPengelolaSppg', 'panelManajemenStaf', 'panelPergiliran', 'panelPenetapanPergiliran', 'panelPendataan3B', 'panelVerifikasiWa',
     'panelPeriode', 'panelKalender', 'panelLokasi', 'panelShift',
     'panelNotifikasiAdmin', 'panelInformasi', 'panelPengumuman', 'panelDokumen',
     'panelLaporan', 'panelWebsitePublik', 'panelPengaturan'
@@ -417,7 +417,7 @@
     // SEMUA panel dipastikan ambil salinan terbaru, bukan cache lama.
     panelShift: 'modules/admin/admin-shift.js?v=20261024c',
     panelJadwalIndividu: 'modules/admin/admin-koreksi-presensi.js?v=20261125c',
-    panelDiagnosaAbsen: 'modules/admin/admin-diagnosa-absen.js?v=20261125c',   // 25 Nov 2026: Cek Absen & Hari Shift Malam
+    panelDiagnosaAbsen: 'modules/admin/admin-diagnosa-absen.js?v=20261125f',   // 25 Nov 2026: Cek Absen & Hari Shift Malam
     panelLaporan: 'modules/admin/admin-laporan.js?v=20261104d',
     panelProfilRelawan: 'modules/admin/admin-profil-relawan.js?v=20261125a',
     panelMenuHariIni: 'modules/admin/admin-menu-hari-ini.js?v=20261023a',
@@ -425,6 +425,7 @@
     panelManajemenHakAkses: 'modules/admin/admin-manajemen-hak-akses.js?v=20261105e',
     panelRoleAkses: 'modules/admin/admin-role.js?v=20261023a',
     panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261124b',
+    panelManajemenStaf: 'modules/admin/admin-manajemen-staf.js?v=20261126h',   // 25 Nov 2026 (25g): Manajemen Staff
     panelPergiliran: 'modules/admin/admin-pergiliran.js?v=20261124b',   // 22 Nov 2026 (Tahap 3): SIMSDM menyusun kebutuhan & mengajukan pergiliran
     panelPenetapanPergiliran: 'modules/admin/admin-pergiliran-sikop.js?v=20261124b',
     panelPendataan3B: 'modules/admin/admin-pendataan-3b.js?v=20261125g',

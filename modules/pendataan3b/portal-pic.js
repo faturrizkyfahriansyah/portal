@@ -515,26 +515,44 @@
     return h('div', { class: 'item', id: 'formDiri' }, nik.blok, tmp.blok, tgl.blok, h('div', { class: 'fld' }, h('label', { text: 'Jenis kelamin' }), seg), wil ? wadahWil : null, h('div', { class: 'fld' }, h('label', { for: 'dAlamat', text: wil ? 'Alamat (jalan, RT/RW, kampung)' : 'Alamat' }), alm), btn, msg);
   }
   /** Username login, nomor HP, dan rekening. Yang sudah tersimpan hanya bisa diubah dengan password dan dibatasi 30 hari sekali. */
+  /* 26 Nov 2026 (25h): nomor HP dan rekening yang SUDAH tersimpan tampil dan TERKUNCI (bukan kotak kosong). Ketuk "Ubah" untuk mengganti. */
+  var IKON_KUNCI = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:5px"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>';
+  function blokTerkunci(id, label, nilai, bantu, aksiUbah) {
+    var kotak = h('div', { id: id, style: 'padding:11px 12px;border:1px solid #d5dbe3;border-radius:10px;background:#f3f5f8;font-weight:600;word-break:break-word' });
+    kotak.innerHTML = IKON_KUNCI; kotak.appendChild(document.createTextNode(nilai));
+    var blok = h('div', { class: 'fld' }, h('label', { text: label }), kotak, bantu ? h('div', { class: 'hint', text: bantu }) : null);
+    if (aksiUbah) blok.appendChild(h('button', { type: 'button', class: 'btn sec', id: id + 'Ubah', style: 'margin-top:8px', text: 'Ubah', onclick: aksiUbah }));
+    return blok;
+  }
   function formAkun(R) {
     var usr = fld('aUsername', 'Username untuk masuk', 'Huruf kecil, angka, titik atau garis bawah (4-30). Bisa dipakai masuk bersama password.', { maxlength: '30', autocapitalize: 'none', autocomplete: 'off' }, R.username);
-    var hp = fld('aHp', 'Nomor HP', R.sisaHariHp > 0 ? 'Nomor HP bisa diubah lagi ' + R.sisaHariHp + ' hari lagi.' : 'Dipakai untuk masuk dan menerima kode WhatsApp.', { type: 'tel', maxlength: '16', inputmode: 'tel', autocomplete: 'off' }, R.nomorHp);
-    var nr = fld('aNamaRek', 'Nama pemilik rekening', null, { maxlength: '80', autocomplete: 'off' }, R.namaRekening);
-    var rek = fld('aRek', 'Nomor rekening', R.rekeningTerisi ? 'Tersimpan: ' + R.rekening + (R.sisaHariRek > 0 ? '. Bisa diubah lagi ' + R.sisaHariRek + ' hari lagi.' : '. Ketik nomor baru bila ingin mengubah.') : 'Belum diisi. Isi bila perlu.', { inputmode: 'numeric', maxlength: '25', autocomplete: 'off' }, '');
+    var hpKunci = !!String(R.nomorHp || '').trim() && !P.ubahHp, rekKunci = !!R.rekeningTerisi && !P.ubahRek;
+    var hp = hpKunci ? { blok: blokTerkunci('aHpKunci', 'Nomor HP', R.nomorHp, R.sisaHariHp > 0 ? 'Tersimpan. Bisa diubah lagi ' + R.sisaHariHp + ' hari lagi.' : 'Tersimpan. Dipakai untuk masuk dan menerima kode WhatsApp.', R.sisaHariHp > 0 ? null : function () { P.ubahHp = true; K().render(); }), el: null }
+      : fld('aHp', 'Nomor HP', R.sisaHariHp > 0 ? 'Nomor HP bisa diubah lagi ' + R.sisaHariHp + ' hari lagi.' : 'Dipakai untuk masuk dan menerima kode WhatsApp.', { type: 'tel', maxlength: '16', inputmode: 'tel', autocomplete: 'off' }, R.nomorHp);
+    var nr, rek;
+    if (rekKunci) {
+      nr = { blok: blokTerkunci('aNamaRekKunci', 'Nama pemilik rekening', R.namaRekening || '(belum diisi)', null, null), el: null };
+      rek = { blok: blokTerkunci('aRekKunci', 'Nomor rekening', R.rekening, R.sisaHariRek > 0 ? 'Tersimpan. Bisa diubah lagi ' + R.sisaHariRek + ' hari lagi.' : 'Tersimpan. Sebagian angka disamarkan demi keamanan.', R.sisaHariRek > 0 ? null : function () { P.ubahRek = true; K().render(); }), el: null };
+    } else {
+      nr = fld('aNamaRek', 'Nama pemilik rekening', null, { maxlength: '80', autocomplete: 'off' }, R.namaRekening);
+      rek = fld('aRek', 'Nomor rekening', R.rekeningTerisi ? 'Tersimpan: ' + R.rekening + '. Ketik nomor baru untuk mengganti.' : 'Belum diisi. Isi bila perlu.', { inputmode: 'numeric', maxlength: '25', autocomplete: 'off' }, '');
+    }
     var pw = inputPin('aPassword', 'Password Anda', 'Hanya diperlukan untuk mengubah nomor HP atau rekening yang sudah tersimpan.');
     var msg = h('div', { class: 'msg err', role: 'alert', 'aria-live': 'polite' }), btn = h('button', { class: 'btn block', id: 'btnSimpanAkun', text: 'Simpan akun dan kontak' });
     btn.addEventListener('click', async function () {
       msg.textContent = '';
       var isi = { username: usr.el.value.trim() };
-      if (hp.el.value.trim() && hp.el.value.trim() !== String(R.nomorHp || '').trim()) isi.nomorHp = hp.el.value.trim();
-      if (rek.el.value.trim()) { isi.nomorRekening = rek.el.value.trim(); isi.namaRekening = nr.el.value.trim(); }
+      if (hp.el && hp.el.value.trim() && hp.el.value.trim() !== String(R.nomorHp || '').trim()) isi.nomorHp = hp.el.value.trim();
+      if (rek.el && rek.el.value.trim()) { isi.nomorRekening = rek.el.value.trim(); isi.namaRekening = nr.el.value.trim(); }
       if (pw.el.value) isi.password = pw.el.value;
       mulai(btn);
       try {
         await K().api('simpanAkunPic3B', Object.assign({ idInstansi: '' }, isi));
-        ok(btn, 'Tersimpan', function () { P.profil = null; K().render(); });
+        ok(btn, 'Tersimpan', function () { P.profil = null; P.ubahHp = false; P.ubahRek = false; K().render(); });
       } catch (e) { gagal(btn, msg, e, 'Simpan akun dan kontak'); }
     });
-    return h('div', { class: 'item', id: 'formAkun' }, usr.blok, hp.blok, nr.blok, rek.blok, pw.blok, btn, msg);
+    var batal = (P.ubahHp || P.ubahRek) ? h('button', { type: 'button', class: 'btn sec block', id: 'btnBatalAkun', style: 'margin-top:8px', text: 'Batal', onclick: function () { P.ubahHp = false; P.ubahRek = false; K().render(); } }) : null;
+    return h('div', { class: 'item', id: 'formAkun' }, usr.blok, hp.blok, nr.blok, rek.blok, pw.blok, btn, batal, msg);
   }
   /* Kolom password + ikon mata (gambar garis, bukan emoji). */
   function kolomSandi(el) {
