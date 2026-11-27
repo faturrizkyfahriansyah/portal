@@ -16,28 +16,32 @@
   const tglIndo = function (iso) { return iso ? iso.split('-').reverse().join('/') : ''; };
   const senenDepan = function () { const d = new Date(); d.setDate(d.getDate() + (8 - (d.getDay() || 7))); return isoLokal(d); };   // Senin berikutnya
   const api = function (aksi, payload) { return apiPost(aksi, Object.assign({ token: ambilSesiAdmin().token }, payload || {})); };
-  let data = [], tanggalLihat = isoLokal(new Date()), standar = { tarifMulai: '', pergiliran: false }, pmNow = null;
+  let data = [], tanggalLihat = isoLokal(new Date()), tanggalPm = senenDepan(), standar = { tarifMulai: '', pergiliran: false }, pmNow = null;
 
   function kerangka() {
     $('mtIsi').innerHTML =
-      '<div class="admin-stat-card" style="padding:12px;text-align:left;margin-bottom:12px;font-size:13px;line-height:1.55;">' +
-      'Tarif harian berlaku <b>mulai tanggal yang Anda pilih</b> dan dikali jumlah hari hadir pada <b>Rekap Mingguan</b>. Minggu yang sudah lewat <b>tidak berubah</b> kecuali Anda memilih tanggal berlaku yang sudah lewat (akan diminta konfirmasi).</div>' +
       '<div id="mtStandar"></div>' +
       '<div class="filter-bar"><input id="mtCari" placeholder="Cari nama relawan..." style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;min-width:200px;">' +
       '<select id="mtDivisi"><option value="">Semua Divisi</option></select>' +
-      '<label style="font-size:12px;">Tarif yang tampil berlaku pada <input type="date" id="mtLihat"></label></div>' +
+      '</div>' +
       '<div class="filter-bar" style="background:var(--color-surface,#f6f8fb);padding:10px;border-radius:10px;">' +
-      '<label style="font-size:13px;font-weight:600;">Tarif BARU berlaku mulai <input type="date" id="mtBerlaku"></label>' +
+      '<label style="font-size:13px;font-weight:600;">Berlaku mulai <input type="date" id="mtBerlaku"></label>' +
       '<label style="font-size:12px;">Isi semua yang tampil: <input type="number" id="mtMassal" min="0" step="1000" placeholder="nominal" style="width:110px;"></label>' +
       '<button class="btn-mini" id="mtTerapkan" type="button">Terapkan ke yang tampil</button>' +
-      '<button class="btn-mini" id="mtRekom" type="button" title="Mengisi kolom Tarif baru dengan Rekomendasi Master (tarif 100%) untuk relawan yang tampil. Tetap bisa diubah satu per satu sebelum disimpan.">Pakai rekomendasi ke yang tampil</button>' +
+      '<button class="btn-mini" id="mtRekom" type="button" >Isi dari Master (100%)</button>' +
       '<input id="mtKet" placeholder="Keterangan (opsional)" style="padding:7px;border:1px solid var(--color-border,#d5dbe3);border-radius:8px;min-width:170px;"></div>' +
       '<div id="mtPesan" style="font-size:13px;margin:8px 0;"></div>' +
-      '<div class="table-wrap"><table class="tabel-kolom-beku-3"><thead><tr><th>Nama</th><th>Divisi</th><th>Tarif saat ini</th><th>Rekomendasi Master (100%)</th><th>Tarif pada PM sekarang</th><th>Tarif baru (Rp/hari)</th><th></th></tr></thead><tbody id="mtTbody"></tbody></table></div>' +
+      '<div class="table-wrap"><table class="tabel-kolom-beku-3"><thead><tr><th>Nama</th><th>Divisi</th><th>Tarif saat ini</th><th>Master (100%)</th><th>Tarif pada PM tgl itu</th><th>Tarif baru (Rp/hari)</th><th></th></tr></thead><tbody id="mtTbody"></tbody></table></div>' +
       '<div style="margin:14px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><button class="btn-mini primary" id="mtSimpan" type="button" disabled>Simpan perubahan</button><span id="mtHitung" style="font-size:13px;"></span></div>';
-    $('mtLihat').value = tanggalLihat; $('mtBerlaku').value = senenDepan();
+    $('mtBerlaku').value = tanggalPm;
     $('mtCari').addEventListener('input', isiTabel); $('mtDivisi').addEventListener('change', isiTabel);
-    $('mtLihat').addEventListener('change', function () { if ($('mtLihat').value) { tanggalLihat = $('mtLihat').value; muat(); } });
+    $('mtBerlaku').addEventListener('change', async function () {
+      if (!$('mtBerlaku').value) return; tanggalPm = $('mtBerlaku').value;
+      const isi = {}; $('mtTbody').querySelectorAll('input[data-id]').forEach(function (i) { if (i.value !== '') isi[i.dataset.id] = i.value; });
+      await muat(true);
+      $('mtTbody').querySelectorAll('input[data-id]').forEach(function (i) { if (isi[i.dataset.id] !== undefined) i.value = isi[i.dataset.id]; });
+      hitungPerubahan();
+    });
     $('mtTerapkan').addEventListener('click', terapkanMassal); $('mtRekom').addEventListener('click', pakaiRekomendasi);
     $('mtStandar').addEventListener('click', klikStandar); $('mtSimpan').addEventListener('click', simpan);
     $('mtTbody').addEventListener('input', hitungPerubahan);
@@ -95,31 +99,29 @@
     pesan(n ? n + ' relawan diisi rekomendasi Master (tarif 100%). Periksa, ubah bila perlu, pilih tanggal berlaku, lalu klik Simpan.' + (sama ? ' ' + sama + ' sudah sama.' : '') + (tanpa ? ' ' + tanpa + ' tanpa rekomendasi (belum punya tarif atau persen tarif sudah dinyalakan).' : '') : (standar.tarifMulai ? 'Persen tarif sudah dinyalakan, jadi rekomendasi Master tidak ditawarkan lagi. Tarif di sini sudah dianggap tarif Master (100%).' : 'Tidak ada yang perlu diubah: semua yang tampil sudah sama dengan rekomendasi atau belum punya tarif.'), n === 0 && !!tanpa && !sama);
   }
   function pmTeks() {
-    if (!pmNow || pmNow.pm === null) return '<b>PM sekarang:</b> belum ada data PM terverifikasi, jadi tarif pada PM sekarang belum bisa dihitung.';
-    if (pmNow.di_bawah_batas) return '<b>PM sekarang: ' + Number(pmNow.pm).toLocaleString('id-ID') + '</b> (di bawah 1.000, standar tidak berlaku).';
-    return '<b>PM sekarang: ' + Number(pmNow.pm).toLocaleString('id-ID') + '</b>' + (pmNow.sumber === 'PEKAN_SEBELUMNYA' ? ' <span style="font-size:11px;">(acuan ' + tglIndo(pmNow.acuan) + ')</span>' : '') + ' &rarr; pita <b>' + esc(pmNow.pita) + '</b> &rarr; tarif <b>' + String(pmNow.persen).replace('.', ',') + '%</b> dari Master. Kolom <b>Tarif pada PM sekarang</b> menunjukkan tarif tiap relawan pada PM ini.';
+    const t = '<b>' + tglIndo(tanggalPm) + '</b>: ';
+    if (!pmNow || pmNow.pm === null) return t + 'belum ada data PM.';
+    if (pmNow.di_bawah_batas) return t + 'PM <b>' + Number(pmNow.pm).toLocaleString('id-ID') + '</b> (di bawah 1.000, standar tidak berlaku).';
+    return t + 'PM <b>' + Number(pmNow.pm).toLocaleString('id-ID') + '</b>' + (pmNow.sumber === 'PEKAN_SEBELUMNYA' ? ' <span style="font-size:11px;">(acuan ' + tglIndo(pmNow.acuan) + ')</span>' : '') + ' &rarr; pita <b>' + esc(pmNow.pita) + '</b> &rarr; <b>' + String(pmNow.persen).replace('.', ',') + '%</b> dari Master';
   }
   function kartuStandar() {
     const el = $('mtStandar'); if (!el) return;
     const on = !!standar.tarifMulai;
-    el.innerHTML = '<div class="admin-stat-card" style="padding:12px;text-align:left;margin-bottom:12px;font-size:13px;line-height:1.55;border-left:4px solid ' + (on ? '#2e7d32' : '#b0b8c4') + ';">' +
-      '<b>Standar Pita PM (tarif naik-turun mengikuti PM)</b> ' + (on ? '<span style="color:#2e7d32;font-weight:600;">AKTIF mulai ' + tglIndo(standar.tarifMulai) + '</span>' : '<span style="color:var(--color-text-muted,#55606f);">Belum dipakai</span>') +
-      '<div style="margin-top:6px;padding:8px;background:var(--color-surface,#f6f8fb);border-radius:8px;">' + pmTeks() + '</div>' +
-      '<div style="margin-top:6px;">Kolom <b>Tarif saat ini</b> dianggap <b>tarif penuh (Master)</b>. Bila dinyalakan, tarif harian = Master × persen pita PM hari itu (83,3% di PM 1.900–1.999 sama dengan tarif sekarang; 100% di PM 3.000 ke atas). Asisten Lapangan dan Juru Utama Masak tetap Rp200.000 mulai PM 1.500. Bila <b>belum</b> dinyalakan, semuanya berjalan seperti biasa.</div>' +
-      '<div style="margin-top:6px;"><b>Urutan:</b> (1) isi tarif Master baru lewat <i>Pakai rekomendasi</i> dengan tanggal berlaku yang sama, (2) baru nyalakan persen di sini. Jangan dinyalakan sebelum Master diganti, karena persen akan memotong tarif lama.</div>' +
-      '<div class="filter-bar" style="margin-top:8px;"><label style="font-size:12px;">Persen berlaku mulai (pilih hari Senin) <input type="date" id="mtStdMulai" value="' + esc(standar.tarifMulai || senenDepan()) + '"></label>' +
-      '<button class="btn-mini primary" type="button" data-std="on">' + (on ? 'Ubah tanggal mulai' : 'Nyalakan persen tarif') + '</button>' + (on ? '<button class="btn-mini" type="button" data-std="off">Matikan</button>' : '') + '</div></div>';
+    el.innerHTML = '<div class="admin-stat-card" style="padding:12px;text-align:left;margin-bottom:12px;font-size:13px;line-height:1.5;border-left:4px solid ' + (on ? '#2e7d32' : '#b0b8c4') + ';">' +
+      '<b>Tarif mengikuti PM</b> ' + (on ? '<span style="color:#2e7d32;font-weight:600;">AKTIF sejak ' + tglIndo(standar.tarifMulai) + '</span>' : '<span style="color:var(--color-text-muted,#55606f);">belum dinyalakan</span>') +
+      '<div style="margin-top:6px;">' + pmTeks() + '</div>' +
+      '<div class="filter-bar" style="margin-top:8px;"><button class="btn-mini primary" type="button" data-std="on">' + (on ? 'Ganti tanggal mulai ke tanggal di bawah' : 'Nyalakan mulai tanggal di bawah') + '</button>' + (on ? '<button class="btn-mini" type="button" data-std="off">Matikan</button>' : '') + '</div></div>';
   }
   async function klikStandar(e) {
     const b = e.target.closest('button[data-std]'); if (!b) return;
-    const mulai = b.dataset.std === 'on' ? $('mtStdMulai').value : '';
-    if (b.dataset.std === 'on') { if (!mulai) { pesan('Pilih tanggal mulai dulu.', true); return; } if (!confirm('Nyalakan persen tarif mulai ' + tglIndo(mulai) + '?\n\nPastikan tarif Master baru (120/125/130/145 ribu) sudah disimpan dengan tanggal berlaku yang sama atau lebih awal.')) return; }
+    const mulai = b.dataset.std === 'on' ? $('mtBerlaku').value : '';
+    if (b.dataset.std === 'on') { if (!mulai) { pesan('Pilih tanggal mulai dulu.', true); return; } if (!confirm('Nyalakan tarif mengikuti PM mulai ' + tglIndo(mulai) + '?\n\nTarif Master (100%) sudah harus disimpan dengan tanggal yang sama atau lebih awal.')) return; }
     else if (!confirm('Matikan persen tarif? Rekap kembali memakai tarif Master apa adanya.')) return;
     const kirim = function (surut) { return api('simpanPengaturanStandarAdmin', { tarifMulai: mulai, konfirmasiSurut: surut === true }); };
     try {
       try { await kirim(false); }
       catch (err) { if (String(err.message || '').indexOf('BERLAKU_SURUT') < 0) throw err; if (!confirm(String(err.message).replace('BERLAKU_SURUT: ', '') + '\n\nLanjutkan?')) { pesan('Dibatalkan.'); return; } await kirim(true); }
-      await muat(true); pesan(mulai ? 'Persen tarif dinyalakan mulai ' + tglIndo(mulai) + '.' : 'Persen tarif dimatikan.');
+      await muat(true); pesan(mulai ? 'Persen tarif dinyalakan mulai ' + tglIndo(mulai) + '.' : 'Dimatikan.');
     } catch (err) { pesan(err.message || 'Gagal menyimpan.', true); }
   }
   async function simpan() {
@@ -152,7 +154,7 @@
   async function muat(diam) {
     try {
       if (!diam) $('mtTbody').innerHTML = '<tr><td colspan="7"><div class="empty-state">Memuat data...</div></td></tr>';
-      const h = await api('getMasterTarifAdmin', { tanggal: tanggalLihat });
+      const h = await api('getMasterTarifAdmin', { tanggal: tanggalLihat, tanggalPm: tanggalPm });
       data = h.data; standar = h.standar || { tarifMulai: '', pergiliran: false }; pmNow = h.pmSekarang || null; kartuStandar();
       const dv = Array.from(new Set(data.map(function (r) { return r.divisi; }).filter(Boolean))).sort(), pilih = $('mtDivisi').value;
       $('mtDivisi').innerHTML = '<option value="">Semua Divisi</option>' + dv.map(function (d) { return '<option value="' + esc(d) + '">' + esc(d) + '</option>'; }).join('');
