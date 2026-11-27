@@ -21,6 +21,7 @@
   };
   const gaya = '<style>.bn-tab{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}.bn-kartu{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:0 0 14px}.bn-k{background:#fff;border:1px solid #E1E8F0;border-radius:12px;padding:12px 14px}.bn-k b{display:block;font-size:22px;color:#14304F}.bn-k span{font-size:13px;color:#5B6876}.bn-pw{font-size:30px;letter-spacing:.12em;font-weight:800;text-align:center;padding:14px;margin:12px 0;border:2px dashed #127CB4;border-radius:12px;background:#E6F3FB;color:#14304F;word-break:break-all}.bn-ov{position:fixed;inset:0;background:rgba(10,29,51,.5);display:grid;place-items:center;z-index:9999;padding:16px}.bn-dlg{background:#fff;border-radius:16px;padding:20px;max-width:440px;width:100%}</style>';
   panel.innerHTML = gaya + '<div class="shell-page-head"><div><h2 class="shell-page-title">Pendataan BNBA</h2><p class="shell-page-sub">BNBA = By Name, By Address: data penerima manfaat per orang. Posyandu (ibu hamil, ibu menyusui, balita) dan satuan pendidikan (siswa, guru, tendik) diisi PIC lewat Portal PIC. <b>Berisi NIK/NISN: jangan dibagikan.</b></p></div></div>'
+    + '<div id="bnKunci" class="panel-block" style="margin:0 0 14px"></div>'
     + '<div id="bnRingkas" class="bn-kartu"></div>'
     + '<div class="bn-tab" role="tablist"><button type="button" class="btn-mini primary" data-bn="pos" role="tab">Posyandu</button><button type="button" class="btn-mini" data-bn="sek" role="tab">Satuan pendidikan</button><button type="button" class="btn-mini" data-bn="info" role="tab">Pengumuman untuk PIC</button><button type="button" class="btn-mini" data-bn="peng" role="tab" id="bnTabPeng">Pengaduan PIC</button></div>'
     + '<div id="bnPos"><div id="p3Info"></div><div id="p3Pos" class="panel-block"></div>'
@@ -36,6 +37,32 @@
       if (b.dataset.bn === 'peng') muatPeng();
     });
   });
+  /** Kunci pendataan (27 Nov 2026): kunci per jenis supaya data yang sudah diunggah ke MPM tidak berubah. */
+  async function muatKunci() {
+    const el = $('bnKunci'); if (!el) return;
+    let k; try { k = await api('getKunciPendataanAdmin'); } catch (e) { el.innerHTML = ''; return; }
+    const waktu = function (iso) { return iso ? dmy(iso) + ' ' + String(iso).slice(11, 16) : ''; };
+    const baris = function (j, nama) {
+      const x = k[j] || {};
+      return '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:6px 0">'
+        + '<b style="min-width:140px">' + nama + '</b>'
+        + (x.aktif ? '<span class="pg-status pg-wait">TERKUNCI</span><span style="font-size:13px;color:#5B6876;flex:1;min-width:180px">sejak ' + esc(waktu(x.sejak)) + ' · ' + esc(x.jumlah) + ' data' + (x.catatan ? ' · ' + esc(x.catatan) : '') + '</span>'
+          : '<span class="pg-status pg-ok">Terbuka</span><span style="flex:1"></span>')
+        + '<button type="button" class="btn-mini ' + (x.aktif ? '' : 'primary') + '" data-kunci="' + j + '" data-aksi="' + (x.aktif ? 'buka' : 'kunci') + '">' + (x.aktif ? 'Buka kunci' : 'Kunci') + '</button></div>';
+    };
+    el.innerHTML = '<div style="font-weight:700;margin-bottom:2px">Kunci pendataan</div><div style="font-size:13px;color:#5B6876;margin-bottom:4px">Terkunci = PIC dan Admin tidak bisa menambah, mengubah, atau menghapus data. Unduhan tetap bisa.</div>' + baris('POSYANDU', 'Posyandu') + baris('SEKOLAH', 'Satuan pendidikan');
+    el.querySelectorAll('[data-kunci]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        const j = b.dataset.kunci, nama = j === 'POSYANDU' ? 'Posyandu' : 'Satuan pendidikan', kunci = b.dataset.aksi === 'kunci';
+        let catatan = '';
+        if (kunci) { if (!confirm('Kunci pendataan ' + nama + '? PIC tidak bisa lagi menambah atau mengubah data sampai kunci dibuka.')) return; catatan = prompt('Catatan (boleh kosong), misalnya "sudah diunggah ke MPM 27/11":', '') || ''; }
+        else if (!confirm('Buka kunci pendataan ' + nama + '? PIC bisa mengubah data lagi.')) return;
+        b.disabled = true;
+        try { await api('aturKunciPendataanAdmin', { jenis: j, kunci: kunci, catatan: catatan }); info(kunci ? 'Terkunci.' : 'Kunci dibuka.'); } catch (e) { lapor(e.message); }
+        muatKunci();
+      });
+    });
+  }
   /** Jendela kecil untuk password sementara (ganti alert bawaan browser): ada tombol Salin. */
   function tampilPassword(r) {
     const ov = document.createElement('div'); ov.className = 'bn-ov';
@@ -205,7 +232,7 @@
     } catch (e) { lapor(e.message); }
     sibuk = false;
   }
-  muat();
+  muat(); muatKunci();
   // Pendataan satuan pendidikan (25 Nov 2026): bagian tambahan di panel yang sama
   (function () { function muatSekolah() { const s = document.createElement('script'); s.src = 'modules/admin/admin-pendataan-sekolah.js?v=20261126j'; document.head.appendChild(s); }
     if (window.CoreSekolah) muatSekolah(); else { const c = document.createElement('script'); c.src = 'core/core-sekolah.js?v=20261125b'; c.onload = muatSekolah; document.head.appendChild(c); } })();

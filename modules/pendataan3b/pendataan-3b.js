@@ -83,7 +83,7 @@
       var r = await Promise.all([api('getRingkasan3B'), api('getDaftarPenerima3B')]);
       var p = r[0].posyandu.filter(function (x) { return x.id === S.idi; })[0];
       S.ring = p ? p.jumlah : { 'Ibu Hamil': 0, 'Ibu Menyusui': 0, 'Balita': 0, total: 0, perluDiperbarui: 0 };
-      S.peng = r[0].pengaturan; S.items = r[1].items;
+      S.peng = r[0].pengaturan; S.items = r[1].items; S.kunci = r[0].kunci || null;
     } catch (e) { toast(e.message); }
     S.memuat = false; render();
   }
@@ -152,23 +152,25 @@
         : S.instansi.length > 1 ? h('button', { class: 'back', onclick: function () { S.view = 'pilih'; S.idi = ''; simpanSesi(); render(); } }, ikon('kiri', 18), 'Kembali ke daftar') : null,
       h('small', { text: 'Pendataan • ' + (S.pic ? S.pic.nama : '') }), h('h1', { text: S.nmPos })));
     var wrap = h('div', { class: 'wrap' });
-    if (S.peng && S.peng.putaranTanggal) {
+    var terkunci = !!(S.kunci && S.kunci.aktif);
+    if (terkunci) wrap.appendChild(h('div', { class: 'ban', role: 'status' }, h('b', { text: 'Pendataan sedang dikunci' }), h('span', { text: 'Data tidak bisa ditambah atau diubah dulu. Hubungi Admin bila ada yang perlu diperbarui.' })));
+    if (!terkunci && S.peng && S.peng.putaranTanggal) {
       wrap.appendChild(h('div', { class: 'ban' }, h('b', { text: 'Admin meminta data diperbarui (sejak ' + dmy(S.peng.putaranTanggal) + ')' }),
         h('span', { text: (S.peng.putaranCatatan ? S.peng.putaranCatatan + ' ' : '') + (r.perluDiperbarui ? 'Masih ' + r.perluDiperbarui + ' data yang belum diperbarui.' : 'Semua data sudah diperbarui. Terima kasih.') })));
-    } else if (r.perluDiperbarui) {
+    } else if (!terkunci && r.perluDiperbarui) {
       wrap.appendChild(h('div', { class: 'ban' }, h('b', { text: r.perluDiperbarui + ' data perlu diperbarui' }), h('span', { text: 'Periksa datanya. Bila tidak ada perubahan, ketuk "Masih sesuai".' })));
     }
     if (MODE_PIC && window.PortalPic) {
       var rt = window.PortalPic.ringkasanTempat(S.idi);
       wrap.appendChild(window.PortalPic.kartuKemajuan(rt ? Object.assign({}, rt, { terisi: r.total || 0, kurang: Math.max(0, (rt.target || 0) - (r.total || 0)), persen: rt.target > 0 ? Math.min(100, Math.round((r.total || 0) * 100 / rt.target)) : 0, status: (rt.target > 0 ? ((r.total || 0) >= rt.target ? 'LENGKAP' : ((r.total || 0) > 0 ? 'SEBAGIAN' : 'BELUM')) : ((r.total || 0) > 0 ? 'TANPA_TARGET' : 'BELUM')) }) : null));
     }
-    wrap.appendChild(h('h2', { text: 'Siapa yang mau didata?' }));
+    if (!terkunci) wrap.appendChild(h('h2', { text: 'Siapa yang mau didata?' }));
     var kats = h('div', { class: 'kats' });
-    KATS.forEach(function (k) {
+    if (!terkunci) KATS.forEach(function (k) {
       var st = KSTYLE[k];
       kats.appendChild(h('button', { class: 'kat ' + st.cls, onclick: function () { bukaForm(k); } }, h('div', { class: 'ic' }, ikon(st.icon)), h('div', null, h('b', { text: k }), h('span', { class: 's', text: st.sub })), h('div', { class: 'n', text: String(r[k] || 0) })));
     });
-    wrap.appendChild(kats);
+    if (!terkunci) wrap.appendChild(kats);
     wrap.appendChild(h('h2', { text: 'Data yang sudah masuk (' + (r.total || 0) + ')' }));
     var chips = h('div', { class: 'chips' });
     ['Semua'].concat(KATS).concat(r.perluDiperbarui ? ['Perlu diperbarui'] : []).forEach(function (k) {
@@ -193,7 +195,7 @@
     cari.addEventListener('input', function () { S.cari = cari.value; isiDaftar(); });
     isiDaftar();
     app.appendChild(top); app.appendChild(wrap);
-    if (r.perluDiperbarui) {
+    if (r.perluDiperbarui && !terkunci) {
       app.appendChild(h('div', { class: 'bar' }, h('div', { class: 'in' }, h('button', { class: 'btn', disabled: S.busy, text: 'Semua yang belum diperbarui masih sesuai (' + r.perluDiperbarui + ')', onclick: function () {
         dialog('Konfirmasi semua?', 'Hanya untuk data yang memang tidak ada perubahan. Data yang sudah lewat batas usia tidak ikut. ' + r.perluDiperbarui + ' data akan ditandai masih sesuai.', [
           { label: 'Batal', cls: 'sec' }, { label: 'Ya, masih sesuai', fn: function () { konfirmasi({ semuaPerluDiperbarui: true }); } }]);
@@ -214,7 +216,7 @@
     t.appendChild(h('thead', null, kep));
     var tb = h('tbody');
     list.slice(0, 300).forEach(function (x, i) {
-      tb.appendChild(h('tr', { tabindex: '0', onclick: function () { bukaForm(x.kategori, x.id); } }, h('td', { text: String(i + 1) }), h('td', { text: C.normNama(x.nama) }), h('td', null, h('span', { class: 'tag ' + KSTYLE[x.kategori].cls, text: x.kategori })), h('td', { text: dmy(x.diperbaruiPada) + (x.perluDiperbarui ? ' (perlu diperbarui)' : '') })));
+      tb.appendChild(h('tr', { tabindex: '0', onclick: function () { if (!(S.kunci && S.kunci.aktif)) bukaForm(x.kategori, x.id); } }, h('td', { text: String(i + 1) }), h('td', { text: C.normNama(x.nama) }), h('td', null, h('span', { class: 'tag ' + KSTYLE[x.kategori].cls, text: x.kategori })), h('td', { text: dmy(x.diperbaruiPada) + (x.perluDiperbarui ? ' (perlu diperbarui)' : '') })));
     });
     t.appendChild(tb); return h('div', { class: 'table-scroll' }, t);
   }
@@ -230,7 +232,7 @@
       h('div', { class: 'meta', text: meta }),
       x.catatan ? h('div', { class: 'meta', style: 'color:var(--red)', text: x.catatan + ' Ubah datanya atau hubungi Admin.' }) : null,
       h('div', { class: 'meta', text: 'Terakhir diperbarui ' + dmy(x.diperbaruiPada) }),
-      h('div', { class: 'acts' },
+      S.kunci && S.kunci.aktif ? null : h('div', { class: 'acts' },
         h('button', { class: 'btn sec sm', text: 'Ubah', onclick: function () { bukaForm(x.kategori, x.id); } }),
         x.perluDiperbarui && !x.catatan ? h('button', { class: 'btn sec sm', text: 'Masih sesuai', onclick: function () { konfirmasi({ ids: [x.id] }); } }) : null,
         h('button', { class: 'btn del sm', text: 'Hapus', onclick: function () {

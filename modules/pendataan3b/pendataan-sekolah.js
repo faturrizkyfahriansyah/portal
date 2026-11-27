@@ -32,7 +32,7 @@
     Q.memuat = true; rerender();
     try {
       var r = await Promise.all([api('getRingkasanSekolah3B'), api('getDaftarSekolah3B')]);
-      Q.ring = r[0].jumlah; Q.items = r[1].items;
+      Q.ring = r[0].jumlah; Q.items = r[1].items; Q.kunci = r[0].kunci || null;
     } catch (e) { K().toast(e.message); }
     Q.memuat = false; rerender();
   }
@@ -47,7 +47,8 @@
     var c = h('div', { class: 'item sekolah p' + x.posisi, 'data-id': x.id },
       h('span', { class: 'tag pos', text: st.nama }), !x.status ? h('span', { class: 'tag stale', text: 'Tidak menerima' }) : null, x.perluKonfirmasi ? h('span', { class: 'tag cat', text: 'Periksa NISN' }) : null,
       h('div', { class: 'nm', text: x.nama }), h('div', { class: 'meta', text: meta.join(' • ') }), x.posisi === 1 && x.ortu && x.ortu !== '-' ? h('div', { class: 'meta', text: 'Orang tua/wali: ' + x.ortu }) : null);
-    var acts = h('div', { class: 'acts' });
+    var acts = h('div', { class: 'acts' }), lock = !!(Q.kunci && Q.kunci.aktif);
+    if (lock) return c;
     if (x.perluKonfirmasi) acts.appendChild(h('button', { class: 'btn sm', text: 'Sudah benar', onclick: function () { konfirmasi([x.id]); } }));
     acts.appendChild(h('button', { class: 'btn sm sec', text: 'Ubah', onclick: function () { bukaForm(x.posisi, x.id); } }));
     acts.appendChild(h('button', { class: 'btn sm del', text: 'Hapus', onclick: function () {
@@ -73,22 +74,23 @@
       var rt = P.ringkasanTempat(Q.idi), sw = r.siswa || 0;
       wrap.appendChild(P.kartuKemajuan(rt ? Object.assign({}, rt, { terisi: sw, kurang: Math.max(0, (rt.target || 0) - sw), persen: rt.target > 0 ? Math.min(100, Math.round(sw * 100 / rt.target)) : 0, status: rt.target > 0 ? (sw >= rt.target ? 'LENGKAP' : (sw > 0 ? 'SEBAGIAN' : 'BELUM')) : (sw > 0 ? 'TANPA_TARGET' : 'BELUM') }) : null));
     }
-    wrap.appendChild(h('div', { class: 'tip', style: 'margin-top:0', text: 'Isi data siswa, guru, dan tenaga kependidikan yang menerima makan bergizi.' }));
-    if (r.perluKonfirmasi) {
+    var terkunci = !!(Q.kunci && Q.kunci.aktif);
+    wrap.appendChild(terkunci ? h('div', { class: 'ban', role: 'status' }, h('b', { text: 'Pendataan sedang dikunci' }), h('span', { text: 'Data tidak bisa ditambah atau diubah dulu. Hubungi Admin bila ada yang perlu diperbarui.' })) : h('div', { class: 'tip', style: 'margin-top:0', text: 'Isi data siswa, guru, dan tenaga kependidikan yang menerima makan bergizi.' }));
+    if (r.perluKonfirmasi && !terkunci) {
       wrap.appendChild(h('div', { class: 'ban', role: 'status' }, h('b', { text: r.perluKonfirmasi + ' NISN perlu diperiksa' }),
         h('span', { text: 'Angka 0 di depan NISN hilang saat disalin dari Excel, jadi dilengkapi otomatis. Periksa NISN-nya, lalu ketuk "Sudah benar". Data ini belum ikut diunduh Admin.' }),
         h('div', { style: 'margin-top:8px' }, h('button', { class: 'btn sm', disabled: Q.busy, text: 'Semua sudah benar (' + r.perluKonfirmasi + ')', onclick: function () {
           dialog('Semua NISN sudah benar?', 'Pastikan sudah memeriksa NISN yang ditandai "Periksa NISN". Setelah ini data siap diunduh Admin.', [{ label: 'Batal', cls: 'sec' }, { label: 'Ya, sudah benar', fn: function () { konfirmasi(Q.items.filter(function (x) { return x.perluKonfirmasi; }).map(function (x) { return x.id; })); } }]);
         } }))));
     }
-    wrap.appendChild(h('h2', { text: 'Siapa yang mau didata?' }));
+    if (!terkunci) wrap.appendChild(h('h2', { text: 'Siapa yang mau didata?' }));
     var kats = h('div', { class: 'kats' });
-    ['1', '2', '3'].forEach(function (p) {
+    if (!terkunci) ['1', '2', '3'].forEach(function (p) {
       var st = POS[p], n = p === '1' ? r.siswa : p === '2' ? r.guru : r.tendik;
       kats.appendChild(h('button', { class: 'kat pos', 'data-pos': p, onclick: function () { bukaForm(Number(p)); } }, h('div', { class: 'ic' }, K().ikon(st.ikon)), h('div', null, h('b', { text: st.nama }), h('span', { class: 's', text: st.sub })), h('div', { class: 'n', text: String(n || 0) })));
     });
-    wrap.appendChild(kats);
-    wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnTempel', style: 'margin-top:12px', onclick: function () { bukaTempel(); } }, K().ikon('tempel', 20), 'Tempel banyak data dari Excel'));
+    if (!terkunci) wrap.appendChild(kats);
+    if (!terkunci) wrap.appendChild(h('button', { class: 'btn sec block', id: 'btnTempel', style: 'margin-top:12px', onclick: function () { bukaTempel(); } }, K().ikon('tempel', 20), 'Tempel banyak data dari Excel'));
     wrap.appendChild(h('h2', { text: 'Data yang sudah masuk (' + (r.total || 0) + ')' }));
     var chips = h('div', { class: 'chips' });
     ['Semua', 'Siswa', 'Guru', 'Tendik'].concat(r.perluKonfirmasi ? ['Periksa NISN'] : []).forEach(function (k) {
@@ -204,7 +206,7 @@
       else { Q.form = null; K().S.view = 'sekolah'; muat(); window.scrollTo(0, 0); }
     } catch (e) { Q.busy = false; K().toast(e.message); if (Q.form) rerender(); }
   }
-  async function muatDiam() { try { var r = await Promise.all([api('getRingkasanSekolah3B'), api('getDaftarSekolah3B')]); Q.ring = r[0].jumlah; Q.items = r[1].items; } catch (e) { /* diamkan */ } }
+  async function muatDiam() { try { var r = await Promise.all([api('getRingkasanSekolah3B'), api('getDaftarSekolah3B')]); Q.ring = r[0].jumlah; Q.items = r[1].items; Q.kunci = r[0].kunci || null; } catch (e) { /* diamkan */ } }
 
   /* ---------- tempel dari Excel ---------- */
   function bukaTempel() { Q.tempel = { teks: '', posisi: '1', hasil: null, baris: null, busy: false }; ke('sekolahTempel'); }
