@@ -16,81 +16,75 @@
   const geserIso = function (iso, n) { const d = dari(iso); d.setDate(d.getDate() + n); return isoLokal(d); };
   const namaHari = function (iso) { return ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][dari(iso).getDay()]; };
   const kunci = function (d) { return d.tanggal + '|' + d.idRelawan; };
-  const TAB = [['struktur', 'Struktur dan Penempatan'], ['kebutuhan', 'Pengaturan'], ['rencana', 'Rencana Pergiliran'], ['riwayat', 'Riwayat']];
+  const TAB = [['rencana', 'Rencana'], ['riwayat', 'Riwayat'], ['kebutuhan', 'Pengaturan']];
+  if (!document.getElementById('pgGaya')) { const st = document.createElement('style'); st.id = 'pgGaya'; st.textContent =
+    '.pg-atas{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0 12px}'
+    + '.pg-kartu{border:1px solid var(--color-border,#d5dbe3);border-radius:12px;padding:14px 16px;margin:0 0 12px;background:var(--color-surface-raised,#fff)}'
+    + '.pg-kartu-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}'
+    + '.pg-kartu-j{font-size:15px;font-weight:700;margin:0}.pg-kartu-d{font-size:12.5px;color:var(--color-text-muted,#55606f);margin:2px 0 0;max-width:62ch}'
+    + '.pg-kartu-b{margin-top:10px}.pg-sakelar{display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}.pg-sakelar input{width:20px;height:20px}'
+    + '.pg-langkah{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px}.pg-langkah span{border:1px solid var(--color-border,#d5dbe3);border-radius:999px;padding:2px 10px;font-size:12.5px;color:var(--color-text-muted,#55606f)}'
+    + '.pg-lencana{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}.pg-lencana.ok{background:#e6f4ea;color:#1e6b34}.pg-lencana.err{background:#fde8e6;color:#b3261e}.pg-lencana.wait{background:#fff4e0;color:#8a5a00}'
+    + '.pg-kosong{border:1px dashed var(--color-border,#d5dbe3);border-radius:12px;padding:18px;text-align:center;color:var(--color-text-muted,#55606f)}';
+    document.head.appendChild(st); }
 
-  panel.innerHTML = '<div class="shell-page-head"><div><h2 class="shell-page-title">Kebutuhan Tenaga dan Pergiliran</h2><p class="shell-page-sub">Hitung rekomendasi libur, ajukan ke SIKOP. Jadwal berubah setelah SIKOP menetapkan.</p></div></div>'
+  panel.innerHTML = '<div class="shell-page-head"><div><h2 class="shell-page-title">Pergiliran</h2><p class="shell-page-sub">Hitung siapa libur bergilir, lalu ajukan ke SIKOP. Jadwal berubah setelah SIKOP menetapkan.</p></div></div>'
+    + '<div class="pg-atas" id="pgAtas"></div>'
     + '<div class="pg-tabs">' + TAB.map(function (t, i) { return '<button type="button" class="btn-mini' + (i === 0 ? ' primary' : '') + '" data-pg="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>'
     + TAB.map(function (t, i) { return '<div id="pg_' + t[0] + '" class="panel-block"' + (i ? ' style="display:none"' : '') + '></div>'; }).join('');
   panel.querySelectorAll('[data-pg]').forEach(function (b) { b.addEventListener('click', function () {
     panel.querySelectorAll('[data-pg]').forEach(function (x) { x.classList.toggle('primary', x === b); });
     TAB.forEach(function (t) { $('pg_' + t[0]).style.display = t[0] === b.dataset.pg ? '' : 'none'; });
-    ({ struktur: muatStruktur, kebutuhan: muatKebutuhan, rencana: muatRencana, riwayat: muatRiwayat })[b.dataset.pg]();
+    ({ kebutuhan: muatKebutuhan, rencana: muatRencana, riwayat: muatRiwayat })[b.dataset.pg](); muatAtas();
   }); });
   const api = function (aksi, p) { return apiPost(aksi, Object.assign({ token: tok() }, p || {})); };
   const lapor = function (m) { if (typeof showError === 'function') showError(m); else alert(m); };
   const info = function (m) { if (typeof showSuccess === 'function') showSuccess(m); else alert(m); };
   const sibuk = async function (teks, fn) { try { if (typeof showLoading === 'function') showLoading(teks); return await fn(); } finally { if (typeof hideLoading === 'function') hideLoading(); } };
+  const kotakAtas = function (judul, nilai, sub) { return '<div class="pg-kotak"><div class="pg-kotak-j">' + judul + '</div><div class="pg-kotak-n">' + nilai + '</div>' + (sub ? '<div class="pg-kotak-s">' + sub + '</div>' : '') + '</div>'; };
 
-  /* ---------------- STRUKTUR DAN PENEMPATAN (baca Data Relawan) ---------------- */
-  async function muatStruktur() {
-    const el = $('pg_struktur'); el.innerHTML = '<p class="pg-sub">Memuat…</p>';
-    let d; try { d = await api('getStrukturPenempatan'); } catch (e) { el.innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return; }
-    el.innerHTML = '<p class="pg-sub">Dari Data Relawan. Total aktif: <b>' + d.totalAktif + '</b>.</p>'
-      + d.divisi.map(function (dv) {
-        return '<details class="pg-div"><summary><b>' + esc(dv.divisi) + '</b> <span class="pg-sub">' + dv.aktif + ' relawan aktif</span></summary>'
-          + dv.jabatan.map(function (j) { return '<div style="margin:6px 0 2px 14px"><b>' + esc(j.jabatan) + '</b> <span class="pg-sub">(' + j.jumlah + ')</span><div>' + j.anggota.map(function (a) { return '<span class="pg-chip" style="background:#eef1f6;color:#344054">' + esc(a.nama) + '</span>'; }).join('') + '</div></div>'; }).join('') + '</details>';
-      }).join('');
+  /* ---------------- RINGKASAN DI ATAS (pengaturan yang berlaku + antrean) ---------------- */
+  async function muatAtas() {
+    const el = $('pgAtas'); if (!el) return;
+    const [k, s, r] = await Promise.all([api('getKebutuhanTenagaAdmin').catch(function () { return null; }), api('getStandarPitaAdmin').catch(function () { return null; }), api('getRiwayatPergiliran', {}).catch(function () { return null; })]);
+    const ag = (k && k.anggaran) || null, kot = [];
+    if (s && s.saklar) kot.push(kotakAtas('Standar pita PM', s.saklar.pergiliran ? 'Nyala' : 'Mati', s.sumber === 'SHEET' ? 'tabel diubah Admin' : 'tabel bawaan'));
+    if (ag) kot.push(kotakAtas('Dana per PM', rp(ag.danaPerPm), 'dana harian = PM × ini'), kotakAtas('Koordinator', ag.koordLibur === true ? 'Boleh libur' : 'Tetap masuk', ''), kotakAtas('Ratakan upah', ag.adilGeser > 0 ? 'maks. ' + ag.adilGeser + ' orang' : 'Mati', 'per divisi per hari'));
+    if (r && r.ringkas) kot.push(kotakAtas('Menunggu SIKOP', r.ringkas.DIAJUKAN + r.ringkas.REKOMENDASI, 'libur diajukan'), kotakAtas('Sudah ditetapkan', r.ringkas.DITETAPKAN, 'libur'));
+    el.innerHTML = kot.join('');
   }
 
-  /* ---------------- PENGATURAN (25t: disederhanakan; tanpa Sahkan, tanpa tabel batas bawah) ---------------- */
+  /* ---------------- PENGATURAN: lima kartu (standar, dana, koordinator, ratakan upah, kalkulator) ---------------- */
   async function muatKebutuhan() {
     const el = $('pg_kebutuhan'); el.innerHTML = '<p class="pg-sub">Memuat…</p>';
     let k; try { k = await api('getKebutuhanTenagaAdmin'); } catch (e) { el.innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return; }
     S.keb = k;
     const ag = k.anggaran || { danaPerPm: 3000, kebOpsHarian: 1000000, kebOpsMinimum: 750000, tanpaBatas: true, asDriverPm: 1500, aktif: false };
-    el.innerHTML = '<div id="pgStandar"></div>'
-      + '<details id="pgAgBox" style="margin-top:14px"><summary><b>Dana manual</b> <span class="pg-sub">(dipakai bila Standar pita PM mati)</span></summary>'
-      + '<div class="pg-form" style="margin-top:8px"><label>Dana per PM (Rp) <input type="number" min="1" inputmode="numeric" id="pgAgPm" value="' + esc(ag.danaPerPm) + '"></label>'
-      + '<label>Operasional aman per hari (Rp) <input type="number" min="0" inputmode="numeric" id="pgAgOps" value="' + esc(ag.kebOpsHarian) + '"></label>'
-      + '<label>Operasional minimum per hari (Rp) <input type="number" min="0" inputmode="numeric" id="pgAgMin" value="' + esc(ag.kebOpsMinimum) + '"></label>'
-      + '<label>Asisten Driver libur bila PM di bawah (0 = mati) <input type="number" min="0" inputmode="numeric" id="pgAgAsd" value="' + esc(ag.asDriverPm) + '"></label>'
-      + '<div style="align-self:end"><button type="button" class="btn-mini primary" id="pgAgSimpan">Simpan</button></div></div></details>';
-    muatStandar();
+    const kartu = function (judul, desk, kanan, isi, id) { return '<div class="pg-kartu"' + (id ? ' id="' + id + '"' : '') + '><div class="pg-kartu-h"><div><h4 class="pg-kartu-j">' + judul + '</h4><div class="pg-kartu-d">' + desk + '</div></div>' + (kanan || '') + '</div>' + (isi ? '<div class="pg-kartu-b">' + isi + '</div>' : '') + '</div>'; };
+    el.innerHTML = '<div class="pg-kartu" id="pgStandar"></div>'
+      + kartu('Dana per PM', 'Dana harian = PM × angka ini. Dipakai untuk menghitung sisa operasional.', '',
+        '<div class="pg-form"><label>Dana per PM (Rp) <input type="number" min="1" inputmode="numeric" id="pgAgPm" value="' + esc(ag.danaPerPm) + '"></label><div style="align-self:end"><button type="button" class="btn-mini primary" id="pgAgSimpan">Simpan</button></div></div>'
+        + '<details id="pgAgBox" style="margin-top:8px"><summary>Batas operasional <span class="pg-sub">(dipakai bila Standar pita PM mati)</span></summary><div class="pg-form" style="margin-top:8px">'
+        + '<label>Operasional aman per hari (Rp) <input type="number" min="0" inputmode="numeric" id="pgAgOps" value="' + esc(ag.kebOpsHarian) + '"></label>'
+        + '<label>Operasional minimum per hari (Rp) <input type="number" min="0" inputmode="numeric" id="pgAgMin" value="' + esc(ag.kebOpsMinimum) + '"></label>'
+        + '<label>Asisten Driver libur bila PM di bawah (0 = mati) <input type="number" min="0" inputmode="numeric" id="pgAgAsd" value="' + esc(ag.asDriverPm) + '"></label></div></details>', 'pgKartuDana')
+      + kartu('Koordinator tetap masuk', 'Koordinator tidak ikut libur bergilir. Matikan bila koordinator juga boleh bergilir.',
+        '<label class="pg-sakelar"><input type="checkbox" id="pgAdilKoord"' + (ag.koordLibur === true ? '' : ' checked') + '> <span id="pgAdilKoordTeks">' + (ag.koordLibur === true ? 'Boleh libur' : 'Tetap masuk') + '</span></label>', '', 'pgKartuKoord')
+      + kartu('Ratakan upah antar divisi', 'Divisi yang liburnya lebih sedikit diberi lebih banyak libur supaya upah antar divisi rata. Isi 0 untuk mematikan (maksimal 5 orang per divisi per hari).', '',
+        '<div class="pg-form" id="pgAdilBox"><label>Geser maksimal (orang per hari) <input type="number" min="0" max="5" inputmode="numeric" id="pgAdilGeser" value="' + esc(ag.adilGeser === undefined ? 3 : ag.adilGeser) + '"></label><div style="align-self:end"><button type="button" class="btn-mini primary" id="pgAdilSimpan">Simpan</button></div></div>', 'pgKartuAdil')
+      + kartu('Kalkulator PM', 'Coba satu angka PM: berapa orang masuk, biaya relawan, dan sisa operasional.', '',
+        '<div class="pg-bar"><label>PM <input type="number" min="1" id="pgStdPm" placeholder="mis. 1900"></label><label>Insentif PIC hari itu (Rp, kosongkan = perkiraan) <input type="number" min="0" id="pgStdPic"></label><button type="button" class="btn-mini primary" id="pgStdGo">Hitung</button></div><div id="pgStdHasil"></div>', 'pgStdHitung');
+    muatStandar(); muatAtas();
+    const simpanAdil = function (koordLibur, geser) { return sibuk('Menyimpan…', function () { return api('simpanPengaturanAdilPergiliran', { koordinatorLibur: koordLibur, adilGeser: geser }); }); };
+    $('pgAdilKoord').addEventListener('change', async function () {
+      const kotak = this, v = kotak.checked;
+      try { await simpanAdil(!v, ag.adilGeser === undefined ? 3 : ag.adilGeser); info(v ? 'Koordinator tetap masuk.' : 'Koordinator boleh ikut libur bergilir.'); muatKebutuhan(); } catch (e) { kotak.checked = !v; lapor(e.message); }
+    });
+    $('pgAdilSimpan').addEventListener('click', async function () {
+      try { await simpanAdil(!$('pgAdilKoord').checked, $('pgAdilGeser').value); info('Tersimpan. Hitung ulang rekomendasi agar berlaku.'); muatKebutuhan(); } catch (e) { lapor(e.message); }
+    });
     $('pgAgSimpan').addEventListener('click', async function () {
       try { await sibuk('Menyimpan…', function () { return api('simpanPengaturanAnggaranPergiliran', { danaPerPm: $('pgAgPm').value, kebOpsHarian: $('pgAgOps').value, kebOpsMinimum: $('pgAgMin').value, tanpaBatas: true, pmAsistenDriverLibur: $('pgAgAsd').value }); }); info('Tersimpan.'); muatKebutuhan(); } catch (e) { lapor(e.message); }
-    });
-  }
-  /* ---------------- STANDAR PITA PM (25p): saklar, tabel, kalkulator ---------------- */
-  const PD = [['P', 'Pemorsian'], ['G', 'Pengolahan'], ['C', 'Cuci Ompreng'], ['S', 'Persiapan']];
-  const pitaTeks = function (b) { return b.pitaMaks === null ? angka(b.pitaMin) + ' ke atas' : angka(b.pitaMin) + '–' + angka(b.pitaMaks); };
-  let STD = null;
-  async function muatStandar() {
-    const el = $('pgStandar'); if (!el) return;
-    try { STD = await api('getStandarPitaAdmin'); } catch (e) { el.innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return; }
-    if (!STD || !STD.saklar || !Array.isArray(STD.baris)) { el.innerHTML = '<p class="pg-sub">StandarPita.gs belum terpasang di Apps Script.</p>'; return; }
-    const on = !!STD.saklar.pergiliran;
-    el.innerHTML = '<h4 style="margin:0 0 6px">Standar pita PM ' + (on ? '<span class="pg-status pg-ok">Nyala</span>' : '<span class="pg-status pg-wait">Mati</span>') + '</h4>'
-      + '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" id="pgStdOn"' + (on ? ' checked' : '') + '> <span><b>Pakai rekomendasi standar pita PM</b> pada Hitung Rekomendasi' + (STD.anggaranAktif ? '' : ' (otomatis ikut mengaktifkan perhitungan dana)') + '</span></label>'
-      + '<details id="pgStdTabel"><summary><b>Tabel standar</b> (' + (STD.sumber === 'SHEET' ? 'diubah Admin' : 'bawaan') + ')</summary>'
-      + '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>PM dari</th><th>sampai</th>' + PD.map(function (d) { return '<th>' + d[1] + ' masuk<br><span class="pg-sub">aktif ' + (STD.divisi.filter(function (x) { return x.kode === d[0]; })[0] || {}).relawanAktif + '</span></th>'; }).join('') + '<th>Tarif (% Master)</th><th>Operasional aman</th><th>Operasional minimum</th></tr></thead><tbody>'
-      + STD.baris.map(function (b, i) { const n = function (k, v, w) { return '<td><input type="number" min="0" data-i="' + i + '" data-k="' + k + '" value="' + v + '" style="width:' + (w || 62) + 'px"></td>'; };
-        return '<tr><td><b>' + angka(b.pitaMin) + '</b></td><td>' + (b.pitaMaks === null ? 'ke atas' : angka(b.pitaMaks)) + '</td>' + PD.map(function (d) { return n('m' + d[0], b.masuk[d[0]]); }).join('') + '<td><input type="number" min="1" max="100" step="0.1" data-i="' + i + '" data-k="persen" value="' + b.persen + '" style="width:70px"></td>' + n('aman', b.aman, 100) + n('minimum', b.minimum, 100) + '</tr>'; }).join('')
-      + '</tbody></table></div><div class="pg-aksi"><button type="button" class="btn-mini primary" id="pgStdSimpan">Simpan tabel</button><button type="button" class="btn-mini" id="pgStdBawaan"' + (STD.sumber === 'SHEET' ? '' : ' disabled') + '>Kembalikan ke bawaan</button></div>'
-      + '</details>'
-      + '<details id="pgStdHitung" style="margin-top:8px"><summary><b>Kalkulator PM</b></summary><div class="pg-bar"><label>PM <input type="number" min="1" id="pgStdPm" placeholder="mis. 1900"></label><label>Insentif PIC hari itu (Rp, kosongkan = perkiraan) <input type="number" min="0" id="pgStdPic"></label><button type="button" class="btn-mini primary" id="pgStdGo">Hitung</button></div><div id="pgStdHasil"></div></details>';
-    $('pgStdOn').addEventListener('change', async function () {
-      const v = this.checked, kotak = this;
-      try { await sibuk('Menyimpan…', function () { return api('simpanPengaturanStandarAdmin', { pergiliran: v }); }); info(v ? 'Standar pita PM dipakai.' : 'Standar pita PM dimatikan.'); muatKebutuhan(); }
-      catch (e) { kotak.checked = !v; lapor(e.message); }
-    });
-    $('pgStdSimpan').addEventListener('click', async function () {
-      const baris = STD.baris.map(function (b) { return { pitaMin: b.pitaMin, pitaMaks: b.pitaMaks, catatan: b.catatan || '', masuk: {}, persen: 0, aman: 0, minimum: 0 }; });
-      el.querySelectorAll('input[data-k]').forEach(function (x) { const b = baris[Number(x.dataset.i)], k = x.dataset.k; if (k.charAt(0) === 'm' && k.length === 2) b.masuk[k.charAt(1)] = x.value; else b[k] = x.value; });
-      try { await sibuk('Menyimpan tabel…', function () { return api('simpanStandarPitaAdmin', { baris: baris }); }); info('Tabel standar tersimpan.'); await muatStandar(); $('pgStdTabel').open = true; } catch (e) { lapor(e.message); }
-    });
-    $('pgStdBawaan').addEventListener('click', async function () {
-      if (!confirm('Kembalikan tabel standar ke angka bawaan? Perubahan Anda akan hilang.')) return;
-      try { await sibuk('Mengembalikan…', function () { return api('kembalikanStandarPitaAdmin', {}); }); info('Tabel kembali ke bawaan.'); muatStandar(); } catch (e) { lapor(e.message); }
     });
     $('pgStdGo').addEventListener('click', async function () {
       const out = $('pgStdHasil'), pm = $('pgStdPm').value.trim(), pic = $('pgStdPic').value.trim();
@@ -104,6 +98,38 @@
         + '<p>Dana ' + rp(d.dana) + ' − gaji relawan ' + rp(d.biayaRelawan) + ' − PIC ' + rp(d.pic) + (d.picPerkiraan ? ' <span class="pg-sub">(perkiraan)</span>' : '') + ' = <b>sisa operasional ' + rp(d.sisaOps) + '</b> · garis aman ' + rp(d.aman) + ', minimum ' + rp(d.minimum) + ' → <span class="pg-status ' + stt[1] + '">' + stt[0] + '</span></p>'
         + (d.kelas.length ? '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Tarif Master</th><th>Tarif hari itu</th><th>Orang</th></tr></thead><tbody>' + d.kelas.map(function (c) { return '<tr><td>' + rp(c.master) + (c.flat ? ' <span class="pg-sub">(tetap)</span>' : '') + '</td><td><b>' + rp(c.tarif) + '</b></td><td>' + c.orang + '</td></tr>'; }).join('') + '</tbody></table></div>' : '')
         + (d.tarifMasterDariRekomendasi ? '<p class="pg-sub">Tarif Master = tarif sekarang ÷ 83,3% (persen tarif belum dinyalakan).</p>' : '');
+    });
+  }
+  /* ---------------- STANDAR PITA PM (25p): saklar dan tabel ---------------- */
+  const PD = [['P', 'Pemorsian'], ['G', 'Pengolahan'], ['C', 'Cuci Ompreng'], ['S', 'Persiapan']];
+  const pitaTeks = function (b) { return b.pitaMaks === null ? angka(b.pitaMin) + ' ke atas' : angka(b.pitaMin) + '–' + angka(b.pitaMaks); };
+  let STD = null;
+  async function muatStandar() {
+    const el = $('pgStandar'); if (!el) return;
+    try { STD = await api('getStandarPitaAdmin'); } catch (e) { el.innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return; }
+    if (!STD || !STD.saklar || !Array.isArray(STD.baris)) { el.innerHTML = '<p class="pg-sub">StandarPita.gs belum terpasang di Apps Script.</p>'; return; }
+    const on = !!STD.saklar.pergiliran;
+    el.innerHTML = '<div class="pg-kartu-h"><div><h4 class="pg-kartu-j">Standar pita PM ' + (on ? '<span class="pg-status pg-ok">Nyala</span>' : '<span class="pg-status pg-wait">Mati</span>') + '</h4><div class="pg-kartu-d">Jumlah relawan yang masuk tiap divisi mengikuti tabel menurut besar PM hari itu.' + (STD.anggaranAktif ? '' : ' Menyalakan ini otomatis mengaktifkan perhitungan dana.') + '</div></div>'
+      + '<label class="pg-sakelar"><input type="checkbox" id="pgStdOn"' + (on ? ' checked' : '') + '> <span>Pakai standar</span></label></div>'
+      + '<details id="pgStdTabel" class="pg-kartu-b"><summary><b>Tabel standar</b> (' + (STD.sumber === 'SHEET' ? 'diubah Admin' : 'bawaan') + ')</summary>'
+      + '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>PM dari</th><th>sampai</th>' + PD.map(function (d) { return '<th>' + d[1] + ' masuk<br><span class="pg-sub">aktif ' + (STD.divisi.filter(function (x) { return x.kode === d[0]; })[0] || {}).relawanAktif + '</span></th>'; }).join('') + '<th>Tarif (% Master)</th><th>Operasional aman</th><th>Operasional minimum</th></tr></thead><tbody>'
+      + STD.baris.map(function (b, i) { const n = function (k, v, w) { return '<td><input type="number" min="0" data-i="' + i + '" data-k="' + k + '" value="' + v + '" style="width:' + (w || 62) + 'px"></td>'; };
+        return '<tr><td><b>' + angka(b.pitaMin) + '</b></td><td>' + (b.pitaMaks === null ? 'ke atas' : angka(b.pitaMaks)) + '</td>' + PD.map(function (d) { return n('m' + d[0], b.masuk[d[0]]); }).join('') + '<td><input type="number" min="1" max="100" step="0.1" data-i="' + i + '" data-k="persen" value="' + b.persen + '" style="width:70px"></td>' + n('aman', b.aman, 100) + n('minimum', b.minimum, 100) + '</tr>'; }).join('')
+      + '</tbody></table></div><div class="pg-aksi"><button type="button" class="btn-mini primary" id="pgStdSimpan">Simpan tabel</button><button type="button" class="btn-mini" id="pgStdBawaan"' + (STD.sumber === 'SHEET' ? '' : ' disabled') + '>Kembalikan ke bawaan</button></div>'
+      + '</details>';
+    $('pgStdOn').addEventListener('change', async function () {
+      const v = this.checked, kotak = this;
+      try { await sibuk('Menyimpan…', function () { return api('simpanPengaturanStandarAdmin', { pergiliran: v }); }); info(v ? 'Standar pita PM dipakai.' : 'Standar pita PM dimatikan.'); muatKebutuhan(); }
+      catch (e) { kotak.checked = !v; lapor(e.message); }
+    });
+    $('pgStdSimpan').addEventListener('click', async function () {
+      const baris = STD.baris.map(function (b) { return { pitaMin: b.pitaMin, pitaMaks: b.pitaMaks, catatan: b.catatan || '', masuk: {}, persen: 0, aman: 0, minimum: 0 }; });
+      el.querySelectorAll('input[data-k]').forEach(function (x) { const b = baris[Number(x.dataset.i)], k = x.dataset.k; if (k.charAt(0) === 'm' && k.length === 2) b.masuk[k.charAt(1)] = x.value; else b[k] = x.value; });
+      try { await sibuk('Menyimpan tabel…', function () { return api('simpanStandarPitaAdmin', { baris: baris }); }); info('Tabel standar tersimpan.'); await muatStandar(); $('pgStdTabel').open = true; } catch (e) { lapor(e.message); }
+    });
+    $('pgStdBawaan').addEventListener('click', async function () {
+      if (!confirm('Kembalikan tabel standar ke angka bawaan? Perubahan Anda akan hilang.')) return;
+      try { await sibuk('Mengembalikan…', function () { return api('kembalikanStandarPitaAdmin', {}); }); info('Tabel kembali ke bawaan.'); muatStandar(); } catch (e) { lapor(e.message); }
     });
   }
   /* ---------------- RENCANA PERGILIRAN ---------------- */
@@ -176,7 +202,7 @@
     const akhir = geserIso(S.awal, S.n - 1);
     let html = '<div id="pgBerjalan"></div><div class="pg-bar"><label>Periode <select id="pgN"><option value="1"' + (S.n === 1 ? ' selected' : '') + '>1 hari</option><option value="3"' + (S.n === 3 ? ' selected' : '') + '>3 hari</option><option value="7"' + (S.n === 7 ? ' selected' : '') + '>7 hari</option></select></label>'
       + '<label>' + (S.n === 1 ? 'Tanggal' : 'Mulai tanggal') + ' <input type="date" id="pgAwal" value="' + esc(S.awal) + '"></label><button type="button" class="btn-mini primary" id="pgHitung">Hitung Rekomendasi</button>'
-      + '</div>'
+      + '</div><div class="pg-langkah"><span>1 · Hitung rekomendasi</span><span>2 · Periksa atau ubah nama</span><span>3 · Ajukan ke SIKOP</span></div>'
       + '<p class="pg-sub" style="margin:2px 0 8px">' + (S.n === 1 ? namaHari(S.awal) + ' ' + dmy(S.awal) : namaHari(S.awal) + ' ' + dmy(S.awal) + ' – ' + namaHari(akhir) + ' ' + dmy(akhir)) + '</p>';
     S.masalah.forEach(function (m) { html += '<div class="pg-alert">' + esc(m) + '</div>'; });
     if (!h) { el.innerHTML = html; ikatRencana(); muatBerjalan(); return; }
@@ -214,13 +240,13 @@
     if (!S.daftar.length) return;
     if (!confirm('Ajukan ' + S.daftar.length + ' libur ke SIKOP?')) return;
     const aj = $('pgAjukan'); if (aj) aj.disabled = true;
-    try { const r = await sibuk('Mengajukan…', function () { return api('ajukanLangsungPergiliran', { tanggalMulai: S.awal, hari: S.n, daftar: kirimDaftar() }); }); info('Diajukan ke SIKOP: ' + r.diajukan + ' libur.'); S.hasil = null; S.daftar = []; S.masalah = []; S.buka = {}; }
+    try { const r = await sibuk('Mengajukan…', function () { return api('ajukanLangsungPergiliran', { tanggalMulai: S.awal, hari: S.n, daftar: kirimDaftar() }); }); info('Diajukan ke SIKOP: ' + r.diajukan + ' libur.'); muatAtas(); S.hasil = null; S.daftar = []; S.masalah = []; S.buka = {}; }
     catch (e) { lapor(e.message); }
     renderRencana();
   }
   async function tarik(idBatch) {
     const a = prompt('Alasan menarik (wajib):'); if (!a || !a.trim()) return;
-    try { await api('tarikPengajuanPergiliran', { idBatch: idBatch, alasan: a.trim() }); info('Ditarik.'); } catch (e) { lapor(e.message); }
+    try { await api('tarikPengajuanPergiliran', { idBatch: idBatch, alasan: a.trim() }); info('Ditarik.'); muatAtas(); } catch (e) { lapor(e.message); }
   }
   /** Draf dan pengajuan yang sedang berjalan (belum ditetapkan SIKOP). */
   async function muatBerjalan() {
@@ -231,7 +257,7 @@
     el.innerHTML = '<div class="pg-valid"><b>Menunggu SIKOP</b>' + ids.map(function (id) { const r = per[id], ajukanSudah = r[0].STATUS === 'DIAJUKAN';
       return '<div style="margin:6px 0">' + esc(id) + ' · ' + r.length + ' libur · <b>' + (ajukanSudah ? 'menunggu SIKOP' : 'draf lama, belum diajukan') + '</b> · ' + esc(r.map(function (x) { return dmy(x.TANGGAL); }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(', '))
         + ' <button type="button" class="btn-mini" data-ajukan="' + esc(id) + '"' + (ajukanSudah ? ' style="display:none"' : '') + '>Ajukan ke SIKOP</button> <button type="button" class="btn-mini" data-tarik="' + esc(id) + '">Tarik</button></div>'; }).join('') + '</div>';
-    el.querySelectorAll('[data-ajukan]').forEach(function (b) { b.addEventListener('click', async function () { try { const r = await api('ajukanPergiliran', { idBatch: b.dataset.ajukan }); info('Diajukan: ' + r.diajukan + ' libur.'); } catch (e) { lapor(e.message); } muatBerjalan(); }); });
+    el.querySelectorAll('[data-ajukan]').forEach(function (b) { b.addEventListener('click', async function () { try { const r = await api('ajukanPergiliran', { idBatch: b.dataset.ajukan }); info('Diajukan: ' + r.diajukan + ' libur.'); muatAtas(); } catch (e) { lapor(e.message); } muatBerjalan(); }); });
     el.querySelectorAll('[data-tarik]').forEach(function (b) { b.addEventListener('click', function () { tarik(b.dataset.tarik).then(muatBerjalan); }); });
   }
 
@@ -245,5 +271,5 @@
         + (d.items.map(function (x) { return '<tr><td>' + dmy(x.TANGGAL) + '</td><td>' + esc(x.NAMA_RELAWAN) + '</td><td>' + esc(x.DIVISI) + '</td><td><b>' + esc(x.STATUS) + '</b></td><td>' + esc(x.SUMBER) + '</td><td>' + esc(x.TERSEDIA) + '/' + esc(x.KEB_MIN) + '/' + esc(x.KEB_IDEAL) + '</td><td>' + esc(x.DIAJUKAN_OLEH || '') + '</td><td>' + esc(x.DITETAPKAN_OLEH || x.DIBATALKAN_OLEH || '') + (x.ALASAN_BATAL ? ' · ' + esc(x.ALASAN_BATAL) : '') + '</td></tr>'; }).join('') || '<tr><td colspan="8">Belum ada riwayat.</td></tr>') + '</tbody></table></div>';
     } catch (e) { el.innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; }
   }
-  muatStruktur();
+  muatRencana(); muatAtas();
 })();

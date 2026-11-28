@@ -52,7 +52,7 @@ const PETA_PANEL_KE_MODUL_ = {
   panelPeriode: 'SIKOP', panelKalender: 'SIKOP', panelKalenderOperasional: 'SIKOP', panelLokasi: 'SIKOP', panelJadwal: 'SIKOP', panelShift: 'SIKOP',
   panelStok: 'SIRAGA', panelPengajuanKebutuhanAdmin: 'SIRAGA', panelReturBarangAdmin: 'SIRAGA',
   panelHakAksesSipandu: 'SIPANDU',
-  panelInformasi: 'SIPIKA', panelPengumuman: 'SIPIKA', panelNotifikasiAdmin: 'SIPIKA', panelDokumen: 'SIPIKA', panelPenerimaManfaatOps: 'SIPIKA', panelPendataan3B: 'SIPIKA',
+  panelInformasi: 'SIPIKA', panelPengumuman: 'SIPIKA', panelNotifikasiAdmin: 'SIPIKA', panelDokumen: 'SIPIKA', panelPenerimaManfaatOps: 'SIPIKA', panelPendataan3B: 'SIPIKA', panelPemutakhiran: 'SIPIKA',
   panelWebsitePublik: 'SIPIKA',
   panelMenuHariIni: 'SIPOGIM',
   panelSipendokGenerate: 'SIPENDOK', panelSipendokArsip: 'SIPENDOK'   // 26 Nov 2026 (25k): SIPENDOK ditanam di Portal; akses mengikuti Hak Akses modul SIPENDOK

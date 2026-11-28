@@ -19,20 +19,19 @@
     const pr = Math.min(100, Math.round(terisi * 100 / target)), ok = terisi >= target;
     return '<div style="height:9px;border-radius:99px;background:#E8EEF4;overflow:hidden;min-width:120px"><div style="height:100%;width:' + pr + '%;background:' + (ok ? '#1E8E5A' : '#127CB4') + '"></div></div><small>' + (ok ? 'Lengkap' : 'Kurang ' + angka(target - terisi)) + ' · ' + pr + '%</small>';
   };
-  const gaya = '<style>.bn-tab{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}.bn-kartu{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:0 0 14px}.bn-k{background:#fff;border:1px solid #E1E8F0;border-radius:12px;padding:12px 14px}.bn-k b{display:block;font-size:22px;color:#14304F}.bn-k span{font-size:13px;color:#5B6876}.bn-pw{font-size:30px;letter-spacing:.12em;font-weight:800;text-align:center;padding:14px;margin:12px 0;border:2px dashed #127CB4;border-radius:12px;background:#E6F3FB;color:#14304F;word-break:break-all}.bn-ov{position:fixed;inset:0;background:rgba(10,29,51,.5);display:grid;place-items:center;z-index:9999;padding:16px}.bn-dlg{background:#fff;border-radius:16px;padding:20px;max-width:440px;width:100%}</style>';
+  const gaya = '<style>.bn-tab{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}.bn-kartu{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:0 0 14px}.bn-k{background:#fff;border:1px solid #E1E8F0;border-radius:12px;padding:12px 14px}.bn-k b{display:block;font-size:22px;color:#14304F}.bn-k span{font-size:13px;color:#5B6876}.bn-pw{font-size:30px;letter-spacing:.12em;font-weight:800;text-align:center;padding:14px;margin:12px 0;border:2px dashed #127CB4;border-radius:12px;background:#E6F3FB;color:#14304F;word-break:break-all}.bn-ov{position:fixed;inset:0;background:rgba(10,29,51,.5);display:grid;place-items:center;z-index:9999;padding:16px}.bn-dlg{background:#fff;border-radius:16px;padding:20px;max-width:440px;width:100%}.bb-tab{display:flex;gap:4px;margin:0 0 14px;padding:4px;border:1px solid var(--color-border,#d5dbe3);border-radius:12px;background:var(--color-surface,#f6f8fb);flex-wrap:wrap;width:fit-content;max-width:100%}.bb-tab .btn-mini{border:0;background:transparent;border-radius:9px;padding:8px 14px}.bb-tab .btn-mini.primary{background:var(--color-navy,#14304F);color:#fff}.bb-kartu{border:1px solid var(--color-border,#d5dbe3);border-radius:14px;padding:16px 18px;margin:0 0 14px;background:var(--color-surface-raised,#fff)}.bb-kartu h3{margin:0;font-size:15px}.bb-d{font-size:13px;color:var(--color-text-muted,#55606f);margin:3px 0 0;max-width:72ch}.bb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}.bb-i{border:1px solid var(--color-border,#d5dbe3);border-radius:14px;padding:14px 16px;background:var(--color-surface-raised,#fff);display:flex;flex-direction:column;gap:6px}.bb-i h4{margin:0;font-size:15px}.bb-i small{color:var(--color-text-muted,#55606f)}.bb-bar{height:9px;border-radius:99px;background:#E8EEF4;overflow:hidden}.bb-bar i{display:block;height:100%;background:#127CB4}.bb-bar.ok i{background:#1E8E5A}.bb-cp{display:flex;gap:6px;flex-wrap:wrap}.bb-cp span{border:1px solid var(--color-border,#d5dbe3);border-radius:999px;padding:2px 10px;font-size:12.5px}.bb-aksi{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}.bb-i details{font-size:13px}.bb-i summary{cursor:pointer;color:var(--color-text-muted,#55606f)}.bb-ac{display:grid;grid-template-columns:minmax(180px,1.4fr) 1fr 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--color-border,#e1e8f0)}.bb-ac:first-of-type{border-top:0}.bb-ac b{display:block}.bb-ac small{color:var(--color-text-muted,#55606f)}.bb-ac .bb-arah{font-weight:700;color:#14304F}@media(max-width:700px){.bb-ac{grid-template-columns:1fr 1fr}.bb-ac>:first-child{grid-column:1/-1}}.bb-kosong{border:1px dashed var(--color-border,#d5dbe3);border-radius:12px;padding:18px;text-align:center;color:var(--color-text-muted,#55606f)}</style>';
   panel.innerHTML = gaya + '<div class="shell-page-head"><div><h2 class="shell-page-title">Pendataan BNBA</h2><p class="shell-page-sub">BNBA = By Name, By Address: data penerima manfaat per orang. Posyandu (ibu hamil, ibu menyusui, balita) dan satuan pendidikan (siswa, guru, tendik) diisi PIC lewat Portal PIC. <b>Berisi NIK/NISN: jangan dibagikan.</b></p></div></div>'
-    + '<div id="bnKunci" class="panel-block" style="margin:0 0 14px"></div>'
-    + '<div id="bnRingkas" class="bn-kartu"></div>'
-    + '<div class="bn-tab" role="tablist"><button type="button" class="btn-mini primary" data-bn="pos" role="tab">Posyandu</button><button type="button" class="btn-mini" data-bn="sek" role="tab">Satuan pendidikan</button><button type="button" class="btn-mini" data-bn="info" role="tab">Pengumuman untuk PIC</button><button type="button" class="btn-mini" data-bn="peng" role="tab" id="bnTabPeng">Pengaduan PIC</button></div>'
-    + '<div id="bnPos"><div id="p3Info"></div><div id="p3Pos" class="panel-block"></div>'
-    + '<h4 style="margin:16px 0 6px">Pemutakhiran data berkala</h4><div id="p3Peng" class="panel-block"></div>'
-    + '<div id="p3Data"></div>'
-    + '<h4 style="margin:16px 0 6px">Riwayat unduhan</h4><div id="p3Riw" class="panel-block"></div></div>'
-    + '<div id="bnSek" style="display:none"></div><div id="bnInfo" style="display:none"></div><div id="bnPeng" style="display:none"></div>';
+    + '<div id="bnRingkas" class="bn-kartu"></div><div id="bnKunci" class="bb-kartu"></div>'
+    + '<div class="bb-tab" role="tablist"><button type="button" class="btn-mini primary" data-bn="pos" role="tab">Posyandu</button><button type="button" class="btn-mini" data-bn="sek" role="tab">Satuan pendidikan</button><button type="button" class="btn-mini" data-bn="acu" role="tab">Jadikan acuan</button><button type="button" class="btn-mini" data-bn="info" role="tab">Pengumuman PIC</button><button type="button" class="btn-mini" data-bn="peng" role="tab" id="bnTabPeng">Pengaduan PIC</button></div>'
+    + '<div id="bnPos"><div id="p3Info"></div><div id="p3Pos"></div><div id="p3Data"></div>'
+    + '<div class="bb-kartu"><h3>Riwayat unduhan</h3><div id="p3Riw" style="margin-top:8px"></div></div></div>'
+    + '<div id="bnSek" style="display:none"></div><div id="bnAcu" style="display:none"></div><div id="bnInfo" style="display:none"></div><div id="bnPeng" style="display:none"></div>'
+;
   panel.querySelectorAll('[data-bn]').forEach(function (b) {
     b.addEventListener('click', function () {
       panel.querySelectorAll('[data-bn]').forEach(function (x) { x.classList.toggle('primary', x === b); });
-      ['pos', 'sek', 'info', 'peng'].forEach(function (k) { $('bn' + k.charAt(0).toUpperCase() + k.slice(1)).style.display = k === b.dataset.bn ? '' : 'none'; });
+      ['pos', 'sek', 'acu', 'info', 'peng'].forEach(function (k) { $('bn' + k.charAt(0).toUpperCase() + k.slice(1)).style.display = k === b.dataset.bn ? '' : 'none'; });
+      if (b.dataset.bn === 'acu') muatAcuan();
       if (b.dataset.bn === 'info') muatInfo();
       if (b.dataset.bn === 'peng') muatPeng();
     });
@@ -86,13 +85,17 @@
   };
   window.bnRingkasSekolah = function (sekolah) { ringkasSek = sekolah; gambarRingkas(); };
   let ringkasSek = null;
+  let jmlPengaduan = null;
   function gambarRingkas() {
     const el = $('bnRingkas'); if (!el || !data) return;
+    const kotak = function (j, n, sub) { return '<div class="pg-kotak"><div class="pg-kotak-j">' + j + '</div><div class="pg-kotak-n">' + n + '</div>' + (sub ? '<div class="pg-kotak-s">' + sub + '</div>' : '') + '</div>'; };
     const tp = data.posyandu.filter(function (p) { return p.aktif; }), pT = tp.reduce(function (a, p) { return a + (p.target || 0); }, 0), pI = tp.reduce(function (a, p) { return a + p.jumlah.total; }, 0);
-    let h = '<div class="bn-k"><b>' + angka(pI) + (pT ? ' / ' + angka(pT) : '') + '</b><span>Posyandu: penerima manfaat terisi' + (pT ? ' dari target' : '') + '</span></div>';
-    if (ringkasSek) { const sT = ringkasSek.reduce(function (a, p) { return a + (p.target || 0); }, 0), sI = ringkasSek.reduce(function (a, p) { return a + p.jumlah.siswa; }, 0); h += '<div class="bn-k"><b>' + angka(sI) + (sT ? ' / ' + angka(sT) : '') + '</b><span>Satuan pendidikan: siswa terisi' + (sT ? ' dari target' : '') + '</span></div>'; }
+    let h = kotak('Posyandu', angka(pI) + (pT ? ' / ' + angka(pT) : ''), 'penerima manfaat terisi' + (pT ? ' dari target' : ''));
+    if (ringkasSek) { const sT = ringkasSek.reduce(function (a, p) { return a + (p.target || 0); }, 0), sI = ringkasSek.reduce(function (a, p) { return a + p.jumlah.siswa; }, 0); h += kotak('Satuan pendidikan', angka(sI) + (sT ? ' / ' + angka(sT) : ''), 'siswa terisi' + (sT ? ' dari target' : '')); }
     const tanpaPw = data.posyandu.reduce(function (a, p) { return a + p.pic.filter(function (c) { return c.pinStatus !== 'DIATUR'; }).length; }, 0) + (ringkasSek ? ringkasSek.reduce(function (a, p) { return a + (p.picDetail || []).filter(function (c) { return c.pinStatus !== 'DIATUR'; }).length; }, 0) : 0);
-    h += '<div class="bn-k"><b>' + tanpaPw + '</b><span>PIC yang belum punya password</span></div>';
+    h += kotak('PIC tanpa password', tanpaPw, tanpaPw ? 'perlu dibuatkan' : 'semua sudah punya');
+    h += kotak('Perlu diperbarui', angka(tp.reduce(function (a, p) { return a + p.jumlah.perluDiperbarui; }, 0)), 'lihat menu Pemutakhiran Data');
+    if (jmlPengaduan !== null) h += kotak('Pengaduan baru', jmlPengaduan, 'dari PIC');
     el.innerHTML = h;
   }
 
@@ -100,7 +103,7 @@
   /* ---------- Pengaduan dari PIC ---------- */
   const ST_PENG = { BARU: 'Baru', DIPROSES: 'Sedang diproses', SELESAI: 'Selesai', DITOLAK: 'Tidak dapat dipenuhi', DITARIK: 'Ditarik PIC' };
   let filterPeng = 'BARU';
-  function lencanaPeng(n) { const t = $('bnTabPeng'); if (t) t.textContent = 'Pengaduan PIC' + (n ? ' (' + n + ' baru)' : ''); }
+  function lencanaPeng(n) { const t = $('bnTabPeng'); if (t) t.textContent = 'Pengaduan PIC' + (n ? ' (' + n + ' baru)' : ''); jmlPengaduan = n || 0; gambarRingkas(); }
   async function muatPeng() {
     const el = $('bnPeng'); el.innerHTML = '<p class="pg-sub">Memuat…</p>';
     let d; try { d = await api('getPengaduanPicAdmin', { status: filterPeng }); } catch (e) { el.innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return; }
@@ -135,26 +138,63 @@
     el.querySelectorAll('[data-tarik]').forEach(function (b) { b.addEventListener('click', async function () { if (!confirm('Tarik pengumuman ini? PIC tidak akan melihatnya lagi.')) return; try { await api('hapusPengumumanPic3BAdmin', { id: b.dataset.tarik }); info('Ditarik.'); } catch (e) { lapor(e.message); } muatInfo(); }); });
   }
 
+  /* ---------- Jadikan acuan (28c): isi acuan di Master Instansi dari data BNBA ---------- */
+  async function muatAcuan() {
+    const el = $('bnAcu'); el.innerHTML = '<p class="pg-sub">Memuat…</p>';
+    let d; try { d = await api('getUsulanAcuanBnbaAdmin'); } catch (e) { el.innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return; }
+    const n = function (v) { return v === null || v === undefined ? '–' : angka(v); };
+    const posBeda = d.posyandu.filter(function (x) { return x.jumlahData && !x.sama; }), sekBeda = d.sekolah.filter(function (x) { return x.jumlahData && !x.sama; });
+    const status = function (x) { return !x.jumlahData ? '<span class="pg-status pg-kosong">Belum ada data BNBA</span>' : x.sama ? '<span class="pg-status pg-ok">Sudah sama</span>' : '<span class="pg-status pg-wait">Berbeda</span>'; };
+    const tombol = function (x) { return '<button type="button" class="btn-mini ' + (x.jumlahData && !x.sama ? 'primary' : '') + '" data-acu="' + esc(x.id) + '"' + (x.jumlahData && !x.sama ? '' : ' disabled') + '>Jadikan acuan</button>'; };
+    let h = '<div class="bb-kartu"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div><h3>Jadikan acuan dari data BNBA</h3>'
+      + '<p class="bb-d">Acuan di Manajemen Instansi diisi dari jumlah data BNBA yang sudah terisi. Angkanya dihitung ulang oleh server saat tombol ditekan. Yang belum punya data BNBA tidak diubah. Acuan tetap bisa diubah manual.</p></div>'
+      + '<button type="button" class="btn-mini primary" id="acuSemua"' + (posBeda.length + sekBeda.length ? '' : ' disabled') + '>Jadikan acuan semua yang berbeda (' + (posBeda.length + sekBeda.length) + ')</button></div></div>';
+    h += '<div class="bb-kartu"><h3>Posyandu</h3><p class="bb-d">Acuan balita, ibu hamil (bumil), dan ibu menyusui (busui) = jumlah data yang terisi.</p><div style="margin-top:8px">'
+      + (d.posyandu.length ? d.posyandu.map(function (x) {
+        return '<div class="bb-ac"><div><b>' + esc(x.nama) + '</b>' + status(x) + '</div>'
+          + '<div><small>Acuan sekarang</small><br>Balita ' + n(x.sekarang.balita) + ' · Bumil ' + n(x.sekarang.bumil) + ' · Busui ' + n(x.sekarang.busui) + '</div>'
+          + '<div><small>Dari data BNBA</small><br><span class="bb-arah">Balita ' + x.usulan.balita + ' · Bumil ' + x.usulan.bumil + ' · Busui ' + x.usulan.busui + '</span></div><div>' + tombol(x) + '</div></div>';
+      }).join('') : '<div class="bb-kosong">Belum ada posyandu aktif.</div>') + '</div></div>';
+    h += '<div class="bb-kartu"><h3>Satuan pendidikan</h3><p class="bb-d">Aturan: PAUD/TK = porsi kecil. SD/MI kelas 1–3 = porsi kecil, kelas 4–6 = porsi besar. SMP/MTs/SMA/SMK/MA = porsi besar. Guru dan tenaga pendidik = porsi besar. '
+      + 'BNBA tidak mencatat kelas, jadi kelas SD/MI <b>diperkirakan dari umur per ' + esc(d.acuanUmurPer) + '</b> (tahun ajaran ' + esc(d.tahunAjaran) + '): umur 9 tahun ke bawah = kelas 1–3.</p><div style="margin-top:8px">'
+      + (d.sekolah.length ? d.sekolah.map(function (x) {
+        const c = x.rincian, cat = [];
+        if (x.jumlahData) { cat.push('Siswa ' + c.siswa + ' · Guru ' + c.guru + ' · Tendik ' + c.tendik); if (c.perkiraan) cat.push('<b>' + c.perkiraan + ' siswa diperkirakan dari umur</b>'); if (c.tanpaTanggal) cat.push('<b class="pg-err">' + c.tanpaTanggal + ' siswa tanpa tanggal lahir tidak dihitung</b>'); if (x.jenjang === 'LAINNYA') cat.push('<b class="pg-err">jenjang tidak dikenali dari nama</b>'); }
+        return '<div class="bb-ac"><div><b>' + esc(x.nama) + '</b><small>' + esc(x.jenjangNama) + '</small> ' + status(x) + (cat.length ? '<br><small>' + cat.join(' · ') + '</small>' : '') + '</div>'
+          + '<div><small>Acuan sekarang</small><br>Kecil ' + n(x.sekarang.pk) + ' · Besar ' + n(x.sekarang.pb) + '</div>'
+          + '<div><small>Dari data BNBA</small><br><span class="bb-arah">Kecil ' + x.usulan.pk + ' · Besar ' + x.usulan.pb + '</span></div><div>' + tombol(x) + '</div></div>';
+      }).join('') : '<div class="bb-kosong">Belum ada satuan pendidikan aktif.</div>') + '</div></div>';
+    el.innerHTML = h;
+    const terapkan = async function (b, ids, semua, teks) {
+      if (!confirm(teks)) return; b.disabled = true;
+      try { const r = await api('jadikanAcuanBnbaAdmin', semua ? { semua: true } : { ids: ids }); info(r.diubah.length + ' acuan diperbarui' + (r.dilewati.length && semua ? ', ' + r.dilewati.length + ' dilewati.' : '.')); } catch (e) { lapor(e.message); }
+      muatAcuan();
+    };
+    el.querySelectorAll('[data-acu]').forEach(function (b) { b.addEventListener('click', function () { const x = d.posyandu.concat(d.sekolah).filter(function (y) { return y.id === b.dataset.acu; })[0]; terapkan(b, [b.dataset.acu], false, 'Jadikan data BNBA sebagai acuan ' + x.nama + '? Acuan lama diganti.'); }); });
+    if ($('acuSemua')) $('acuSemua').addEventListener('click', function () { terapkan(this, [], true, 'Jadikan data BNBA sebagai acuan untuk ' + (posBeda.length + sekBeda.length) + ' tempat yang berbeda? Acuan lama diganti. Yang belum punya data BNBA tidak diubah.'); });
+  }
+
   async function muat() {
     $('p3Pos').innerHTML = '<p class="pg-sub">Memuat…</p>';
     try { data = await api('getPosyandu3BAdmin'); } catch (e) {
       $('p3Pos').innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return;
     }
-    gambarPos(); gambarPeng(); muatRiwayat();
+    gambarPos(); muatRiwayat();
   }
   function gambarPos() {
-    const el = $('p3Pos'); let h = '<div class="pg-aksi" style="margin-bottom:8px"><button type="button" class="btn-mini primary" id="p3Semua">Unduh semua Posyandu</button></div>';
-    h += '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Posyandu</th><th>PIC dan password</th><th>Terisi dari target</th><th>Kode kelompok MPM</th><th>Aksi</th></tr></thead><tbody>';
+    const el = $('p3Pos'); let h = '<div class="bb-aksi" style="margin:0 0 10px"><button type="button" class="btn-mini primary" id="p3Semua">Unduh semua Posyandu</button></div><div class="bb-grid">';
     data.posyandu.forEach(function (p) {
-      h += '<tr' + (p.aktif ? '' : ' style="opacity:.55"') + '><td><b>' + esc(p.nama) + '</b>' + (p.aktif ? '' : '<br><small>NONAKTIF</small>') + '</td>'
-        + '<td>' + (p.pic.length ? p.pic.map(window.bnBarisPic).join('') : '<small>Belum ada PIC di SIPANDU.</small>') + '</td>'
-        + '<td><b>' + angka(p.jumlah.total) + (p.target ? ' dari ' + angka(p.target) : '') + '</b><br><small>Bumil ' + p.jumlah['Ibu Hamil'] + ' · Busui ' + p.jumlah['Ibu Menyusui'] + ' · Balita ' + p.jumlah['Balita'] + '</small><br>' + batang(p.jumlah.total, p.target)
-        + '<br><small>' + (p.jumlah.perluDiperbarui ? '<b>' + p.jumlah.perluDiperbarui + ' perlu diperbarui</b>' : 'semua terbarui') + '</small></td>'
-        + '<td>' + (p.kodeKelompok ? esc(p.kodeKelompok) : '<small>belum diisi</small>') + ' <button type="button" class="btn-mini" data-kode="' + esc(p.id) + '">Ubah</button></td>'
-        + '<td><button type="button" class="btn-mini" data-lihat="' + esc(p.id) + '">Lihat data</button> <button type="button" class="btn-mini primary" data-unduh="' + esc(p.id) + '"' + (p.jumlah.total ? '' : ' disabled') + '>Unduh Excel</button></td></tr>';
+      const j = p.jumlah, t = p.target || 0, pr = t > 0 ? Math.min(100, Math.round(j.total * 100 / t)) : 0, lengkap = t > 0 && j.total >= t;
+      h += '<div class="bb-i"' + (p.aktif ? '' : ' style="opacity:.55"') + '><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><h4>' + esc(p.nama) + '</h4>'
+        + (!p.aktif ? '<span class="pg-status pg-kosong">NONAKTIF</span>' : t <= 0 ? '<span class="pg-status pg-kosong">Target belum diatur</span>' : lengkap ? '<span class="pg-status pg-ok">Lengkap</span>' : '<span class="pg-status pg-wait">Kurang ' + angka(t - j.total) + '</span>') + '</div>'
+        + '<div><b style="font-size:20px">' + angka(j.total) + '</b>' + (t ? ' <small>dari ' + angka(t) + ' · ' + pr + '%</small>' : ' <small>penerima manfaat</small>') + '</div>'
+        + (t ? '<div class="bb-bar' + (lengkap ? ' ok' : '') + '"><i style="width:' + pr + '%"></i></div>' : '')
+        + '<div class="bb-cp"><span>Bumil ' + j['Ibu Hamil'] + '</span><span>Busui ' + j['Ibu Menyusui'] + '</span><span>Balita ' + j['Balita'] + '</span></div>'
+        + '<small>' + (j.perluDiperbarui ? '<b>' + j.perluDiperbarui + ' perlu diperbarui</b>' : 'semua terbarui') + ' · Kode MPM: ' + (p.kodeKelompok ? esc(p.kodeKelompok) : 'belum diisi') + '</small>'
+        + '<details><summary>PIC dan password (' + p.pic.length + ')</summary><div style="margin-top:6px">' + (p.pic.length ? p.pic.map(window.bnBarisPic).join('') : '<small>Belum ada PIC di SIPANDU.</small>') + '</div></details>'
+        + '<div class="bb-aksi"><button type="button" class="btn-mini" data-lihat="' + esc(p.id) + '">Lihat data</button><button type="button" class="btn-mini primary" data-unduh="' + esc(p.id) + '"' + (j.total ? '' : ' disabled') + '>Unduh Excel</button><button type="button" class="btn-mini" data-kode="' + esc(p.id) + '">Ubah kode</button></div></div>';
     });
-    h += '</tbody></table></div>';
-    el.innerHTML = h;
+    el.innerHTML = h + '</div>';
     $('p3Semua').addEventListener('click', function () { unduh(null); });
     el.querySelectorAll('[data-unduh]').forEach(function (b) { b.addEventListener('click', function () { unduh(b.dataset.unduh); }); });
     el.querySelectorAll('[data-lihat]').forEach(function (b) { b.addEventListener('click', function () { lihat(b.dataset.lihat); }); });
@@ -164,22 +204,12 @@
     window.bnPasangPassword(el, muat);
     gambarRingkas();
   }
-  function gambarPeng() {
-    const p = data.pengaturan, el = $('p3Peng');
-    el.innerHTML = '<p class="pg-sub">' + (p.putaranTanggal ? '<b>Putaran pemutakhiran AKTIF</b> sejak ' + dmy(p.putaranTanggal) + (p.putaranCatatan ? ': “' + esc(p.putaranCatatan) + '”' : '') + '. Data yang belum diperbarui sejak tanggal itu ditandai “perlu diperbarui” di layar PIC.' : 'Tidak ada putaran aktif. Tekan “Mulai putaran” untuk meminta semua PIC memperbarui data (data yang belum disentuh sejak hari ini ditandai).') + '</p>'
-    + '<div class="pg-aksi"><input type="text" id="p3Cat" placeholder="Catatan untuk PIC (mis. batas waktu)" style="min-width:260px"> <button type="button" class="btn-mini primary" id="p3Mulai">Mulai putaran</button> ' + (p.putaranTanggal ? '<button type="button" class="btn-mini" id="p3Akhiri">Akhiri putaran</button>' : '') + '</div>'
-    + '<p class="pg-sub" style="margin-top:10px">Batas otomatis: data yang tidak diperbarui lebih dari <input type="number" id="p3Bln" min="0" max="36" value="' + p.batasBulan + '" style="width:64px"> bulan ditandai perlu diperbarui (0 = tidak dipakai). <button type="button" class="btn-mini" id="p3SimpanBln">Simpan</button></p>';
-    $('p3Mulai').addEventListener('click', async function () { if (!confirm('Mulai putaran pemutakhiran? Semua data yang belum diperbarui sejak hari ini akan ditandai di layar PIC.')) return;
-      try { await api('simpanPengaturan3BAdmin', { mulaiPutaran: true, catatan: $('p3Cat').value }); info('Putaran dimulai.'); } catch (e) { lapor(e.message); } muat(); });
-    if ($('p3Akhiri')) $('p3Akhiri').addEventListener('click', async function () { try { await api('simpanPengaturan3BAdmin', { akhiriPutaran: true }); info('Putaran diakhiri.'); } catch (e) { lapor(e.message); } muat(); });
-    $('p3SimpanBln').addEventListener('click', async function () { try { await api('simpanPengaturan3BAdmin', { batasBulan: Number($('p3Bln').value) }); info('Disimpan.'); } catch (e) { lapor(e.message); } muat(); });
-  }
   async function lihat(idi) {
     const el = $('p3Data'), p = data.posyandu.filter(function (x) { return x.id === idi; })[0]; el.innerHTML = '<p class="pg-sub">Memuat data…</p>';
     let d; try { d = await api('getDaftarPenerima3B', { idInstansi: idi }); } catch (e) { el.innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return; }
-    el.innerHTML = '<h4 style="margin:16px 0 6px">Data ' + esc(p.nama) + ' (' + d.items.length + ')</h4><div class="panel-block">' + (d.items.length ? '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Kategori</th><th>Nama</th><th>Lahir</th><th>NIK</th><th>Pasangan</th><th>Diperbarui</th><th></th></tr></thead><tbody>' + d.items.map(function (x) {
+    el.innerHTML = '<div class="bb-kartu"><h3>Data ' + esc(p.nama) + ' (' + d.items.length + ')</h3><div style="margin-top:8px">' + (d.items.length ? '<div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Kategori</th><th>Nama</th><th>Lahir</th><th>NIK</th><th>Pasangan</th><th>Diperbarui</th><th></th></tr></thead><tbody>' + d.items.map(function (x) {
       const ps = x.kategori === 'Ibu Hamil' ? 'HPHT ' + esc(x.hpht) : x.kategori === 'Ibu Menyusui' ? 'Anak ' + esc(x.anak_nama) + ' · ' + esc(x.anak_nik) : 'Ibu ' + esc(x.ibu_nama) + ' · ' + esc(x.ibu_nik);
-      return '<tr><td>' + esc(x.kategori) + '</td><td>' + esc(x.nama) + '</td><td>' + esc(x.tgl) + '</td><td>' + esc(x.nik) + '</td><td>' + ps + '</td><td>' + dmy(x.diperbaruiPada) + (x.perluDiperbarui ? ' <b>(perlu diperbarui)</b>' : '') + (x.catatan ? '<br><small class="pg-err">' + esc(x.catatan) + '</small>' : '') + '</td><td><button type="button" class="btn-mini" data-hapus="' + esc(x.id) + '">Hapus</button></td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="pg-sub">Belum ada data.</p>') + '</div>';
+      return '<tr><td>' + esc(x.kategori) + '</td><td>' + esc(x.nama) + '</td><td>' + esc(x.tgl) + '</td><td>' + esc(x.nik) + '</td><td>' + ps + '</td><td>' + dmy(x.diperbaruiPada) + (x.perluDiperbarui ? ' <b>(perlu diperbarui)</b>' : '') + (x.catatan ? '<br><small class="pg-err">' + esc(x.catatan) + '</small>' : '') + '</td><td><button type="button" class="btn-mini" data-hapus="' + esc(x.id) + '">Hapus</button></td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="pg-sub">Belum ada data.</p>') + '</div></div>';
     el.querySelectorAll('[data-hapus]').forEach(function (b) { b.addEventListener('click', async function () { if (!confirm('Hapus data ini? (Dihapus dari daftar dan tidak ikut diunduh.)')) return;
       try { await api('hapusPenerima3B', { idInstansi: idi, id: b.dataset.hapus }); info('Dihapus.'); } catch (e) { lapor(e.message); } lihat(idi); muat(); }); });
   }
@@ -234,6 +264,6 @@
   }
   muat(); muatKunci();
   // Pendataan satuan pendidikan (25 Nov 2026): bagian tambahan di panel yang sama
-  (function () { function muatSekolah() { const s = document.createElement('script'); s.src = 'modules/admin/admin-pendataan-sekolah.js?v=20261126j'; document.head.appendChild(s); }
+  (function () { function muatSekolah() { const s = document.createElement('script'); s.src = 'modules/admin/admin-pendataan-sekolah.js?v=20261128c'; document.head.appendChild(s); }
     if (window.CoreSekolah) muatSekolah(); else { const c = document.createElement('script'); c.src = 'core/core-sekolah.js?v=20261125b'; c.onload = muatSekolah; document.head.appendChild(c); } })();
 })();

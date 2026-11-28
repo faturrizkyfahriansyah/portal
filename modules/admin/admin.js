@@ -357,7 +357,7 @@
   // Panel di bawah TETAP disembunyikan untuk Staff: akun & kata sandi, pengelolaan staf/pengelola, verifikasi WhatsApp, data pribadi
   // penerima manfaat (BNBA), website publik, pengaturan, dan pengaturan hak akses. (Cek Absen & Shift Malam tetap bisa dibuka Staff lewat tab di Koreksi & Cek Absen: hanya memeriksa.)
   const PANEL_KHUSUS_ADMIN = [
-    'panelAkun', 'panelRoleAkses', 'panelPengelolaSppg', 'panelManajemenStaf', 'panelVerifikasiWa', 'panelPendataan3B',
+    'panelAkun', 'panelRoleAkses', 'panelPengelolaSppg', 'panelManajemenStaf', 'panelVerifikasiWa', 'panelPendataan3B', 'panelPemutakhiran',
     'panelManajemenHakAkses', 'panelHakAksesSipandu',
     'panelWebsitePublik', 'panelPengaturan',
     'panelSipendokGenerate', 'panelSipendokArsip'   // 25k: Generate Dokumen dan Arsip (SIPENDOK ditanam di Portal) mengubah data -> khusus pengelola
@@ -423,9 +423,10 @@
     panelRoleAkses: 'modules/admin/admin-role.js?v=20261023a',
     panelPengelolaSppg: 'modules/admin/admin-pengelola-sppg.js?v=20261124b',
     panelManajemenStaf: 'modules/admin/admin-manajemen-staf.js?v=20261126j',   // 25 Nov 2026 (25g): Manajemen Staff
-    panelPergiliran: 'modules/admin/admin-pergiliran.js?v=20261124b',   // 22 Nov 2026 (Tahap 3): SIMSDM menyusun kebutuhan & mengajukan pergiliran
-    panelPenetapanPergiliran: 'modules/admin/admin-pergiliran-sikop.js?v=20261124b',
-    panelPendataan3B: 'modules/admin/admin-pendataan-3b.js?v=20261125g',
+    panelPergiliran: 'modules/admin/admin-pergiliran.js?v=20261128c',   // 22 Nov 2026 (Tahap 3): SIMSDM menyusun kebutuhan & mengajukan pergiliran
+    panelPenetapanPergiliran: 'modules/admin/admin-pergiliran-sikop.js?v=20261128c',
+    panelPendataan3B: 'modules/admin/admin-pendataan-3b.js?v=20261128c',
+    panelPemutakhiran: 'modules/admin/admin-pemutakhiran.js?v=20261128c',   // 28 Nov 2026 (28c): Pemutakhiran data berkala jadi menu sendiri di bawah Pendataan BNBA
     panelVerifikasiWa: 'modules/admin/admin-verifikasi-wa.js?v=20261125d',   // 24 Nov 2026: Verifikasi WhatsApp + antrean pendaftaran   // 24 Nov 2026: Pendataan 3B (SIPIKA)   // SIKOP menetapkan
     panelPengajuanKebutuhanAdmin: 'modules/admin/admin-pengajuan-kebutuhan.js?v=20261023a',
     panelReturBarangAdmin: 'modules/admin/admin-retur-barang.js?v=20261023a',

@@ -116,7 +116,7 @@
         + (rendah.length ? '<p class="dt-sub" style="margin:6px 0 4px">Paling rendah:</p>' + rendah.map(function (x) { return hbar(x.nama, x.persen, warnaPersen(x.persen), ang(x.terisi) + '/' + ang(x.target)); }).join('') : '');
       html += '<div class="dt-grid">' + kartu('Pendataan BNBA', isi, 'Posyandu dan satuan pendidikan', '<button type="button" class="btn-mini" style="margin-top:8px" data-ke="panelPendataan3B">Buka Pendataan BNBA</button>');
       const pm = '<div class="dt-chips"><div class="dt-chip"><b>' + ang(b.perluDiperbarui) + '</b>data perlu diperbarui</div><div class="dt-chip"><b>' + b.tempatPerlu + '</b>tempat terkait</div><div class="dt-chip"><b>' + (b.putaranAktif ? 'Aktif' : 'Tidak ada') + '</b>putaran pemutakhiran</div></div>';
-      html += kartu('Pemutakhiran data', pm, 'Data yang sudah lewat batas dan belum dikonfirmasi PIC', '<button type="button" class="btn-mini" data-ke="panelPendataan3B">Atur putaran</button>') + '</div>';
+      html += kartu('Pemutakhiran data', pm, 'Data yang sudah lewat batas dan belum dikonfirmasi PIC', '<button type="button" class="btn-mini" data-ke="panelPemutakhiran">Atur putaran</button>') + '</div>';
     }
     let kanan = '';
     if (p.biaya) {

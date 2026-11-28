@@ -14,8 +14,8 @@
   let data = null, sibuk = false;
 
   const root = document.createElement('div'); root.id = 'skAdmin';
-  root.innerHTML = '<p class="pg-sub" style="margin-top:0">Data siswa, guru, dan tendik per satuan pendidikan, diisi PIC lewat Portal PIC, lalu diunduh sebagai file Excel berformat contoh. <b>Berisi NISN/NIK: jangan dibagikan.</b></p>'
-    + '<div id="skDaftar" class="panel-block"></div><div id="skData"></div>';
+  root.innerHTML = '<p class="bb-d" style="margin:0 0 10px">Data siswa, guru, dan tendik per satuan pendidikan, diisi PIC lewat Portal PIC, lalu diunduh sebagai file Excel berformat contoh. <b>Berisi NISN/NIK: jangan dibagikan.</b></p>'
+    + '<div id="skDaftar"></div><div id="skData"></div>';
   ($('bnSek') || panel).appendChild(root);
 
   async function muat() {
@@ -26,19 +26,21 @@
   }
   function gambar() {
     const el = $('skDaftar');
-    if (!data.sekolah.length) { el.innerHTML = '<p class="pg-sub">Belum ada satuan pendidikan aktif di SIPANDU.</p>'; return; }
+    if (!data.sekolah.length) { el.innerHTML = '<div class="bb-kosong">Belum ada satuan pendidikan aktif di SIPANDU.</div>'; return; }
     const ang = function (n) { return String(n || 0).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
-    let h = '<div class="pg-aksi" style="margin-bottom:8px"><button type="button" class="btn-mini primary" id="skSemua">Unduh semua satuan pendidikan</button></div><div class="table-wrap"><table class="rmg-tabel"><thead><tr><th>Satuan pendidikan</th><th>PIC dan password</th><th>Terisi dari target</th><th>Aksi</th></tr></thead><tbody>';
+    let h = '<div class="bb-aksi" style="margin:0 0 10px"><button type="button" class="btn-mini primary" id="skSemua">Unduh semua satuan pendidikan</button></div><div class="bb-grid">';
     data.sekolah.forEach(function (s) {
-      const j = s.jumlah, t = s.target || 0, pr = t > 0 ? Math.min(100, Math.round(j.siswa * 100 / t)) : 0;
-      h += '<tr data-sk="' + esc(s.id) + '"><td><b>' + esc(s.nama) + '</b><br><small>' + esc(s.jenis) + '</small></td>'
-        + '<td>' + ((s.picDetail || []).length && window.bnBarisPic ? s.picDetail.map(window.bnBarisPic).join('') : '<small>Belum ada PIC di SIPANDU.</small>') + '</td>'
-        + '<td><b>Siswa ' + ang(j.siswa) + (t ? ' dari ' + ang(t) : '') + '</b><br><small>Guru ' + j.guru + ' · Tendik ' + j.tendik + '</small>'
-        + (t ? '<div style="height:9px;border-radius:99px;background:#E8EEF4;overflow:hidden;min-width:120px;margin-top:4px"><div style="height:100%;width:' + pr + '%;background:' + (j.siswa >= t ? '#1E8E5A' : '#127CB4') + '"></div></div><small>' + (j.siswa >= t ? 'Lengkap' : 'Kurang ' + ang(t - j.siswa)) + ' · ' + pr + '%</small>' : '<br><small>Jumlah harus diisi: belum diatur</small>')
-        + '<br><small>' + (j.perluKonfirmasi ? '<b>' + j.perluKonfirmasi + ' NISN menunggu konfirmasi PIC</b>' : 'tidak ada yang tertunda') + '</small></td>'
-        + '<td><button type="button" class="btn-mini" data-lihat="' + esc(s.id) + '">Lihat data</button> <button type="button" class="btn-mini primary" data-unduh="' + esc(s.id) + '"' + (j.total ? '' : ' disabled') + '>Unduh Excel</button></td></tr>';
+      const j = s.jumlah, t = s.target || 0, pr = t > 0 ? Math.min(100, Math.round(j.siswa * 100 / t)) : 0, lengkap = t > 0 && j.siswa >= t;
+      h += '<div class="bb-i" data-sk="' + esc(s.id) + '"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h4>' + esc(s.nama) + '</h4><small>' + esc(s.jenis) + '</small></div>'
+        + (t <= 0 ? '<span class="pg-status pg-kosong">Target belum diatur</span>' : lengkap ? '<span class="pg-status pg-ok">Lengkap</span>' : '<span class="pg-status pg-wait">Kurang ' + ang(t - j.siswa) + '</span>') + '</div>'
+        + '<div><b style="font-size:20px">' + ang(j.siswa) + '</b> <small>siswa' + (t ? ' dari ' + ang(t) + ' · ' + pr + '%' : '') + '</small></div>'
+        + (t ? '<div class="bb-bar' + (lengkap ? ' ok' : '') + '"><i style="width:' + pr + '%"></i></div>' : '')
+        + '<div class="bb-cp"><span>Guru ' + j.guru + '</span><span>Tendik ' + j.tendik + '</span></div>'
+        + '<small>' + (j.perluKonfirmasi ? '<b>' + j.perluKonfirmasi + ' NISN menunggu konfirmasi PIC</b>' : 'tidak ada yang tertunda') + '</small>'
+        + '<details><summary>PIC dan password (' + (s.picDetail || []).length + ')</summary><div style="margin-top:6px">' + ((s.picDetail || []).length && window.bnBarisPic ? s.picDetail.map(window.bnBarisPic).join('') : '<small>Belum ada PIC di SIPANDU.</small>') + '</div></details>'
+        + '<div class="bb-aksi"><button type="button" class="btn-mini" data-lihat="' + esc(s.id) + '">Lihat data</button><button type="button" class="btn-mini primary" data-unduh="' + esc(s.id) + '"' + (j.total ? '' : ' disabled') + '>Unduh Excel</button></div></div>';
     });
-    el.innerHTML = h + '</tbody></table></div>';
+    el.innerHTML = h + '</div>';
     if (window.bnPasangPassword) window.bnPasangPassword(el, muat);
     $('skSemua').addEventListener('click', function () { unduh(null); });
     el.querySelectorAll('[data-unduh]').forEach(function (b) { b.addEventListener('click', function () { unduh(b.dataset.unduh); }); });
@@ -47,8 +49,8 @@
   async function lihat(idi) {
     const el = $('skData'); el.innerHTML = '<p class="pg-sub">Memuat data…</p>';
     let d; try { d = await api('getLihatSekolah3BAdmin', { idInstansi: idi }); } catch (e) { el.innerHTML = '<p class="pg-err">' + esc(e.message) + '</p>'; return; }
-    el.innerHTML = '<h4 style="margin:16px 0 6px">Data ' + esc(d.instansi.nama) + ' (' + d.items.length + ')</h4><div class="panel-block">' + (d.items.length ? '<div class="table-wrap"><table class="rmg-tabel" id="skTabel"><thead><tr><th>Posisi</th><th>NISN/NIK</th><th>Nama</th><th>Lahir</th><th>JK</th><th>Orang tua</th><th>Status</th><th></th></tr></thead><tbody>' + d.items.map(function (x) {
-      return '<tr><td>' + esc(x.posisiNama) + '</td><td>' + esc(x.nomor) + (x.perluKonfirmasi ? ' <b>(menunggu konfirmasi)</b>' : '') + '</td><td>' + esc(x.nama) + '</td><td>' + esc(x.tgl) + '</td><td>' + esc(x.gender) + '</td><td>' + esc(x.ortu) + '</td><td>' + (x.status ? 'menerima' : 'tidak menerima') + '</td><td><button type="button" class="btn-mini" data-hapus="' + esc(x.id) + '">Hapus</button></td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="pg-sub">Belum ada data.</p>') + '</div>';
+    el.innerHTML = '<div class="bb-kartu" style="margin-top:14px"><h3>Data ' + esc(d.instansi.nama) + ' (' + d.items.length + ')</h3><div style="margin-top:8px">' + (d.items.length ? '<div class="table-wrap"><table class="rmg-tabel" id="skTabel"><thead><tr><th>Posisi</th><th>NISN/NIK</th><th>Nama</th><th>Lahir</th><th>JK</th><th>Orang tua</th><th>Status</th><th></th></tr></thead><tbody>' + d.items.map(function (x) {
+      return '<tr><td>' + esc(x.posisiNama) + '</td><td>' + esc(x.nomor) + (x.perluKonfirmasi ? ' <b>(menunggu konfirmasi)</b>' : '') + '</td><td>' + esc(x.nama) + '</td><td>' + esc(x.tgl) + '</td><td>' + esc(x.gender) + '</td><td>' + esc(x.ortu) + '</td><td>' + (x.status ? 'menerima' : 'tidak menerima') + '</td><td><button type="button" class="btn-mini" data-hapus="' + esc(x.id) + '">Hapus</button></td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="pg-sub">Belum ada data.</p>') + '</div></div>';
     el.querySelectorAll('[data-hapus]').forEach(function (b) { b.addEventListener('click', async function () { if (!confirm('Hapus data ini? (Dihapus dari daftar dan tidak ikut diunduh.)')) return;
       try { await api('hapusSekolah3BAdmin', { idRekam: b.dataset.hapus }); info('Dihapus.'); } catch (e) { lapor(e.message); } lihat(idi); muat(); }); });
   }
